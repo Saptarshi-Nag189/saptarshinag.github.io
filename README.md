@@ -4,7 +4,7 @@ Personal portfolio site for Saptarshi Nag, AI/ML Engineer.
 
 Built with pure HTML, CSS, and JavaScript. Three.js particle network background via CDN.
 
-**Live:** [saptarshinag.github.io](https://saptarshinag.github.io)
+**Live:** [saptarshi-nag189.github.io/saptarshinag.github.io](https://saptarshi-nag189.github.io/saptarshinag.github.io/)
 
 ## Stack
 
