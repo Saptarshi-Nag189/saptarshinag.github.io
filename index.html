@@ -1,550 +1,133 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="en-GB">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Saptarshi Nag -- AI/ML Engineer</title>
-  <meta name="description"
-    content="AI/ML engineer with an M.Tech in Artificial Intelligence from DIAT (DRDO). Research at NCRA-TIFR and GMRT. Production ML systems, real-time IoT security, physics-informed neural networks.">
-  <meta property="og:title" content="Saptarshi Nag -- AI/ML Engineer">
-  <meta property="og:description"
-    content="AI/ML engineer at the intersection of security and systems research. DRDO, NCRA-TIFR, C-DAC.">
-  <meta property="og:type" content="website">
+  <title>Saptarshi Nag // Browser OS</title>
+  <meta
+    name="description"
+    content="Browser-based operating system simulation for Saptarshi Nag. Explore portfolio content through a virtual file system, terminal, and desktop applications."
+  >
   <link rel="icon" href="icon.ico">
-
-  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
-    rel="stylesheet">
-
-  <!-- Styles -->
-  <link rel="stylesheet" href="style.css">
-
-  <!-- Three.js import map -->
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  >
+  <link rel="stylesheet" href="css/main.css">
   <script type="importmap">
-  {
-    "imports": {
-      "three": "https://cdn.jsdelivr.net/npm/three@0.162.0/build/three.module.js"
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js"
+      }
     }
-  }
   </script>
 </head>
-
 <body>
-
-  <!-- Three.js background canvas -->
-  <canvas id="bg" aria-hidden="true"></canvas>
-
-  <!-- Noise overlay for texture -->
-  <div class="noise" aria-hidden="true"></div>
-
-  <!-- Navigation -->
-  <nav id="nav" role="navigation" aria-label="Main navigation">
-    <div class="nav__inner">
-      <a href="#hero" class="nav__logo" aria-label="Home">
-        <span class="nav__logo-text">SN</span>
-      </a>
-
-      <button class="nav__toggle" id="nav-toggle" aria-label="Toggle menu" aria-expanded="false">
-        <span class="nav__toggle-line"></span>
-        <span class="nav__toggle-line"></span>
-        <span class="nav__toggle-line"></span>
-      </button>
-
-      <div class="nav__menu" id="nav-menu">
-        <a href="#experience" class="nav__link">Experience</a>
-        <a href="#projects" class="nav__link">Projects</a>
-        <a href="#skills" class="nav__link">Skills</a>
-        <a href="#contact" class="nav__link">Contact</a>
-        <a href="saptarshi_resume_linkedin_2026.pdf" class="nav__cta" target="_blank" rel="noopener">Download CV</a>
+  <div id="boot-screen" class="boot-screen" role="dialog" aria-label="System boot sequence" aria-live="polite">
+    <div class="boot-screen__panel">
+      <div class="boot-screen__header">
+        <div>
+          <p class="boot-screen__eyebrow">BROWSER OS FIRMWARE</p>
+          <h1 class="boot-screen__title">Saptarshi Workstation</h1>
+        </div>
+        <div class="boot-screen__meta">
+          <span>branch: browser-os-experiment</span>
+          <span>runtime: pure html/css/js</span>
+        </div>
+      </div>
+      <div class="boot-screen__grid">
+        <div class="boot-screen__status">
+          <div class="status-block">
+            <span class="status-block__label">kernel</span>
+            <span id="boot-kernel-state" class="status-block__value">initialising</span>
+          </div>
+          <div class="status-block">
+            <span class="status-block__label">services</span>
+            <span id="boot-services-state" class="status-block__value">pending</span>
+          </div>
+          <div class="status-block">
+            <span class="status-block__label">ui</span>
+            <span id="boot-ui-state" class="status-block__value">pending</span>
+          </div>
+        </div>
+        <div id="boot-log" class="boot-screen__log" aria-label="Boot log"></div>
+      </div>
+      <div class="boot-screen__footer">
+        <div class="boot-screen__progress">
+          <span id="boot-progress-label">waiting for firmware</span>
+          <div class="boot-screen__meter">
+            <div id="boot-progress-bar" class="boot-screen__meter-bar"></div>
+          </div>
+        </div>
+        <p class="boot-screen__hint">Loading kernel, services, desktop scene, and session runtime.</p>
       </div>
     </div>
-  </nav>
+  </div>
 
-  <main>
+  <div id="os-root" class="os-shell is-hidden">
+    <canvas id="desktop-scene" class="desktop-scene" aria-hidden="true"></canvas>
+    <div class="desktop-backdrop"></div>
+    <div class="desktop-grid" aria-hidden="true"></div>
 
-    <!-- ==================== HERO ==================== -->
-    <section id="hero" class="hero">
-      <div class="container hero__grid">
-        <div class="hero__content">
-          <p class="hero__label mono reveal" style="--i:0">AI/ML Engineer</p>
-          <h1 class="hero__name reveal" style="--i:1">
-            <span class="gradient-text">Saptarshi</span><br>
-            <span class="gradient-text">Nag</span>
-          </h1>
-          <p class="hero__bio reveal" style="--i:2">
-            AI/ML engineer with an M.Tech in Artificial Intelligence (DIAT, DRDO) and research
-            experience at NCRA-TIFR and GMRT. Works across the full stack of an ML project:
-            feature engineering from raw data, model development and optimisation, and production
-            deployment under tight performance constraints. Current work at C-DAC focuses on
-            real-time IoT security using a Zero Trust framework with ML-based threat detection
-            across multiple wireless protocols. Past projects span physics-informed neural networks,
-            GPU-accelerated scientific computing, LLM fine-tuning, and RAG systems.
-          </p>
-          <div class="hero__actions reveal" style="--i:3">
-            <a href="#projects" class="btn btn--primary">View Work</a>
-            <a href="saptarshi_resume_linkedin_2026.pdf" class="btn btn--ghost" target="_blank"
-              rel="noopener">Download CV</a>
-          </div>
-        </div>
-        <div class="hero__visual reveal" style="--i:2">
-          <div class="hero__photo-wrap">
-            <div class="hero__photo-border"></div>
-            <img src="img/sapta_image.jpeg" alt="Saptarshi Nag" class="hero__photo" width="380" height="460"
-              loading="eager">
-          </div>
-        </div>
+    <header class="top-bar">
+      <div class="top-bar__brand">
+        <span class="top-bar__dot"></span>
+        <span>Saptarshi Browser OS</span>
       </div>
-      <div class="hero__scroll-hint" aria-hidden="true">
-        <div class="hero__scroll-line"></div>
+      <div class="top-bar__status">
+        <span id="focused-window-label">desktop idle</span>
+        <span class="top-bar__divider"></span>
+        <span id="system-clock">--:--:--</span>
       </div>
-    </section>
+    </header>
 
-    <!-- ==================== MARQUEE ==================== -->
-    <div class="marquee" aria-hidden="true">
-      <div class="marquee__track">
-        <span class="marquee__item">DRDO</span>
-        <span class="marquee__sep">/</span>
-        <span class="marquee__item">NCRA-TIFR</span>
-        <span class="marquee__sep">/</span>
-        <span class="marquee__item">GMRT</span>
-        <span class="marquee__sep">/</span>
-        <span class="marquee__item">C-DAC</span>
-        <span class="marquee__sep">/</span>
-        <span class="marquee__item">IoT Security</span>
-        <span class="marquee__sep">/</span>
-        <span class="marquee__item">Zero Trust</span>
-        <span class="marquee__sep">/</span>
-        <span class="marquee__item">Physics-Informed Neural Networks</span>
-        <span class="marquee__sep">/</span>
-        <span class="marquee__item">GPU Computing</span>
-        <span class="marquee__sep">/</span>
-        <span class="marquee__item">LLM Fine-Tuning</span>
-        <span class="marquee__sep">/</span>
-        <span class="marquee__item">RAG Systems</span>
-        <span class="marquee__sep">/</span>
-        <span class="marquee__item">Signal Processing</span>
-        <span class="marquee__sep">/</span>
-        <span class="marquee__item">Multi-Agent Orchestration</span>
-        <span class="marquee__sep">/</span>
-        <!-- duplicate for seamless loop -->
-        <span class="marquee__item">DRDO</span>
-        <span class="marquee__sep">/</span>
-        <span class="marquee__item">NCRA-TIFR</span>
-        <span class="marquee__sep">/</span>
-        <span class="marquee__item">GMRT</span>
-        <span class="marquee__sep">/</span>
-        <span class="marquee__item">C-DAC</span>
-        <span class="marquee__sep">/</span>
-        <span class="marquee__item">IoT Security</span>
-        <span class="marquee__sep">/</span>
-        <span class="marquee__item">Zero Trust</span>
-        <span class="marquee__sep">/</span>
-        <span class="marquee__item">Physics-Informed Neural Networks</span>
-        <span class="marquee__sep">/</span>
-        <span class="marquee__item">GPU Computing</span>
-        <span class="marquee__sep">/</span>
-        <span class="marquee__item">LLM Fine-Tuning</span>
-        <span class="marquee__sep">/</span>
-        <span class="marquee__item">RAG Systems</span>
-        <span class="marquee__sep">/</span>
-        <span class="marquee__item">Signal Processing</span>
-        <span class="marquee__sep">/</span>
-        <span class="marquee__item">Multi-Agent Orchestration</span>
-        <span class="marquee__sep">/</span>
+    <main id="desktop" class="desktop" aria-label="Desktop workspace">
+      <section id="desktop-icons" class="desktop-icons" aria-label="Desktop launchers">
+        <button class="desktop-icon" data-open="terminal" type="button">
+          <span class="desktop-icon__glyph">></span>
+          <span class="desktop-icon__label">Terminal</span>
+        </button>
+        <button class="desktop-icon" data-open="files" type="button">
+          <span class="desktop-icon__glyph">[]</span>
+          <span class="desktop-icon__label">Explorer</span>
+        </button>
+        <button class="desktop-icon" data-open="about" type="button">
+          <span class="desktop-icon__glyph">i</span>
+          <span class="desktop-icon__label">About</span>
+        </button>
+        <button class="desktop-icon" data-open="projects" type="button">
+          <span class="desktop-icon__glyph">{ }</span>
+          <span class="desktop-icon__label">Projects</span>
+        </button>
+        <button class="desktop-icon" data-open="experience" type="button">
+          <span class="desktop-icon__glyph">::</span>
+          <span class="desktop-icon__label">Experience</span>
+        </button>
+        <button class="desktop-icon" data-open="cv" type="button">
+          <span class="desktop-icon__glyph">PDF</span>
+          <span class="desktop-icon__label">CV</span>
+        </button>
+      </section>
+
+      <section id="window-layer" class="window-layer" aria-label="Application windows"></section>
+    </main>
+
+    <footer class="status-bar">
+      <div class="status-bar__left">
+        <span class="status-pill">session active</span>
+        <span class="status-pill status-pill--subtle">hint: use <code>help</code> in terminal</span>
       </div>
-    </div>
-
-    <!-- ==================== EXPERIENCE ==================== -->
-    <section id="experience" class="section">
-      <div class="container">
-        <h2 class="section__heading reveal">
-          <span class="section__heading-text">Experience</span>
-          <span class="section__heading-line"></span>
-        </h2>
-
-        <!-- C-DAC -->
-        <article class="timeline__entry reveal" style="--i:0">
-          <div class="timeline__marker"></div>
-          <div class="timeline__content">
-            <div class="timeline__header">
-              <div>
-                <h3 class="timeline__company">C-DAC
-                  <span class="timeline__company-full">(Centre for Development of Advanced Computing)</span>
-                </h3>
-                <p class="timeline__role">Project Engineer -- AI Research &amp; IoT Security</p>
-              </div>
-              <div class="timeline__meta">
-                <span class="mono">July 2025 -- Present</span>
-                <span class="timeline__location">Chennai, India</span>
-              </div>
-            </div>
-            <ul class="timeline__list">
-              <li>Built a real-time Zero Trust security framework for IoT networks covering WiFi (802.11), BLE, Zigbee,
-                and LoRa; ML-based attack detection feeds a continuous 7-pillar device trust score engine.</li>
-              <li>Two-stage hybrid detection pipeline: window model (1-second sliding windows, 7 attack classes) + flow
-                model for longer-duration patterns. Compared RF, XGBoost, SVM, MLP, and Voting Ensemble across 6
-                preprocessing iterations with SMOTE and Optuna (TPE) hyperparameter search.</li>
-              <li>Best results: <strong>96.97% accuracy</strong> (flow/RF); <strong>90.86% accuracy / 86.78% macro
-                  F1</strong> (window/Voting Ensemble).</li>
-              <li>Engineered 63 statistical and behavioural features from raw PCAPs using Scapy and PyShark (MAC entropy,
-                frame rate statistics, sequence gap analysis, EAPOL key MIC ratios, beacon timestamp variance).</li>
-              <li>Live PCAP drop-folder pipeline via Watchdog: MD5 deduplication, multi-threaded extraction, batch
-                inference, per-resource thread-safe locking.</li>
-              <li>Integrated SPIFFE/SPIRE workload identity, mTLS, OTP-based 2FA.</li>
-              <li>Co-authored two papers published at IoTaIS 2025.</li>
-            </ul>
-          </div>
-        </article>
-
-        <!-- NCRA-TIFR -->
-        <article class="timeline__entry reveal" style="--i:1">
-          <div class="timeline__marker"></div>
-          <div class="timeline__content">
-            <div class="timeline__header">
-              <div>
-                <h3 class="timeline__company">National Centre for Radio Astrophysics (NCRA-TIFR)</h3>
-                <p class="timeline__role">Research Intern (M.Tech Project)</p>
-              </div>
-              <div class="timeline__meta">
-                <span class="mono">Aug 2024 -- Apr 2025</span>
-                <span class="timeline__location">Pune, India</span>
-              </div>
-            </div>
-            <ul class="timeline__list">
-              <li>Designed a ResNet1D architecture with Squeeze-and-Excitation attention for weak pulsar signal detection
-                in noisy astrophysical data at low SNR.</li>
-              <li>Achieved <strong>99.8% F1-score</strong> across 70M+ samples; built adaptive thresholding for
-                non-stationary noise floors across observation sessions.</li>
-              <li>Ran the project end-to-end independently: scoping through deployment and write-up.</li>
-            </ul>
-          </div>
-        </article>
-
-        <!-- GMRT -->
-        <article class="timeline__entry reveal" style="--i:2">
-          <div class="timeline__marker"></div>
-          <div class="timeline__content">
-            <div class="timeline__header">
-              <div>
-                <h3 class="timeline__company">Giant Metrewave Radio Telescope (GMRT-NCRA-TIFR)</h3>
-                <p class="timeline__role">Winter Intern -- HPC &amp; Signal Processing Optimisation</p>
-              </div>
-              <div class="timeline__meta">
-                <span class="mono">Dec 2023 -- Jan 2024</span>
-                <span class="timeline__location">Pune, India</span>
-              </div>
-            </div>
-            <ul class="timeline__list">
-              <li>Profiled legacy CPU signal filtering pipelines, refactored for multicore execution.</li>
-              <li>Cut latency by <strong>50%</strong>, unblocking real-time processing of continuous telescope data
-                streams.</li>
-            </ul>
-          </div>
-        </article>
-
+      <div id="task-strip" class="task-strip" aria-label="Open windows"></div>
+      <div class="status-bar__right">
+        <span id="process-count">0 processes</span>
+        <span class="status-bar__divider"></span>
+        <span id="uptime-display">uptime 00:00:00</span>
       </div>
-    </section>
+    </footer>
+  </div>
 
-    <!-- ==================== PROJECTS ==================== -->
-    <section id="projects" class="section section--alt">
-      <div class="container">
-        <h2 class="section__heading reveal">
-          <span class="section__heading-text">Projects</span>
-          <span class="section__heading-line"></span>
-        </h2>
-
-        <div class="projects__grid">
-
-          <!-- F1 Tyre Degradation -->
-          <article class="project-card reveal" style="--i:0">
-            <div class="project-card__glow"></div>
-            <h3 class="project-card__title">GPU-Accelerated F1 Tyre Degradation &amp; Race Strategy</h3>
-            <div class="project-card__stack">
-              <span class="pill">Python</span>
-              <span class="pill">PyTorch</span>
-              <span class="pill">CUDA</span>
-              <span class="pill">CuPy</span>
-              <span class="pill">XGBoost</span>
-            </div>
-            <ul class="project-card__list">
-              <li>Hybrid LSTM-XGBoost architecture for tyre wear modelling and pit-stop window prediction from 10 Hz
-                telemetry.</li>
-              <li>Physics-Informed Loss Functions (PINNs) separating thermal and mechanical degradation; enforces
-                physical constraints pure data-driven models cannot capture.</li>
-              <li>Custom CUDA/CuPy kernels for dense matrix operations; <strong>4.1x training speedup</strong>.</li>
-            </ul>
-          </article>
-
-          <!-- Omniscience Pro -->
-          <article class="project-card reveal" style="--i:1">
-            <div class="project-card__glow"></div>
-            <h3 class="project-card__title">Omniscience Pro -- Privacy-First Local RAG System</h3>
-            <div class="project-card__stack">
-              <span class="pill">Python</span>
-              <span class="pill">LangChain</span>
-              <span class="pill">ChromaDB</span>
-              <span class="pill">Docker</span>
-            </div>
-            <ul class="project-card__list">
-              <li>Local, privacy-first RAG supporting multi-modal document ingestion.</li>
-              <li>&lt;50 ms vector search (HNSW index); &lt;500 ms first-token latency on consumer hardware.</li>
-              <li>GPU-aware Docker with full CI/CD pipeline; POSIX file locking for concurrent access.</li>
-            </ul>
-          </article>
-
-          <!-- ARO -->
-          <article class="project-card reveal" style="--i:2">
-            <div class="project-card__glow"></div>
-            <h3 class="project-card__title">ARO -- Autonomous Research Operator (Multi-Agent LLM Platform)</h3>
-            <div class="project-card__stack">
-              <span class="pill">Python</span>
-              <span class="pill">Flask</span>
-              <span class="pill">SQLAlchemy</span>
-              <span class="pill">NetworkX</span>
-              <span class="pill">React</span>
-            </div>
-            <ul class="project-card__list">
-              <li>Multi-agent LLM workflows as directed graphs (NetworkX); Flask backend streaming via Server-Sent
-                Events; React frontend for interactive output.</li>
-              <li>Full adversarial audit post-build: found and fixed 16 vulnerabilities across auth, SSRF, input
-                validation, and CORS. SQLAlchemy-backed audit trails.</li>
-            </ul>
-          </article>
-
-          <!-- Llama 3.2 -->
-          <article class="project-card reveal" style="--i:3">
-            <div class="project-card__glow"></div>
-            <h3 class="project-card__title">Llama 3.2 Optimisation for Efficient Inference</h3>
-            <div class="project-card__stack">
-              <span class="pill">Python</span>
-              <span class="pill">Unsloth</span>
-              <span class="pill">Hugging Face</span>
-              <span class="pill">PyTorch</span>
-            </div>
-            <ul class="project-card__list">
-              <li>Fine-tuned Llama 3.2 (1B and 3B) on 21.5k domain-specific interactions for specialised task following
-                and agentic use cases.</li>
-              <li>4-bit quantisation via Unsloth for consumer GPU deployment; no meaningful quality drop vs
-                full-precision baselines.</li>
-            </ul>
-          </article>
-
-        </div>
-      </div>
-    </section>
-
-    <!-- ==================== PUBLICATIONS ==================== -->
-    <section id="publications" class="section">
-      <div class="container">
-        <h2 class="section__heading reveal">
-          <span class="section__heading-text">Publications</span>
-          <span class="section__heading-line"></span>
-        </h2>
-
-        <div class="publications__list">
-          <article class="publication reveal" style="--i:0">
-            <div class="publication__indicator"></div>
-            <div>
-              <h3 class="publication__title">Protocol-Aware Continuous Monitoring and Anomaly Detection in IoT Networks
-              </h3>
-              <p class="publication__venue mono">IoTaIS 2025, Bali, Indonesia</p>
-            </div>
-          </article>
-
-          <article class="publication reveal" style="--i:1">
-            <div class="publication__indicator"></div>
-            <div>
-              <h3 class="publication__title">A Comprehensive Survey on Zero Trust Architecture in IoT Networks</h3>
-              <p class="publication__venue mono">IoTaIS 2025, Bali, Indonesia</p>
-            </div>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <!-- ==================== EDUCATION ==================== -->
-    <section id="education" class="section section--alt">
-      <div class="container">
-        <h2 class="section__heading reveal">
-          <span class="section__heading-text">Education</span>
-          <span class="section__heading-line"></span>
-        </h2>
-
-        <div class="education__grid">
-
-          <article class="edu-card reveal" style="--i:0">
-            <div class="edu-card__glow"></div>
-            <span class="edu-card__degree mono">M.Tech</span>
-            <h3 class="edu-card__field">Computer Science &amp; Engineering (Artificial Intelligence)</h3>
-            <p class="edu-card__institution">Defence Institute of Advanced Technology (DIAT), DRDO</p>
-            <p class="edu-card__location">Pune, India</p>
-            <div class="edu-card__details">
-              <span class="edu-card__year mono">2023 -- 2025</span>
-              <span class="edu-card__score">CGPA: <strong>8.64</strong>/10.0</span>
-            </div>
-          </article>
-
-          <article class="edu-card reveal" style="--i:1">
-            <div class="edu-card__glow"></div>
-            <span class="edu-card__degree mono">B.Tech</span>
-            <h3 class="edu-card__field">Computer Science &amp; Engineering</h3>
-            <p class="edu-card__institution">Academy of Technology</p>
-            <p class="edu-card__location">Kolkata, India</p>
-            <div class="edu-card__details">
-              <span class="edu-card__year mono">2019 -- 2023</span>
-              <span class="edu-card__score">CGPA: <strong>9.44</strong>/10.0</span>
-            </div>
-            <div class="edu-card__badge">
-              <span class="pill pill--accent">GATE 2024 Qualified -- Rank 1790 in Data Science &amp; AI (Top 5%)</span>
-            </div>
-          </article>
-
-        </div>
-      </div>
-    </section>
-
-    <!-- ==================== SKILLS ==================== -->
-    <section id="skills" class="section">
-      <div class="container">
-        <h2 class="section__heading reveal">
-          <span class="section__heading-text">Technical Skills</span>
-          <span class="section__heading-line"></span>
-        </h2>
-
-        <div class="skills__grid">
-
-          <div class="skill-group reveal" style="--i:0">
-            <h3 class="skill-group__label mono">Languages</h3>
-            <div class="skill-group__pills">
-              <span class="pill">Python <small>(advanced)</small></span>
-              <span class="pill">C++ <small>(proficient)</small></span>
-              <span class="pill">C</span>
-              <span class="pill">Bash</span>
-              <span class="pill">SQL</span>
-            </div>
-          </div>
-
-          <div class="skill-group reveal" style="--i:1">
-            <h3 class="skill-group__label mono">ML &amp; Scientific Computing</h3>
-            <div class="skill-group__pills">
-              <span class="pill">PyTorch</span>
-              <span class="pill">XGBoost</span>
-              <span class="pill">Scikit-learn</span>
-              <span class="pill">PINNs</span>
-              <span class="pill">NumPy</span>
-              <span class="pill">SciPy</span>
-            </div>
-          </div>
-
-          <div class="skill-group reveal" style="--i:2">
-            <h3 class="skill-group__label mono">HPC &amp; Systems</h3>
-            <div class="skill-group__pills">
-              <span class="pill">CUDA</span>
-              <span class="pill">CuPy</span>
-              <span class="pill">Parallel Processing</span>
-              <span class="pill">Model Quantisation (4-bit/8-bit)</span>
-              <span class="pill">Latency Optimisation</span>
-              <span class="pill">Linux</span>
-            </div>
-          </div>
-
-          <div class="skill-group reveal" style="--i:3">
-            <h3 class="skill-group__label mono">Data &amp; Engineering</h3>
-            <div class="skill-group__pills">
-              <span class="pill">Statistical Anomaly Detection</span>
-              <span class="pill">Time-Series Analysis</span>
-              <span class="pill">CI/CD</span>
-              <span class="pill">Docker</span>
-              <span class="pill">Git</span>
-              <span class="pill">Flask</span>
-              <span class="pill">ChromaDB</span>
-            </div>
-          </div>
-
-          <div class="skill-group reveal" style="--i:4">
-            <h3 class="skill-group__label mono">AI &amp; MLOps</h3>
-            <div class="skill-group__pills">
-              <span class="pill">RAG Systems</span>
-              <span class="pill">LLM Fine-Tuning</span>
-              <span class="pill">Multi-Agent Orchestration (NetworkX, LangChain)</span>
-              <span class="pill">SQLAlchemy</span>
-            </div>
-          </div>
-
-        </div>
-      </div>
-    </section>
-
-    <!-- ==================== CONTACT ==================== -->
-    <section id="contact" class="section section--alt">
-      <div class="container contact__container">
-        <h2 class="section__heading reveal">
-          <span class="section__heading-text">Get in Touch</span>
-          <span class="section__heading-line"></span>
-        </h2>
-
-        <p class="contact__subtitle reveal" style="--i:0">Open to research collaborations, engineering roles, and interesting problems.</p>
-
-        <div class="contact__links">
-
-          <a href="mailto:saptarshinag18@gmail.com" class="contact-card reveal" style="--i:0">
-            <div class="contact-card__glow"></div>
-            <svg class="contact-card__icon" xmlns="http://www.w3.org/2000/svg" width="28" height="28"
-              viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-              stroke-linejoin="round">
-              <rect width="20" height="16" x="2" y="4" rx="2" />
-              <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
-            </svg>
-            <span class="contact-card__label">Email</span>
-            <span class="contact-card__value mono">saptarshinag18@gmail.com</span>
-          </a>
-
-          <a href="https://www.linkedin.com/in/saptarshi18" target="_blank" rel="noopener"
-            class="contact-card reveal" style="--i:1">
-            <div class="contact-card__glow"></div>
-            <svg class="contact-card__icon" xmlns="http://www.w3.org/2000/svg" width="28" height="28"
-              viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-              stroke-linejoin="round">
-              <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
-              <rect width="4" height="12" x="2" y="9" />
-              <circle cx="4" cy="4" r="2" />
-            </svg>
-            <span class="contact-card__label">LinkedIn</span>
-            <span class="contact-card__value mono">/in/saptarshi18</span>
-          </a>
-
-          <a href="https://github.com/Saptarshi-Nag189" target="_blank" rel="noopener"
-            class="contact-card reveal" style="--i:2">
-            <div class="contact-card__glow"></div>
-            <svg class="contact-card__icon" xmlns="http://www.w3.org/2000/svg" width="28" height="28"
-              viewBox="0 0 24 24" fill="currentColor">
-              <path
-                d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23a11.509 11.509 0 0 1 3.004-.404c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
-            </svg>
-            <span class="contact-card__label">GitHub</span>
-            <span class="contact-card__value mono">Saptarshi-Nag189</span>
-          </a>
-
-        </div>
-      </div>
-    </section>
-
-  </main>
-
-  <!-- Footer -->
-  <footer class="footer">
-    <div class="container">
-      <p class="footer__text">Saptarshi Nag <span class="footer__sep">/</span> <span id="footer-year"></span></p>
-    </div>
-  </footer>
-
-  <!-- App script -->
-  <script type="module" src="app.js"></script>
-
+  <script type="module" src="js/main.js"></script>
 </body>
-
 </html>

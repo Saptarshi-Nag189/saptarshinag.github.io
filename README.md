@@ -1,14 +1,22 @@
-# Saptarshi Nag — Portfolio
+# Saptarshi Browser OS
 
-Personal portfolio site for Saptarshi Nag, AI/ML Engineer.
+Browser-based operating system simulation for Saptarshi Nag's portfolio.
 
-Built with pure HTML, CSS, and JavaScript. Three.js particle network background via CDN.
+The site now boots into a desktop environment with:
 
-**Live:** [saptarshi-nag189.github.io/saptarshinag.github.io](https://saptarshi-nag189.github.io/saptarshinag.github.io/)
+- a JSON-backed virtual file system
+- a real terminal command registry operating on that VFS
+- draggable, resizable, stateful application windows
+- Explorer, About, Projects, Experience, document, and PDF viewers
+- Three.js desktop depth tied to live window state
 
 ## Stack
 
-- HTML5 / CSS3 / Vanilla JS (ES Modules)
-- Three.js r162 (jsDelivr CDN)
-- Inter + JetBrains Mono (Google Fonts)
-- No build step. No npm. Deployed directly via GitHub Pages.
+- HTML5 / CSS3 / Vanilla JavaScript (ES modules)
+- Three.js via jsDelivr CDN
+- IBM Plex Sans + IBM Plex Mono via Google Fonts
+- No build step and no npm
+
+## Local Run
+
+Open `index.html` directly in a browser, or serve the repository statically.
