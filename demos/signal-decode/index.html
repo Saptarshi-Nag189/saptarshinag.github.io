@@ -10,6 +10,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&display=swap"
     rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <style>
     :root {
       --bg: #04070a;
@@ -70,6 +71,12 @@
       text-shadow: 0 0 20px rgba(61, 255, 154, 0.4); line-height: 1; }
     .panel .role { font-size: clamp(1rem, 2.4vw, 1.5rem); color: var(--green); letter-spacing: 0.26em;
       text-transform: uppercase; margin-top: 12px; }
+    .panel .tagline { font-size: 12.5px; color: var(--text); opacity: 0.82; margin-top: 12px;
+      max-width: 620px; margin-left: auto; margin-right: auto; line-height: 1.55; letter-spacing: 0.02em; }
+    .panel .tagline i { color: var(--amber); margin-right: 7px; }
+    .panel .bio { font-size: 11px; color: var(--text); opacity: 0.62; margin-top: 9px;
+      max-width: 620px; margin-left: auto; margin-right: auto; line-height: 1.55; letter-spacing: 0.01em; }
+    .panel .bio i { color: var(--green-dim); margin-right: 6px; }
     .metrics { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px 26px; margin-top: 28px; }
     .metric { min-width: 120px; }
     .metric .v { font-size: clamp(1.4rem, 3.4vw, 2.2rem); font-weight: 800; color: var(--green);
@@ -77,20 +84,61 @@
     .metric .l { font-size: 9.5px; letter-spacing: 0.1em; color: var(--green-dim); text-transform: uppercase; margin-top: 4px; }
 
     /* channel (transmission) view */
-    .channel { margin-top: 26px; border: 1px solid rgba(61, 255, 154, 0.3); border-radius: 6px;
-      background: rgba(6, 18, 12, 0.72); padding: 22px 26px; text-align: left; min-height: 168px;
+    .channel { margin-top: 22px; border: 1px solid rgba(61, 255, 154, 0.3); border-radius: 6px;
+      background: rgba(6, 18, 12, 0.78); padding: 20px 24px 18px; text-align: left; min-height: 168px;
       box-shadow: 0 0 30px rgba(0, 0, 0, 0.6), inset 0 0 20px rgba(61, 255, 154, 0.04); }
-    .channel .chan-head { font-size: 11px; letter-spacing: 0.22em; color: var(--amber); text-transform: uppercase; margin-bottom: 12px; }
-    .channel .chan-body { font-size: 13.5px; line-height: 1.7; color: var(--text); min-height: 96px; }
+    .channel .chan-head { font-size: 11px; letter-spacing: 0.22em; color: var(--amber); text-transform: uppercase;
+      margin-bottom: 12px; display: flex; align-items: center; gap: 9px; }
+    .channel .chan-head i { color: var(--amber); filter: drop-shadow(0 0 6px rgba(255,184,77,0.5)); }
+    .channel .chan-body { font-size: 13px; line-height: 1.65; color: var(--text);
+      max-height: 38vh; overflow-y: auto; padding-right: 8px; scrollbar-width: thin;
+      scrollbar-color: rgba(61,255,154,0.4) transparent; }
+    .channel .chan-body::-webkit-scrollbar { width: 7px; }
+    .channel .chan-body::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); border-radius: 4px; }
+    .channel .chan-body::-webkit-scrollbar-thumb { background: rgba(61,255,154,0.35); border-radius: 4px; }
+    .channel .chan-body::-webkit-scrollbar-thumb:hover { background: rgba(61,255,154,0.6); }
     .channel .chan-body b { color: var(--green); font-weight: 700; }
     .channel .chan-body .row { padding: 3px 0; }
     .channel a { color: var(--amber); text-decoration: none; border-bottom: 1px dotted var(--amber-dim); }
+    .channel a:hover { text-shadow: 0 0 8px rgba(255,184,77,0.5); }
 
-    .nav-row { display: flex; gap: 10px; align-items: center; justify-content: space-between; margin-top: 16px; flex-wrap: wrap; }
+    /* rich content blocks inside a channel */
+    .entry { margin-bottom: 16px; padding-bottom: 14px; border-bottom: 1px dashed rgba(61,255,154,0.16); }
+    .entry:last-child { border-bottom: none; margin-bottom: 4px; padding-bottom: 0; }
+    .entry-title { color: #eafff2; font-weight: 700; font-size: 13.5px; display: flex; align-items: baseline;
+      gap: 9px; flex-wrap: wrap; }
+    .entry-title i { color: var(--green); font-size: 12px; filter: drop-shadow(0 0 5px rgba(61,255,154,0.5)); }
+    .entry-title .org { color: var(--green); }
+    .entry-meta { color: var(--amber-dim); font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase;
+      margin: 2px 0 8px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .entry-meta .sep { opacity: 0.5; }
+    .entry-meta i { font-size: 9px; }
+    ul.bullets { list-style: none; margin: 4px 0 0; padding: 0; }
+    ul.bullets li { position: relative; padding: 2px 0 2px 18px; line-height: 1.55; }
+    ul.bullets li::before { content: "\f105"; font-family: "Font Awesome 6 Free"; font-weight: 900;
+      position: absolute; left: 2px; top: 2px; color: var(--green-dim); font-size: 11px; }
+    .stack { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+    .stack .tag { font-size: 9.5px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--green);
+      background: rgba(8, 30, 20, 0.7); border: 1px solid rgba(61,255,154,0.26); padding: 3px 8px; border-radius: 3px; }
+    .grp { margin-bottom: 12px; }
+    .grp:last-child { margin-bottom: 2px; }
+    .grp-label { color: var(--amber); font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase;
+      margin-bottom: 5px; display: flex; align-items: center; gap: 8px; }
+    .grp-label i { color: var(--amber); font-size: 11px; }
+    .grp-items { color: var(--text); line-height: 1.6; }
+    .comm-row { display: flex; align-items: center; gap: 11px; padding: 6px 0; }
+    .comm-row i { color: var(--green); width: 18px; text-align: center; font-size: 14px;
+      filter: drop-shadow(0 0 6px rgba(61,255,154,0.5)); }
+    .comm-row .lbl { color: var(--amber-dim); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+      width: 78px; flex-shrink: 0; }
+
+    .nav-row { display: flex; gap: 10px; align-items: center; justify-content: space-between; margin-top: 14px; flex-wrap: wrap; }
     .chips { display: flex; gap: 7px; flex-wrap: wrap; }
     .chip { font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase;
       color: var(--green-dim); background: rgba(8, 28, 18, 0.6); border: 1px solid rgba(61, 255, 154, 0.28);
-      padding: 6px 10px; border-radius: 4px; cursor: pointer; transition: 0.15s; }
+      padding: 6px 10px; border-radius: 4px; cursor: pointer; transition: 0.15s; display: inline-flex;
+      align-items: center; gap: 6px; }
+    .chip i { font-size: 10px; }
     .chip:hover, .chip.active { color: #04110a; background: var(--green); border-color: var(--green); box-shadow: 0 0 12px rgba(61, 255, 154, 0.4); }
 
     /* tuner */
@@ -125,7 +173,7 @@
   <div class="vignette"></div>
   <div class="scanlines"></div>
 
-  <a class="top-left" href="../index.html">← demos</a>
+  <a class="top-left" href="../index.html"><i class="fa-solid fa-chevron-left"></i> demos</a>
   <span class="concept-tag">concept demo · 04</span>
 
   <div class="hud hud-tl">
@@ -150,6 +198,8 @@
     <div class="eyebrow" id="eyebrow">// carrier locked — transmission decoded</div>
     <h1 id="title"></h1>
     <div class="role" id="role"></div>
+    <div class="tagline" id="tagline"></div>
+    <div class="bio" id="bio"></div>
     <div class="metrics" id="metrics"></div>
 
     <div class="channel">
@@ -158,14 +208,14 @@
       <div class="nav-row">
         <div class="chips" id="chips"></div>
         <a class="chip" href="../../saptarshi_resume_linkedin_2026.pdf" target="_blank" rel="noopener"
-          style="border-color: var(--amber); color: var(--amber);">⤓ cv.pdf</a>
+          style="border-color: var(--amber); color: var(--amber);"><i class="fa-solid fa-download"></i> cv.pdf</a>
       </div>
     </div>
   </div>
 
   <!-- tuner -->
   <div class="tuner" id="tuner">
-    <div class="tune-hint" id="hint">◂ drag to tune the frequency ▸</div>
+    <div class="tune-hint" id="hint"><i class="fa-solid fa-satellite-dish"></i> &nbsp;◂ drag to tune the frequency ▸</div>
     <div class="dial-area" id="dial">
       <div class="dial-track">
         <div class="target-zone" id="targetZone"></div>
@@ -177,7 +227,7 @@
       <span class="freq-now" id="freqNow">1.420 GHz</span>
       <span>1.430 GHz</span>
     </div>
-    <button class="btn" id="autoBtn">▸ auto-tune</button>
+    <button class="btn" id="autoBtn"><i class="fa-solid fa-wand-magic-sparkles"></i> auto-tune</button>
   </div>
 
   <script>
@@ -194,58 +244,164 @@
       { v: '50%', l: 'latency cut' },
       { v: '70M+', l: 'samples' },
     ];
+    const TAGLINE = 'AI/ML engineer at the intersection of security and systems research.';
+    const BIO = 'AI/ML engineer with an M.Tech in Artificial Intelligence (DIAT, DRDO) and research experience at NCRA-TIFR and GMRT. Works across the full ML stack: feature engineering from raw data, model development and optimisation, and production deployment under tight performance constraints. Current work at C-DAC focuses on real-time IoT security using a Zero Trust framework with ML-based threat detection across multiple wireless protocols. Past projects span physics-informed neural networks, GPU-accelerated scientific computing, LLM fine-tuning, and RAG systems.';
+
+    // icon shorthand
+    function fa(name) { return `<i class="fa-solid ${name}"></i>`; }
+
+    function entry({ icon, title, org, meta, bullets, stack }) {
+      const metaHtml = meta && meta.length
+        ? `<div class="entry-meta">${meta.map((m, i) => (i ? '<span class="sep">·</span>' : '') + m).join('')}</div>` : '';
+      const bulletHtml = bullets && bullets.length
+        ? `<ul class="bullets">${bullets.map(b => `<li>${b}</li>`).join('')}</ul>` : '';
+      const stackHtml = stack && stack.length
+        ? `<div class="stack">${stack.map(s => `<span class="tag">${s}</span>`).join('')}</div>` : '';
+      const orgHtml = org ? ` — <span class="org">${org}</span>` : '';
+      return `<div class="entry"><div class="entry-title">${fa(icon)}<span>${title}</span>${orgHtml}</div>${metaHtml}${bulletHtml}${stackHtml}</div>`;
+    }
+    function group({ icon, label, items }) {
+      return `<div class="grp"><div class="grp-label">${fa(icon)}${label}</div><div class="grp-items">${items}</div></div>`;
+    }
+    function comm({ icon, lbl, body, brand }) {
+      const iconHtml = `<i class="${brand ? 'fa-brands' : 'fa-solid'} ${icon}"></i>`;
+      return `<div class="comm-row">${iconHtml}<span class="lbl">${lbl}</span><span>${body}</span></div>`;
+    }
+
     const CHANNELS = {
       experience: {
-        head: 'CH.01 — EXPERIENCE LOG',
-        rows: [
-          '<b>C-DAC</b> — Project Engineer, AI Research & IoT Security · Jul 2025–Present · Chennai',
-          'Real-time Zero Trust framework + ML threat detection across WiFi/BLE/Zigbee/LoRa — <b>96.97%</b> accuracy.',
-          '<b>NCRA-TIFR</b> — Research Intern · Aug 2024–Apr 2025 · Pune',
-          'Weak pulsar signal detection at low SNR — <b>99.8% F1</b> across 70M+ samples.',
-          '<b>GMRT</b> — Winter Intern · Dec 2023–Jan 2024 · Pune — cut signal-pipeline latency <b>50%</b>.',
-        ],
+        head: 'CH.01 — EXPERIENCE LOG', icon: 'fa-briefcase',
+        html:
+          entry({
+            icon: 'fa-microchip',
+            title: 'Project Engineer, AI Research & IoT Security',
+            org: 'C-DAC (Centre for Development of Advanced Computing)',
+            meta: ['Jul 2025–Present', 'Chennai, India'],
+            bullets: [
+              'Built a real-time <b>Zero Trust</b> security framework for IoT networks covering WiFi (802.11), BLE, Zigbee, and LoRa; ML-based attack detection feeds a continuous <b>7-pillar device trust score</b> engine.',
+              'Two-stage hybrid detection pipeline: window model (1-second sliding windows, 7 attack classes) + flow model for longer-duration patterns. Compared RF, XGBoost, SVM, MLP, and Voting Ensemble across 6 preprocessing iterations with <b>SMOTE</b> and <b>Optuna (TPE)</b>.',
+              'Best results: <b>96.97% accuracy</b> (flow/RF); <b>90.86% accuracy / 86.78% macro F1</b> (window/Voting Ensemble).',
+              'Engineered <b>63 statistical and behavioural features</b> from raw PCAPs using Scapy and PyShark.',
+              'Live PCAP drop-folder pipeline via Watchdog: MD5 deduplication, multi-threaded extraction, batch inference, thread-safe locking. Integrated <b>SPIFFE/SPIRE, mTLS, OTP-based 2FA</b>. Co-authored two IoTaIS 2025 papers.',
+            ],
+          }) +
+          entry({
+            icon: 'fa-satellite-dish',
+            title: 'Research Intern (M.Tech Project)',
+            org: 'NCRA-TIFR (National Centre for Radio Astrophysics)',
+            meta: ['Aug 2024–Apr 2025', 'Pune, India'],
+            bullets: [
+              '<b>ResNet1D</b> architecture with <b>Squeeze-and-Excitation</b> attention for weak pulsar signal detection at low SNR.',
+              '<b>99.8% F1-score</b> across 70M+ samples; adaptive thresholding for non-stationary noise floors. Ran end-to-end independently.',
+            ],
+          }) +
+          entry({
+            icon: 'fa-gauge-high',
+            title: 'Winter Intern, HPC & Signal Processing Optimisation',
+            org: 'GMRT (Giant Metrewave Radio Telescope, NCRA-TIFR)',
+            meta: ['Dec 2023–Jan 2024', 'Pune, India'],
+            bullets: [
+              'Profiled legacy CPU signal filtering pipelines, refactored for multicore execution. <b>Cut latency by 50%</b>, unblocking real-time processing of continuous telescope data streams.',
+            ],
+          }),
       },
       projects: {
-        head: 'CH.02 — PROJECTS',
-        rows: [
-          '<b>F1 Tyre Degradation & Race Strategy</b> — PyTorch/CUDA/CuPy/XGBoost, physics-informed loss, <b>4.1× speedup</b>.',
-          '<b>Omniscience Pro</b> — privacy-first local RAG · LangChain/ChromaDB/Docker · &lt;50 ms vector search.',
-          '<b>ARO</b> — Autonomous Research Operator · multi-agent LLM · Flask/NetworkX/React.',
-          '<b>Llama 3.2 Optimisation</b> — Unsloth, 4-bit quantisation for consumer GPUs.',
-        ],
+        head: 'CH.02 — PROJECTS', icon: 'fa-diagram-project',
+        html:
+          entry({
+            icon: 'fa-gauge-high',
+            title: 'GPU-Accelerated F1 Tyre Degradation & Race Strategy',
+            bullets: [
+              'Hybrid <b>LSTM-XGBoost</b> for tyre wear + pit-stop window prediction from 10 Hz telemetry.',
+              '<b>PINNs</b> separating thermal and mechanical degradation.',
+              'Custom CUDA/CuPy kernels; <b>4.1× training speedup</b>.',
+            ],
+            stack: ['Python', 'PyTorch', 'CUDA', 'CuPy', 'XGBoost'],
+          }) +
+          entry({
+            icon: 'fa-database',
+            title: 'Omniscience Pro — Privacy-First Local RAG System',
+            bullets: [
+              'Multi-modal document ingestion; <b>&lt;50 ms vector search</b> (HNSW); <b>&lt;500 ms first-token latency</b>.',
+              'GPU-aware Docker, CI/CD, POSIX file locking.',
+            ],
+            stack: ['Python', 'LangChain', 'ChromaDB', 'Docker'],
+          }) +
+          entry({
+            icon: 'fa-robot',
+            title: 'ARO — Autonomous Research Operator',
+            bullets: [
+              'Multi-agent LLM workflows as <b>directed graphs</b>; Flask SSE streaming; React frontend.',
+              'Adversarial audit found &amp; fixed <b>16 vulnerabilities</b> (auth, SSRF, input validation, CORS).',
+            ],
+            stack: ['Python', 'Flask', 'SQLAlchemy', 'NetworkX', 'React'],
+          }) +
+          entry({
+            icon: 'fa-compress',
+            title: 'Llama 3.2 Optimisation for Efficient Inference',
+            bullets: [
+              'Fine-tuned Llama 3.2 (1B and 3B) on <b>21.5k interactions</b>; 4-bit quantisation via Unsloth; no meaningful quality drop.',
+            ],
+            stack: ['Python', 'Unsloth', 'Hugging Face', 'PyTorch'],
+          }),
       },
       skills: {
-        head: 'CH.03 — SKILLS',
-        rows: [
-          'Languages — <b>Python</b>, C++, C, Bash, SQL',
-          'ML / Sci — PyTorch, XGBoost, scikit-learn, <b>PINNs</b>, NumPy, SciPy',
-          'HPC — <b>CUDA</b>, CuPy, parallel processing, model quantisation',
-          'AI / MLOps — <b>RAG</b>, LLM fine-tuning, multi-agent orchestration, Docker, Flask, Linux',
-        ],
+        head: 'CH.03 — SKILLS', icon: 'fa-microchip',
+        html:
+          group({ icon: 'fa-code', label: 'Languages', items: '<b>Python</b> (advanced), <b>C++</b> (proficient), C, Bash, SQL' }) +
+          group({ icon: 'fa-brain', label: 'ML & Scientific Computing', items: 'PyTorch, XGBoost, Scikit-learn, <b>PINNs</b>, NumPy, SciPy' }) +
+          group({ icon: 'fa-server', label: 'HPC & Systems', items: '<b>CUDA</b>, CuPy, Parallel Processing, Model Quantisation (4-bit/8-bit), Latency Optimisation, Linux' }) +
+          group({ icon: 'fa-chart-line', label: 'Data & Engineering', items: 'Statistical Anomaly Detection, Time-Series Analysis, CI/CD, Docker, Git, Flask, ChromaDB' }) +
+          group({ icon: 'fa-network-wired', label: 'AI & MLOps', items: '<b>RAG Systems</b>, LLM Fine-Tuning, Multi-Agent Orchestration (NetworkX, LangChain), SQLAlchemy' }),
       },
       publications: {
-        head: 'CH.04 — PUBLICATIONS',
-        rows: [
-          '<b>Protocol-Aware Continuous Monitoring and Anomaly Detection in IoT Networks</b> — IoTaIS 2025, Bali.',
-          '<b>A Comprehensive Survey on Zero Trust Architecture in IoT Networks</b> — IoTaIS 2025, Bali.',
-        ],
+        head: 'CH.04 — PUBLICATIONS', icon: 'fa-book',
+        html:
+          entry({
+            icon: 'fa-file-lines',
+            title: '"Protocol-Aware Continuous Monitoring and Anomaly Detection in IoT Networks"',
+            meta: ['IoTaIS 2025', 'Bali'],
+          }) +
+          entry({
+            icon: 'fa-file-lines',
+            title: '"A Comprehensive Survey on Zero Trust Architecture in IoT Networks"',
+            meta: ['IoTaIS 2025', 'Bali'],
+          }),
       },
       education: {
-        head: 'CH.05 — EDUCATION',
-        rows: [
-          '<b>M.Tech, Artificial Intelligence</b> — DIAT (DRDO) · 2023–2025 · CGPA 8.64',
-          '<b>B.Tech, CSE</b> — Academy of Technology · 2019–2023 · CGPA 9.44',
-          'GATE 2024 — Rank <b>1790</b> in Data Science & AI (top 5%).',
-        ],
+        head: 'CH.05 — EDUCATION', icon: 'fa-graduation-cap',
+        html:
+          entry({
+            icon: 'fa-graduation-cap',
+            title: 'M.Tech, CSE (Artificial Intelligence)',
+            org: 'DIAT (DRDO), Pune',
+            meta: ['2023–2025', 'CGPA 8.64/10.0'],
+          }) +
+          entry({
+            icon: 'fa-graduation-cap',
+            title: 'B.Tech, CSE',
+            org: 'Academy of Technology, Kolkata',
+            meta: ['2019–2023', 'CGPA 9.44/10.0'],
+          }) +
+          entry({
+            icon: 'fa-award',
+            title: 'GATE 2024',
+            meta: ['Data Science & AI'],
+            bullets: ['Rank <b>1790</b> in Data Science &amp; AI (<b>Top 5%</b>).'],
+          }),
       },
       contact: {
-        head: 'CH.06 — COMMS',
-        rows: [
-          'EMAIL — <a href="mailto:saptarshinag18@gmail.com">saptarshinag18@gmail.com</a>',
-          'LINKEDIN — <a href="https://www.linkedin.com/in/saptarshi18" target="_blank" rel="noopener">/in/saptarshi18</a>',
-          'GITHUB — <a href="https://github.com/Saptarshi-Nag189" target="_blank" rel="noopener">Saptarshi-Nag189</a>',
-        ],
+        head: 'CH.06 — COMMS', icon: 'fa-envelope',
+        html:
+          comm({ icon: 'fa-envelope', lbl: 'Email', body: '<a href="mailto:saptarshinag18@gmail.com">saptarshinag18@gmail.com</a>' }) +
+          comm({ icon: 'fa-linkedin-in', brand: true, lbl: 'LinkedIn', body: '<a href="https://www.linkedin.com/in/saptarshi18" target="_blank" rel="noopener">/in/saptarshi18</a>' }) +
+          comm({ icon: 'fa-github', brand: true, lbl: 'GitHub', body: '<a href="https://github.com/Saptarshi-Nag189" target="_blank" rel="noopener">Saptarshi-Nag189</a>' }) +
+          comm({ icon: 'fa-download', lbl: 'CV', body: '<a href="../../saptarshi_resume_linkedin_2026.pdf" target="_blank" rel="noopener">saptarshi_resume_linkedin_2026.pdf</a>' }),
       },
+    };
+    const CH_ICONS = {
+      experience: 'fa-briefcase', projects: 'fa-diagram-project', skills: 'fa-microchip',
+      publications: 'fa-book', education: 'fa-graduation-cap', contact: 'fa-envelope',
     };
     const CH_ORDER = ['experience', 'projects', 'skills', 'publications', 'education', 'contact'];
 
@@ -386,7 +542,7 @@
     function renderChips() {
       const chips = document.getElementById('chips');
       chips.innerHTML = CH_ORDER.map(k =>
-        `<span class="chip${k === currentCh ? ' active' : ''}" data-ch="${k}">${k}</span>`).join('');
+        `<span class="chip${k === currentCh ? ' active' : ''}" data-ch="${k}"><i class="fa-solid ${CH_ICONS[k]}"></i>${k}</span>`).join('');
       chips.querySelectorAll('.chip').forEach(c =>
         c.addEventListener('click', () => showChannel(c.dataset.ch)));
     }
@@ -394,19 +550,22 @@
       currentCh = key;
       renderChips();
       const ch = CHANNELS[key];
-      document.getElementById('chanHead').textContent = ch.head;
+      document.getElementById('chanHead').innerHTML = `<i class="fa-solid ${ch.icon}"></i>${ch.head}`;
       const body = document.getElementById('chanBody');
-      if (reduce) {
-        body.innerHTML = ch.rows.map(r => `<div class="row">${r}</div>`).join('');
-        return;
-      }
-      // glitch-in rows
-      body.innerHTML = ch.rows.map(r => `<div class="row" style="opacity:0">${r}</div>`).join('');
-      const rows = [...body.children];
-      rows.forEach((row, i) => setTimeout(() => {
-        row.style.transition = 'opacity .35s';
-        row.style.opacity = '1';
-      }, 90 * i));
+      body.scrollTop = 0;
+      body.innerHTML = ch.html;
+      if (reduce) return;
+      // glitch-in entries
+      const items = [...body.querySelectorAll('.entry, .grp, .comm-row')];
+      items.forEach((row, i) => {
+        row.style.opacity = '0';
+        setTimeout(() => {
+          row.style.transition = 'opacity .35s, transform .35s';
+          row.style.opacity = '1';
+          row.style.transform = 'none';
+        }, 80 * i);
+        row.style.transform = 'translateY(6px)';
+      });
     }
 
     let onLockDone = false;
@@ -420,6 +579,10 @@
       renderChips();
       const title = document.getElementById('title');
       const role = document.getElementById('role');
+      document.getElementById('tagline').innerHTML =
+        `<i class="fa-solid fa-satellite-dish"></i>${TAGLINE}`;
+      document.getElementById('bio').innerHTML =
+        `<i class="fa-solid fa-circle-info"></i>${BIO}`;
       scrambleTo(title, NAME, 700).then(() => scrambleTo(role, ROLE, 500));
       // decode metrics values
       if (!reduce) {

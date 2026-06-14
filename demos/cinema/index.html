@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;0,900;1,600&family=Oswald:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
 <style>
   :root {
     --gold: #e8c170;
@@ -231,10 +232,43 @@
   .pubs .pub { border-left: 3px solid var(--red-bright); padding: 4px 0 4px 16px; margin-bottom: 18px; }
   .pub-title { font-family: var(--serif); font-weight: 600; color: var(--gold-bright); font-size: 18px; line-height: 1.3; }
   .pub-venue { font-family: var(--cond); letter-spacing: .16em; text-transform: uppercase; color: var(--muted); font-size: 12px; margin-top: 4px; }
+  .pub-venue i { color: var(--gold-dim); }
 
   .edu .tl-item::before { background: var(--red-bright); box-shadow: 0 0 12px rgba(163,31,29,0.6); }
 
   .lead { font-family: var(--serif); font-style: italic; color: var(--gold-bright); font-size: clamp(16px,2.2vw,21px); line-height: 1.5; margin-bottom: 20px; }
+
+  /* reel icons (Font Awesome) */
+  .reel-icon i { color: var(--gold); text-shadow: 0 0 16px rgba(232,193,112,0.45); }
+
+  /* bullet lists inside reels */
+  .tl-bullets { list-style: none; margin: 8px 0 0; padding: 0; }
+  .tl-bullets li { position: relative; padding: 4px 0 4px 22px; color: var(--cream); font-size: 13.5px; line-height: 1.55; opacity: .9; }
+  .tl-bullets li::before { content: ""; position: absolute; left: 4px; top: 12px; width: 6px; height: 6px; border-radius: 50%; background: var(--gold-dim); }
+  .tl-bullets li b { color: var(--gold-bright); font-weight: 600; }
+
+  .work-desc ul { list-style: none; margin: 8px 0 0; padding: 0; }
+  .work-desc ul li { position: relative; padding: 3px 0 3px 18px; font-size: 12.5px; line-height: 1.5; }
+  .work-desc ul li::before { content: ""; position: absolute; left: 2px; top: 11px; width: 5px; height: 5px; border-radius: 50%; background: var(--red-bright); }
+
+  /* skill group label with icon */
+  .craft-group { margin: 16px 0 8px; display: flex; align-items: center; gap: 9px; font-family: var(--cond); letter-spacing: .22em; text-transform: uppercase; color: var(--gold); font-size: 13px; }
+  .craft-group i { color: var(--gold-dim); font-size: 14px; }
+
+  .pub-meta { font-family: var(--cond); letter-spacing: .14em; text-transform: uppercase; color: var(--gold-dim); font-size: 11px; margin-top: 3px; display: flex; align-items: center; gap: 6px; }
+
+  .gate { margin-top: 14px; border: 1px solid rgba(163,31,29,0.5); border-radius: 4px; padding: 12px 16px; background: rgba(122,20,19,0.12); display: flex; align-items: center; gap: 12px; }
+  .gate i { color: var(--red-bright); font-size: 20px; }
+  .gate-txt { font-size: 13.5px; color: var(--cream); }
+  .gate-txt b { color: var(--gold-bright); }
+
+  /* contact reel (non-credits) */
+  .contact-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap: 14px; margin-bottom: 22px; }
+  .contact-card { display: flex; align-items: center; gap: 14px; border: 1px solid rgba(232,193,112,0.22); border-radius: 4px; padding: 14px 16px; background: rgba(20,14,8,0.5); text-decoration: none; transition: .25s; }
+  .contact-card:hover { border-color: var(--gold); transform: translateY(-3px); box-shadow: 0 10px 28px rgba(0,0,0,0.5); }
+  .contact-card i { font-size: 22px; color: var(--gold); width: 28px; text-align: center; }
+  .contact-card .cc-lab { font-family: var(--cond); letter-spacing: .2em; text-transform: uppercase; color: var(--muted); font-size: 10px; }
+  .contact-card .cc-val { color: var(--gold-bright); font-size: 14px; }
 
   /* ===== END CREDITS ===== */
   #creditsRoll { position: absolute; inset: 7vh 0; overflow: hidden; display: none; z-index: 1; }
@@ -590,81 +624,128 @@
   // ---------- theatre / reels ----------
   var REELS = [
     {
-      no: "01", icon: "&#127902;", name: "The Career Arc", tag: "Experience",
+      no: "01", icon: '<i class="fa-solid fa-briefcase"></i>', name: "The Career Arc", tag: "Experience",
       render: function () {
         return '<p class="lead">From radio telescopes to zero-trust IoT &mdash; a researcher\'s journey into applied AI.</p>' +
           '<div class="timeline">' +
-            tl("Jul 2025 &mdash; Present &middot; Chennai", "Project Engineer, AI Research &amp; IoT Security", "C-DAC", "Building real-time IoT security systems combining Zero Trust architecture with ML-based threat detection. Achieved 96.97% attack-detection accuracy with 50% latency reduction.") +
-            tl("Aug 2024 &mdash; Apr 2025 &middot; Pune", "Research Intern", "NCRA-TIFR", "Weak pulsar signal detection on radio-astronomy data. Built ML pipelines reaching 99.8% F1 on pulsar candidates across 70M+ samples.") +
-            tl("Dec 2023 &mdash; Jan 2024 &middot; Pune", "Winter Intern", "GMRT", "HPC and signal-processing optimisation for the Giant Metrewave Radio Telescope &mdash; GPU acceleration delivering 4.1&times; training speedups.") +
+            tl("Jul 2025 &mdash; Present &middot; Chennai, India",
+               "Project Engineer, AI Research &amp; IoT Security",
+               "C-DAC &mdash; Centre for Development of Advanced Computing",
+               [
+                 "Built a real-time <b>Zero Trust</b> security framework for IoT networks covering WiFi (802.11), BLE, Zigbee, and LoRa; ML-based attack detection feeds a continuous <b>7-pillar device trust score</b> engine.",
+                 "Two-stage hybrid detection pipeline: window model (1-second sliding windows, 7 attack classes) + flow model; compared <b>RF, XGBoost, SVM, MLP, and Voting Ensemble</b> across 6 preprocessing iterations with SMOTE and Optuna (TPE).",
+                 "Best results: <b>96.97% accuracy</b> (flow/RF); <b>90.86% accuracy / 86.78% macro F1</b> (window/Voting Ensemble).",
+                 "Engineered <b>63 features</b> from raw PCAPs (Scapy/PyShark). Live PCAP drop-folder pipeline (Watchdog, MD5 dedup, multi-threaded). SPIFFE/SPIRE, mTLS, OTP-based 2FA. Two IoTaIS 2025 papers."
+               ]) +
+            tl("Aug 2024 &mdash; Apr 2025 &middot; Pune, India",
+               "Research Intern (M.Tech Project)",
+               "NCRA-TIFR &mdash; National Centre for Radio Astrophysics",
+               [
+                 "<b>ResNet1D + Squeeze-and-Excitation attention</b> for weak pulsar signal detection at low SNR.",
+                 "<b>99.8% F1-score</b> across 70M+ samples; adaptive thresholding for non-stationary noise floors. Ran end-to-end independently."
+               ]) +
+            tl("Dec 2023 &mdash; Jan 2024 &middot; Pune, India",
+               "Winter Intern, HPC &amp; Signal Processing Optimisation",
+               "GMRT &mdash; Giant Metrewave Radio Telescope, NCRA-TIFR",
+               [
+                 "Profiled legacy CPU signal filtering pipelines, refactored for multicore execution. <b>Cut latency by 50%</b>, unblocking real-time processing of continuous telescope data streams."
+               ]) +
           '</div>';
       }
     },
     {
-      no: "02", icon: "&#127916;", name: "Featured Works", tag: "Projects",
+      no: "02", icon: '<i class="fa-solid fa-diagram-project"></i>', name: "Featured Works", tag: "Projects",
       render: function () {
         return '<p class="lead">The headline acts &mdash; selected projects in GPU computing, RAG, and agentic AI.</p>' +
           '<div class="works">' +
-            work("F1 Tyre Degradation &amp; Race Strategy", "GPU-Accelerated ML", "Physics-informed neural networks modelling tyre wear and optimal race strategy. CUDA/CuPy pipeline delivering a 4.1&times; training speedup.", ["PyTorch","CUDA","CuPy","XGBoost","PINNs"]) +
-            work("Omniscience Pro", "Local RAG Engine", "Fully local retrieval-augmented generation with sub-50ms semantic search. Private, dockerised, and offline-capable.", ["LangChain","ChromaDB","Docker","RAG"]) +
-            work("ARO", "Multi-Agent LLM", "Autonomous research orchestrator using multi-agent LLMs with a graph-based reasoning backbone and a React front end.", ["Flask","NetworkX","React","LLM"]) +
-            work("Llama 3.2 Optimisation", "LLM Fine-Tuning", "Efficient fine-tuning of Llama 3.2 with Unsloth and 4-bit quantisation for memory-constrained deployment.", ["Unsloth","4-bit Quant","LLM"]) +
+            work("GPU-Accelerated F1 Tyre Degradation &amp; Race Strategy", "GPU-Accelerated ML",
+              [
+                "Hybrid <b>LSTM-XGBoost</b> for tyre wear + pit-stop window prediction from 10 Hz telemetry.",
+                "PINNs separating thermal and mechanical degradation.",
+                "Custom CUDA/CuPy kernels; <b>4.1&times; training speedup</b>."
+              ],
+              ["Python","PyTorch","CUDA","CuPy","XGBoost"]) +
+            work("Omniscience Pro &mdash; Privacy-First Local RAG System", "Local RAG Engine",
+              [
+                "Multi-modal document ingestion.",
+                "<b>&lt;50 ms</b> vector search (HNSW); <b>&lt;500 ms</b> first-token latency.",
+                "GPU-aware Docker, CI/CD, POSIX file locking."
+              ],
+              ["Python","LangChain","ChromaDB","Docker"]) +
+            work("ARO &mdash; Autonomous Research Operator", "Multi-Agent LLM",
+              [
+                "Multi-agent LLM workflows as directed graphs; Flask SSE streaming; React frontend.",
+                "Adversarial audit found &amp; fixed <b>16 vulnerabilities</b> (auth, SSRF, input validation, CORS)."
+              ],
+              ["Python","Flask","SQLAlchemy","NetworkX","React"]) +
+            work("Llama 3.2 Optimisation for Efficient Inference", "LLM Fine-Tuning",
+              [
+                "Fine-tuned Llama 3.2 (<b>1B and 3B</b>) on 21.5k interactions.",
+                "<b>4-bit quantisation</b> via Unsloth; no meaningful quality drop."
+              ],
+              ["Python","Unsloth","Hugging Face","PyTorch"]) +
           '</div>';
       }
     },
     {
-      no: "03", icon: "&#9874;", name: "The Craft", tag: "Skills",
+      no: "03", icon: '<i class="fa-solid fa-microchip"></i>', name: "The Craft", tag: "Skills",
       render: function () {
         var groups = [
-          ["Languages", ["Python","C++","CUDA"]],
-          ["ML / DL", ["PyTorch","XGBoost","scikit-learn","PINNs","CuPy"]],
-          ["AI Systems", ["RAG","LLM fine-tuning"]],
-          ["Infra", ["Docker","Flask","Linux"]]
+          ["fa-code", "Languages", ["Python (advanced)","C++ (proficient)","C","Bash","SQL"]],
+          ["fa-brain", "ML &amp; Scientific Computing", ["PyTorch","XGBoost","Scikit-learn","PINNs","NumPy","SciPy"]],
+          ["fa-microchip", "HPC &amp; Systems", ["CUDA","CuPy","Parallel Processing","Model Quantisation (4-bit/8-bit)","Latency Optimisation","Linux"]],
+          ["fa-database", "Data &amp; Engineering", ["Statistical Anomaly Detection","Time-Series Analysis","CI/CD","Docker","Git","Flask","ChromaDB"]],
+          ["fa-robot", "AI &amp; MLOps", ["RAG Systems","LLM Fine-Tuning","Multi-Agent Orchestration (NetworkX, LangChain)","SQLAlchemy"]]
         ];
         var html = '<p class="lead">The toolkit behind the performance &mdash; from low-level GPU code to LLM systems.</p>';
         groups.forEach(function (g) {
-          html += '<div class="cr-role" style="margin:14px 0 8px">' + g[0] + '</div><div class="craft">';
-          g[1].forEach(function (s) { html += '<span class="chip">' + s + '</span>'; });
+          html += '<div class="craft-group"><i class="fa-solid ' + g[0] + '"></i>' + g[1] + '</div><div class="craft">';
+          g[2].forEach(function (s) { html += '<span class="chip">' + s + '</span>'; });
           html += '</div>';
         });
         return html;
       }
     },
     {
-      no: "04", icon: "&#128214;", name: "Published", tag: "Publications",
+      no: "04", icon: '<i class="fa-solid fa-book"></i>', name: "Published", tag: "Publications",
       render: function () {
         return '<p class="lead">On the festival circuit &mdash; peer-reviewed work presented at IoTaIS 2025, Bali.</p>' +
           '<div class="pubs">' +
-            pub("Protocol-Aware Continuous Monitoring and Anomaly Detection in IoT Networks", "IEEE IoTaIS 2025 &middot; Bali, Indonesia") +
-            pub("A Comprehensive Survey on Zero Trust Architecture in IoT Networks", "IEEE IoTaIS 2025 &middot; Bali, Indonesia") +
+            pub("Protocol-Aware Continuous Monitoring and Anomaly Detection in IoT Networks", "IoTaIS 2025 &middot; Bali, Indonesia") +
+            pub("A Comprehensive Survey on Zero Trust Architecture in IoT Networks", "IoTaIS 2025 &middot; Bali, Indonesia") +
           '</div>';
       }
     },
     {
-      no: "05", icon: "&#127891;", name: "Origins", tag: "Education",
+      no: "05", icon: '<i class="fa-solid fa-graduation-cap"></i>', name: "Origins", tag: "Education",
       render: function () {
         return '<p class="lead">The backstory &mdash; where the training montage began.</p>' +
           '<div class="timeline edu">' +
-            tl("2023 &mdash; 2025", "M.Tech, Artificial Intelligence", "DIAT (DRDO) &middot; CGPA 8.64", "Defence Institute of Advanced Technology. GATE 2024 Rank 1790 (top 5%).") +
-            tl("2019 &mdash; 2023", "B.Tech, Computer Science &amp; Engineering", "Academy of Technology &middot; CGPA 9.44", "Foundations in computer science, systems, and machine learning.") +
-          '</div>';
+            tl("2023 &mdash; 2025", "M.Tech, CSE (Artificial Intelligence)", "DIAT (DRDO), Pune &middot; CGPA 8.64/10.0",
+               ["Defence Institute of Advanced Technology &mdash; specialisation in Artificial Intelligence."]) +
+            tl("2019 &mdash; 2023", "B.Tech, Computer Science &amp; Engineering", "Academy of Technology, Kolkata &middot; CGPA 9.44/10.0",
+               ["Foundations in computer science, systems, and machine learning."]) +
+          '</div>' +
+          '<div class="gate"><i class="fa-solid fa-medal"></i><div class="gate-txt"><b>GATE 2024</b> &mdash; Rank 1790 in Data Science &amp; AI (Top 5%).</div></div>';
       }
     },
     {
-      no: "06", icon: "&#10024;", name: "End Credits", tag: "Contact", credits: true,
+      no: "06", icon: '<i class="fa-solid fa-ticket"></i>', name: "End Credits", tag: "Get in Touch", credits: true,
       render: function () { return ""; }
     }
   ];
 
-  function tl(when, role, where, desc) {
-    return '<div class="tl-item"><div class="tl-when">' + when + '</div><div class="tl-role">' + role + '</div><div class="tl-where">' + where + '</div><div class="tl-desc">' + desc + '</div></div>';
+  function tl(when, role, where, bullets) {
+    var items = bullets.map(function (b) { return '<li>' + b + '</li>'; }).join("");
+    return '<div class="tl-item"><div class="tl-when">' + when + '</div><div class="tl-role">' + role + '</div><div class="tl-where">' + where + '</div><ul class="tl-bullets">' + items + '</ul></div>';
   }
-  function work(name, tag, desc, tech) {
+  function work(name, tag, bullets, tech) {
+    var items = bullets.map(function (b) { return '<li>' + b + '</li>'; }).join("");
     var chips = tech.map(function (t) { return '<span class="chip">' + t + '</span>'; }).join("");
-    return '<div class="work"><div class="work-name">' + name + '</div><div class="work-tag">' + tag + '</div><div class="work-desc">' + desc + '</div><div class="work-tech">' + chips + '</div></div>';
+    return '<div class="work"><div class="work-name">' + name + '</div><div class="work-tag">' + tag + '</div><div class="work-desc"><ul>' + items + '</ul></div><div class="work-tech">' + chips + '</div></div>';
   }
   function pub(title, venue) {
-    return '<div class="pub"><div class="pub-title">' + title + '</div><div class="pub-venue">' + venue + '</div></div>';
+    return '<div class="pub"><div class="pub-title">' + title + '</div><div class="pub-venue"><i class="fa-solid fa-book"></i>&nbsp;' + venue + '</div></div>';
   }
 
   // box office stats prepended to first reel body
@@ -707,10 +788,10 @@
         '<h2>End Credits</h2>' +
         '<div class="cr-block"><div class="cr-role">Directed &amp; Engineered By</div><div class="cr-name">Saptarshi Nag</div></div>' +
         '<div class="cr-block"><div class="cr-role">Role</div><div class="cr-name">AI / ML Engineer</div></div>' +
-        '<div class="cr-block"><div class="cr-role">Correspondence</div><div class="cr-name"><a href="mailto:saptarshinag18@gmail.com">saptarshinag18@gmail.com</a></div></div>' +
-        '<div class="cr-block"><div class="cr-role">LinkedIn</div><div class="cr-name"><a href="https://www.linkedin.com/in/saptarshi18" target="_blank" rel="noopener">/in/saptarshi18</a></div></div>' +
-        '<div class="cr-block"><div class="cr-role">GitHub</div><div class="cr-name"><a href="https://github.com/Saptarshi-Nag189" target="_blank" rel="noopener">Saptarshi-Nag189</a></div></div>' +
-        '<div class="cr-block"><div class="cr-role">Press Kit</div><div style="margin-top:10px">' + ticketHTML() + '</div></div>' +
+        '<div class="cr-block"><div class="cr-role"><i class="fa-solid fa-envelope"></i> Correspondence</div><div class="cr-name"><a href="mailto:saptarshinag18@gmail.com">saptarshinag18@gmail.com</a></div></div>' +
+        '<div class="cr-block"><div class="cr-role"><i class="fa-brands fa-linkedin"></i> LinkedIn</div><div class="cr-name"><a href="https://www.linkedin.com/in/saptarshi18" target="_blank" rel="noopener">/in/saptarshi18</a></div></div>' +
+        '<div class="cr-block"><div class="cr-role"><i class="fa-brands fa-github"></i> GitHub</div><div class="cr-name"><a href="https://github.com/Saptarshi-Nag189" target="_blank" rel="noopener">Saptarshi-Nag189</a></div></div>' +
+        '<div class="cr-block"><div class="cr-role"><i class="fa-solid fa-ticket"></i> Press Kit</div><div style="margin-top:10px">' + ticketHTML() + '</div></div>' +
         '<div class="cr-fin">~ Fin ~</div>' +
         '<div style="height:30vh"></div>' +
       '</div>';
@@ -718,7 +799,7 @@
 
   function ticketHTML() {
     return '<a class="ticket" href="../../saptarshi_resume_linkedin_2026.pdf" download>' +
-      '<span class="ticket-stub">Admit One</span>' +
+      '<span class="ticket-stub"><i class="fa-solid fa-ticket"></i>&nbsp; Admit One</span>' +
       '<span class="ticket-main"><span class="tm-top">The Premiere &middot; CV</span><span class="tm-mid">Download Resume</span><span class="tm-bot">Saptarshi Nag &middot; 2026</span></span>' +
       '</a>';
   }

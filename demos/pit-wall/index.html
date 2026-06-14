@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
 <style>
   :root{
     --red:#ff2d2d;
@@ -179,6 +180,9 @@
   .d-tier{font-family:var(--mono);font-size:10px;letter-spacing:.22em;color:var(--red);text-transform:uppercase}
   .d-title{font-size:24px;font-weight:800;line-height:1.05;letter-spacing:-.01em}
   .d-sub{font-family:var(--mono);font-size:12px;color:var(--cyan);letter-spacing:.06em}
+  .d-org{font-family:var(--mono);font-size:11px;color:var(--mut);letter-spacing:.04em;margin-top:3px}
+  .d-org i{color:var(--red);margin-right:5px}
+  .d-org i.fa-location-dot{margin-left:4px}
   .d-meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:2px}
   .chip{font-family:var(--mono);font-size:10px;letter-spacing:.08em;padding:4px 9px;border-radius:6px;
     border:1px solid var(--line2);color:var(--mut);background:rgba(255,255,255,.02)}
@@ -241,6 +245,37 @@
   .skillgrid{display:flex;flex-wrap:wrap;gap:6px}
   .contact a{color:var(--cyan);text-decoration:none}.contact a:hover{text-decoration:underline}
 
+  /* font-awesome accents */
+  .ph i,.mini h4 i,.d-tier i,.keymetric i,.chip i,.rec i.faicon,.tyre-c i.faicon{margin-right:6px}
+  .pill i{margin-right:4px}
+  .ses i{margin-right:7px;color:var(--red)}
+  .rec .recico{display:flex;align-items:center;justify-content:center;width:30px;height:30px;flex:0 0 30px;
+    border-radius:7px;border:1px solid var(--line2);background:rgba(255,255,255,.03);color:var(--red);font-size:13px}
+  .rec.best .recico{color:var(--red);box-shadow:0 0 12px rgba(255,45,45,.3)}
+  .rec .recmid{flex:1;display:flex;flex-direction:column;gap:2px}
+  .rec .rl{text-align:left;max-width:none}
+  .lapno i{font-size:14px;color:var(--red)}
+
+  /* bullet lists inside detail / mini */
+  .bullets{list-style:none;display:flex;flex-direction:column;gap:9px;margin-top:4px}
+  .bullets li{position:relative;padding-left:24px;font-size:13.5px;line-height:1.6;color:#cdd1d7}
+  .bullets li b{color:#fff}
+  .bullets li>i.bico{position:absolute;left:0;top:3px;color:var(--red);font-size:12px;width:16px;text-align:center}
+  .d-section{font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:var(--cyan);
+    text-transform:uppercase;margin-top:6px;display:flex;align-items:center;gap:7px}
+  .d-section::before{content:"";flex:1;height:1px;background:var(--line);order:2}
+  .d-section span{order:1;white-space:nowrap}
+  .stack{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  .stack .chip{background:rgba(34,211,238,.06);border-color:rgba(34,211,238,.28);color:#bfe9f4}
+
+  /* skills grouped */
+  .skgroup{margin-bottom:10px}
+  .skgroup:last-child{margin-bottom:0}
+  .skgroup .sklab{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;color:var(--red);
+    text-transform:uppercase;margin-bottom:5px;display:flex;align-items:center;gap:6px}
+  .grid2.wide{grid-template-columns:1fr 1fr}
+  .mini.span2{grid-column:1/-1}
+
   @media (max-width:1100px){
     body{overflow-y:auto;overflow-x:hidden}
     #hud{height:auto;grid-template-columns:1fr;grid-template-rows:none;padding:54px 12px 24px}
@@ -264,7 +299,7 @@
 
 <!-- ===================== START LIGHTS INTRO ===================== -->
 <div id="intro">
-  <div class="driver-line" id="driverLine">CAR 18 &nbsp;·&nbsp; S. NAG &nbsp;·&nbsp; FORMATION LAP COMPLETE</div>
+  <div class="driver-line" id="driverLine"><i class="fa-solid fa-helmet-safety"></i>&nbsp; CAR 18 &nbsp;·&nbsp; S. NAG &nbsp;·&nbsp; FORMATION LAP COMPLETE</div>
   <div class="gantry" id="gantry" aria-hidden="true">
     <div class="lamp-col"><div class="lamp"></div><div class="lamp"></div></div>
     <div class="lamp-col"><div class="lamp"></div><div class="lamp"></div></div>
@@ -274,7 +309,7 @@
   </div>
   <div class="intro-status" id="introStatus">SYSTEMS GO &nbsp;·&nbsp; AWAITING START</div>
   <div class="lights-out" id="lightsOut">LIGHTS OUT — AND AWAY WE GO</div>
-  <button class="skip" id="skipBtn">SKIP INTRO ▸</button>
+  <button class="skip" id="skipBtn">SKIP INTRO <i class="fa-solid fa-forward-fast"></i></button>
 </div>
 
 <!-- ===================== HUD ===================== -->
@@ -282,28 +317,28 @@
   <!-- top strip -->
   <section class="panel topstrip">
     <span class="c-tl corner"></span><span class="c-tr corner"></span>
-    <div class="ses">PIT&nbsp;WALL</div>
+    <div class="ses"><i class="fa-solid fa-flag-checkered"></i>PIT&nbsp;WALL</div>
     <div>
       <div class="name">SAPTARSHI NAG</div>
       <div class="role">AI / ML ENGINEER · RACE ENGINEER</div>
     </div>
-    <span class="pill live">● LIVE SESSION</span>
+    <span class="pill live"><i class="fa-solid fa-circle" style="font-size:7px;vertical-align:middle"></i> LIVE SESSION</span>
     <div class="spacer"></div>
-    <span class="pill drs off" id="drsPill">DRS</span>
-    <span class="pill" id="ersPill">ERS 100%</span>
+    <span class="pill drs off" id="drsPill"><i class="fa-solid fa-wind"></i>DRS</span>
+    <span class="pill" id="ersPill"><i class="fa-solid fa-bolt"></i>ERS 100%</span>
     <span class="clock" id="clock">--:--:--</span>
   </section>
 
   <!-- left lap list -->
   <section class="panel laplist">
-    <div class="ph"><span>TIMING BOARD · CAREER</span><span class="dot"></span></div>
+    <div class="ph"><span><i class="fa-solid fa-stopwatch"></i>TIMING BOARD · CAREER</span><span class="dot"></span></div>
     <div class="laps" id="laps"></div>
   </section>
 
   <!-- center main -->
   <section class="panel mainwrap">
     <div class="ph">
-      <span id="stageLabel">RACE CONTROL · OVERVIEW</span>
+      <span><i class="fa-solid fa-tower-broadcast"></i><span id="stageLabel">RACE CONTROL · OVERVIEW</span></span>
       <span class="lapcount" id="lapCounter">LAP 0 / 6</span>
     </div>
     <div class="sectors">
@@ -320,16 +355,16 @@
   <!-- right column -->
   <aside class="rightcol">
     <section class="panel records">
-      <div class="ph" style="border:0;padding-bottom:4px"><span>FASTEST LAPS · RECORDS</span></div>
-      <div class="rec best"><span class="rv">96.97%</span><span class="rl">IoT attack-detection accuracy</span></div>
-      <div class="rec"><span class="rv">99.8%</span><span class="rl">Pulsar-detection F1 score</span></div>
-      <div class="rec"><span class="rv">4.1&times;</span><span class="rl">GPU training speedup (CUDA)</span></div>
-      <div class="rec"><span class="rv">50%</span><span class="rl">Signal-pipeline latency cut</span></div>
-      <div class="rec"><span class="rv">70M+</span><span class="rl">Samples processed</span></div>
+      <div class="ph" style="border:0;padding-bottom:4px"><span><i class="fa-solid fa-trophy"></i>FASTEST LAPS · RECORDS</span></div>
+      <div class="rec best"><span class="recico"><i class="fa-solid fa-shield-halved"></i></span><span class="recmid"><span class="rv">96.97%</span><span class="rl">IoT attack-detection accuracy</span></span></div>
+      <div class="rec"><span class="recico"><i class="fa-solid fa-satellite-dish"></i></span><span class="recmid"><span class="rv">99.8%</span><span class="rl">Pulsar-detection F1 score</span></span></div>
+      <div class="rec"><span class="recico"><i class="fa-solid fa-microchip"></i></span><span class="recmid"><span class="rv">4.1&times;</span><span class="rl">GPU training speedup (CUDA)</span></span></div>
+      <div class="rec"><span class="recico"><i class="fa-solid fa-gauge-high"></i></span><span class="recmid"><span class="rv">50%</span><span class="rl">Signal-pipeline latency cut</span></span></div>
+      <div class="rec"><span class="recico"><i class="fa-solid fa-database"></i></span><span class="recmid"><span class="rv">70M+</span><span class="rl">Samples processed</span></span></div>
     </section>
 
     <section class="panel tyres">
-      <div class="ph" style="border:0;padding:0 0 8px"><span>TYRE TEMPS · CORE °C</span></div>
+      <div class="ph" style="border:0;padding:0 0 8px"><span><i class="fa-solid fa-circle-notch"></i>TYRE TEMPS · CORE °C</span></div>
       <div class="tyregrid" id="tyreGrid"></div>
     </section>
   </aside>
@@ -338,23 +373,23 @@
   <section class="panel gauges" style="display:contents">
     <div class="panel gauge">
       <span class="c-bl corner"></span>
-      <div class="glab">SPEED · KM/H</div>
+      <div class="glab"><i class="fa-solid fa-gauge-high"></i> SPEED · KM/H</div>
       <canvas data-g="speed"></canvas>
       <div class="gval" id="vSpeed">0<small>km/h</small></div>
     </div>
     <div class="panel gauge">
-      <div class="glab">ENGINE · RPM</div>
+      <div class="glab"><i class="fa-solid fa-gears"></i> ENGINE · RPM</div>
       <canvas data-g="rpm"></canvas>
       <div class="gval" id="vRpm">0<small>rpm</small></div>
     </div>
     <div class="panel gauge">
-      <div class="glab">ERS DEPLOY · kJ</div>
+      <div class="glab"><i class="fa-solid fa-bolt"></i> ERS DEPLOY · kJ</div>
       <canvas data-g="ers"></canvas>
       <div class="gval" id="vErs">0<small>kJ</small></div>
     </div>
     <div class="panel gauge">
       <span class="c-br corner"></span>
-      <div class="glab">THROTTLE / BRAKE</div>
+      <div class="glab"><i class="fa-solid fa-shoe-prints"></i> THROTTLE / BRAKE</div>
       <canvas data-g="thr"></canvas>
       <div class="gval" id="vThr">0<small>%</small></div>
     </div>
@@ -375,101 +410,172 @@
   var ITEMS = [
     {kind:'lap', no:1, time:'1:24.918', tier:'CAREER LAP · STINT 1',
      title:'GMRT — Giant Metrewave Radio Telescope',
-     sub:'Winter Intern · HPC & Signal Processing · Pune',
+     org:'NCRA-TIFR', loc:'Pune',
+     sub:'Winter Intern · HPC & Signal Processing Optimisation',
      dates:'Dec 2023 — Jan 2024', compound:'soft', cName:'SOFT',
      meta:['HPC','SIGNAL PROCESSING','OPTIMISATION'],
      metric:['50%','PIPELINE LATENCY CUT'],
-     body:'Optimised radio-astronomy signal-processing pipelines on HPC infrastructure at one of the world’s largest radio telescope arrays. <b>Cut end-to-end pipeline latency by 50%</b> through profiling, vectorisation and parallel restructuring of the data path — the first stint that set the tyre temperature for everything that followed.'},
+     body:'Winter internship at one of the world’s largest radio telescope arrays — the opening stint, optimising the signal-processing data path that everything else builds on.',
+     bullets:[
+       {i:'fa-magnifying-glass-chart', t:'Profiled legacy <b>CPU signal-filtering pipelines</b> and refactored them for <b>multicore execution</b>.'},
+       {i:'fa-gauge-high', t:'Cut latency by <b>50%</b>, unblocking <b>real-time processing</b> of continuous telescope data streams.'}
+     ]},
 
     {kind:'lap', no:2, time:'1:23.402', purple:true, tier:'CAREER LAP · STINT 2',
      title:'NCRA-TIFR — Weak Pulsar Detection',
-     sub:'Research Intern · ML for Astrophysics · Pune',
+     org:'National Centre for Radio Astrophysics', loc:'Pune',
+     sub:'Research Intern (M.Tech Project) · ML for Astrophysics',
      dates:'Aug 2024 — Apr 2025', compound:'medium', cName:'MEDIUM',
      meta:['ML RESEARCH','PULSAR DETECTION','PYTORCH'],
      metric:['99.8%','DETECTION F1 SCORE'],
-     body:'Built deep-learning models to surface <b>weak pulsar signals</b> buried in noisy radio data at the National Centre for Radio Astrophysics (TIFR). Reached a <b>99.8% F1 score</b> on detection — the purple-sector lap of the research stint, pushing recall on faint candidates other pipelines missed.'},
+     body:'M.Tech research project at the National Centre for Radio Astrophysics (TIFR) — the purple-sector lap of the research stint, surfacing faint pulsar signals other pipelines missed.',
+     bullets:[
+       {i:'fa-brain', t:'<b>ResNet1D + Squeeze-and-Excitation attention</b> for weak pulsar signal detection at <b>low SNR</b>.'},
+       {i:'fa-bullseye', t:'<b>99.8% F1-score</b> across <b>70M+ samples</b>; adaptive thresholding for non-stationary noise floors.'},
+       {i:'fa-user-gear', t:'Ran the project <b>end-to-end independently</b>.'}
+     ]},
 
     {kind:'lap', no:3, time:'1:23.961', tier:'CAREER LAP · STINT 3 · CURRENT',
      title:'C-DAC — AI Research & IoT Security',
-     sub:'Project Engineer · Zero Trust + ML · Chennai',
+     org:'Centre for Development of Advanced Computing', loc:'Chennai',
+     sub:'Project Engineer · Zero Trust + ML Threat Detection',
      dates:'Jul 2025 — Present', compound:'hard', cName:'HARD',
      meta:['IoT SECURITY','ZERO TRUST','REAL-TIME ML'],
      metric:['96.97%','IoT ATTACK DETECTION'],
-     body:'Current race seat: real-time IoT security at the Centre for Development of Advanced Computing. Designing <b>Zero Trust architectures with ML threat detection</b>, reaching <b>96.97% attack-detection accuracy</b> on live network telemetry — a long hard-compound stint, managing degradation while holding pace over distance.'},
+     body:'Current race seat at the Centre for Development of Advanced Computing — a long hard-compound stint, holding pace over distance on live IoT network telemetry.',
+     bullets:[
+       {i:'fa-shield-halved', t:'Real-time <b>Zero Trust security framework</b> for IoT (<b>WiFi / BLE / Zigbee / LoRa</b>) feeding a continuous <b>7-pillar device trust-score engine</b>.'},
+       {i:'fa-layer-group', t:'<b>Two-stage hybrid detection</b>: window model (1s windows, 7 attack classes) + flow model. Compared <b>RF / XGBoost / SVM / MLP / Voting Ensemble</b> over 6 preprocessing iterations with <b>SMOTE + Optuna (TPE)</b>. Best: <b>96.97% accuracy</b> (flow / RF); <b>90.86% acc / 86.78% macro F1</b> (window / Ensemble).'},
+       {i:'fa-network-wired', t:'Engineered <b>63 features</b> from raw PCAPs (Scapy / PyShark). Live PCAP pipeline (Watchdog, MD5 dedup, multi-threaded). <b>SPIFFE/SPIRE, mTLS, OTP 2FA</b>. Two <b>IoTaIS 2025</b> papers.'}
+     ]},
 
     {kind:'stint', no:'P1', time:'1:22.117', purple:true, tier:'PROJECT · QUALI STINT',
-     title:'F1 Tyre Degradation & Race Strategy',
+     title:'GPU-Accelerated F1 Tyre Degradation & Race Strategy',
      sub:'Physics-Informed GPU Strategy Model',
-     dates:'PyTorch · CUDA · CuPy · XGBoost', compound:'soft', cName:'SOFT (QUALI)',
+     dates:'Python · PyTorch · CUDA · CuPy · XGBoost', compound:'soft', cName:'SOFT (QUALI)',
      meta:['PINN','CUDA','CuPy','XGBoost'],
      metric:['4.1×','GPU TRAINING SPEEDUP'],
-     body:'A GPU-accelerated tyre-degradation and race-strategy engine using a <b>physics-informed loss (PINN)</b> to constrain wear curves to real tyre thermodynamics. CUDA/CuPy kernels deliver a <b>4.1× training speedup</b>; XGBoost layers pit-strategy decisions on top. The flagship lap — and the reason this whole pit wall exists.'},
+     stack:['Python','PyTorch','CUDA','CuPy','XGBoost'],
+     body:'The flagship lap — and the reason this whole pit wall exists. A physics-informed, GPU-accelerated tyre and strategy engine.',
+     bullets:[
+       {i:'fa-chart-line', t:'Hybrid <b>LSTM-XGBoost</b> for tyre wear + <b>pit-stop window prediction</b> from <b>10 Hz telemetry</b>.'},
+       {i:'fa-temperature-half', t:'<b>PINNs</b> separating <b>thermal vs mechanical degradation</b>, constraining wear curves to real tyre thermodynamics.'},
+       {i:'fa-microchip', t:'Custom <b>CUDA / CuPy kernels</b>; <b>4.1× training speedup</b>.'}
+     ]},
 
     {kind:'stint', no:'P2', time:'1:23.044', tier:'PROJECT · ENDURANCE STINT',
-     title:'Omniscience Pro',
+     title:'Omniscience Pro — Privacy-First Local RAG',
      sub:'Local Retrieval-Augmented Generation',
-     dates:'LangChain · ChromaDB · Docker', compound:'medium', cName:'MEDIUM',
+     dates:'Python · LangChain · ChromaDB · Docker', compound:'medium', cName:'MEDIUM',
      meta:['RAG','LangChain','ChromaDB','Docker'],
      metric:['<50ms','VECTOR SEARCH LATENCY'],
-     body:'A fully <b>local RAG stack</b> — private, offline, containerised. LangChain orchestration over a ChromaDB vector store returns <b>sub-50ms semantic search</b>, Docker-packaged for reproducible deployment. A consistent endurance stint: no cloud, no leaks, steady lap times.'},
+     stack:['Python','LangChain','ChromaDB','Docker'],
+     body:'A fully local, offline, containerised RAG stack — a consistent endurance stint: no cloud, no leaks, steady lap times.',
+     bullets:[
+       {i:'fa-photo-film', t:'<b>Multi-modal ingestion</b> across document and media types.'},
+       {i:'fa-magnifying-glass', t:'<b>&lt;50 ms vector search</b> via <b>HNSW</b>; <b>&lt;500 ms first-token latency</b>.'},
+       {i:'fa-docker', t:'<b>GPU-aware Docker</b>, CI/CD, and <b>POSIX locking</b> for safe concurrent access.', brand:true}
+     ]},
 
     {kind:'stint', no:'P3', time:'1:23.510', tier:'PROJECT · MULTI-AGENT STINT',
-     title:'ARO — Multi-Agent LLM',
-     sub:'Agentic Reasoning Orchestrator',
-     dates:'Flask · NetworkX · React', compound:'inter', cName:'INTERMEDIATE',
+     title:'ARO — Autonomous Research Operator',
+     sub:'Multi-Agent LLM Orchestration',
+     dates:'Python · Flask · SQLAlchemy · NetworkX · React', compound:'inter', cName:'INTERMEDIATE',
      meta:['MULTI-AGENT','Flask','NetworkX','React'],
-     metric:['N-AGENT','GRAPH ORCHESTRATION'],
-     body:'A <b>multi-agent LLM system</b> that routes reasoning across cooperating agents over a NetworkX dependency graph, served by Flask with a React control surface. Changeable conditions, mixed strategy — the intermediate-tyre stint where adaptability wins the lap.'},
+     metric:['16 VULNS','FIXED IN ADVERSARIAL AUDIT'],
+     stack:['Python','Flask','SQLAlchemy','NetworkX','React'],
+     body:'Changeable conditions, mixed strategy — the intermediate-tyre stint where adaptability wins the lap.',
+     bullets:[
+       {i:'fa-diagram-project', t:'<b>Multi-agent LLM workflows</b> modelled as <b>directed graphs</b> (NetworkX).'},
+       {i:'fa-tower-broadcast', t:'<b>Flask SSE streaming</b> backend with a <b>React</b> control UI.'},
+       {i:'fa-user-shield', t:'<b>Adversarial audit</b> fixed <b>16 vulnerabilities</b> (auth, SSRF, input validation, CORS).'}
+     ]},
 
     {kind:'stint', no:'P4', time:'1:24.220', tier:'PROJECT · EFFICIENCY STINT',
      title:'Llama 3.2 Optimisation',
      sub:'4-bit Quantised Fine-Tuning',
-     dates:'Unsloth · 4-bit Quant', compound:'hard', cName:'HARD',
+     dates:'Python · Unsloth · Hugging Face · PyTorch', compound:'hard', cName:'HARD',
      meta:['Unsloth','4-bit QUANT','FINE-TUNE'],
      metric:['4-BIT','MEMORY-EFFICIENT TUNING'],
-     body:'Fine-tuned <b>Llama 3.2</b> with Unsloth and <b>4-bit quantisation</b> to fit serious training into modest VRAM — the fuel-saving hard stint, squeezing maximum performance from minimum resources.'}
+     stack:['Python','Unsloth','Hugging Face','PyTorch'],
+     body:'The fuel-saving hard stint, squeezing maximum performance from minimum resources.',
+     bullets:[
+       {i:'fa-robot', t:'Fine-tuned <b>Llama 3.2 (1B / 3B)</b> on <b>21.5k interactions</b>.'},
+       {i:'fa-compress', t:'<b>4-bit quantisation</b> via Unsloth.'},
+       {i:'fa-circle-check', t:'<b>No meaningful quality drop</b> versus full-precision baseline.'}
+     ]}
   ];
 
   /* ---------------- OVERVIEW (Lap 0 / Race Control) ---------------- */
+  var SKILLS = [
+    {lab:'LANGUAGES', i:'fa-code', items:['Python (advanced)','C++ (proficient)','C','Bash','SQL']},
+    {lab:'ML / SCI', i:'fa-brain', items:['PyTorch','XGBoost','Scikit-learn','PINNs','NumPy','SciPy']},
+    {lab:'HPC', i:'fa-microchip', items:['CUDA','CuPy','Parallel Processing','Quantisation (4/8-bit)','Latency Optimisation','Linux']},
+    {lab:'DATA / ENG', i:'fa-database', items:['Statistical Anomaly Detection','Time-Series','CI/CD','Docker','Git','Flask','ChromaDB']},
+    {lab:'AI / MLOps', i:'fa-robot', items:['RAG','LLM Fine-Tuning','Multi-Agent Orchestration (NetworkX, LangChain)','SQLAlchemy']}
+  ];
+
   function overviewHTML(){
+    var skillsHTML = SKILLS.map(function(g){
+      return '<div class="skgroup"><div class="sklab"><i class="fa-solid '+g.i+'"></i>'+g.lab+'</div>'+
+        '<div class="skillgrid">'+g.items.map(function(s){return '<span class="chip">'+s+'</span>';}).join('')+'</div></div>';
+    }).join('');
     return ''+
-    '<div class="d-tier">RACE CONTROL · DRIVER BRIEFING</div>'+
+    '<div class="d-tier"><i class="fa-solid fa-flag-checkered"></i>RACE CONTROL · DRIVER BRIEFING</div>'+
     '<div class="d-title">Saptarshi Nag — AI / ML Engineer</div>'+
-    '<div class="d-sub">M.Tech AI (DIAT, DRDO) · Race Engineer of GPU-accelerated systems</div>'+
-    '<div class="d-body">M.Tech in Artificial Intelligence from <b>DIAT (DRDO)</b>; research at <b>NCRA-TIFR</b> and the <b>GMRT</b>; now <b>Project Engineer at C-DAC</b> building real-time IoT security — Zero Trust architecture with ML threat detection. Builder of a GPU-accelerated <b>F1 tyre-degradation &amp; race-strategy model</b>. <br><br>Select a <b>LAP</b> (career milestone) or a <b>STINT</b> (project) on the timing board to open its telemetry.</div>'+
+    '<div class="d-sub">AI/ML engineer at the intersection of security and systems research</div>'+
+    '<div class="d-body">AI/ML engineer with an <b>M.Tech in Artificial Intelligence (DIAT, DRDO)</b> and research experience at <b>NCRA-TIFR</b> and the <b>GMRT</b>. Works across the full ML stack: feature engineering, model development and optimisation, and production deployment under tight performance constraints. Current work at <b>C-DAC</b> focuses on real-time IoT security using a <b>Zero Trust framework with ML-based threat detection</b> across multiple wireless protocols. Past projects span physics-informed neural networks, GPU-accelerated scientific computing, LLM fine-tuning, and RAG systems.<br><br>Select a <b>LAP</b> (career milestone) or a <b>STINT</b> (project) on the timing board to open its telemetry.</div>'+
     '<div class="tyreband">'+
       '<span class="tyre-c soft"><span class="tyre-dot"></span>SOFT · GMRT</span>'+
       '<span class="tyre-c medium"><span class="tyre-dot"></span>MEDIUM · NCRA-TIFR</span>'+
       '<span class="tyre-c hard"><span class="tyre-dot"></span>HARD · C-DAC</span>'+
     '</div>'+
-    '<div class="grid2" style="margin-top:6px">'+
-      '<div class="mini"><h4>EDUCATION</h4><p><b>M.Tech AI</b> — DIAT (DRDO) <span>2023–2025 · CGPA 8.64</span><br><b>B.Tech CSE</b> — Academy of Technology <span>2019–2023 · CGPA 9.44</span><br><b>GATE 2024</b> — Rank 1790 <span>(top 5%)</span></p></div>'+
-      '<div class="mini"><h4>PUBLICATIONS · IoTaIS 2025, BALI</h4><p>Protocol-Aware Continuous Monitoring &amp; Anomaly Detection in IoT Networks<br><span>—</span><br>A Comprehensive Survey on Zero Trust Architecture in IoT Networks</p></div>'+
-      '<div class="mini"><h4>SKILLS · PARC FERMÉ</h4><div class="skillgrid">'+
-        ['Python','C++','CUDA','CuPy','PyTorch','XGBoost','scikit-learn','PINNs','RAG','LLM fine-tuning','Docker','Flask','Linux'].map(function(s){return '<span class="chip">'+s+'</span>';}).join('')+
-      '</div></div>'+
-      '<div class="mini contact"><h4>RADIO · CONTACT</h4><p>'+
-        '<a href="mailto:saptarshinag18@gmail.com">saptarshinag18@gmail.com</a><br>'+
-        '<a href="https://linkedin.com/in/saptarshi18" target="_blank" rel="noopener">linkedin.com/in/saptarshi18</a><br>'+
-        '<a href="https://github.com/Saptarshi-Nag189" target="_blank" rel="noopener">github.com/Saptarshi-Nag189</a><br>'+
-        '<a href="../../saptarshi_resume_linkedin_2026.pdf" target="_blank" rel="noopener">▸ Download CV / Race Notes</a>'+
+    '<div class="d-section"><span><i class="fa-solid fa-clipboard-list"></i> PADDOCK DATA</span></div>'+
+    '<div class="grid2 wide" style="margin-top:2px">'+
+      '<div class="mini"><h4><i class="fa-solid fa-graduation-cap"></i>EDUCATION</h4><p>'+
+        '<b>M.Tech CSE (AI)</b> — DIAT (DRDO), Pune <span>2023–2025 · CGPA 8.64</span><br>'+
+        '<b>B.Tech CSE</b> — Academy of Technology, Kolkata <span>2019–2023 · CGPA 9.44</span><br>'+
+        '<b>GATE 2024</b> — Rank 1790 <span>(Data Science &amp; AI · top 5%)</span></p></div>'+
+      '<div class="mini"><h4><i class="fa-solid fa-book"></i>PUBLICATIONS · IoTaIS 2025, BALI</h4><p>'+
+        '<i class="fa-solid fa-file-lines" style="color:var(--cyan)"></i> <b>Protocol-Aware Continuous Monitoring and Anomaly Detection in IoT Networks</b> <span>— IoTaIS 2025, Bali</span><br><br>'+
+        '<i class="fa-solid fa-file-lines" style="color:var(--cyan)"></i> <b>A Comprehensive Survey on Zero Trust Architecture in IoT Networks</b> <span>— IoTaIS 2025, Bali</span></p></div>'+
+      '<div class="mini span2"><h4><i class="fa-solid fa-screwdriver-wrench"></i>SKILLS · PARC FERMÉ</h4>'+skillsHTML+'</div>'+
+      '<div class="mini contact span2"><h4><i class="fa-solid fa-tower-broadcast"></i>RADIO · CONTACT</h4><p>'+
+        '<i class="fa-solid fa-envelope"></i> <a href="mailto:saptarshinag18@gmail.com">saptarshinag18@gmail.com</a><br>'+
+        '<i class="fa-brands fa-linkedin"></i> <a href="https://www.linkedin.com/in/saptarshi18" target="_blank" rel="noopener">linkedin.com/in/saptarshi18</a><br>'+
+        '<i class="fa-brands fa-github"></i> <a href="https://github.com/Saptarshi-Nag189" target="_blank" rel="noopener">github.com/Saptarshi-Nag189</a><br>'+
+        '<i class="fa-solid fa-file-arrow-down"></i> <a href="../../saptarshi_resume_linkedin_2026.pdf" target="_blank" rel="noopener">Download CV / Race Notes</a>'+
       '</p></div>'+
     '</div>';
   }
 
   function detailHTML(it){
+    var tierIco = it.kind==='lap' ? 'fa-helmet-safety' : 'fa-flask';
+    var orgLine = it.org ? '<div class="d-org"><i class="fa-solid fa-building-columns"></i> '+it.org+(it.loc?' · <i class="fa-solid fa-location-dot"></i> '+it.loc:'')+'</div>' : '';
+    var bullets = (it.bullets||[]).map(function(b){
+      return '<li><i class="'+(b.brand?'fa-brands':'fa-solid')+' '+b.i+' bico"></i>'+b.t+'</li>';
+    }).join('');
+    var stackBlk = '';
+    if(it.stack){
+      stackBlk = '<div class="d-section"><span><i class="fa-solid fa-layer-group"></i> TECH STACK</span></div>'+
+        '<div class="stack">'+it.stack.map(function(s){return '<span class="chip"><i class="fa-solid fa-cube"></i>'+s+'</span>';}).join('')+'</div>';
+    }
     return ''+
-    '<div class="d-tier">'+it.tier+'</div>'+
+    '<div class="d-tier"><i class="fa-solid '+tierIco+'"></i>'+it.tier+'</div>'+
     '<div class="d-title">'+it.title+'</div>'+
     '<div class="d-sub">'+it.sub+'</div>'+
+    orgLine+
     '<div class="d-meta">'+
-      '<span class="chip">⏱ '+it.dates+'</span>'+
-      '<span class="chip">FASTEST LAP '+it.time+(it.purple?' · PURPLE':'')+'</span>'+
+      '<span class="chip"><i class="fa-solid fa-calendar-day"></i>'+it.dates+'</span>'+
+      '<span class="chip"><i class="fa-solid fa-stopwatch"></i>FASTEST LAP '+it.time+(it.purple?' · PURPLE':'')+'</span>'+
       it.meta.map(function(m){return '<span class="chip">'+m+'</span>';}).join('')+
     '</div>'+
     '<div class="tyreband"><span class="tyre-c '+it.compound+'"><span class="tyre-dot"></span>'+it.cName+'</span></div>'+
     '<div class="d-body">'+it.body+'</div>'+
-    '<div class="keymetric"><span class="v">'+it.metric[0]+'</span><span class="l">'+it.metric[1]+'</span></div>';
+    '<div class="d-section"><span><i class="fa-solid fa-list-check"></i> '+(it.kind==='lap'?'LAP NOTES':'STINT NOTES')+'</span></div>'+
+    '<ul class="bullets">'+bullets+'</ul>'+
+    stackBlk+
+    '<div class="keymetric"><i class="fa-solid fa-trophy"></i><span class="v">'+it.metric[0]+'</span><span class="l">'+it.metric[1]+'</span></div>';
   }
 
   /* ---------------- BUILD LAP LIST ---------------- */
@@ -629,7 +735,7 @@
     drawArc(canvases[2],2.1/4,'#22d3ee'); drawBar(canvases[3],0.82,0);
     vSpeed.innerHTML='287<small>km/h</small>'; vRpm.innerHTML='11,800<small>rpm</small>';
     vErs.innerHTML='2.1<small>MJ</small>'; vThr.innerHTML='82<small>%</small>';
-    drsPill.classList.remove('off'); drsPill.classList.add('drs'); drsPill.textContent='DRS ●';
+    drsPill.classList.remove('off'); drsPill.classList.add('drs'); drsPill.innerHTML='<i class="fa-solid fa-wind"></i>DRS OPEN';
     secA.style.width='100%'; secB.style.width='72%'; secC.style.width='40%';
     TYRES.forEach(function(t,i){ drawTyre(i,t); });
     clockEl.textContent='14:09:18';
@@ -672,9 +778,9 @@
     vErs.innerHTML=state.ers.toFixed(1)+'<small>MJ</small>';
     vThr.innerHTML=Math.round((state.thr-state.brk)*100)+'<small>%</small>';
 
-    if(deployDRS){ drsPill.classList.remove('off'); drsPill.classList.add('drs'); drsPill.textContent='DRS ●'; }
-    else{ drsPill.classList.add('off'); drsPill.classList.remove('drs'); drsPill.textContent='DRS'; }
-    ersPill.textContent='ERS '+Math.round(70+30*(state.ers/4))+'%';
+    if(deployDRS){ drsPill.classList.remove('off'); drsPill.classList.add('drs'); drsPill.innerHTML='<i class="fa-solid fa-wind"></i>DRS OPEN'; }
+    else{ drsPill.classList.add('off'); drsPill.classList.remove('drs'); drsPill.innerHTML='<i class="fa-solid fa-wind"></i>DRS'; }
+    ersPill.innerHTML='<i class="fa-solid fa-bolt"></i>ERS '+Math.round(70+30*(state.ers/4))+'%';
 
     // tyres wander
     telemAcc+=dt;

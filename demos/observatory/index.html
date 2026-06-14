@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
 <style>
   :root{
     --bg:#03060e;
@@ -116,6 +117,7 @@
     display:flex;align-items:center;gap:7px;
   }
   .panel-label .dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green)}
+  .panel-label i.fa-solid{font-size:11px;color:var(--cyan);filter:drop-shadow(0 0 5px rgba(54,224,255,.5))}
 
   /* header */
   .head{
@@ -128,6 +130,7 @@
   .head .role{font-family:var(--mono);font-size:11px;letter-spacing:.24em;color:var(--txt-dim);text-transform:uppercase}
   .head .sys{display:flex;align-items:center;gap:22px;font-family:var(--mono);font-size:10.5px;color:var(--txt-dim);letter-spacing:.1em}
   .head .sys b{color:var(--green);font-weight:500}
+  .head .sys i.fa-solid{margin-right:6px;color:var(--cyan);opacity:.85}
   .head .clock{color:var(--cyan)}
   .status-led{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 10px var(--green);margin-right:6px;animation:blink 2.4s infinite}
   @keyframes blink{0%,92%,100%{opacity:1}94%{opacity:.25}}
@@ -143,7 +146,9 @@
     overflow:hidden;
   }
   .station-btn .idx{position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:9px;color:var(--cyan-dim)}
-  .station-btn .sub{display:block;font-family:var(--sans);font-size:9.5px;letter-spacing:0;text-transform:none;color:#4f6customed;color:#54688a;margin-top:3px}
+  .station-btn .st-ico{margin-right:8px;color:var(--cyan-dim);font-size:12px;width:15px;text-align:center;transition:.18s}
+  .station-btn:hover .st-ico,.station-btn.active .st-ico{color:var(--cyan);filter:drop-shadow(0 0 6px rgba(54,224,255,.6))}
+  .station-btn .sub{display:block;font-family:var(--sans);font-size:9.5px;letter-spacing:0;text-transform:none;color:#54688a;margin-top:3px}
   .station-btn:hover{border-color:var(--line);color:var(--txt);background:rgba(54,224,255,.05)}
   .station-btn.active{
     color:#fff;border-color:var(--cyan);
@@ -183,8 +188,9 @@
     display:flex;align-items:center;justify-content:space-between;
     padding:14px 20px 12px;border-bottom:1px solid var(--line);flex:0 0 auto;
   }
-  .drawer-title{font-family:var(--mono);font-size:15px;letter-spacing:.16em;color:#fff;text-transform:uppercase}
-  .drawer-title small{display:block;font-size:9.5px;color:var(--cyan);letter-spacing:.2em;margin-top:4px;font-weight:400}
+  .drawer-title{font-family:var(--mono);font-size:15px;letter-spacing:.16em;color:#fff;text-transform:uppercase;display:flex;align-items:center;flex-wrap:wrap;column-gap:11px}
+  .drawer-title #drawer-ico{color:var(--cyan);font-size:15px;filter:drop-shadow(0 0 7px rgba(54,224,255,.6))}
+  .drawer-title small{flex-basis:100%;display:block;font-size:9.5px;color:var(--cyan);letter-spacing:.2em;margin-top:4px;font-weight:400;padding-left:26px}
   .drawer-close{
     cursor:pointer;font-family:var(--mono);font-size:11px;color:var(--txt-dim);
     border:1px solid var(--line-soft);background:transparent;border-radius:3px;padding:5px 11px;transition:.18s;letter-spacing:.1em;
@@ -223,7 +229,9 @@
   .entry{border-left:2px solid var(--line);padding:2px 0 18px 16px;position:relative;margin-bottom:4px}
   .entry::before{content:"";position:absolute;left:-5px;top:5px;width:8px;height:8px;border-radius:50%;background:var(--cyan);box-shadow:0 0 8px var(--cyan)}
   .entry .e-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px}
-  .entry h3{font-family:var(--mono);font-size:13.5px;color:#fff;letter-spacing:.04em;font-weight:600}
+  .entry h3{font-family:var(--mono);font-size:13.5px;color:#fff;letter-spacing:.04em;font-weight:600;display:flex;align-items:center;gap:9px}
+  .entry h3 i.fa-solid{color:var(--cyan);font-size:12px;filter:drop-shadow(0 0 5px rgba(54,224,255,.5))}
+  .entry .org i.fa-solid{margin-right:6px;color:var(--blue);font-size:10px}
   .entry .when{font-family:var(--mono);font-size:10px;color:var(--cyan);letter-spacing:.06em;white-space:nowrap}
   .entry .org{font-family:var(--mono);font-size:11px;color:var(--blue);margin:3px 0 7px;letter-spacing:.03em}
   .entry p{font-size:12.5px;line-height:1.62;color:var(--txt);max-width:62ch}
@@ -234,7 +242,9 @@
   .cards{display:grid;grid-template-columns:1fr 1fr;gap:14px}
   .card{border:1px solid var(--line-soft);border-radius:4px;padding:14px 15px;background:rgba(54,224,255,.025);transition:.2s;position:relative;overflow:hidden}
   .card:hover{border-color:var(--line);background:rgba(54,224,255,.06)}
-  .card h4{font-family:var(--mono);font-size:12.5px;color:#fff;letter-spacing:.03em;margin-bottom:6px;font-weight:600}
+  .card h4{font-family:var(--mono);font-size:12.5px;color:#fff;letter-spacing:.03em;margin-bottom:6px;font-weight:600;display:flex;align-items:center;gap:8px}
+  .card h4 i.fa-solid{color:var(--cyan);font-size:12px;filter:drop-shadow(0 0 5px rgba(54,224,255,.5))}
+  .card .tag i.fa-solid{margin-right:5px}
   .card .tag{font-family:var(--mono);font-size:9px;color:var(--cyan);letter-spacing:.1em;text-transform:uppercase}
   .card p{font-size:11.5px;line-height:1.55;color:var(--txt-dim);margin:7px 0 9px}
   .chips{display:flex;flex-wrap:wrap;gap:5px}
@@ -242,7 +252,8 @@
   .card .stat{position:absolute;top:12px;right:14px;font-family:var(--mono);font-size:11px;font-weight:700;color:var(--green)}
 
   .skillgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px 22px}
-  .skillblock h5{font-family:var(--mono);font-size:10px;color:var(--cyan);letter-spacing:.14em;text-transform:uppercase;margin-bottom:9px;padding-bottom:5px;border-bottom:1px solid var(--line-soft)}
+  .skillblock h5{font-family:var(--mono);font-size:10px;color:var(--cyan);letter-spacing:.14em;text-transform:uppercase;margin-bottom:9px;padding-bottom:5px;border-bottom:1px solid var(--line-soft);display:flex;align-items:center;gap:8px}
+  .skillblock h5 i.fa-solid{font-size:11px;filter:drop-shadow(0 0 5px rgba(54,224,255,.5))}
   .srow{display:flex;align-items:center;gap:9px;margin-bottom:8px}
   .srow .sn{font-family:var(--mono);font-size:11px;color:var(--txt);width:96px;flex:0 0 auto}
   .srow .sb{flex:1;height:4px;background:rgba(54,224,255,.1);border-radius:2px;overflow:hidden}
@@ -250,13 +261,17 @@
 
   .pubrow{border:1px solid var(--line-soft);border-radius:4px;padding:14px 16px;margin-bottom:12px;background:rgba(54,224,255,.02)}
   .pubrow .ph{font-family:var(--mono);font-size:9px;color:var(--cyan);letter-spacing:.12em;text-transform:uppercase;margin-bottom:6px}
-  .pubrow h4{font-size:13px;color:#fff;font-weight:600;line-height:1.4;margin-bottom:5px}
+  .pubrow .ph i.fa-solid{margin-right:6px}
+  .pubrow h4{font-size:13px;color:#fff;font-weight:600;line-height:1.4;margin-bottom:5px;display:flex;align-items:flex-start;gap:9px}
+  .pubrow h4 i.fa-solid{color:var(--cyan);font-size:12px;margin-top:2px;flex:0 0 auto;filter:drop-shadow(0 0 5px rgba(54,224,255,.5))}
   .pubrow .meta{font-family:var(--mono);font-size:10.5px;color:var(--txt-dim);letter-spacing:.03em}
+  .pubrow .meta i.fa-solid{margin-right:6px;color:var(--blue)}
 
   .commsgrid{display:flex;flex-direction:column;gap:12px;max-width:520px}
   .comm{display:flex;align-items:center;gap:14px;border:1px solid var(--line-soft);border-radius:4px;padding:13px 16px;text-decoration:none;background:rgba(54,224,255,.02);transition:.2s}
   .comm:hover{border-color:var(--cyan);background:rgba(54,224,255,.08);box-shadow:0 0 16px rgba(54,224,255,.14)}
-  .comm .ico{font-family:var(--mono);font-size:11px;color:var(--cyan);width:46px;letter-spacing:.1em}
+  .comm .ico{font-size:17px;color:var(--cyan);width:34px;text-align:center;flex:0 0 auto;filter:drop-shadow(0 0 6px rgba(54,224,255,.5))}
+  .comm:hover .ico{color:#fff}
   .comm .cval{font-family:var(--mono);font-size:13px;color:#fff;letter-spacing:.02em}
   .comm .cval small{display:block;font-family:var(--sans);font-size:10px;color:var(--txt-dim);margin-top:2px;letter-spacing:0}
 
@@ -294,8 +309,8 @@
   <div id="grid-overlay"></div>
 
   <div class="topbar">
-    <a class="back-link" href="../index.html">&larr; demos</a>
-    <span class="concept-tag">concept demo · mission control</span>
+    <a class="back-link" href="../index.html"><i class="fa-solid fa-arrow-left" style="margin-right:6px"></i>demos</a>
+    <span class="concept-tag"><i class="fa-solid fa-tower-observation" style="margin-right:7px;opacity:.8"></i>concept demo · mission control</span>
   </div>
 
   <main class="hud" id="hud">
@@ -308,16 +323,16 @@
       </div>
       <div class="sys">
         <span><span class="status-led"></span>ARRAY <b>ONLINE</b></span>
-        <span>FEED <b>NOMINAL</b></span>
-        <span>LOCK PSR&nbsp;J0633</span>
-        <span class="clock" id="clock">--:--:-- UTC</span>
+        <span><i class="fa-solid fa-wave-square"></i>FEED <b>NOMINAL</b></span>
+        <span><i class="fa-solid fa-crosshairs"></i>LOCK PSR&nbsp;J0633</span>
+        <span class="clock"><i class="fa-solid fa-clock"></i><span id="clock">--:--:-- UTC</span></span>
       </div>
     </header>
 
     <!-- STATIONS NAV -->
     <nav class="panel stations">
       <span class="br-tr"></span><span class="br-bl"></span>
-      <div class="panel-label"><span class="dot"></span>STATIONS</div>
+      <div class="panel-label"><span class="dot"></span><i class="fa-solid fa-tower-broadcast"></i>STATIONS</div>
       <!-- buttons injected -->
       <div id="station-list" style="display:flex;flex-direction:column;gap:8px"></div>
       <div class="nav-foot">
@@ -330,7 +345,7 @@
     <!-- SKY MAP -->
     <section class="panel sky">
       <span class="br-tr"></span><span class="br-bl"></span>
-      <div class="panel-label"><span class="dot"></span>SKY MAP · LIVE</div>
+      <div class="panel-label"><span class="dot"></span><i class="fa-solid fa-satellite-dish"></i>SKY MAP · LIVE</div>
       <div class="sky-canvas-wrap">
         <canvas id="skymap"></canvas>
         <div class="sky-hint">click pulsar to inspect<br/>select a station &rarr;</div>
@@ -339,8 +354,8 @@
         <!-- content drawer -->
         <div class="drawer" id="drawer">
           <div class="drawer-head">
-            <div class="drawer-title" id="drawer-title">—<small id="drawer-sub">—</small></div>
-            <button class="drawer-close" id="drawer-close">[ CLOSE × ]</button>
+            <div class="drawer-title" id="drawer-title"><i class="fa-solid fa-satellite-dish" id="drawer-ico"></i><span id="drawer-title-txt">—</span><small id="drawer-sub">—</small></div>
+            <button class="drawer-close" id="drawer-close"><i class="fa-solid fa-xmark" style="margin-right:7px"></i>CLOSE</button>
           </div>
           <div class="drawer-body" id="drawer-body"></div>
         </div>
@@ -350,7 +365,7 @@
     <!-- SIGNAL SCOPE TICKER -->
     <section class="panel ticker">
       <span class="br-tr"></span><span class="br-bl"></span>
-      <div class="panel-label"><span class="dot"></span>SIGNAL STRENGTH · OSCILLOSCOPE</div>
+      <div class="panel-label"><span class="dot"></span><i class="fa-solid fa-wave-square"></i>SIGNAL STRENGTH · OSCILLOSCOPE</div>
       <div class="scope-tags">CH-1 &nbsp;|&nbsp; 1.4 GHz &nbsp;|&nbsp; FOLD x256</div>
       <div class="scope-wrap"><canvas id="scope"></canvas></div>
     </section>
@@ -358,7 +373,7 @@
     <!-- TELEMETRY -->
     <aside class="panel telemetry" id="telemetry">
       <span class="br-tr"></span><span class="br-bl"></span>
-      <div class="panel-label"><span class="dot"></span>TELEMETRY</div>
+      <div class="panel-label"><span class="dot"></span><i class="fa-solid fa-gauge-high"></i>TELEMETRY</div>
       <!-- metrics injected -->
     </aside>
   </main>
@@ -374,117 +389,127 @@
 
   /* ---------------- CONTENT DATA ---------------- */
   var STATIONS = [
-    {id:'log',    name:'MISSION LOG',     sub:'Experience',       sub2:'OPERATIONAL HISTORY'},
-    {id:'systems',name:'DEPLOYED SYSTEMS',sub:'Projects',         sub2:'ACTIVE BUILDS'},
-    {id:'diag',   name:'DIAGNOSTICS',     sub:'Skills',           sub2:'CAPABILITY MATRIX'},
-    {id:'pubs',   name:'PUBLICATIONS',    sub:'Papers',           sub2:'PUBLISHED RESEARCH'},
-    {id:'edu',    name:'EDUCATION',       sub:'Training',         sub2:'ACADEMIC RECORD'},
-    {id:'comms',  name:'COMMS',           sub:'Contact',          sub2:'UPLINK CHANNELS'}
+    {id:'log',    name:'MISSION LOG',     sub:'Experience',       sub2:'OPERATIONAL HISTORY', icon:'fa-rocket'},
+    {id:'systems',name:'DEPLOYED SYSTEMS',sub:'Projects',         sub2:'ACTIVE BUILDS',       icon:'fa-microchip'},
+    {id:'diag',   name:'DIAGNOSTICS',     sub:'Skills',           sub2:'CAPABILITY MATRIX',   icon:'fa-diagram-project'},
+    {id:'pubs',   name:'PUBLICATIONS',    sub:'Papers',           sub2:'PUBLISHED RESEARCH',  icon:'fa-book'},
+    {id:'edu',    name:'EDUCATION',       sub:'Training',         sub2:'ACADEMIC RECORD',     icon:'fa-graduation-cap'},
+    {id:'comms',  name:'COMMS',           sub:'Contact',          sub2:'UPLINK CHANNELS',     icon:'fa-envelope'}
   ];
 
   var CONTENT = {
     pulsar:{
-      title:'PSR · SAPTARSHI NAG', sub:'Source acquired · object profile',
+      title:'PSR · SAPTARSHI NAG', sub:'Source acquired · object profile', icon:'fa-satellite',
       html:''
-        +'<p class="lead">AI/ML Engineer with an <b>M.Tech in Artificial Intelligence</b> from DIAT (DRDO). '
-        +'Research at <b>NCRA-TIFR &amp; GMRT</b> on weak pulsar-signal detection at low SNR. Currently '
-        +'<b>Project Engineer at C-DAC</b> building real-time IoT security — Zero Trust architecture and '
-        +'ML threat detection.</p>'
+        +'<p class="lead"><b>Saptarshi Nag — AI/ML Engineer.</b> AI/ML engineer at the intersection of security and systems research. '
+        +'AI/ML engineer with an <b>M.Tech in Artificial Intelligence (DIAT, DRDO)</b> and research experience at <b>NCRA-TIFR and GMRT</b>. '
+        +'Works across the full stack of an ML project: feature engineering from raw data, model development and optimisation, and production '
+        +'deployment under tight performance constraints. Current work at <b>C-DAC</b> focuses on real-time IoT security using a Zero Trust '
+        +'framework with ML-based threat detection across multiple wireless protocols. Past projects span physics-informed neural networks, '
+        +'GPU-accelerated scientific computing, LLM fine-tuning, and RAG systems.</p>'
         +'<div class="cards">'
-        +card('96.97%','IoT Detection','Attack-detection accuracy on protocol-aware IoT traffic monitoring.','live model')
-        +card('99.8%','Pulsar F1','F1-score for weak pulsar detection at low signal-to-noise ratio.','signal pipeline')
-        +card('4.1×','GPU Speedup','Training acceleration via CUDA / CuPy and physics-informed loss.','hpc')
-        +card('70M+','Samples','Telemetry samples processed across security &amp; astronomy pipelines.','throughput')
+        +card('96.97%','IoT Detection','Attack-detection accuracy on protocol-aware IoT traffic monitoring.','live model','fa-shield-halved')
+        +card('99.8%','Pulsar F1','F1-score for weak pulsar detection at low signal-to-noise ratio.','signal pipeline','fa-satellite-dish')
+        +card('4.1×','GPU Speedup','Training acceleration via CUDA / CuPy and physics-informed loss.','hpc','fa-microchip')
+        +card('50%','Latency Cut','Signal-pipeline latency reduction unblocking real-time processing.','optimisation','fa-gauge-high')
+        +card('70M+','Samples','Telemetry samples processed across security &amp; astronomy pipelines.','throughput','fa-database')
         +'</div>'
         +'<p class="lead" style="margin-top:20px">Select a <b>STATION</b> at left to open a console, or click any '
         +'star region on the SKY MAP. The pulsar marker emits one radio pulse every rotation period.</p>'
     },
     log:{
-      title:'MISSION LOG', sub:'Operational history · experience',
+      title:'MISSION LOG', sub:'Operational history · experience', icon:'fa-rocket',
       html:''
-        +entry('Project Engineer — AI Research &amp; IoT Security','Jul 2025 – Present','C-DAC · Chennai',
-          'Building real-time IoT security systems combining Zero Trust architecture with ML-based threat detection.',
-          ['Protocol-aware continuous monitoring &amp; anomaly detection across IoT networks',
-           'ML threat-detection models reaching 96.97% attack-detection accuracy',
-           'Processing 70M+ telemetry samples through production security pipelines'])
-        +entry('Research Intern — M.Tech Project','Aug 2024 – Apr 2025','NCRA-TIFR · Pune',
-          'Weak pulsar-signal detection at low SNR — the core research thread of the M.Tech thesis.',
-          ['Detection pipeline reaching 99.8% F1-score on weak pulsar candidates',
-           'GPU-accelerated folding &amp; classification (CUDA / CuPy), 4.1× training speedup',
-           'Low-SNR signal modelling under realistic radio-frequency interference'])
-        +entry('Winter Intern — HPC &amp; Signal Processing','Dec 2023 – Jan 2024','GMRT · Pune',
+        +entry('Project Engineer — AI Research &amp; IoT Security','Jul 2025 – Present','C-DAC (Centre for Development of Advanced Computing) · Chennai, India','fa-shield-halved',
+          'Building real-time IoT security systems combining Zero Trust architecture with ML-based threat detection across multiple wireless protocols.',
+          ['Built a real-time Zero Trust security framework for IoT networks covering WiFi (802.11), BLE, Zigbee, and LoRa; ML-based attack detection feeds a continuous 7-pillar device trust score engine.',
+           'Two-stage hybrid detection pipeline: window model (1-second sliding windows, 7 attack classes) + flow model for longer-duration patterns. Compared RF, XGBoost, SVM, MLP, and Voting Ensemble across 6 preprocessing iterations with SMOTE and Optuna (TPE) hyperparameter search.',
+           'Best results: 96.97% accuracy (flow/RF); 90.86% accuracy / 86.78% macro F1 (window/Voting Ensemble).',
+           'Engineered 63 statistical and behavioural features from raw PCAPs using Scapy and PyShark (MAC entropy, frame rate statistics, sequence gap analysis, EAPOL key MIC ratios, beacon timestamp variance).',
+           'Live PCAP drop-folder pipeline via Watchdog: MD5 deduplication, multi-threaded extraction, batch inference, per-resource thread-safe locking.',
+           'Integrated SPIFFE/SPIRE workload identity, mTLS, OTP-based 2FA. Co-authored two papers published at IoTaIS 2025.'])
+        +entry('Research Intern — M.Tech Project','Aug 2024 – Apr 2025','NCRA-TIFR (National Centre for Radio Astrophysics) · Pune, India','fa-satellite-dish',
+          'Weak pulsar-signal detection at low SNR in noisy astrophysical data — the core research thread of the M.Tech thesis.',
+          ['Designed a ResNet1D architecture with Squeeze-and-Excitation attention for weak pulsar signal detection in noisy astrophysical data at low SNR.',
+           'Achieved 99.8% F1-score across 70M+ samples; built adaptive thresholding for non-stationary noise floors across observation sessions.',
+           'Ran the project end-to-end independently: scoping through deployment and write-up.'])
+        +entry('Winter Intern — HPC &amp; Signal Processing Optimisation','Dec 2023 – Jan 2024','GMRT (Giant Metrewave Radio Telescope, NCRA-TIFR) · Pune, India','fa-server',
           'Optimisation of high-performance computing and signal-processing routines on the GMRT array.',
-          ['Cut signal-pipeline latency by 50% through HPC optimisation',
-           'Hands-on work with radio-astronomy data acquisition at the GMRT-30 array'])
+          ['Profiled legacy CPU signal filtering pipelines, refactored for multicore execution.',
+           'Cut latency by 50%, unblocking real-time processing of continuous telescope data streams.'])
     },
     systems:{
-      title:'DEPLOYED SYSTEMS', sub:'Active builds · projects',
+      title:'DEPLOYED SYSTEMS', sub:'Active builds · projects', icon:'fa-microchip',
       html:'<div class="cards" style="grid-template-columns:1fr 1fr">'
-        +proj('GPU F1 Tyre Degradation','RACE STRATEGY','Physics-informed model for F1 tyre degradation &amp; race-strategy optimisation. Physics-informed loss couples thermal/wear dynamics with data.',['PyTorch','CUDA','CuPy','XGBoost','PINNs'],'4.1×')
-        +proj('Omniscience Pro','LOCAL RAG','Privacy-first, fully local retrieval-augmented generation. Documents never leave the machine; sub-50ms vector search.',['LangChain','ChromaDB','Docker'],'&lt;50ms')
-        +proj('ARO','MULTI-AGENT','Autonomous Research Operator — a multi-agent LLM platform orchestrating research tasks over a graph of agents.',['Flask','NetworkX','React','LLM'],'agents')
-        +proj('Llama 3.2 Optimisation','FINE-TUNE','Efficient fine-tuning of Llama 3.2 with Unsloth and 4-bit quantisation for low-resource deployment.',['Unsloth','4-bit','LLM'],'4-bit')
+        +proj('GPU-Accelerated F1 Tyre Degradation &amp; Race Strategy','RACE STRATEGY','fa-flag-checkered','Hybrid LSTM-XGBoost architecture for tyre wear modelling and pit-stop window prediction from 10 Hz telemetry. Physics-Informed Loss Functions (PINNs) separating thermal and mechanical degradation. Custom CUDA/CuPy kernels; 4.1x training speedup.',['Python','PyTorch','CUDA','CuPy','XGBoost'],'4.1×')
+        +proj('Omniscience Pro — Privacy-First Local RAG System','LOCAL RAG','fa-shield-halved','Local, privacy-first RAG supporting multi-modal document ingestion. &lt;50 ms vector search (HNSW); &lt;500 ms first-token latency on consumer hardware. GPU-aware Docker with full CI/CD; POSIX file locking.',['Python','LangChain','ChromaDB','Docker'],'&lt;50ms')
+        +proj('ARO — Autonomous Research Operator','MULTI-AGENT','fa-diagram-project','Multi-agent LLM workflows as directed graphs (NetworkX); Flask backend streaming via SSE; React frontend. Full adversarial audit: found and fixed 16 vulnerabilities across auth, SSRF, input validation, CORS.',['Python','Flask','SQLAlchemy','NetworkX','React'],'16 fixes')
+        +proj('Llama 3.2 Optimisation for Efficient Inference','FINE-TUNE','fa-robot','Fine-tuned Llama 3.2 (1B and 3B) on 21.5k domain-specific interactions. 4-bit quantisation via Unsloth for consumer GPU deployment; no meaningful quality drop.',['Python','Unsloth','Hugging Face','PyTorch'],'4-bit')
         +'</div>'
     },
     diag:{
-      title:'DIAGNOSTICS', sub:'Capability matrix · skills',
+      title:'DIAGNOSTICS', sub:'Capability matrix · skills', icon:'fa-diagram-project',
       html:'<div class="skillgrid">'
-        +skillblock('LANGUAGES',[['Python',97],['C++',86],['C',82],['CUDA',88]])
-        +skillblock('ML / DL',[['PyTorch',94],['XGBoost',88],['scikit-learn',90],['PINNs',82]])
-        +skillblock('GPU / HPC',[['CuPy',86],['CUDA Kernels',84],['Linux',92],['Docker',85]])
-        +skillblock('LLM / SYSTEMS',[['RAG',90],['LLM Fine-tune',88],['Flask',84],['Vector DB',86]])
+        +skillblock('LANGUAGES','fa-code',[['Python',97],['C++',88],['C',82],['Bash',84],['SQL',80]])
+        +skillblock('ML &amp; SCIENTIFIC COMPUTING','fa-brain',[['PyTorch',94],['XGBoost',90],['Scikit-learn',90],['PINNs',82],['NumPy',92],['SciPy',86]])
+        +skillblock('HPC &amp; SYSTEMS','fa-microchip',[['CUDA',88],['CuPy',86],['Parallel Proc.',85],['Quantisation',84],['Latency Opt.',88],['Linux',92]])
+        +skillblock('DATA &amp; ENGINEERING','fa-database',[['Anomaly Detect.',88],['Time-Series',86],['CI/CD',83],['Docker',85],['Git',90],['Flask · ChromaDB',84]])
+        +skillblock('AI &amp; MLOPS','fa-robot',[['RAG Systems',90],['LLM Fine-Tune',88],['Multi-Agent',86],['NetworkX',83],['LangChain',85],['SQLAlchemy',82]])
         +'</div>'
     },
     pubs:{
-      title:'PUBLICATIONS', sub:'Published research · IoTaIS 2025',
+      title:'PUBLICATIONS', sub:'Published research · IoTaIS 2025', icon:'fa-book',
       html:''
         +pub('IoTaIS 2025 · Bali','Protocol-Aware Continuous Monitoring and Anomaly Detection in IoT Networks','Conference paper · IEEE IoTaIS 2025, Bali, Indonesia')
         +pub('IoTaIS 2025 · Bali','A Comprehensive Survey on Zero Trust Architecture in IoT Networks','Conference paper · IEEE IoTaIS 2025, Bali, Indonesia')
     },
     edu:{
-      title:'EDUCATION', sub:'Academic record · training',
+      title:'EDUCATION', sub:'Academic record · training', icon:'fa-graduation-cap',
       html:''
-        +entry('M.Tech — Artificial Intelligence','2023 – 2025','DIAT (DRDO)','Defence Institute of Advanced Technology.',['CGPA 8.64','Thesis: weak pulsar detection at low SNR (NCRA-TIFR)'])
-        +entry('B.Tech — Computer Science &amp; Engineering','2019 – 2023','Academy of Technology','Undergraduate degree in CSE.',['CGPA 9.44'])
-        +entry('GATE 2024 — Data Science &amp; AI','2024','Graduate Aptitude Test','National-level examination.',['All-India Rank 1790','Top 5% percentile band'])
+        +entry('M.Tech, CSE (Artificial Intelligence)','2023 – 2025','DIAT (DRDO) · Pune','fa-graduation-cap','Defence Institute of Advanced Technology, DRDO.',['CGPA 8.64/10.0','Thesis: weak pulsar detection at low SNR (NCRA-TIFR)'])
+        +entry('B.Tech, CSE','2019 – 2023','Academy of Technology · Kolkata','fa-school','Bachelor of Technology in Computer Science &amp; Engineering.',['CGPA 9.44/10.0'])
+        +entry('GATE 2024 — Data Science &amp; AI','2024','Graduate Aptitude Test in Engineering','fa-award','National-level postgraduate entrance examination.',['Rank 1790 in Data Science &amp; AI','Top 5% percentile band'])
     },
     comms:{
-      title:'COMMS', sub:'Uplink channels · contact',
+      title:'COMMS', sub:'Uplink channels · contact', icon:'fa-envelope',
       html:'<div class="commsgrid">'
-        +comm('MAIL','saptarshinag18@gmail.com','Primary uplink','mailto:saptarshinag18@gmail.com')
-        +comm('LINK','linkedin.com/in/saptarshi18','Professional channel','https://www.linkedin.com/in/saptarshi18')
-        +comm('REPO','github.com/Saptarshi-Nag189','Source &amp; deployments','https://github.com/Saptarshi-Nag189')
-        +comm('DOC','saptarshi_resume_linkedin_2026.pdf','Full mission dossier (CV)','../../saptarshi_resume_linkedin_2026.pdf')
+        +comm('fa-envelope','saptarshinag18@gmail.com','Primary uplink','mailto:saptarshinag18@gmail.com')
+        +comm('fa-linkedin','linkedin.com/in/saptarshi18','Professional channel','https://www.linkedin.com/in/saptarshi18',true)
+        +comm('fa-github','github.com/Saptarshi-Nag189','Source &amp; deployments','https://github.com/Saptarshi-Nag189',true)
+        +comm('fa-file-lines','saptarshi_resume_linkedin_2026.pdf','Full mission dossier (CV)','../../saptarshi_resume_linkedin_2026.pdf')
         +'</div>'
     }
   };
 
-  function entry(h,when,org,p,items){
+  function entry(h,when,org,oico,p,items){
     var li = (items||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
     return '<div class="entry"><div class="e-head"><h3>'+h+'</h3><span class="when">'+when+'</span></div>'
-      +'<div class="org">'+org+'</div><p>'+p+'</p>'+(li?'<ul>'+li+'</ul>':'')+'</div>';
+      +'<div class="org"><i class="fa-solid '+oico+'"></i>'+org+'</div><p>'+p+'</p>'+(li?'<ul>'+li+'</ul>':'')+'</div>';
   }
-  function card(stat,name,desc,tag){
-    return '<div class="card"><span class="stat">'+stat+'</span><span class="tag">'+tag+'</span>'
-      +'<h4>'+name+'</h4><p>'+desc+'</p></div>';
+  function card(stat,name,desc,tag,ico){
+    return '<div class="card"><span class="stat">'+stat+'</span><span class="tag"><i class="fa-solid '+ico+'"></i>'+tag+'</span>'
+      +'<h4><i class="fa-solid '+ico+'"></i>'+name+'</h4><p>'+desc+'</p></div>';
   }
-  function proj(name,tag,desc,chips,stat){
+  function proj(name,tag,ico,desc,chips,stat){
     var c = chips.map(function(x){return '<span class="chip">'+x+'</span>';}).join('');
-    return '<div class="card"><span class="stat">'+stat+'</span><span class="tag">'+tag+'</span>'
-      +'<h4>'+name+'</h4><p>'+desc+'</p><div class="chips">'+c+'</div></div>';
+    return '<div class="card"><span class="stat">'+stat+'</span><span class="tag"><i class="fa-solid '+ico+'"></i>'+tag+'</span>'
+      +'<h4><i class="fa-solid '+ico+'"></i>'+name+'</h4><p>'+desc+'</p><div class="chips">'+c+'</div></div>';
   }
-  function skillblock(title,rows){
+  function skillblock(title,ico,rows){
     var r = rows.map(function(x){
       return '<div class="srow"><span class="sn">'+x[0]+'</span><span class="sb"><i style="width:'+x[1]+'%"></i></span></div>';
     }).join('');
-    return '<div class="skillblock"><h5>'+title+'</h5>'+r+'</div>';
+    return '<div class="skillblock"><h5><i class="fa-solid '+ico+'"></i>'+title+'</h5>'+r+'</div>';
   }
   function pub(ph,h,meta){
-    return '<div class="pubrow"><div class="ph">'+ph+'</div><h4>'+h+'</h4><div class="meta">'+meta+'</div></div>';
+    return '<div class="pubrow"><div class="ph"><i class="fa-solid fa-book-open"></i>'+ph+'</div>'
+      +'<h4><i class="fa-solid fa-file-lines"></i>'+h+'</h4>'
+      +'<div class="meta"><i class="fa-solid fa-location-dot"></i>'+meta+'</div></div>';
   }
-  function comm(ico,val,sub,href){
+  function comm(ico,val,sub,href,brand){
     var ext = href.indexOf('http')===0 ? ' target="_blank" rel="noopener"' : '';
-    return '<a class="comm" href="'+href+'"'+ext+'><span class="ico">'+ico+'</span>'
+    var iclass = brand ? 'fa-brands' : 'fa-solid';
+    return '<a class="comm" href="'+href+'"'+ext+'><span class="ico"><i class="'+iclass+' '+ico+'"></i></span>'
       +'<span class="cval">'+val+'<small>'+sub+'</small></span></a>';
   }
 
@@ -494,7 +519,8 @@
     var b = document.createElement('button');
     b.className='station-btn';
     b.setAttribute('data-id',s.id);
-    b.innerHTML='<span class="idx">'+String(i+1).padStart(2,'0')+'</span>'+s.name
+    b.innerHTML='<span class="idx">'+String(i+1).padStart(2,'0')+'</span>'
+      +'<i class="fa-solid '+s.icon+' st-ico"></i>'+s.name
       +'<span class="sub">'+s.sub2+'</span>';
     b.addEventListener('click',function(){ openStation(s.id); });
     stationList.appendChild(b);
@@ -502,10 +528,15 @@
 
   /* ---------------- DRAWER ---------------- */
   var drawer = document.getElementById('drawer');
-  var drawerTitle = document.getElementById('drawer-title');
+  var drawerTitleTxt = document.getElementById('drawer-title-txt');
+  var drawerIco = document.getElementById('drawer-ico');
   var drawerSub = document.getElementById('drawer-sub');
   var drawerBody = document.getElementById('drawer-body');
   var closeBtn = document.getElementById('drawer-close');
+
+  function setDrawerIcon(icon){
+    drawerIco.className = 'fa-solid '+(icon||'fa-satellite-dish');
+  }
 
   function setActive(id){
     var btns = stationList.querySelectorAll('.station-btn');
@@ -514,7 +545,8 @@
   function openStation(id){
     var c = CONTENT[id]; if(!c) return;
     setActive(id);
-    drawerTitle.childNodes[0].nodeValue = c.title;
+    drawerTitleTxt.textContent = c.title;
+    setDrawerIcon(c.icon);
     drawerSub.textContent = c.sub;
     drawerBody.innerHTML = c.html;
     drawer.classList.add('open');
@@ -773,11 +805,13 @@
       // clicked pulsar -> open profile drawer
       var c=CONTENT.pulsar;
       setActive(null);
-      drawerTitle.childNodes[0].nodeValue=c.title;
+      drawerTitleTxt.textContent=c.title;
+      setDrawerIcon(c.icon);
       drawerSub.textContent=c.sub;
       drawerBody.innerHTML=c.html;
       drawer.classList.add('open');
       drawerBody.scrollTop=0;
+      animateSkillBars();
     }
   });
 
