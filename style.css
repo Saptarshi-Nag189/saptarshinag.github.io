@@ -703,7 +703,11 @@
     .nav__toggle { display: flex; }
     .nav__menu {
       position: fixed;
-      inset: 0;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100dvh;
+      overflow-y: auto;
       flex-direction: column;
       justify-content: center;
       gap: 1.8rem;
