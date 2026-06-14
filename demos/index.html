@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Experience Demos — Saptarshi Nag</title>
+  <meta name="description" content="Six concept prototypes for a portfolio experience. Pick a direction.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg: #08080b;
+      --fg: #ededf2;
+      --dim: #9a9aa8;
+      --muted: #66666f;
+      --border: #232329;
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg);
+      color: var(--fg);
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* animated aurora backdrop */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: -20%;
+      z-index: -2;
+      background:
+        radial-gradient(40% 40% at 20% 20%, rgba(124, 92, 255, 0.18), transparent 70%),
+        radial-gradient(40% 40% at 80% 30%, rgba(54, 224, 255, 0.14), transparent 70%),
+        radial-gradient(50% 50% at 60% 90%, rgba(255, 45, 45, 0.10), transparent 70%);
+      filter: blur(20px);
+      animation: drift 24s ease-in-out infinite alternate;
+    }
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 46px 46px;
+      opacity: 0.16;
+      mask-image: radial-gradient(ellipse 75% 70% at 50% 35%, #000 30%, transparent 100%);
+      -webkit-mask-image: radial-gradient(ellipse 75% 70% at 50% 35%, #000 30%, transparent 100%);
+    }
+    @keyframes drift {
+      to { transform: translate3d(0, -4%, 0) scale(1.08); }
+    }
+
+    .wrap {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: clamp(3rem, 8vw, 6rem) clamp(1.2rem, 4vw, 2.5rem) 5rem;
+    }
+
+    header { margin-bottom: clamp(2.5rem, 6vw, 4rem); }
+    .kicker {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 1.2rem;
+    }
+    h1 {
+      font-size: clamp(2.2rem, 6vw, 4.2rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.02;
+      margin-bottom: 1.2rem;
+    }
+    h1 .grad {
+      background: linear-gradient(100deg, #7c5cff, #36e0ff 55%, #e8c170);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .lede {
+      max-width: 60ch;
+      color: var(--dim);
+      font-size: clamp(1rem, 1.6vw, 1.18rem);
+    }
+    .lede strong { color: var(--fg); font-weight: 600; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+      gap: 1.3rem;
+    }
+
+    .card {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      min-height: 290px;
+      padding: 1.7rem;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: linear-gradient(160deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.008));
+      overflow: hidden;
+      text-decoration: none;
+      color: inherit;
+      transition: transform 0.4s cubic-bezier(0.22, 0.61, 0.36, 1),
+                  border-color 0.4s ease, box-shadow 0.4s ease;
+    }
+    .card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(120% 90% at 50% 0%, var(--c, #7c5cff), transparent 60%);
+      opacity: 0.0;
+      transition: opacity 0.4s ease;
+      pointer-events: none;
+    }
+    .card:hover {
+      transform: translateY(-6px);
+      border-color: color-mix(in srgb, var(--c) 60%, var(--border));
+      box-shadow: 0 24px 60px -34px var(--c);
+    }
+    .card:hover::before { opacity: 0.16; }
+    .card:focus-visible { outline: 2px solid var(--c); outline-offset: 3px; }
+
+    .card__num {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--c, #7c5cff);
+      letter-spacing: 0.1em;
+    }
+    .card__icon {
+      font-size: 2.1rem;
+      margin: 0.4rem 0 1.1rem;
+      line-height: 1;
+    }
+    .card__title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      margin-bottom: 0.5rem;
+    }
+    .card__tag {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--c, #7c5cff);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 0.7rem;
+    }
+    .card__desc {
+      color: var(--dim);
+      font-size: 0.94rem;
+      margin-bottom: 1.2rem;
+    }
+    .card__go {
+      margin-top: auto;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--fg);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .card__go .arrow { transition: transform 0.3s ease; color: var(--c); }
+    .card:hover .card__go .arrow { transform: translateX(6px); }
+
+    footer {
+      margin-top: 3.5rem;
+      padding-top: 1.6rem;
+      border-top: 1px solid var(--border);
+      font-family: var(--font-mono);
+      font-size: 0.76rem;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+    }
+    footer a { color: var(--dim); }
+
+    @media (prefers-reduced-motion: reduce) {
+      body::before { animation: none; }
+      .card, .card__go .arrow { transition: none; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <header>
+      <p class="kicker">Concept Lab · Saptarshi Nag</p>
+      <h1>Choose your<br><span class="grad">experience.</span></h1>
+      <p class="lede">Six radically different ways to present the same portfolio — not a page you
+        scroll, but a world you explore. Each is a working prototype. <strong>Open them, play, and
+        pick a direction</strong> (or mix a few). The live site stays untouched.</p>
+    </header>
+
+    <div class="grid" id="grid"></div>
+
+    <footer>
+      <span>// six concept prototypes · cinematic · built from scratch</span>
+      <span>pick one → we build the full site on it</span>
+    </footer>
+  </div>
+
+  <script>
+    const demos = [
+      {
+        slug: 'terminal-os', num: '01', icon: '▮', c: '#4aff8f',
+        title: 'Terminal OS', tag: 'boot · type · explore',
+        desc: 'The site boots like an operating system, then hands you a live shell. Run commands to reveal everything — no scrolling, you drive it.'
+      },
+      {
+        slug: 'observatory', num: '02', icon: '🛰', c: '#36e0ff',
+        title: 'Mission Control', tag: 'observatory HUD',
+        desc: 'A cinematic control room with a radio-telescope sky map, a pulsing pulsar and live telemetry. Jump between stations instead of scrolling.'
+      },
+      {
+        slug: 'neural-graph', num: '03', icon: '⊚', c: '#a78bfa',
+        title: 'Neural Graph', tag: 'explorable node map',
+        desc: 'A living force-directed galaxy of roles, projects and skills. Click a node to expand it; drag to pan, scroll to zoom. Non-linear discovery.'
+      },
+      {
+        slug: 'signal-decode', num: '04', icon: '∿', c: '#3dff9a',
+        title: 'Signal Decode', tag: 'tune · lock · reveal',
+        desc: 'An incoming deep-space signal buried in static. Tune the frequency and the portfolio decodes out of the noise as the carrier locks.'
+      },
+      {
+        slug: 'pit-wall', num: '05', icon: '🏁', c: '#ff2d2d',
+        title: 'F1 Pit Wall', tag: 'lights out · go',
+        desc: 'A Formula 1 race-engineer HUD: start lights, live tyre telemetry, and a timing board where every lap is a career milestone.'
+      },
+      {
+        slug: 'cinema', num: '06', icon: '🎬', c: '#e8c170',
+        title: 'Movie Premiere', tag: 'now showing',
+        desc: 'Your portfolio as a film: a marquee, an opening title sequence, and selectable reels that play onto the screen. Roll the credits.'
+      },
+    ];
+
+    const grid = document.getElementById('grid');
+    grid.innerHTML = demos.map(d => `
+      <a class="card" href="./${d.slug}/index.html" style="--c:${d.c}">
+        <span class="card__num">${d.num} / 06</span>
+        <span class="card__icon">${d.icon}</span>
+        <h2 class="card__title">${d.title}</h2>
+        <p class="card__tag">${d.tag}</p>
+        <p class="card__desc">${d.desc}</p>
+        <span class="card__go">Launch demo <span class="arrow">▸</span></span>
+      </a>
+    `).join('');
+  </script>
+</body>
+
+</html>

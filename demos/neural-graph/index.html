@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Neural Graph Universe · Saptarshi Nag</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --violet:#a78bfa;
+    --indigo:#7c5cff;
+    --bg:#07060d;
+    --bg2:#0d0a18;
+    --ink:#e8e6f2;
+    --muted:#9a96b3;
+    --line:rgba(167,139,250,.18);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);}
+  body{
+    font-family:'Inter',system-ui,sans-serif;
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+    position:relative;
+    touch-action:none;
+  }
+  #graph{
+    position:fixed;inset:0;display:block;
+    cursor:grab;
+  }
+  #graph.grabbing{cursor:grabbing;}
+  #graph.hovering{cursor:pointer;}
+
+  /* vignette overlay */
+  .vignette{
+    position:fixed;inset:0;pointer-events:none;z-index:2;
+    background:radial-gradient(ellipse 120% 120% at 50% 45%, transparent 38%, rgba(3,2,8,.55) 78%, rgba(2,1,6,.92) 100%);
+    mix-blend-mode:normal;
+  }
+
+  /* top-left back link */
+  .topbar{
+    position:fixed;top:0;left:0;z-index:6;
+    padding:18px 22px;display:flex;align-items:center;gap:14px;
+    pointer-events:none;
+  }
+  .back{
+    pointer-events:auto;
+    font-family:'JetBrains Mono',monospace;
+    font-size:12.5px;letter-spacing:.04em;
+    color:var(--muted);text-decoration:none;
+    padding:7px 13px;border:1px solid var(--line);border-radius:999px;
+    background:rgba(13,10,24,.55);backdrop-filter:blur(8px);
+    transition:color .25s,border-color .25s,background .25s;
+  }
+  .back:hover{color:var(--violet);border-color:rgba(167,139,250,.5);background:rgba(124,92,255,.12);}
+  .tag{
+    font-family:'JetBrains Mono',monospace;
+    font-size:10px;letter-spacing:.22em;text-transform:uppercase;
+    color:rgba(154,150,179,.6);
+    border:1px solid rgba(167,139,250,.12);
+    padding:4px 9px;border-radius:4px;
+  }
+
+  /* title block top-center-ish */
+  .brand{
+    position:fixed;top:20px;left:50%;transform:translateX(-50%);
+    z-index:5;text-align:center;pointer-events:none;
+  }
+  .brand h1{
+    font-size:13px;font-weight:600;letter-spacing:.34em;text-transform:uppercase;
+    color:var(--violet);opacity:.85;
+    text-shadow:0 0 22px rgba(124,92,255,.6);
+  }
+  .brand p{
+    margin-top:5px;font-family:'JetBrains Mono',monospace;
+    font-size:10.5px;color:var(--muted);letter-spacing:.08em;opacity:.7;
+  }
+
+  /* hint bottom-center */
+  .hint{
+    position:fixed;bottom:18px;left:50%;transform:translateX(-50%);
+    z-index:5;pointer-events:none;
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;letter-spacing:.06em;color:var(--muted);
+    background:rgba(13,10,24,.45);backdrop-filter:blur(6px);
+    padding:7px 16px;border-radius:999px;border:1px solid var(--line);
+    white-space:nowrap;opacity:.85;
+  }
+  .hint b{color:var(--violet);font-weight:500;}
+
+  /* legend bottom-left */
+  .legend{
+    position:fixed;bottom:18px;left:18px;z-index:5;
+    background:rgba(11,8,20,.6);backdrop-filter:blur(10px);
+    border:1px solid var(--line);border-radius:12px;
+    padding:12px 14px;
+    font-family:'JetBrains Mono',monospace;font-size:11px;
+    pointer-events:auto;
+    transition:opacity .3s;
+  }
+  .legend h2{
+    font-size:9px;letter-spacing:.2em;text-transform:uppercase;
+    color:var(--muted);margin-bottom:9px;font-weight:600;
+  }
+  .legend .row{display:flex;align-items:center;gap:9px;margin:5px 0;color:#cfcbe2;cursor:default;}
+  .legend .dot{width:10px;height:10px;border-radius:50%;flex:none;box-shadow:0 0 8px currentColor;}
+
+  /* detail panel right */
+  .panel{
+    position:fixed;top:0;right:0;height:100%;width:380px;max-width:88vw;
+    z-index:7;
+    background:linear-gradient(180deg, rgba(16,12,28,.94), rgba(9,7,17,.96));
+    backdrop-filter:blur(18px);
+    border-left:1px solid rgba(167,139,250,.22);
+    box-shadow:-30px 0 80px rgba(0,0,0,.5), inset 1px 0 0 rgba(167,139,250,.06);
+    transform:translateX(105%);
+    transition:transform .55s cubic-bezier(.16,.84,.3,1);
+    display:flex;flex-direction:column;
+    overflow:hidden;
+  }
+  .panel.open{transform:translateX(0);}
+  .panel .scroll{overflow-y:auto;padding:30px 28px 36px;height:100%;}
+  .panel .scroll::-webkit-scrollbar{width:8px;}
+  .panel .scroll::-webkit-scrollbar-thumb{background:rgba(124,92,255,.3);border-radius:8px;}
+  .panel .kicker{
+    font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.22em;
+    text-transform:uppercase;color:var(--violet);opacity:.9;margin-bottom:8px;
+    display:flex;align-items:center;gap:8px;
+  }
+  .panel .kicker .pdot{width:8px;height:8px;border-radius:50%;box-shadow:0 0 10px currentColor;}
+  .panel h3{font-size:25px;font-weight:600;line-height:1.15;letter-spacing:-.01em;margin-bottom:6px;}
+  .panel .sub{font-size:13px;color:var(--muted);margin-bottom:18px;font-weight:400;}
+  .panel .body{font-size:14px;line-height:1.62;color:#d6d3e6;}
+  .panel .body p{margin-bottom:13px;}
+  .panel .meta{
+    display:flex;flex-wrap:wrap;gap:7px;margin:4px 0 20px;
+  }
+  .panel .chip{
+    font-family:'JetBrains Mono',monospace;font-size:11px;
+    padding:5px 10px;border-radius:6px;
+    background:rgba(124,92,255,.1);border:1px solid rgba(167,139,250,.22);
+    color:#cbbff4;
+  }
+  .panel .stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:6px 0 20px;}
+  .panel .stat{
+    background:rgba(124,92,255,.07);border:1px solid var(--line);
+    border-radius:10px;padding:12px 13px;
+  }
+  .panel .stat .num{font-size:19px;font-weight:700;color:#fff;letter-spacing:-.01em;}
+  .panel .stat .lbl{font-size:10.5px;color:var(--muted);margin-top:3px;line-height:1.3;}
+  .panel .conns{margin-top:6px;}
+  .panel .conns .ch2{
+    font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.2em;
+    text-transform:uppercase;color:var(--muted);margin-bottom:10px;
+  }
+  .panel .conn{
+    display:flex;align-items:center;gap:10px;
+    padding:8px 10px;margin-bottom:6px;border-radius:8px;cursor:pointer;
+    border:1px solid transparent;transition:background .2s,border-color .2s;
+    font-size:13px;color:#cfcbe2;
+  }
+  .panel .conn:hover{background:rgba(124,92,255,.12);border-color:rgba(167,139,250,.3);}
+  .panel .conn .cdot{width:9px;height:9px;border-radius:50%;flex:none;box-shadow:0 0 8px currentColor;}
+  .panel .links{display:flex;flex-direction:column;gap:9px;margin-top:6px;}
+  .panel a.lk{
+    color:#c9bdf6;text-decoration:none;font-size:13.5px;
+    display:flex;align-items:center;gap:9px;
+    padding:9px 12px;border-radius:9px;border:1px solid var(--line);
+    background:rgba(124,92,255,.06);transition:all .2s;
+  }
+  .panel a.lk:hover{border-color:rgba(167,139,250,.5);background:rgba(124,92,255,.14);color:#fff;}
+  .panel .close{
+    position:absolute;top:18px;right:18px;z-index:2;
+    width:34px;height:34px;border-radius:50%;
+    border:1px solid var(--line);background:rgba(124,92,255,.08);
+    color:var(--muted);font-size:18px;cursor:pointer;line-height:1;
+    display:flex;align-items:center;justify-content:center;
+    transition:all .2s;
+  }
+  .panel .close:hover{color:#fff;border-color:rgba(167,139,250,.5);background:rgba(124,92,255,.2);transform:rotate(90deg);}
+
+  @media (max-width:600px){
+    .brand{display:none;}
+    .legend{font-size:10px;padding:9px 11px;bottom:14px;left:12px;}
+    .hint{font-size:9.5px;padding:6px 11px;bottom:auto;top:54px;}
+    .topbar{padding:12px 14px;}
+    .panel{width:100%;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .panel{transition:transform .01s;}
+    .close:hover{transform:none;}
+  }
+</style>
+</head>
+<body>
+  <canvas id="graph"></canvas>
+  <div class="vignette"></div>
+
+  <div class="topbar">
+    <a class="back" href="../index.html">← demos</a>
+    <span class="tag">concept demo</span>
+  </div>
+
+  <div class="brand">
+    <h1>Neural Graph Universe</h1>
+    <p>a living map of Saptarshi Nag</p>
+  </div>
+
+  <div class="hint">
+    <b>click</b> a node · <b>drag</b> to pan · <b>scroll</b> to zoom · drag a node to move it
+  </div>
+
+  <div class="legend" id="legend">
+    <h2>Node Map</h2>
+  </div>
+
+  <aside class="panel" id="panel" aria-hidden="true">
+    <button class="close" id="closeBtn" aria-label="Close">×</button>
+    <div class="scroll" id="panelScroll"></div>
+  </aside>
+
+<script>
+(function(){
+  "use strict";
+
+  var prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var canvas = document.getElementById('graph');
+  var ctx = canvas.getContext('2d');
+  var panel = document.getElementById('panel');
+  var panelScroll = document.getElementById('panelScroll');
+  var closeBtn = document.getElementById('closeBtn');
+  var legendEl = document.getElementById('legend');
+
+  // ---------- categories ----------
+  var CATS = {
+    you:       { color:'#ffffff', label:'You',          r:26 },
+    role:      { color:'#7c5cff', label:'Roles',         r:18 },
+    project:   { color:'#a78bfa', label:'Projects',      r:17 },
+    skill:     { color:'#5ad1e6', label:'Skills',        r:11 },
+    education: { color:'#f0a3ff', label:'Education',      r:15 },
+    publication:{color:'#ffd479', label:'Publications',  r:14 },
+    contact:   { color:'#7affc1', label:'Contact',       r:14 }
+  };
+
+  // ---------- node data ----------
+  var NODES = [
+    { id:'you', cat:'you', label:'Saptarshi Nag', sub:'AI / ML Engineer',
+      kicker:'You',
+      body:'<p>M.Tech in Artificial Intelligence (DIAT, DRDO). Research at <b>NCRA-TIFR</b> &amp; the <b>GMRT</b> radio observatory; now Project Engineer at <b>C-DAC</b> building real-time IoT security — Zero Trust architecture fused with ML-driven threat detection.</p><p>I work across the stack: GPU kernels and physics-informed nets to retrieval systems and multi-agent LLMs.</p>',
+      stats:[
+        {num:'96.97%', lbl:'IoT attack-detection accuracy'},
+        {num:'99.8%',  lbl:'Pulsar-detection F1'},
+        {num:'4.1×',   lbl:'GPU training speedup'},
+        {num:'70M+',   lbl:'samples processed'}
+      ]
+    },
+
+    // roles
+    { id:'cdac', cat:'role', label:'C-DAC', sub:'Project Engineer · Jul 2025–Present · Chennai',
+      kicker:'Role',
+      body:'<p>AI Research &amp; IoT Security. Building real-time IoT threat detection — a <b>Zero Trust</b> architecture combined with ML anomaly detection, achieving <b>96.97%</b> attack-detection accuracy with a <b>50%</b> latency reduction.</p>',
+      stats:[{num:'96.97%',lbl:'attack detection'},{num:'-50%',lbl:'latency'}]
+    },
+    { id:'ncra', cat:'role', label:'NCRA-TIFR', sub:'Research Intern · Aug 2024–Apr 2025 · Pune',
+      kicker:'Role',
+      body:'<p>Pulsar-detection research. Designed ML pipelines over <b>70M+</b> samples of radio-astronomy signal data, reaching a <b>99.8% F1</b> on pulsar classification.</p>',
+      stats:[{num:'99.8%',lbl:'pulsar F1'},{num:'70M+',lbl:'samples'}]
+    },
+    { id:'gmrt', cat:'role', label:'GMRT', sub:'Winter Intern · Dec 2023–Jan 2024 · Pune',
+      kicker:'Role',
+      body:'<p>HPC &amp; signal processing at the Giant Metrewave Radio Telescope. Worked on high-throughput pipelines for large-scale radio-frequency data on cluster hardware.</p>'
+    },
+
+    // projects
+    { id:'f1', cat:'project', label:'F1 Tyre Degradation', sub:'PyTorch · CUDA · PINNs',
+      kicker:'Project',
+      body:'<p>Physics-Informed Neural Networks modelling Formula 1 tyre degradation. Custom <b>CUDA</b>/<b>CuPy</b> kernels and XGBoost ensembles delivered a <b>4.1× training speedup</b> over the baseline.</p>',
+      stats:[{num:'4.1×',lbl:'speedup'},{num:'PINNs',lbl:'physics-informed'}]
+    },
+    { id:'omni', cat:'project', label:'Omniscience Pro', sub:'Local RAG · LangChain · ChromaDB',
+      kicker:'Project',
+      body:'<p>A fully local Retrieval-Augmented-Generation engine. LangChain + ChromaDB packaged in Docker, serving semantic search in <b>under 50ms</b> — no cloud dependency, fully private.</p>',
+      stats:[{num:'<50ms',lbl:'search latency'},{num:'Local',lbl:'zero cloud'}]
+    },
+    { id:'aro', cat:'project', label:'ARO', sub:'Multi-agent LLM · Flask · React',
+      kicker:'Project',
+      body:'<p>A multi-agent LLM orchestration system. Flask backend with NetworkX-driven agent graphs and a React front end — agents coordinate over a shared knowledge graph.</p>'
+    },
+    { id:'llama', cat:'project', label:'Llama 3.2 Optimisation', sub:'Unsloth · 4-bit quant',
+      kicker:'Project',
+      body:'<p>Fine-tuning and optimising Llama 3.2 with <b>Unsloth</b> and 4-bit quantisation — dramatically reduced memory footprint while preserving task quality.</p>'
+    },
+
+    // skills
+    { id:'python', cat:'skill', label:'Python' },
+    { id:'cpp',    cat:'skill', label:'C++' },
+    { id:'cuda',   cat:'skill', label:'CUDA' },
+    { id:'cupy',   cat:'skill', label:'CuPy' },
+    { id:'pytorch',cat:'skill', label:'PyTorch' },
+    { id:'xgboost',cat:'skill', label:'XGBoost' },
+    { id:'sklearn',cat:'skill', label:'scikit-learn' },
+    { id:'pinns',  cat:'skill', label:'PINNs' },
+    { id:'rag',    cat:'skill', label:'RAG' },
+    { id:'llmft',  cat:'skill', label:'LLM fine-tuning' },
+    { id:'docker', cat:'skill', label:'Docker' },
+    { id:'flask',  cat:'skill', label:'Flask' },
+    { id:'linux',  cat:'skill', label:'Linux' },
+
+    // education
+    { id:'mtech', cat:'education', label:'M.Tech AI — DIAT', sub:'DRDO · 2023–2025 · CGPA 8.64',
+      kicker:'Education',
+      body:'<p>M.Tech in Artificial Intelligence at the Defence Institute of Advanced Technology (DRDO), 2023–2025.</p>',
+      stats:[{num:'8.64',lbl:'CGPA'},{num:'#1790',lbl:'GATE 2024 · top 5%'}]
+    },
+    { id:'btech', cat:'education', label:'B.Tech CSE', sub:'Academy of Technology · 2019–2023 · CGPA 9.44',
+      kicker:'Education',
+      body:'<p>B.Tech in Computer Science &amp; Engineering, Academy of Technology, 2019–2023.</p>',
+      stats:[{num:'9.44',lbl:'CGPA'}]
+    },
+
+    // publications
+    { id:'pub1', cat:'publication', label:'Protocol-Aware Monitoring', sub:'IoTaIS 2025 · Bali',
+      kicker:'Publication',
+      body:'<p><b>Protocol-Aware Continuous Monitoring and Anomaly Detection in IoT Networks.</b></p><p>IEEE IoTaIS 2025, Bali — continuous, protocol-aware anomaly detection for live IoT traffic.</p>'
+    },
+    { id:'pub2', cat:'publication', label:'Zero Trust Survey', sub:'IoTaIS 2025 · Bali',
+      kicker:'Publication',
+      body:'<p><b>A Comprehensive Survey on Zero Trust Architecture in IoT Networks.</b></p><p>IEEE IoTaIS 2025, Bali — a survey mapping Zero Trust principles onto IoT security landscapes.</p>'
+    },
+
+    // contact
+    { id:'contact', cat:'contact', label:'Contact', sub:'Let’s talk',
+      kicker:'Contact',
+      body:'<p>Open to AI/ML research &amp; engineering work.</p>',
+      links:[
+        {t:'saptarshinag18@gmail.com', u:'mailto:saptarshinag18@gmail.com', i:'✉'},
+        {t:'linkedin.com/in/saptarshi18', u:'https://www.linkedin.com/in/saptarshi18', i:'in'},
+        {t:'github.com/Saptarshi-Nag189', u:'https://github.com/Saptarshi-Nag189', i:'⌥'},
+        {t:'Download CV (PDF)', u:'../../saptarshi_resume_linkedin_2026.pdf', i:'↧'}
+      ]
+    }
+  ];
+
+  // ---------- edges ----------
+  var EDGE_DEFS = [
+    ['you','cdac'],['you','ncra'],['you','gmrt'],
+    ['you','f1'],['you','omni'],['you','aro'],['you','llama'],
+    ['you','mtech'],['you','btech'],['you','pub1'],['you','pub2'],['you','contact'],
+
+    // roles -> skills / projects / pubs
+    ['cdac','pinns'],['cdac','python'],['cdac','docker'],['cdac','linux'],
+    ['cdac','pub1'],['cdac','pub2'],
+    ['ncra','pytorch'],['ncra','xgboost'],['ncra','python'],['ncra','cuda'],
+    ['gmrt','cpp'],['gmrt','linux'],['gmrt','cuda'],
+
+    // projects -> skills
+    ['f1','pytorch'],['f1','cuda'],['f1','cupy'],['f1','xgboost'],['f1','pinns'],['f1','python'],
+    ['omni','rag'],['omni','docker'],['omni','python'],['omni','flask'],
+    ['aro','flask'],['aro','python'],['aro','rag'],
+    ['llama','llmft'],['llama','pytorch'],['llama','python'],
+
+    // education -> roles/skills
+    ['mtech','cdac'],['mtech','python'],['mtech','pytorch'],
+    ['btech','cpp'],
+
+    // skill clustering
+    ['cuda','cupy'],['pytorch','sklearn'],['rag','llmft']
+  ];
+
+  // build maps
+  var nodeById = {};
+  NODES.forEach(function(n){
+    n.r = CATS[n.cat].r;
+    n.color = CATS[n.cat].color;
+    nodeById[n.id] = n;
+  });
+
+  var EDGES = [];
+  var neighbors = {};
+  NODES.forEach(function(n){ neighbors[n.id] = {}; });
+  EDGE_DEFS.forEach(function(e){
+    var a = nodeById[e[0]], b = nodeById[e[1]];
+    if(!a || !b) return;
+    EDGES.push({a:a, b:b});
+    neighbors[a.id][b.id] = true;
+    neighbors[b.id][a.id] = true;
+  });
+
+  // ---------- layout init ----------
+  var W = 0, H = 0, DPR = 1;
+  function seedPositions(){
+    var cx = W/2, cy = H/2;
+    NODES.forEach(function(n,i){
+      if(n.id === 'you'){ n.x = cx; n.y = cy; }
+      else{
+        var ang = (i/ NODES.length) * Math.PI*2 + (i%3);
+        var rad = 140 + (i%5)*70;
+        n.x = cx + Math.cos(ang)*rad;
+        n.y = cy + Math.sin(ang)*rad;
+      }
+      n.vx = 0; n.vy = 0;
+      n.fixed = false;
+    });
+  }
+
+  // ---------- view transform (pan/zoom) ----------
+  var view = { x:0, y:0, scale:1 };
+
+  function resize(){
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth;
+    H = window.innerHeight;
+    canvas.width = Math.floor(W*DPR);
+    canvas.height = Math.floor(H*DPR);
+    canvas.style.width = W+'px';
+    canvas.style.height = H+'px';
+    ctx.setTransform(DPR,0,0,DPR,0,0);
+  }
+
+  // ---------- physics ----------
+  var REPULSION = 9000;
+  var SPRING = 0.012;
+  var SPRING_LEN = 110;
+  var CENTER = 0.0016;
+  var DAMP = 0.86;
+
+  function step(){
+    var cx = W/2, cy = H/2;
+    var i,j,n,m,dx,dy,d2,d,f;
+
+    for(i=0;i<NODES.length;i++){
+      n = NODES[i];
+      if(n.fixed) continue;
+      // centering
+      n.vx += (cx - n.x) * CENTER;
+      n.vy += (cy - n.y) * CENTER;
+    }
+
+    // repulsion (all pairs — small graph)
+    for(i=0;i<NODES.length;i++){
+      n = NODES[i];
+      for(j=i+1;j<NODES.length;j++){
+        m = NODES[j];
+        dx = n.x - m.x; dy = n.y - m.y;
+        d2 = dx*dx + dy*dy;
+        if(d2 < 0.01) d2 = 0.01;
+        d = Math.sqrt(d2);
+        f = REPULSION / d2;
+        var fx = (dx/d)*f, fy = (dy/d)*f;
+        if(!n.fixed){ n.vx += fx; n.vy += fy; }
+        if(!m.fixed){ m.vx -= fx; m.vy -= fy; }
+      }
+    }
+
+    // springs
+    for(i=0;i<EDGES.length;i++){
+      var e = EDGES[i];
+      n = e.a; m = e.b;
+      dx = m.x - n.x; dy = m.y - n.y;
+      d = Math.sqrt(dx*dx+dy*dy) || 0.01;
+      var targ = SPRING_LEN + n.r + m.r;
+      f = (d - targ) * SPRING;
+      var sx = (dx/d)*f, sy = (dy/d)*f;
+      if(!n.fixed){ n.vx += sx; n.vy += sy; }
+      if(!m.fixed){ m.vx -= sx; m.vy -= sy; }
+    }
+
+    // integrate
+    var maxV = 0;
+    for(i=0;i<NODES.length;i++){
+      n = NODES[i];
+      if(n.fixed){ n.vx=0; n.vy=0; continue; }
+      n.vx *= DAMP; n.vy *= DAMP;
+      n.x += n.vx; n.y += n.vy;
+      var v = Math.abs(n.vx)+Math.abs(n.vy);
+      if(v>maxV) maxV = v;
+    }
+    return maxV;
+  }
+
+  // ---------- interaction state ----------
+  var selected = null;   // node object
+  var hovered = null;
+  var dragNode = null;
+  var panning = false;
+  var lastPanX = 0, lastPanY = 0;
+  var dragMoved = false;
+  var pointerDownPos = null;
+
+  // convert screen -> world
+  function toWorld(sx, sy){
+    return { x:(sx - view.x)/view.scale, y:(sy - view.y)/view.scale };
+  }
+  function toScreen(wx, wy){
+    return { x: wx*view.scale + view.x, y: wy*view.scale + view.y };
+  }
+
+  function nodeAt(sx, sy){
+    var w = toWorld(sx, sy);
+    var best=null, bestD=Infinity;
+    for(var i=NODES.length-1;i>=0;i--){
+      var n = NODES[i];
+      var dx = n.x - w.x, dy = n.y - w.y;
+      var rr = n.r + 8;
+      var d2 = dx*dx+dy*dy;
+      if(d2 <= rr*rr && d2 < bestD){ bestD = d2; best = n; }
+    }
+    return best;
+  }
+
+  function isRelated(n){
+    if(!selected) return true;
+    if(n === selected) return true;
+    return !!neighbors[selected.id][n.id];
+  }
+  function edgeActive(e){
+    if(hovered){
+      if(e.a===hovered || e.b===hovered) return true;
+    }
+    if(selected){
+      if(e.a===selected || e.b===selected) return true;
+    }
+    return false;
+  }
+
+  // ---------- rendering ----------
+  var t = 0;
+  function draw(){
+    t += 0.016;
+    ctx.clearRect(0,0,W,H);
+
+    // background gradient
+    var bg = ctx.createRadialGradient(W*0.5,H*0.42,0, W*0.5,H*0.42, Math.max(W,H)*0.8);
+    bg.addColorStop(0,'#120d24');
+    bg.addColorStop(0.5,'#0a0816');
+    bg.addColorStop(1,'#050409');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0,0,W,H);
+
+    ctx.save();
+    ctx.translate(view.x, view.y);
+    ctx.scale(view.scale, view.scale);
+
+    var focusMode = !!selected;
+
+    // edges
+    for(var i=0;i<EDGES.length;i++){
+      var e = EDGES[i];
+      var active = edgeActive(e);
+      var rel = (!focusMode) || (isRelated(e.a) && isRelated(e.b) && (e.a===selected || e.b===selected || (neighbors[selected.id][e.a.id] && neighbors[selected.id][e.b.id])));
+      var alpha;
+      if(active) alpha = 0.55;
+      else if(focusMode && !rel) alpha = 0.04;
+      else alpha = 0.13;
+
+      // breathing pulse
+      var pulse = 0.5 + 0.5*Math.sin(t*1.4 + i*0.6);
+      var col = active ? e.b.color : '#7c5cff';
+
+      ctx.beginPath();
+      ctx.moveTo(e.a.x, e.a.y);
+      // slight curve
+      var mx = (e.a.x+e.b.x)/2, my=(e.a.y+e.b.y)/2;
+      ctx.quadraticCurveTo(mx, my, e.b.x, e.b.y);
+      ctx.strokeStyle = hexA(col, alpha);
+      ctx.lineWidth = active ? 1.8 : 1;
+      if(active){
+        ctx.shadowColor = hexA(col,0.6);
+        ctx.shadowBlur = 8;
+      } else {
+        ctx.shadowBlur = 0;
+      }
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+
+      // traveling particle on active edges
+      if(active){
+        var pp = (t*0.35 + i*0.2) % 1;
+        // quadratic point
+        var u = pp;
+        var qx = (1-u)*(1-u)*e.a.x + 2*(1-u)*u*mx + u*u*e.b.x;
+        var qy = (1-u)*(1-u)*e.a.y + 2*(1-u)*u*my + u*u*e.b.y;
+        ctx.beginPath();
+        ctx.arc(qx,qy, 2.4, 0, Math.PI*2);
+        ctx.fillStyle = hexA(col, 0.9);
+        ctx.shadowColor = col; ctx.shadowBlur = 10;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+    }
+
+    // nodes
+    for(var k=0;k<NODES.length;k++){
+      var n = NODES[k];
+      var rel = isRelated(n);
+      var dim = focusMode && !rel;
+      var isHov = (n===hovered);
+      var isSel = (n===selected);
+      var breath = 1 + 0.04*Math.sin(t*1.2 + k);
+      var r = n.r * breath;
+
+      ctx.globalAlpha = dim ? 0.18 : 1;
+
+      // outer glow
+      var glowR = r * (isSel?3.4: isHov?3.0:2.4);
+      var g = ctx.createRadialGradient(n.x,n.y,r*0.4, n.x,n.y, glowR);
+      var gi = (isSel||isHov)?0.5:0.28;
+      g.addColorStop(0, hexA(n.color, gi));
+      g.addColorStop(1, hexA(n.color, 0));
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(n.x,n.y, glowR, 0, Math.PI*2);
+      ctx.fill();
+
+      // selection ring
+      if(isSel){
+        ctx.beginPath();
+        ctx.arc(n.x,n.y, r+8 + 2*Math.sin(t*2), 0, Math.PI*2);
+        ctx.strokeStyle = hexA(n.color, 0.7);
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      }
+
+      // core
+      var cg = ctx.createRadialGradient(n.x - r*0.3, n.y - r*0.3, r*0.1, n.x, n.y, r);
+      cg.addColorStop(0, lighten(n.color));
+      cg.addColorStop(1, n.color);
+      ctx.beginPath();
+      ctx.arc(n.x,n.y, r, 0, Math.PI*2);
+      ctx.fillStyle = cg;
+      ctx.shadowColor = n.color;
+      ctx.shadowBlur = (isHov||isSel)?22:12;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      // inner ring for "you"
+      if(n.cat==='you'){
+        ctx.beginPath();
+        ctx.arc(n.x,n.y, r-6, 0, Math.PI*2);
+        ctx.strokeStyle = hexA('#7c5cff',0.7);
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+
+      ctx.globalAlpha = 1;
+
+      // label
+      var showLabel = !dim && (n.cat!=='skill' || isHov || isSel || view.scale>1.05 || !focusMode);
+      if(dim) showLabel = false;
+      if(showLabel){
+        var fs = n.cat==='you'?15 : (n.cat==='skill'?11:12.5);
+        ctx.font = (n.cat==='you'?'600 ':'500 ')+fs+"px 'JetBrains Mono', monospace";
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        var ly = n.y + r + 6;
+        var txt = n.label;
+        // label backdrop for legibility
+        var tw = ctx.measureText(txt).width;
+        ctx.globalAlpha = dim?0.2:( (isHov||isSel)?1: (n.cat==='skill'?0.62:0.82) );
+        ctx.fillStyle = (isHov||isSel)? '#ffffff' : hexA('#e8e6f2', 0.95);
+        ctx.shadowColor = 'rgba(0,0,0,0.9)';
+        ctx.shadowBlur = 6;
+        ctx.fillText(txt, n.x, ly);
+        ctx.shadowBlur = 0;
+        ctx.globalAlpha = 1;
+      }
+    }
+
+    ctx.restore();
+  }
+
+  // ---------- color helpers ----------
+  function hexA(hex, a){
+    if(hex[0]!=='#') return hex;
+    var h = hex.slice(1);
+    if(h.length===3) h = h[0]+h[0]+h[1]+h[1]+h[2]+h[2];
+    var r=parseInt(h.slice(0,2),16), g=parseInt(h.slice(2,4),16), b=parseInt(h.slice(4,6),16);
+    return 'rgba('+r+','+g+','+b+','+a+')';
+  }
+  function lighten(hex){
+    var h = hex.slice(1);
+    if(h.length===3) h = h[0]+h[0]+h[1]+h[1]+h[2]+h[2];
+    var r=parseInt(h.slice(0,2),16), g=parseInt(h.slice(2,4),16), b=parseInt(h.slice(4,6),16);
+    r=Math.min(255,r+80); g=Math.min(255,g+80); b=Math.min(255,b+80);
+    return 'rgb('+r+','+g+','+b+')';
+  }
+
+  // ---------- main loop ----------
+  var running = true;
+  var settled = false;
+  var settleFrames = 0;
+
+  function loop(){
+    if(!running){ return; }
+    if(!settled || dragNode || focusAnim){
+      var mv = step();
+      settleFrames++;
+      if(mv < 0.12 && !dragNode && settleFrames>40){ settled = true; }
+      if(settleFrames > 1400){ settled = true; }
+    }
+    if(focusAnim) applyFocusAnim();
+    draw();
+    rafId = requestAnimationFrame(loop);
+  }
+  var rafId = null;
+
+  // ---------- focus / center animation ----------
+  var focusAnim = null;
+  function focusOn(node){
+    // pan so node is centered (in screen), keep scale-ish
+    var targetScale = Math.max(view.scale, 1.15);
+    var sp = { x:W*0.42, y:H*0.5 }; // shift left to leave room for panel
+    focusAnim = {
+      fromX:view.x, fromY:view.y, fromS:view.scale,
+      node:node, sp:sp, ts:targetScale,
+      t0: performance.now(), dur: prefersReduced?1:650
+    };
+  }
+  function applyFocusAnim(){
+    var fa = focusAnim;
+    var p = (performance.now() - fa.t0)/fa.dur;
+    if(p>=1) p=1;
+    var e = 1 - Math.pow(1-p, 3);
+    var ns = fa.fromS + (fa.ts - fa.fromS)*e;
+    // we want toScreen(node) ~ sp at scale ns
+    var targX = fa.sp.x - fa.node.x*fa.ts;
+    var targY = fa.sp.y - fa.node.y*fa.ts;
+    view.scale = ns;
+    view.x = fa.fromX + (targX - fa.fromX)*e;
+    view.y = fa.fromY + (targY - fa.fromY)*e;
+    if(p>=1) focusAnim = null;
+  }
+
+  // ---------- selection / panel ----------
+  function selectNode(node){
+    selected = node;
+    settled = false; settleFrames = 30; // gentle re-settle for emphasis
+    if(node){
+      focusOn(node);
+      openPanel(node);
+    } else {
+      closePanel();
+    }
+  }
+
+  function openPanel(n){
+    var html = '';
+    html += '<div class="kicker"><span class="pdot" style="background:'+n.color+';color:'+n.color+'"></span>'+(n.kicker||CATS[n.cat].label)+'</div>';
+    html += '<h3>'+esc(n.label)+'</h3>';
+    if(n.sub) html += '<div class="sub">'+esc(n.sub)+'</div>';
+
+    if(n.cat==='skill'){
+      // generated skill body: where it is used
+      var uses = [];
+      for(var id in neighbors[n.id]){ uses.push(nodeById[id]); }
+      html += '<div class="body"><p>A core tool in my stack. ';
+      var proj = uses.filter(function(u){return u.cat==='project'||u.cat==='role';});
+      if(proj.length){
+        html += 'Used across '+proj.map(function(u){return '<b>'+esc(u.label)+'</b>';}).join(', ')+'.';
+      }
+      html += '</p></div>';
+    } else if(n.body){
+      html += '<div class="body">'+n.body+'</div>';
+    }
+
+    if(n.stats && n.stats.length){
+      html += '<div class="stats">';
+      n.stats.forEach(function(s){
+        html += '<div class="stat"><div class="num">'+esc(s.num)+'</div><div class="lbl">'+esc(s.lbl)+'</div></div>';
+      });
+      html += '</div>';
+    }
+
+    if(n.links && n.links.length){
+      html += '<div class="links">';
+      n.links.forEach(function(l){
+        html += '<a class="lk" href="'+l.u+'" target="_blank" rel="noopener"><span style="opacity:.7;font-family:monospace;width:18px;display:inline-block;text-align:center">'+l.i+'</span>'+esc(l.t)+'</a>';
+      });
+      html += '</div>';
+    }
+
+    // connections list
+    var conns = [];
+    for(var cid in neighbors[n.id]){ conns.push(nodeById[cid]); }
+    if(conns.length){
+      conns.sort(function(a,b){ return (a.cat==='you'?-1:0) - (b.cat==='you'?-1:0); });
+      html += '<div class="conns"><div class="ch2">Connected ('+conns.length+')</div>';
+      conns.forEach(function(c){
+        html += '<div class="conn" data-id="'+c.id+'"><span class="cdot" style="background:'+c.color+';color:'+c.color+'"></span>'+esc(c.label)+'</div>';
+      });
+      html += '</div>';
+    }
+
+    panelScroll.innerHTML = html;
+    panelScroll.scrollTop = 0;
+    panel.classList.add('open');
+    panel.setAttribute('aria-hidden','false');
+
+    // wire connection clicks
+    var cs = panelScroll.querySelectorAll('.conn');
+    for(var i=0;i<cs.length;i++){
+      cs[i].addEventListener('click', function(){
+        var nn = nodeById[this.getAttribute('data-id')];
+        if(nn) selectNode(nn);
+      });
+    }
+  }
+
+  function closePanel(){
+    panel.classList.remove('open');
+    panel.setAttribute('aria-hidden','true');
+    selected = null;
+    settled = false; settleFrames = 30;
+    // ease view back a touch
+    focusAnim = {
+      fromX:view.x, fromY:view.y, fromS:view.scale,
+      node:nodeById['you'], sp:{x:W/2,y:H/2}, ts: Math.max(0.9, Math.min(view.scale,1.0)),
+      t0: performance.now(), dur: prefersReduced?1:600
+    };
+  }
+
+  function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+
+  closeBtn.addEventListener('click', closePanel);
+
+  // ---------- pointer events ----------
+  function getXY(ev){
+    var r = canvas.getBoundingClientRect();
+    var src = ev.touches ? ev.touches[0] : ev;
+    return { x: src.clientX - r.left, y: src.clientY - r.top };
+  }
+
+  function onDown(ev){
+    var p = getXY(ev);
+    pointerDownPos = p;
+    dragMoved = false;
+    var n = nodeAt(p.x, p.y);
+    if(n){
+      dragNode = n;
+      n.fixed = true;
+      settled = false;
+      canvas.classList.add('grabbing');
+    } else {
+      panning = true;
+      lastPanX = p.x; lastPanY = p.y;
+      canvas.classList.add('grabbing');
+    }
+  }
+  function onMove(ev){
+    var p = getXY(ev);
+    if(dragNode){
+      if(ev.cancelable) ev.preventDefault();
+      var w = toWorld(p.x, p.y);
+      dragNode.x = w.x; dragNode.y = w.y;
+      dragNode.vx = 0; dragNode.vy = 0;
+      settled = false; settleFrames = 0;
+      if(dist(p, pointerDownPos)>4) dragMoved = true;
+    } else if(panning){
+      if(ev.cancelable) ev.preventDefault();
+      view.x += (p.x - lastPanX);
+      view.y += (p.y - lastPanY);
+      lastPanX = p.x; lastPanY = p.y;
+      if(dist(p, pointerDownPos)>4) dragMoved = true;
+      // panning cancels any focus animation
+      focusAnim = null;
+    } else {
+      // hover
+      var n = nodeAt(p.x, p.y);
+      hovered = n;
+      canvas.classList.toggle('hovering', !!n);
+    }
+  }
+  function onUp(ev){
+    canvas.classList.remove('grabbing');
+    var wasDragNode = dragNode;
+    if(dragNode){
+      dragNode.fixed = false;
+      dragNode = null;
+    }
+    if(panning){ panning = false; }
+
+    if(!dragMoved && pointerDownPos){
+      // it's a click/tap
+      var n = wasDragNode || nodeAt(pointerDownPos.x, pointerDownPos.y);
+      if(n){
+        if(selected === n) { /* keep */ }
+        selectNode(n);
+      } else {
+        if(selected) selectNode(null);
+      }
+    }
+    pointerDownPos = null;
+  }
+  function dist(a,b){ var dx=a.x-b.x, dy=a.y-b.y; return Math.sqrt(dx*dx+dy*dy); }
+
+  canvas.addEventListener('mousedown', onDown);
+  window.addEventListener('mousemove', onMove);
+  window.addEventListener('mouseup', onUp);
+
+  canvas.addEventListener('touchstart', function(ev){ onDown(ev); }, {passive:true});
+  canvas.addEventListener('touchmove', function(ev){ onMove(ev); }, {passive:false});
+  canvas.addEventListener('touchend', function(ev){ onUp(ev); });
+
+  // wheel zoom (toward cursor)
+  canvas.addEventListener('wheel', function(ev){
+    ev.preventDefault();
+    var p = getXY(ev);
+    var before = toWorld(p.x, p.y);
+    var factor = ev.deltaY < 0 ? 1.12 : 1/1.12;
+    view.scale = Math.max(0.4, Math.min(3.2, view.scale*factor));
+    var after = toWorld(p.x, p.y);
+    view.x += (after.x - before.x)*view.scale;
+    view.y += (after.y - before.y)*view.scale;
+    focusAnim = null;
+  }, {passive:false});
+
+  window.addEventListener('keydown', function(ev){
+    if(ev.key==='Escape' && selected) selectNode(null);
+  });
+
+  // ---------- legend ----------
+  (function buildLegend(){
+    var order = ['you','role','project','skill','education','publication','contact'];
+    var html = '<h2>Node Map</h2>';
+    order.forEach(function(c){
+      html += '<div class="row"><span class="dot" style="background:'+CATS[c].color+';color:'+CATS[c].color+'"></span>'+CATS[c].label+'</div>';
+    });
+    legendEl.innerHTML = html;
+  })();
+
+  // ---------- resize ----------
+  var resizeT;
+  window.addEventListener('resize', function(){
+    var oldW=W, oldH=H;
+    resize();
+    // keep graph roughly centered: shift positions by half delta if first time not seeded
+    settled = false; settleFrames = Math.min(settleFrames, 30);
+  });
+
+  // ---------- visibility pause ----------
+  document.addEventListener('visibilitychange', function(){
+    if(document.hidden){
+      running = false;
+      if(rafId) cancelAnimationFrame(rafId);
+      rafId = null;
+    } else {
+      if(!running){
+        running = true;
+        loop();
+      }
+    }
+  });
+
+  // ---------- init ----------
+  resize();
+  seedPositions();
+
+  if(prefersReduced){
+    // pre-settle: run many physics steps without rendering
+    for(var s=0;s<700;s++){ step(); }
+    settled = true;
+    draw();
+    // still render (one frame loop kept for interaction redraws)
+    running = true;
+    loop();
+    // override loop's continuous stepping is handled by settled flag
+  } else {
+    loop();
+  }
+
+})();
+</script>
+</body>
+</html>
