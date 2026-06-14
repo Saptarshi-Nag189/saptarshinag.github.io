@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PIT WALL — Saptarshi Nag · Race Engineer HUD</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --red:#ff2d2d;
+    --red-dim:#c41818;
+    --yellow:#ffd02e;
+    --green:#27e06a;
+    --cyan:#22d3ee;
+    --bg:#070708;
+    --panel:#101013;
+    --panel2:#0b0b0e;
+    --line:rgba(255,255,255,.09);
+    --line2:rgba(255,255,255,.16);
+    --txt:#eef0f3;
+    --mut:#8b9099;
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+    --sans:'Inter',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:var(--bg);
+    color:var(--txt);
+    font-family:var(--sans);
+    overflow:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  /* carbon fibre texture */
+  .carbon{
+    position:fixed;inset:0;z-index:0;pointer-events:none;
+    background-color:#08080a;
+    background-image:
+      linear-gradient(27deg,#141417 5px,transparent 5px),
+      linear-gradient(207deg,#141417 5px,transparent 5px),
+      linear-gradient(27deg,#0d0d10 5px,transparent 5px),
+      linear-gradient(207deg,#0d0d10 5px,transparent 5px),
+      radial-gradient(1200px 700px at 70% -10%, rgba(255,45,45,.07), transparent 60%),
+      radial-gradient(900px 600px at 10% 110%, rgba(34,211,238,.05), transparent 60%);
+    background-size:10px 10px,10px 10px,10px 10px,10px 10px,100% 100%,100% 100%;
+    background-position:0 0,5px 5px,5px 0,10px 5px,0 0,0 0;
+  }
+  .scanlines{
+    position:fixed;inset:0;z-index:60;pointer-events:none;opacity:.35;
+    background:repeating-linear-gradient(to bottom,rgba(0,0,0,0) 0,rgba(0,0,0,0) 2px,rgba(0,0,0,.22) 3px);
+    mix-blend-mode:multiply;
+  }
+  .vignette{position:fixed;inset:0;z-index:61;pointer-events:none;box-shadow:inset 0 0 240px rgba(0,0,0,.85)}
+
+  /* ---- top nav ---- */
+  .nav{position:fixed;top:14px;left:16px;z-index:80;display:flex;align-items:center;gap:14px}
+  .nav a{
+    font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--mut);
+    text-decoration:none;padding:6px 10px;border:1px solid var(--line);border-radius:6px;
+    background:rgba(10,10,12,.6);backdrop-filter:blur(4px);transition:.18s;
+  }
+  .nav a:hover{color:#fff;border-color:var(--red);box-shadow:0 0 14px rgba(255,45,45,.35)}
+  .tag{
+    position:fixed;top:16px;right:16px;z-index:80;font-family:var(--mono);font-size:10px;
+    letter-spacing:.18em;color:var(--mut);text-transform:uppercase;opacity:.7;
+    border:1px solid var(--line);padding:5px 9px;border-radius:5px;background:rgba(10,10,12,.5);
+  }
+
+  /* ============ START LIGHTS INTRO ============ */
+  #intro{
+    position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:42px;
+    background:radial-gradient(900px 600px at 50% 35%,#161013,#040405 70%);
+    transition:opacity .7s ease;
+  }
+  #intro.gone{opacity:0;pointer-events:none}
+  .gantry{display:flex;gap:26px;padding:26px 34px;border-radius:18px;
+    background:linear-gradient(#0c0c0e,#050506);
+    border:1px solid rgba(255,255,255,.07);
+    box-shadow:0 30px 80px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.05);
+  }
+  .lamp-col{display:flex;flex-direction:column;gap:14px}
+  .lamp{width:46px;height:46px;border-radius:50%;
+    background:radial-gradient(circle at 38% 32%,#2a0d0d,#120808 70%);
+    border:2px solid rgba(0,0,0,.6);
+    box-shadow:inset 0 3px 6px rgba(0,0,0,.7);transition:.12s;
+  }
+  .lamp.on{
+    background:radial-gradient(circle at 38% 32%,#ff8a8a,var(--red) 55%,#7a0d0d 100%);
+    box-shadow:0 0 26px 6px rgba(255,45,45,.75),inset 0 0 10px rgba(255,160,160,.6);
+  }
+  .lamp.amber{background:radial-gradient(circle at 38% 32%,#ffe9a8,var(--yellow) 55%,#a87b00);
+    box-shadow:0 0 24px 5px rgba(255,208,46,.7)}
+  .lamp.greenlight{background:radial-gradient(circle at 38% 32%,#b6ffd0,var(--green) 55%,#0a7a36);
+    box-shadow:0 0 26px 6px rgba(39,224,106,.75)}
+  .intro-status{font-family:var(--mono);font-size:13px;letter-spacing:.32em;color:var(--mut);
+    text-transform:uppercase;min-height:18px}
+  .lights-out{font-family:var(--sans);font-weight:800;font-size:clamp(26px,5vw,58px);
+    letter-spacing:.02em;text-align:center;opacity:0;transform:scale(.9);
+    background:linear-gradient(90deg,#fff,#ffd9d9);-webkit-background-clip:text;background-clip:text;
+    color:transparent;text-shadow:0 0 30px rgba(255,45,45,.4)}
+  .lights-out.show{animation:lo .9s cubic-bezier(.2,.8,.2,1) forwards}
+  @keyframes lo{to{opacity:1;transform:scale(1)}}
+  .skip{position:fixed;bottom:22px;right:22px;font-family:var(--mono);font-size:11px;
+    letter-spacing:.1em;color:var(--mut);background:none;border:1px solid var(--line);
+    padding:7px 13px;border-radius:6px;cursor:pointer;transition:.15s}
+  .skip:hover{color:#fff;border-color:var(--line2)}
+  .driver-line{font-family:var(--mono);font-size:11px;letter-spacing:.3em;color:var(--mut);text-transform:uppercase}
+
+  /* ============ HUD ============ */
+  #hud{position:relative;z-index:10;height:100vh;display:grid;
+    grid-template-columns:300px 1fr 340px;grid-template-rows:auto 1fr auto;
+    gap:12px;padding:56px 16px 14px;opacity:0;transition:opacity .6s ease}
+  #hud.live{opacity:1}
+
+  .panel{background:linear-gradient(180deg,var(--panel),var(--panel2));
+    border:1px solid var(--line);border-radius:12px;position:relative;overflow:hidden}
+  .panel::before{content:"";position:absolute;inset:0;border-radius:12px;pointer-events:none;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.05)}
+  .corner{position:absolute;width:10px;height:10px;border:1px solid var(--red);opacity:.55}
+  .c-tl{top:6px;left:6px;border-right:0;border-bottom:0}
+  .c-tr{top:6px;right:6px;border-left:0;border-bottom:0}
+  .c-bl{bottom:6px;left:6px;border-right:0;border-top:0}
+  .c-br{bottom:6px;right:6px;border-left:0;border-top:0}
+  .ph{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;
+    border-bottom:1px solid var(--line);font-family:var(--mono);font-size:10px;
+    letter-spacing:.2em;text-transform:uppercase;color:var(--mut)}
+  .ph .dot{width:7px;height:7px;border-radius:50%;background:var(--green);
+    box-shadow:0 0 8px var(--green);animation:blink 1.4s infinite}
+  @keyframes blink{50%{opacity:.25}}
+
+  /* header strip */
+  .topstrip{grid-column:1/-1;display:flex;align-items:center;gap:18px;padding:10px 16px}
+  .topstrip .ses{font-family:var(--mono);font-weight:700;font-size:13px;letter-spacing:.18em;color:#fff}
+  .topstrip .name{font-weight:800;font-size:16px;letter-spacing:.01em}
+  .topstrip .role{font-family:var(--mono);font-size:11px;color:var(--mut);letter-spacing:.12em}
+  .pill{font-family:var(--mono);font-size:10px;letter-spacing:.14em;padding:4px 9px;border-radius:20px;
+    border:1px solid var(--line2);color:var(--mut);text-transform:uppercase}
+  .pill.live{color:var(--red);border-color:var(--red);box-shadow:0 0 12px rgba(255,45,45,.25)}
+  .pill.drs{color:var(--green);border-color:rgba(39,224,106,.5)}
+  .pill.drs.off{color:var(--mut);border-color:var(--line);box-shadow:none}
+  .spacer{flex:1}
+  .clock{font-family:var(--mono);font-size:13px;letter-spacing:.12em;color:var(--cyan)}
+
+  /* left: lap list */
+  .laplist{grid-row:2/4;display:flex;flex-direction:column}
+  .laps{overflow-y:auto;padding:8px;display:flex;flex-direction:column;gap:7px;flex:1}
+  .laps::-webkit-scrollbar{width:6px}.laps::-webkit-scrollbar-thumb{background:#2a2a30;border-radius:4px}
+  .lap{display:grid;grid-template-columns:34px 1fr auto;align-items:center;gap:10px;
+    padding:10px;border:1px solid var(--line);border-radius:9px;cursor:pointer;
+    background:rgba(255,255,255,.012);transition:.16s;position:relative}
+  .lap:hover{border-color:var(--line2);background:rgba(255,45,45,.05)}
+  .lap.active{border-color:var(--red);background:rgba(255,45,45,.09);
+    box-shadow:0 0 0 1px rgba(255,45,45,.25),0 8px 24px rgba(255,45,45,.12)}
+  .lap.active::before{content:"";position:absolute;left:0;top:8px;bottom:8px;width:3px;
+    background:var(--red);border-radius:3px;box-shadow:0 0 10px var(--red)}
+  .lapno{font-family:var(--mono);font-weight:800;font-size:18px;text-align:center;color:#fff}
+  .lap .t1{font-weight:700;font-size:13px;line-height:1.15}
+  .lap .t2{font-family:var(--mono);font-size:10px;color:var(--mut);letter-spacing:.05em}
+  .laptime{font-family:var(--mono);font-size:12px;color:var(--green);text-align:right}
+  .laptime.purple{color:#c77dff;text-shadow:0 0 10px rgba(199,125,255,.4)}
+  .stint-head{font-family:var(--mono);font-size:9px;letter-spacing:.22em;color:var(--mut);
+    padding:6px 10px 2px;text-transform:uppercase}
+
+  /* center main */
+  .mainwrap{grid-row:2/3;display:flex;flex-direction:column}
+  .stage{flex:1;position:relative;overflow:hidden}
+  .wipe{position:absolute;inset:0;background:linear-gradient(100deg,transparent,var(--red),transparent);
+    transform:translateX(-130%);pointer-events:none;z-index:5;opacity:0}
+  .wipe.go{animation:wipe .55s cubic-bezier(.5,0,.2,1)}
+  @keyframes wipe{0%{transform:translateX(-130%);opacity:.9}100%{transform:translateX(130%);opacity:0}}
+  .detail{position:absolute;inset:0;padding:18px 22px;overflow-y:auto;
+    display:flex;flex-direction:column;gap:14px}
+  .detail::-webkit-scrollbar{width:6px}.detail::-webkit-scrollbar-thumb{background:#2a2a30;border-radius:4px}
+  .detail.in{animation:din .5s ease}
+  @keyframes din{from{opacity:0;transform:translateX(22px)}to{opacity:1;transform:none}}
+  .d-tier{font-family:var(--mono);font-size:10px;letter-spacing:.22em;color:var(--red);text-transform:uppercase}
+  .d-title{font-size:24px;font-weight:800;line-height:1.05;letter-spacing:-.01em}
+  .d-sub{font-family:var(--mono);font-size:12px;color:var(--cyan);letter-spacing:.06em}
+  .d-meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:2px}
+  .chip{font-family:var(--mono);font-size:10px;letter-spacing:.08em;padding:4px 9px;border-radius:6px;
+    border:1px solid var(--line2);color:var(--mut);background:rgba(255,255,255,.02)}
+  .d-body{font-size:14px;line-height:1.65;color:#cdd1d7;max-width:62ch}
+  .d-body b{color:#fff}
+  .keymetric{display:inline-flex;align-items:baseline;gap:6px;margin-top:4px;
+    font-family:var(--mono);background:rgba(39,224,106,.08);border:1px solid rgba(39,224,106,.3);
+    padding:7px 12px;border-radius:8px}
+  .keymetric .v{font-size:20px;font-weight:800;color:var(--green)}
+  .keymetric .l{font-size:10px;color:var(--mut);letter-spacing:.1em;text-transform:uppercase}
+  .tyreband{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+  .tyre-c{display:flex;align-items:center;gap:7px;padding:6px 11px;border-radius:30px;
+    font-family:var(--mono);font-size:11px;border:1px solid var(--line2)}
+  .tyre-dot{width:14px;height:14px;border-radius:50%;border:2px solid currentColor}
+  .soft{color:var(--red)}.medium{color:var(--yellow)}.hard{color:#dfe3e8}.inter{color:var(--green)}
+
+  /* gauges row */
+  .gauges{grid-column:2/4;grid-row:3/4;display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  .gauge{padding:10px 12px 12px;display:flex;flex-direction:column;gap:8px}
+  .gauge .glab{font-family:var(--mono);font-size:9px;letter-spacing:.2em;color:var(--mut);text-transform:uppercase}
+  .gauge canvas{width:100%;height:96px;display:block}
+  .gval{font-family:var(--mono);font-weight:800;font-size:22px;letter-spacing:.02em}
+  .gval small{font-size:11px;color:var(--mut);font-weight:500;margin-left:3px}
+
+  /* right column: records + tyres */
+  .rightcol{grid-row:2/4;display:flex;flex-direction:column;gap:12px;overflow-y:auto}
+  .rightcol::-webkit-scrollbar{width:6px}.rightcol::-webkit-scrollbar-thumb{background:#2a2a30;border-radius:4px}
+  .records{padding:8px 10px 12px;display:flex;flex-direction:column;gap:7px}
+  .rec{display:flex;align-items:center;justify-content:space-between;gap:10px;
+    padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:rgba(255,255,255,.012)}
+  .rec .rv{font-family:var(--mono);font-weight:800;font-size:19px;color:#fff}
+  .rec .rl{font-size:11px;color:var(--mut);text-align:right;line-height:1.25;max-width:150px}
+  .rec.best .rv{color:var(--red);text-shadow:0 0 14px rgba(255,45,45,.4)}
+
+  .tyres{padding:10px 12px 14px}
+  .tyregrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .twheel{border:1px solid var(--line);border-radius:9px;padding:9px;display:flex;
+    flex-direction:column;align-items:center;gap:6px;position:relative;background:rgba(0,0,0,.25)}
+  .twheel .pos{position:absolute;top:6px;left:8px;font-family:var(--mono);font-size:9px;color:var(--mut);letter-spacing:.1em}
+  .twheel canvas{width:54px;height:54px}
+  .ttemp{font-family:var(--mono);font-weight:700;font-size:15px}
+  .twear{width:100%;height:5px;border-radius:3px;background:#1c1c22;overflow:hidden}
+  .twear i{display:block;height:100%;background:linear-gradient(90deg,var(--green),var(--yellow),var(--red))}
+
+  .ticker{grid-column:1/-1;grid-row:4/5;display:none}
+
+  /* sector strip in main header */
+  .sectors{display:flex;gap:6px;margin-top:8px}
+  .sec{flex:1;height:6px;border-radius:3px;background:#1b1b20;overflow:hidden;position:relative}
+  .sec i{position:absolute;inset:0;width:0;transition:width .1s linear}
+  .sec.s1 i{background:var(--green)}.sec.s2 i{background:var(--yellow)}.sec.s3 i{background:var(--cyan)}
+  .lapcount{font-family:var(--mono);font-size:11px;color:var(--mut);letter-spacing:.1em;margin-left:auto}
+
+  /* education / pubs / skills footer mini-panels inside detail when overview */
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .mini{border:1px solid var(--line);border-radius:9px;padding:11px 13px;background:rgba(255,255,255,.012)}
+  .mini h4{font-family:var(--mono);font-size:10px;letter-spacing:.18em;color:var(--red);text-transform:uppercase;margin-bottom:7px}
+  .mini p{font-size:12.5px;line-height:1.5;color:#c7cbd1}
+  .mini p span{color:var(--mut)}
+  .skillgrid{display:flex;flex-wrap:wrap;gap:6px}
+  .contact a{color:var(--cyan);text-decoration:none}.contact a:hover{text-decoration:underline}
+
+  @media (max-width:1100px){
+    body{overflow-y:auto;overflow-x:hidden}
+    #hud{height:auto;grid-template-columns:1fr;grid-template-rows:none;padding:54px 12px 24px}
+    .laplist,.mainwrap,.gauges,.rightcol{grid-row:auto !important;grid-column:auto !important}
+    .gauges{grid-template-columns:repeat(2,1fr)}
+    .stage{min-height:420px}
+    .laps{max-height:340px}
+    .topstrip{flex-wrap:wrap}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{animation-duration:.001s !important;transition-duration:.001s !important}
+    .ph .dot{animation:none}
+  }
+</style>
+</head>
+<body>
+<div class="carbon"></div>
+
+<div class="nav"><a href="../index.html">&larr; demos</a></div>
+<div class="tag">concept demo</div>
+
+<!-- ===================== START LIGHTS INTRO ===================== -->
+<div id="intro">
+  <div class="driver-line" id="driverLine">CAR 18 &nbsp;·&nbsp; S. NAG &nbsp;·&nbsp; FORMATION LAP COMPLETE</div>
+  <div class="gantry" id="gantry" aria-hidden="true">
+    <div class="lamp-col"><div class="lamp"></div><div class="lamp"></div></div>
+    <div class="lamp-col"><div class="lamp"></div><div class="lamp"></div></div>
+    <div class="lamp-col"><div class="lamp"></div><div class="lamp"></div></div>
+    <div class="lamp-col"><div class="lamp"></div><div class="lamp"></div></div>
+    <div class="lamp-col"><div class="lamp"></div><div class="lamp"></div></div>
+  </div>
+  <div class="intro-status" id="introStatus">SYSTEMS GO &nbsp;·&nbsp; AWAITING START</div>
+  <div class="lights-out" id="lightsOut">LIGHTS OUT — AND AWAY WE GO</div>
+  <button class="skip" id="skipBtn">SKIP INTRO ▸</button>
+</div>
+
+<!-- ===================== HUD ===================== -->
+<main id="hud">
+  <!-- top strip -->
+  <section class="panel topstrip">
+    <span class="c-tl corner"></span><span class="c-tr corner"></span>
+    <div class="ses">PIT&nbsp;WALL</div>
+    <div>
+      <div class="name">SAPTARSHI NAG</div>
+      <div class="role">AI / ML ENGINEER · RACE ENGINEER</div>
+    </div>
+    <span class="pill live">● LIVE SESSION</span>
+    <div class="spacer"></div>
+    <span class="pill drs off" id="drsPill">DRS</span>
+    <span class="pill" id="ersPill">ERS 100%</span>
+    <span class="clock" id="clock">--:--:--</span>
+  </section>
+
+  <!-- left lap list -->
+  <section class="panel laplist">
+    <div class="ph"><span>TIMING BOARD · CAREER</span><span class="dot"></span></div>
+    <div class="laps" id="laps"></div>
+  </section>
+
+  <!-- center main -->
+  <section class="panel mainwrap">
+    <div class="ph">
+      <span id="stageLabel">RACE CONTROL · OVERVIEW</span>
+      <span class="lapcount" id="lapCounter">LAP 0 / 6</span>
+    </div>
+    <div class="sectors">
+      <div class="sec s1"><i id="secA"></i></div>
+      <div class="sec s2"><i id="secB"></i></div>
+      <div class="sec s3"><i id="secC"></i></div>
+    </div>
+    <div class="stage">
+      <div class="wipe" id="wipe"></div>
+      <div class="detail in" id="detail"></div>
+    </div>
+  </section>
+
+  <!-- right column -->
+  <aside class="rightcol">
+    <section class="panel records">
+      <div class="ph" style="border:0;padding-bottom:4px"><span>FASTEST LAPS · RECORDS</span></div>
+      <div class="rec best"><span class="rv">96.97%</span><span class="rl">IoT attack-detection accuracy</span></div>
+      <div class="rec"><span class="rv">99.8%</span><span class="rl">Pulsar-detection F1 score</span></div>
+      <div class="rec"><span class="rv">4.1&times;</span><span class="rl">GPU training speedup (CUDA)</span></div>
+      <div class="rec"><span class="rv">50%</span><span class="rl">Signal-pipeline latency cut</span></div>
+      <div class="rec"><span class="rv">70M+</span><span class="rl">Samples processed</span></div>
+    </section>
+
+    <section class="panel tyres">
+      <div class="ph" style="border:0;padding:0 0 8px"><span>TYRE TEMPS · CORE °C</span></div>
+      <div class="tyregrid" id="tyreGrid"></div>
+    </section>
+  </aside>
+
+  <!-- gauges -->
+  <section class="panel gauges" style="display:contents">
+    <div class="panel gauge">
+      <span class="c-bl corner"></span>
+      <div class="glab">SPEED · KM/H</div>
+      <canvas data-g="speed"></canvas>
+      <div class="gval" id="vSpeed">0<small>km/h</small></div>
+    </div>
+    <div class="panel gauge">
+      <div class="glab">ENGINE · RPM</div>
+      <canvas data-g="rpm"></canvas>
+      <div class="gval" id="vRpm">0<small>rpm</small></div>
+    </div>
+    <div class="panel gauge">
+      <div class="glab">ERS DEPLOY · kJ</div>
+      <canvas data-g="ers"></canvas>
+      <div class="gval" id="vErs">0<small>kJ</small></div>
+    </div>
+    <div class="panel gauge">
+      <span class="c-br corner"></span>
+      <div class="glab">THROTTLE / BRAKE</div>
+      <canvas data-g="thr"></canvas>
+      <div class="gval" id="vThr">0<small>%</small></div>
+    </div>
+  </section>
+</main>
+
+<div class="scanlines"></div>
+<div class="vignette"></div>
+
+<script>
+(function(){
+  "use strict";
+  var REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+  var $ = function(s,r){return (r||document).querySelector(s);};
+  var $$ = function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s));};
+
+  /* ---------------- DATA ---------------- */
+  var ITEMS = [
+    {kind:'lap', no:1, time:'1:24.918', tier:'CAREER LAP · STINT 1',
+     title:'GMRT — Giant Metrewave Radio Telescope',
+     sub:'Winter Intern · HPC & Signal Processing · Pune',
+     dates:'Dec 2023 — Jan 2024', compound:'soft', cName:'SOFT',
+     meta:['HPC','SIGNAL PROCESSING','OPTIMISATION'],
+     metric:['50%','PIPELINE LATENCY CUT'],
+     body:'Optimised radio-astronomy signal-processing pipelines on HPC infrastructure at one of the world’s largest radio telescope arrays. <b>Cut end-to-end pipeline latency by 50%</b> through profiling, vectorisation and parallel restructuring of the data path — the first stint that set the tyre temperature for everything that followed.'},
+
+    {kind:'lap', no:2, time:'1:23.402', purple:true, tier:'CAREER LAP · STINT 2',
+     title:'NCRA-TIFR — Weak Pulsar Detection',
+     sub:'Research Intern · ML for Astrophysics · Pune',
+     dates:'Aug 2024 — Apr 2025', compound:'medium', cName:'MEDIUM',
+     meta:['ML RESEARCH','PULSAR DETECTION','PYTORCH'],
+     metric:['99.8%','DETECTION F1 SCORE'],
+     body:'Built deep-learning models to surface <b>weak pulsar signals</b> buried in noisy radio data at the National Centre for Radio Astrophysics (TIFR). Reached a <b>99.8% F1 score</b> on detection — the purple-sector lap of the research stint, pushing recall on faint candidates other pipelines missed.'},
+
+    {kind:'lap', no:3, time:'1:23.961', tier:'CAREER LAP · STINT 3 · CURRENT',
+     title:'C-DAC — AI Research & IoT Security',
+     sub:'Project Engineer · Zero Trust + ML · Chennai',
+     dates:'Jul 2025 — Present', compound:'hard', cName:'HARD',
+     meta:['IoT SECURITY','ZERO TRUST','REAL-TIME ML'],
+     metric:['96.97%','IoT ATTACK DETECTION'],
+     body:'Current race seat: real-time IoT security at the Centre for Development of Advanced Computing. Designing <b>Zero Trust architectures with ML threat detection</b>, reaching <b>96.97% attack-detection accuracy</b> on live network telemetry — a long hard-compound stint, managing degradation while holding pace over distance.'},
+
+    {kind:'stint', no:'P1', time:'1:22.117', purple:true, tier:'PROJECT · QUALI STINT',
+     title:'F1 Tyre Degradation & Race Strategy',
+     sub:'Physics-Informed GPU Strategy Model',
+     dates:'PyTorch · CUDA · CuPy · XGBoost', compound:'soft', cName:'SOFT (QUALI)',
+     meta:['PINN','CUDA','CuPy','XGBoost'],
+     metric:['4.1×','GPU TRAINING SPEEDUP'],
+     body:'A GPU-accelerated tyre-degradation and race-strategy engine using a <b>physics-informed loss (PINN)</b> to constrain wear curves to real tyre thermodynamics. CUDA/CuPy kernels deliver a <b>4.1× training speedup</b>; XGBoost layers pit-strategy decisions on top. The flagship lap — and the reason this whole pit wall exists.'},
+
+    {kind:'stint', no:'P2', time:'1:23.044', tier:'PROJECT · ENDURANCE STINT',
+     title:'Omniscience Pro',
+     sub:'Local Retrieval-Augmented Generation',
+     dates:'LangChain · ChromaDB · Docker', compound:'medium', cName:'MEDIUM',
+     meta:['RAG','LangChain','ChromaDB','Docker'],
+     metric:['<50ms','VECTOR SEARCH LATENCY'],
+     body:'A fully <b>local RAG stack</b> — private, offline, containerised. LangChain orchestration over a ChromaDB vector store returns <b>sub-50ms semantic search</b>, Docker-packaged for reproducible deployment. A consistent endurance stint: no cloud, no leaks, steady lap times.'},
+
+    {kind:'stint', no:'P3', time:'1:23.510', tier:'PROJECT · MULTI-AGENT STINT',
+     title:'ARO — Multi-Agent LLM',
+     sub:'Agentic Reasoning Orchestrator',
+     dates:'Flask · NetworkX · React', compound:'inter', cName:'INTERMEDIATE',
+     meta:['MULTI-AGENT','Flask','NetworkX','React'],
+     metric:['N-AGENT','GRAPH ORCHESTRATION'],
+     body:'A <b>multi-agent LLM system</b> that routes reasoning across cooperating agents over a NetworkX dependency graph, served by Flask with a React control surface. Changeable conditions, mixed strategy — the intermediate-tyre stint where adaptability wins the lap.'},
+
+    {kind:'stint', no:'P4', time:'1:24.220', tier:'PROJECT · EFFICIENCY STINT',
+     title:'Llama 3.2 Optimisation',
+     sub:'4-bit Quantised Fine-Tuning',
+     dates:'Unsloth · 4-bit Quant', compound:'hard', cName:'HARD',
+     meta:['Unsloth','4-bit QUANT','FINE-TUNE'],
+     metric:['4-BIT','MEMORY-EFFICIENT TUNING'],
+     body:'Fine-tuned <b>Llama 3.2</b> with Unsloth and <b>4-bit quantisation</b> to fit serious training into modest VRAM — the fuel-saving hard stint, squeezing maximum performance from minimum resources.'}
+  ];
+
+  /* ---------------- OVERVIEW (Lap 0 / Race Control) ---------------- */
+  function overviewHTML(){
+    return ''+
+    '<div class="d-tier">RACE CONTROL · DRIVER BRIEFING</div>'+
+    '<div class="d-title">Saptarshi Nag — AI / ML Engineer</div>'+
+    '<div class="d-sub">M.Tech AI (DIAT, DRDO) · Race Engineer of GPU-accelerated systems</div>'+
+    '<div class="d-body">M.Tech in Artificial Intelligence from <b>DIAT (DRDO)</b>; research at <b>NCRA-TIFR</b> and the <b>GMRT</b>; now <b>Project Engineer at C-DAC</b> building real-time IoT security — Zero Trust architecture with ML threat detection. Builder of a GPU-accelerated <b>F1 tyre-degradation &amp; race-strategy model</b>. <br><br>Select a <b>LAP</b> (career milestone) or a <b>STINT</b> (project) on the timing board to open its telemetry.</div>'+
+    '<div class="tyreband">'+
+      '<span class="tyre-c soft"><span class="tyre-dot"></span>SOFT · GMRT</span>'+
+      '<span class="tyre-c medium"><span class="tyre-dot"></span>MEDIUM · NCRA-TIFR</span>'+
+      '<span class="tyre-c hard"><span class="tyre-dot"></span>HARD · C-DAC</span>'+
+    '</div>'+
+    '<div class="grid2" style="margin-top:6px">'+
+      '<div class="mini"><h4>EDUCATION</h4><p><b>M.Tech AI</b> — DIAT (DRDO) <span>2023–2025 · CGPA 8.64</span><br><b>B.Tech CSE</b> — Academy of Technology <span>2019–2023 · CGPA 9.44</span><br><b>GATE 2024</b> — Rank 1790 <span>(top 5%)</span></p></div>'+
+      '<div class="mini"><h4>PUBLICATIONS · IoTaIS 2025, BALI</h4><p>Protocol-Aware Continuous Monitoring &amp; Anomaly Detection in IoT Networks<br><span>—</span><br>A Comprehensive Survey on Zero Trust Architecture in IoT Networks</p></div>'+
+      '<div class="mini"><h4>SKILLS · PARC FERMÉ</h4><div class="skillgrid">'+
+        ['Python','C++','CUDA','CuPy','PyTorch','XGBoost','scikit-learn','PINNs','RAG','LLM fine-tuning','Docker','Flask','Linux'].map(function(s){return '<span class="chip">'+s+'</span>';}).join('')+
+      '</div></div>'+
+      '<div class="mini contact"><h4>RADIO · CONTACT</h4><p>'+
+        '<a href="mailto:saptarshinag18@gmail.com">saptarshinag18@gmail.com</a><br>'+
+        '<a href="https://linkedin.com/in/saptarshi18" target="_blank" rel="noopener">linkedin.com/in/saptarshi18</a><br>'+
+        '<a href="https://github.com/Saptarshi-Nag189" target="_blank" rel="noopener">github.com/Saptarshi-Nag189</a><br>'+
+        '<a href="../../saptarshi_resume_linkedin_2026.pdf" target="_blank" rel="noopener">▸ Download CV / Race Notes</a>'+
+      '</p></div>'+
+    '</div>';
+  }
+
+  function detailHTML(it){
+    return ''+
+    '<div class="d-tier">'+it.tier+'</div>'+
+    '<div class="d-title">'+it.title+'</div>'+
+    '<div class="d-sub">'+it.sub+'</div>'+
+    '<div class="d-meta">'+
+      '<span class="chip">⏱ '+it.dates+'</span>'+
+      '<span class="chip">FASTEST LAP '+it.time+(it.purple?' · PURPLE':'')+'</span>'+
+      it.meta.map(function(m){return '<span class="chip">'+m+'</span>';}).join('')+
+    '</div>'+
+    '<div class="tyreband"><span class="tyre-c '+it.compound+'"><span class="tyre-dot"></span>'+it.cName+'</span></div>'+
+    '<div class="d-body">'+it.body+'</div>'+
+    '<div class="keymetric"><span class="v">'+it.metric[0]+'</span><span class="l">'+it.metric[1]+'</span></div>';
+  }
+
+  /* ---------------- BUILD LAP LIST ---------------- */
+  var lapsEl = $('#laps');
+  var html = '<div class="stint-head">RACE · CAREER LAPS</div>';
+  var current = -1; // -1 = overview
+  ITEMS.forEach(function(it,i){
+    if(it.kind==='stint' && (i===0 || ITEMS[i-1].kind==='lap')){
+      html += '<div class="stint-head">PIT STRATEGY · PROJECT STINTS</div>';
+    }
+    html += '<div class="lap" data-i="'+i+'">'+
+      '<div class="lapno">'+it.no+'</div>'+
+      '<div><div class="t1">'+(it.title.split('—')[0].split(' — ')[0].trim())+'</div>'+
+      '<div class="t2">'+it.sub.split('·')[0].trim()+'</div></div>'+
+      '<div class="laptime'+(it.purple?' purple':'')+'">'+it.time+'</div>'+
+    '</div>';
+  });
+  lapsEl.innerHTML = html;
+
+  var detailEl = $('#detail');
+  var wipeEl = $('#wipe');
+  var stageLabel = $('#stageLabel');
+  var lapCounter = $('#lapCounter');
+
+  function show(i){
+    current = i;
+    $$('.lap').forEach(function(el){el.classList.toggle('active', +el.dataset.i===i);});
+    // wipe transition
+    if(!REDUCED){
+      wipeEl.classList.remove('go'); void wipeEl.offsetWidth; wipeEl.classList.add('go');
+    }
+    var render = function(){
+      if(i<0){ detailEl.innerHTML = overviewHTML(); stageLabel.textContent='RACE CONTROL · OVERVIEW'; lapCounter.textContent='LAP 0 / '+ITEMS.length; }
+      else{ var it=ITEMS[i]; detailEl.innerHTML = detailHTML(it);
+        stageLabel.textContent = (it.kind==='lap'?'CAREER LAP':'PROJECT STINT')+' · '+it.no;
+        lapCounter.textContent = (it.kind==='lap'?('LAP '+it.no+' / '+ITEMS.length):('STINT '+it.no));
+      }
+      detailEl.classList.remove('in'); void detailEl.offsetWidth; detailEl.classList.add('in');
+    };
+    if(REDUCED){ render(); }
+    else{ setTimeout(render, 150); }
+  }
+
+  lapsEl.addEventListener('click', function(e){
+    var lap = e.target.closest('.lap'); if(!lap) return; show(+lap.dataset.i);
+  });
+
+  /* ---------------- GAUGES (canvas) ---------------- */
+  var DPR = Math.min(window.devicePixelRatio||1, 2);
+  var canvases = $$('canvas[data-g]').map(function(c){
+    var ctx=c.getContext('2d');
+    function size(){ var r=c.getBoundingClientRect(); c.width=Math.max(2,r.width*DPR); c.height=Math.max(2,r.height*DPR); }
+    size();
+    return {el:c, ctx:ctx, key:c.getAttribute('data-g'), size:size};
+  });
+
+  function drawArc(g, frac, color, label){
+    var ctx=g.ctx, w=g.el.width, h=g.el.height;
+    ctx.clearRect(0,0,w,h);
+    var cx=w/2, cy=h*0.92, R=Math.min(w/2, h)*0.92;
+    var a0=Math.PI*0.95, a1=Math.PI*2.05;
+    // track
+    ctx.lineWidth=Math.max(5,R*0.13); ctx.lineCap='round';
+    ctx.strokeStyle='rgba(255,255,255,.08)';
+    ctx.beginPath(); ctx.arc(cx,cy,R,a0,a1); ctx.stroke();
+    // ticks
+    for(var t=0;t<=10;t++){
+      var ta=a0+(a1-a0)*(t/10);
+      var r1=R*1.06, r2=R*1.16;
+      ctx.beginPath();
+      ctx.moveTo(cx+Math.cos(ta)*r1, cy+Math.sin(ta)*r1);
+      ctx.lineTo(cx+Math.cos(ta)*r2, cy+Math.sin(ta)*r2);
+      ctx.strokeStyle = (t>=8)?'rgba(255,45,45,.7)':'rgba(255,255,255,.25)';
+      ctx.lineWidth=Math.max(1,R*0.03); ctx.stroke();
+    }
+    // value arc
+    var va=a0+(a1-a0)*frac;
+    var grad=ctx.createLinearGradient(0,0,w,0);
+    grad.addColorStop(0,'#5ad1ff'); grad.addColorStop(.6,color); grad.addColorStop(1,'#ff2d2d');
+    ctx.strokeStyle=grad; ctx.lineWidth=Math.max(5,R*0.13);
+    ctx.beginPath(); ctx.arc(cx,cy,R,a0,va); ctx.stroke();
+    // needle
+    ctx.save();
+    ctx.translate(cx,cy); ctx.rotate(va);
+    ctx.beginPath(); ctx.moveTo(-R*0.12,0); ctx.lineTo(R*0.86,0);
+    ctx.strokeStyle=color; ctx.lineWidth=Math.max(2,R*0.05); ctx.shadowBlur=10; ctx.shadowColor=color; ctx.stroke();
+    ctx.restore();
+    ctx.beginPath(); ctx.arc(cx,cy,R*0.08,0,Math.PI*2); ctx.fillStyle='#1a1a1f'; ctx.fill();
+    ctx.strokeStyle=color; ctx.lineWidth=2; ctx.stroke();
+  }
+
+  function drawBar(g, thr, brk){
+    var ctx=g.ctx, w=g.el.width, h=g.el.height;
+    ctx.clearRect(0,0,w,h);
+    var pad=h*0.14, bw=(w-pad*3)/2;
+    // throttle (green) left, brake (red) right
+    function bar(x,frac,col){
+      ctx.fillStyle='rgba(255,255,255,.07)';
+      ctx.fillRect(x, pad, bw, h-pad*2);
+      ctx.fillStyle=col;
+      var bh=(h-pad*2)*frac;
+      ctx.shadowBlur=12; ctx.shadowColor=col;
+      ctx.fillRect(x, h-pad-bh, bw, bh);
+      ctx.shadowBlur=0;
+    }
+    bar(pad, thr, '#27e06a');
+    bar(pad*2+bw, brk, '#ff2d2d');
+  }
+
+  /* ---------------- TYRES ---------------- */
+  var TYRES = [
+    {pos:'FL', temp:98, wear:.18, comp:'soft'},
+    {pos:'FR', temp:101, wear:.22, comp:'soft'},
+    {pos:'RL', temp:94, wear:.31, comp:'medium'},
+    {pos:'RR', temp:107, wear:.36, comp:'medium'}
+  ];
+  var tyreGrid = $('#tyreGrid');
+  TYRES.forEach(function(t,i){
+    var d=document.createElement('div'); d.className='twheel';
+    d.innerHTML='<div class="pos">'+t.pos+'</div><canvas id="tc'+i+'"></canvas>'+
+      '<div class="ttemp" id="tt'+i+'">'+t.temp+'°</div>'+
+      '<div class="twear"><i id="tw'+i+'" style="width:'+(t.wear*100)+'%"></i></div>';
+    tyreGrid.appendChild(d);
+    var c=$('#tc'+i+''); var r=c.getBoundingClientRect();
+    c.width=54*DPR; c.height=54*DPR;
+  });
+  function tempColor(t){ if(t<92) return '#22d3ee'; if(t<104) return '#27e06a'; if(t<114) return '#ffd02e'; return '#ff2d2d'; }
+  function drawTyre(i,t){
+    var c=$('#tc'+i+''); if(!c) return; var ctx=c.getContext('2d');
+    var w=c.width,h=c.height,cx=w/2,cy=h/2,R=w*0.40;
+    ctx.clearRect(0,0,w,h);
+    var col=tempColor(t.temp);
+    // outer ring
+    ctx.lineWidth=w*0.10; ctx.strokeStyle='rgba(255,255,255,.12)';
+    ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2); ctx.stroke();
+    // temp arc
+    var frac=Math.max(0,Math.min(1,(t.temp-70)/60));
+    ctx.strokeStyle=col; ctx.lineCap='round'; ctx.shadowBlur=8; ctx.shadowColor=col;
+    ctx.beginPath(); ctx.arc(cx,cy,R,-Math.PI/2,-Math.PI/2+Math.PI*2*frac); ctx.stroke();
+    ctx.shadowBlur=0;
+    // hub
+    ctx.beginPath(); ctx.arc(cx,cy,R*0.42,0,Math.PI*2); ctx.fillStyle='#15151a'; ctx.fill();
+    ctx.strokeStyle=col; ctx.lineWidth=w*0.05; ctx.stroke();
+  }
+
+  /* ---------------- ANIMATION LOOP ---------------- */
+  var state = {speed:0, rpm:0, ers:0, thr:0, brk:0, t:0, sec:[0,0,0], paused:false};
+  var vSpeed=$('#vSpeed'),vRpm=$('#vRpm'),vErs=$('#vErs'),vThr=$('#vThr');
+  var drsPill=$('#drsPill'),ersPill=$('#ersPill'),clockEl=$('#clock');
+  var secA=$('#secA'),secB=$('#secB'),secC=$('#secC');
+  var last=0, telemAcc=0, secPhase=0;
+
+  function setStatics(){
+    // reduced-motion: freeze to representative values
+    state.speed=287; state.rpm=11800; state.ers=2.1; state.thr=0.82; state.brk=0;
+    drawArc(canvases[0],287/340,'#ff2d2d'); drawArc(canvases[1],11800/15000,'#ffd02e');
+    drawArc(canvases[2],2.1/4,'#22d3ee'); drawBar(canvases[3],0.82,0);
+    vSpeed.innerHTML='287<small>km/h</small>'; vRpm.innerHTML='11,800<small>rpm</small>';
+    vErs.innerHTML='2.1<small>MJ</small>'; vThr.innerHTML='82<small>%</small>';
+    drsPill.classList.remove('off'); drsPill.classList.add('drs'); drsPill.textContent='DRS ●';
+    secA.style.width='100%'; secB.style.width='72%'; secC.style.width='40%';
+    TYRES.forEach(function(t,i){ drawTyre(i,t); });
+    clockEl.textContent='14:09:18';
+  }
+
+  function frame(ts){
+    if(state.paused){ return; }
+    if(!last) last=ts; var dt=Math.min(0.05,(ts-last)/1000); last=ts; state.t+=dt;
+
+    // synthesise a lap: speed oscillates with corners
+    var lapPhase=(state.t*0.16)%1;
+    var corner=0.5+0.5*Math.sin(lapPhase*Math.PI*2*3 - 1.2); // 3 "corners"
+    var straight=Math.pow(0.5+0.5*Math.sin(lapPhase*Math.PI*2),3);
+    var tgtSpeed=80+ (320-80)*(0.35+0.65*straight);
+    state.speed += (tgtSpeed-state.speed)*Math.min(1,dt*3);
+    var gear=(state.speed/320);
+    state.rpm += ( (6000+9000*( (state.speed%55)/55 )) - state.rpm)*Math.min(1,dt*4);
+    var braking = corner<0.28;
+    state.thr += ((braking?0.05:0.6+0.4*straight) - state.thr)*Math.min(1,dt*5);
+    state.brk += ((braking?0.85:0.0) - state.brk)*Math.min(1,dt*6);
+    var deployDRS = straight>0.7;
+    state.ers += ((deployDRS?3.4:1.2)-state.ers)*Math.min(1,dt*2);
+
+    // sector bars sweep
+    secPhase += dt*0.42; var sp=secPhase%3;
+    state.sec[0]= sp<1? sp : 1;
+    state.sec[1]= sp<1?0:(sp<2? sp-1:1);
+    state.sec[2]= sp<2?0:(sp-2);
+    secA.style.width=(state.sec[0]*100)+'%';
+    secB.style.width=(state.sec[1]*100)+'%';
+    secC.style.width=(state.sec[2]*100)+'%';
+
+    drawArc(canvases[0], Math.min(1,state.speed/340), '#ff2d2d');
+    drawArc(canvases[1], Math.min(1,state.rpm/15000), '#ffd02e');
+    drawArc(canvases[2], Math.min(1,state.ers/4), '#22d3ee');
+    drawBar(canvases[3], state.thr, state.brk);
+
+    vSpeed.innerHTML=Math.round(state.speed)+'<small>km/h</small>';
+    vRpm.innerHTML=Math.round(state.rpm).toLocaleString()+'<small>rpm</small>';
+    vErs.innerHTML=state.ers.toFixed(1)+'<small>MJ</small>';
+    vThr.innerHTML=Math.round((state.thr-state.brk)*100)+'<small>%</small>';
+
+    if(deployDRS){ drsPill.classList.remove('off'); drsPill.classList.add('drs'); drsPill.textContent='DRS ●'; }
+    else{ drsPill.classList.add('off'); drsPill.classList.remove('drs'); drsPill.textContent='DRS'; }
+    ersPill.textContent='ERS '+Math.round(70+30*(state.ers/4))+'%';
+
+    // tyres wander
+    telemAcc+=dt;
+    if(telemAcc>0.12){
+      telemAcc=0;
+      TYRES.forEach(function(t,i){
+        t.temp += (Math.random()-0.5)*2.2 + (braking? (i<2?1.2:-0.4):0);
+        t.temp = Math.max(82, Math.min(122, t.temp));
+        t.wear = Math.min(0.92, t.wear + 0.00018);
+        drawTyre(i,t);
+        var tt=$('#tt'+i+''); if(tt){ tt.textContent=Math.round(t.temp)+'°'; tt.style.color=tempColor(t.temp); }
+        var tw=$('#tw'+i+''); if(tw){ tw.style.width=(t.wear*100)+'%'; }
+      });
+    }
+
+    // clock
+    var d=new Date(); clockEl.textContent=d.toLocaleTimeString('en-GB');
+
+    requestAnimationFrame(frame);
+  }
+
+  /* ---------------- PAUSE ON HIDDEN ---------------- */
+  document.addEventListener('visibilitychange', function(){
+    if(document.hidden){ state.paused=true; }
+    else if(!REDUCED && started){ state.paused=false; last=0; requestAnimationFrame(frame); }
+  });
+
+  /* ---------------- RESIZE ---------------- */
+  var rzT;
+  window.addEventListener('resize', function(){
+    clearTimeout(rzT);
+    rzT=setTimeout(function(){
+      canvases.forEach(function(g){ g.size(); });
+      if(REDUCED) setStatics();
+    },150);
+  });
+
+  /* ---------------- START SEQUENCE ---------------- */
+  var intro=$('#intro'), hud=$('#hud'), gantry=$('#gantry');
+  var lamps=$$('.lamp',gantry);
+  var introStatus=$('#introStatus'), lightsOut=$('#lightsOut'), driverLine=$('#driverLine');
+  var started=false, introTimers=[];
+
+  function startHUD(){
+    if(started) return; started=true;
+    intro.classList.add('gone');
+    hud.classList.add('live');
+    show(-1); // overview
+    if(REDUCED){ setStatics(); }
+    else{ last=0; requestAnimationFrame(frame); }
+    setTimeout(function(){ intro.style.display='none'; }, 800);
+  }
+
+  function clearIntro(){ introTimers.forEach(clearTimeout); introTimers=[]; }
+
+  function runLights(){
+    // illuminate 5 columns (top+bottom) one by one
+    var cols=$$('.lamp-col',gantry);
+    var step=620;
+    cols.forEach(function(col,ci){
+      introTimers.push(setTimeout(function(){
+        $$('.lamp',col).forEach(function(l){ l.classList.add('on'); });
+        introStatus.textContent='LIGHTS · '+(ci+1)+' / 5';
+      }, 700 + ci*step));
+    });
+    // hold, then OUT
+    var holdAt=700+5*step+ (600+Math.random()*900);
+    introTimers.push(setTimeout(function(){
+      introStatus.textContent='HOLD…';
+    }, 700+5*step+200));
+    introTimers.push(setTimeout(function(){
+      lamps.forEach(function(l){ l.classList.remove('on'); });
+      introStatus.textContent='';
+      lightsOut.classList.add('show');
+      driverLine.textContent='RACE START';
+    }, holdAt));
+    introTimers.push(setTimeout(startHUD, holdAt+1600));
+  }
+
+  $('#skipBtn').addEventListener('click', function(){ clearIntro(); startHUD(); });
+  document.addEventListener('keydown', function(e){
+    if((e.key==='Enter'||e.key===' ') && !started){ e.preventDefault(); clearIntro(); startHUD(); }
+    if(e.key==='Escape' && !started){ clearIntro(); startHUD(); }
+  });
+
+  // boot
+  if(REDUCED){
+    // skip lights, show HUD directly
+    intro.style.display='none';
+    hud.classList.add('live'); started=true; show(-1); setStatics();
+  } else {
+    runLights();
+  }
+
+})();
+</script>
+</body>
+</html>

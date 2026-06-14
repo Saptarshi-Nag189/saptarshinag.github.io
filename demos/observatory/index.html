@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>OBSERVATORY // Saptarshi Nag — Mission Control HUD</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#03060e;
+    --bg2:#060c1a;
+    --panel:rgba(8,16,30,0.72);
+    --panel-solid:#070d1c;
+    --cyan:#36e0ff;
+    --cyan-dim:#1a7fa0;
+    --blue:#6aa7ff;
+    --line:rgba(54,224,255,0.22);
+    --line-soft:rgba(54,224,255,0.10);
+    --txt:#dfeefc;
+    --txt-dim:#7d93ad;
+    --amber:#ffc15a;
+    --green:#5dffb0;
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+    --sans:'Inter',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:var(--bg);
+    color:var(--txt);
+    font-family:var(--sans);
+    overflow:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  /* faint global grid + vignette */
+  #cosmos-bg{
+    position:fixed;inset:0;z-index:0;
+    background:
+      radial-gradient(ellipse 120% 90% at 50% 0%, #0a1730 0%, transparent 60%),
+      radial-gradient(ellipse 100% 100% at 50% 120%, #07101f 0%, transparent 55%),
+      var(--bg);
+  }
+  #grid-overlay{
+    position:fixed;inset:0;z-index:1;pointer-events:none;
+    background-image:
+      linear-gradient(var(--line-soft) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line-soft) 1px, transparent 1px);
+    background-size:48px 48px;
+    mask-image:radial-gradient(ellipse 80% 80% at 50% 45%, #000 30%, transparent 95%);
+    -webkit-mask-image:radial-gradient(ellipse 80% 80% at 50% 45%, #000 30%, transparent 95%);
+    opacity:.5;
+  }
+  #vignette{
+    position:fixed;inset:0;z-index:40;pointer-events:none;
+    box-shadow:inset 0 0 220px 60px rgba(0,0,0,0.85);
+    background:radial-gradient(ellipse 75% 70% at 50% 50%, transparent 55%, rgba(0,0,0,0.55) 100%);
+  }
+  #scanlines{
+    position:fixed;inset:0;z-index:41;pointer-events:none;opacity:.35;
+    background:repeating-linear-gradient(to bottom, rgba(0,0,0,0) 0, rgba(0,0,0,0) 2px, rgba(0,0,0,0.18) 3px, rgba(0,0,0,0) 4px);
+    mix-blend-mode:overlay;
+  }
+
+  /* top nav link + tag */
+  .topbar{position:fixed;top:14px;left:18px;z-index:60;display:flex;align-items:center;gap:14px}
+  .back-link{
+    font-family:var(--mono);font-size:12px;letter-spacing:.08em;
+    color:var(--cyan);text-decoration:none;border:1px solid var(--line);
+    padding:6px 12px;border-radius:3px;background:rgba(3,8,18,.6);
+    transition:.2s;
+  }
+  .back-link:hover{background:rgba(54,224,255,.12);box-shadow:0 0 14px rgba(54,224,255,.3)}
+  .concept-tag{
+    font-family:var(--mono);font-size:9.5px;letter-spacing:.22em;
+    color:var(--txt-dim);text-transform:uppercase;opacity:.7;
+  }
+
+  /* main HUD layout */
+  .hud{
+    position:relative;z-index:10;
+    height:100vh;width:100vw;
+    display:grid;
+    grid-template-columns:248px 1fr 300px;
+    grid-template-rows:64px 1fr 132px;
+    grid-template-areas:
+      "head head head"
+      "stations sky telemetry"
+      "stations ticker telemetry";
+    gap:14px;padding:54px 18px 16px;
+  }
+
+  /* generic panel frame with corner brackets */
+  .panel{
+    position:relative;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:4px;
+    backdrop-filter:blur(2px);
+  }
+  .panel::before,.panel::after{
+    content:"";position:absolute;width:13px;height:13px;pointer-events:none;
+    border-color:var(--cyan);opacity:.85;
+  }
+  .panel::before{top:-1px;left:-1px;border-top:2px solid;border-left:2px solid}
+  .panel::after{bottom:-1px;right:-1px;border-bottom:2px solid;border-right:2px solid}
+  .panel .br-tr,.panel .br-bl{position:absolute;width:13px;height:13px;pointer-events:none;border-color:var(--cyan);opacity:.85}
+  .panel .br-tr{top:-1px;right:-1px;border-top:2px solid;border-right:2px solid}
+  .panel .br-bl{bottom:-1px;left:-1px;border-bottom:2px solid;border-left:2px solid}
+
+  .panel-label{
+    position:absolute;top:8px;left:12px;z-index:5;
+    font-family:var(--mono);font-size:10px;letter-spacing:.2em;
+    color:var(--cyan);text-transform:uppercase;
+    display:flex;align-items:center;gap:7px;
+  }
+  .panel-label .dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green)}
+
+  /* header */
+  .head{
+    grid-area:head;display:flex;align-items:center;justify-content:space-between;
+    padding:0 20px;background:linear-gradient(90deg,rgba(8,16,30,.85),rgba(8,16,30,.5));
+  }
+  .head .ident{display:flex;align-items:baseline;gap:16px}
+  .head .name{font-family:var(--mono);font-size:20px;font-weight:700;letter-spacing:.12em;color:#fff}
+  .head .name b{color:var(--cyan)}
+  .head .role{font-family:var(--mono);font-size:11px;letter-spacing:.24em;color:var(--txt-dim);text-transform:uppercase}
+  .head .sys{display:flex;align-items:center;gap:22px;font-family:var(--mono);font-size:10.5px;color:var(--txt-dim);letter-spacing:.1em}
+  .head .sys b{color:var(--green);font-weight:500}
+  .head .clock{color:var(--cyan)}
+  .status-led{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 10px var(--green);margin-right:6px;animation:blink 2.4s infinite}
+  @keyframes blink{0%,92%,100%{opacity:1}94%{opacity:.25}}
+
+  /* stations nav */
+  .stations{grid-area:stations;padding:34px 12px 12px;display:flex;flex-direction:column;gap:8px}
+  .station-btn{
+    position:relative;text-align:left;cursor:pointer;
+    font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;
+    color:var(--txt-dim);background:transparent;
+    border:1px solid var(--line-soft);border-radius:3px;
+    padding:11px 12px 11px 30px;transition:.18s;text-transform:uppercase;
+    overflow:hidden;
+  }
+  .station-btn .idx{position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:9px;color:var(--cyan-dim)}
+  .station-btn .sub{display:block;font-family:var(--sans);font-size:9.5px;letter-spacing:0;text-transform:none;color:#4f6customed;color:#54688a;margin-top:3px}
+  .station-btn:hover{border-color:var(--line);color:var(--txt);background:rgba(54,224,255,.05)}
+  .station-btn.active{
+    color:#fff;border-color:var(--cyan);
+    background:linear-gradient(90deg,rgba(54,224,255,.16),rgba(54,224,255,.02));
+    box-shadow:0 0 18px rgba(54,224,255,.18) inset;
+  }
+  .station-btn.active::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--cyan);box-shadow:0 0 10px var(--cyan)}
+  .stations .nav-foot{margin-top:auto;font-family:var(--mono);font-size:9px;color:var(--txt-dim);letter-spacing:.1em;line-height:1.7;padding:8px 4px 0;border-top:1px solid var(--line-soft)}
+
+  /* sky map */
+  .sky{grid-area:sky;overflow:hidden;display:flex;flex-direction:column}
+  .sky-canvas-wrap{position:relative;flex:1;min-height:0}
+  #skymap{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:crosshair}
+  .sky-readout{
+    position:absolute;bottom:10px;left:12px;z-index:6;
+    font-family:var(--mono);font-size:10px;color:var(--cyan);letter-spacing:.08em;
+    background:rgba(3,8,18,.55);border:1px solid var(--line-soft);padding:5px 9px;border-radius:3px;
+    pointer-events:none;line-height:1.7;
+  }
+  .sky-hint{
+    position:absolute;top:30px;right:12px;z-index:6;
+    font-family:var(--mono);font-size:9px;color:var(--txt-dim);letter-spacing:.12em;
+    text-transform:uppercase;pointer-events:none;text-align:right;line-height:1.8;
+  }
+
+  /* content drawer overlay (over sky) */
+  .drawer{
+    position:absolute;inset:0;z-index:20;
+    background:linear-gradient(180deg,rgba(4,9,20,.93),rgba(3,6,14,.97));
+    border-left:0;display:flex;flex-direction:column;
+    opacity:0;visibility:hidden;transform:translateY(14px);
+    transition:opacity .42s ease,transform .42s cubic-bezier(.2,.7,.2,1),visibility .42s;
+    overflow:hidden;
+  }
+  .drawer.open{opacity:1;visibility:visible;transform:translateY(0)}
+  .drawer-head{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 20px 12px;border-bottom:1px solid var(--line);flex:0 0 auto;
+  }
+  .drawer-title{font-family:var(--mono);font-size:15px;letter-spacing:.16em;color:#fff;text-transform:uppercase}
+  .drawer-title small{display:block;font-size:9.5px;color:var(--cyan);letter-spacing:.2em;margin-top:4px;font-weight:400}
+  .drawer-close{
+    cursor:pointer;font-family:var(--mono);font-size:11px;color:var(--txt-dim);
+    border:1px solid var(--line-soft);background:transparent;border-radius:3px;padding:5px 11px;transition:.18s;letter-spacing:.1em;
+  }
+  .drawer-close:hover{color:var(--cyan);border-color:var(--cyan)}
+  .drawer-body{padding:20px 24px 24px;overflow-y:auto;flex:1;min-height:0}
+  .drawer-body::-webkit-scrollbar{width:8px}
+  .drawer-body::-webkit-scrollbar-thumb{background:var(--cyan-dim);border-radius:4px}
+  .drawer-body::-webkit-scrollbar-track{background:rgba(255,255,255,.03)}
+
+  /* ticker (signal scope) */
+  .ticker{grid-area:ticker;overflow:hidden;display:flex;flex-direction:column}
+  .scope-wrap{position:relative;flex:1;min-height:0;margin-top:22px}
+  #scope{position:absolute;inset:0;width:100%;height:100%;display:block}
+  .scope-tags{position:absolute;top:6px;right:12px;font-family:var(--mono);font-size:9px;color:var(--txt-dim);letter-spacing:.1em;z-index:5}
+
+  /* telemetry */
+  .telemetry{grid-area:telemetry;padding:34px 14px 14px;overflow-y:auto;display:flex;flex-direction:column;gap:14px}
+  .telemetry::-webkit-scrollbar{width:6px}
+  .telemetry::-webkit-scrollbar-thumb{background:var(--cyan-dim);border-radius:3px}
+  .metric{}
+  .metric-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px}
+  .metric-name{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;color:var(--txt-dim);text-transform:uppercase}
+  .metric-val{font-family:var(--mono);font-size:18px;font-weight:700;color:#fff;letter-spacing:.02em}
+  .metric-val .u{font-size:10px;color:var(--cyan);font-weight:400;margin-left:1px}
+  .bar{height:5px;background:rgba(54,224,255,.10);border-radius:3px;overflow:hidden;position:relative}
+  .bar > i{display:block;height:100%;background:linear-gradient(90deg,var(--cyan-dim),var(--cyan));border-radius:3px;box-shadow:0 0 8px rgba(54,224,255,.5);width:0;transition:width 1.4s cubic-bezier(.2,.7,.2,1)}
+  .gauge-row{display:flex;gap:12px;align-items:center;padding-top:4px}
+  .gauge{position:relative;width:58px;height:58px;flex:0 0 auto}
+  .gauge svg{transform:rotate(-90deg)}
+  .gauge .gtxt{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;font-weight:700;color:var(--cyan)}
+  .gauge-cap{font-family:var(--mono);font-size:9px;color:var(--txt-dim);letter-spacing:.08em;line-height:1.6;text-transform:uppercase}
+  .gauge-cap b{color:var(--txt);font-weight:500;font-size:11px;display:block}
+
+  /* content typography inside drawer */
+  .entry{border-left:2px solid var(--line);padding:2px 0 18px 16px;position:relative;margin-bottom:4px}
+  .entry::before{content:"";position:absolute;left:-5px;top:5px;width:8px;height:8px;border-radius:50%;background:var(--cyan);box-shadow:0 0 8px var(--cyan)}
+  .entry .e-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px}
+  .entry h3{font-family:var(--mono);font-size:13.5px;color:#fff;letter-spacing:.04em;font-weight:600}
+  .entry .when{font-family:var(--mono);font-size:10px;color:var(--cyan);letter-spacing:.06em;white-space:nowrap}
+  .entry .org{font-family:var(--mono);font-size:11px;color:var(--blue);margin:3px 0 7px;letter-spacing:.03em}
+  .entry p{font-size:12.5px;line-height:1.62;color:var(--txt);max-width:62ch}
+  .entry ul{margin:6px 0 0 0;padding-left:0;list-style:none}
+  .entry li{font-size:12px;line-height:1.55;color:var(--txt);padding-left:16px;position:relative;margin-bottom:4px}
+  .entry li::before{content:"▸";position:absolute;left:0;color:var(--cyan);font-size:10px}
+
+  .cards{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .card{border:1px solid var(--line-soft);border-radius:4px;padding:14px 15px;background:rgba(54,224,255,.025);transition:.2s;position:relative;overflow:hidden}
+  .card:hover{border-color:var(--line);background:rgba(54,224,255,.06)}
+  .card h4{font-family:var(--mono);font-size:12.5px;color:#fff;letter-spacing:.03em;margin-bottom:6px;font-weight:600}
+  .card .tag{font-family:var(--mono);font-size:9px;color:var(--cyan);letter-spacing:.1em;text-transform:uppercase}
+  .card p{font-size:11.5px;line-height:1.55;color:var(--txt-dim);margin:7px 0 9px}
+  .chips{display:flex;flex-wrap:wrap;gap:5px}
+  .chip{font-family:var(--mono);font-size:9px;color:var(--blue);border:1px solid var(--line-soft);border-radius:20px;padding:2px 8px;letter-spacing:.04em}
+  .card .stat{position:absolute;top:12px;right:14px;font-family:var(--mono);font-size:11px;font-weight:700;color:var(--green)}
+
+  .skillgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px 22px}
+  .skillblock h5{font-family:var(--mono);font-size:10px;color:var(--cyan);letter-spacing:.14em;text-transform:uppercase;margin-bottom:9px;padding-bottom:5px;border-bottom:1px solid var(--line-soft)}
+  .srow{display:flex;align-items:center;gap:9px;margin-bottom:8px}
+  .srow .sn{font-family:var(--mono);font-size:11px;color:var(--txt);width:96px;flex:0 0 auto}
+  .srow .sb{flex:1;height:4px;background:rgba(54,224,255,.1);border-radius:2px;overflow:hidden}
+  .srow .sb > i{display:block;height:100%;background:linear-gradient(90deg,var(--cyan-dim),var(--cyan));border-radius:2px;box-shadow:0 0 6px rgba(54,224,255,.4)}
+
+  .pubrow{border:1px solid var(--line-soft);border-radius:4px;padding:14px 16px;margin-bottom:12px;background:rgba(54,224,255,.02)}
+  .pubrow .ph{font-family:var(--mono);font-size:9px;color:var(--cyan);letter-spacing:.12em;text-transform:uppercase;margin-bottom:6px}
+  .pubrow h4{font-size:13px;color:#fff;font-weight:600;line-height:1.4;margin-bottom:5px}
+  .pubrow .meta{font-family:var(--mono);font-size:10.5px;color:var(--txt-dim);letter-spacing:.03em}
+
+  .commsgrid{display:flex;flex-direction:column;gap:12px;max-width:520px}
+  .comm{display:flex;align-items:center;gap:14px;border:1px solid var(--line-soft);border-radius:4px;padding:13px 16px;text-decoration:none;background:rgba(54,224,255,.02);transition:.2s}
+  .comm:hover{border-color:var(--cyan);background:rgba(54,224,255,.08);box-shadow:0 0 16px rgba(54,224,255,.14)}
+  .comm .ico{font-family:var(--mono);font-size:11px;color:var(--cyan);width:46px;letter-spacing:.1em}
+  .comm .cval{font-family:var(--mono);font-size:13px;color:#fff;letter-spacing:.02em}
+  .comm .cval small{display:block;font-family:var(--sans);font-size:10px;color:var(--txt-dim);margin-top:2px;letter-spacing:0}
+
+  .lead{font-size:13px;line-height:1.7;color:var(--txt);max-width:66ch;margin-bottom:20px}
+  .lead b{color:var(--cyan);font-weight:600}
+
+  .reduced-note{position:fixed;bottom:8px;right:14px;z-index:60;font-family:var(--mono);font-size:9px;color:var(--txt-dim);letter-spacing:.1em;opacity:.6;display:none}
+
+  /* responsive: stack on small screens */
+  @media (max-width:900px){
+    body{overflow:auto}
+    .hud{
+      height:auto;min-height:100vh;
+      grid-template-columns:1fr;
+      grid-template-rows:auto auto 360px auto auto;
+      grid-template-areas:"head" "stations" "sky" "ticker" "telemetry";
+      padding:56px 12px 24px;
+    }
+    .stations{flex-direction:row;flex-wrap:wrap}
+    .station-btn{flex:1 1 44%}
+    .stations .nav-foot{display:none}
+    .head{flex-direction:column;align-items:flex-start;gap:8px;padding:12px 16px;height:auto}
+    .head .sys{flex-wrap:wrap;gap:12px}
+    .cards,.skillgrid{grid-template-columns:1fr}
+    .telemetry{max-height:none}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .status-led{animation:none}
+    .reduced-note{display:block}
+  }
+</style>
+</head>
+<body>
+  <div id="cosmos-bg"></div>
+  <div id="grid-overlay"></div>
+
+  <div class="topbar">
+    <a class="back-link" href="../index.html">&larr; demos</a>
+    <span class="concept-tag">concept demo · mission control</span>
+  </div>
+
+  <main class="hud" id="hud">
+    <!-- HEADER -->
+    <header class="panel head">
+      <span class="br-tr"></span><span class="br-bl"></span>
+      <div class="ident">
+        <div class="name">SAPTARSHI <b>NAG</b></div>
+        <div class="role">AI / ML Engineer</div>
+      </div>
+      <div class="sys">
+        <span><span class="status-led"></span>ARRAY <b>ONLINE</b></span>
+        <span>FEED <b>NOMINAL</b></span>
+        <span>LOCK PSR&nbsp;J0633</span>
+        <span class="clock" id="clock">--:--:-- UTC</span>
+      </div>
+    </header>
+
+    <!-- STATIONS NAV -->
+    <nav class="panel stations">
+      <span class="br-tr"></span><span class="br-bl"></span>
+      <div class="panel-label"><span class="dot"></span>STATIONS</div>
+      <!-- buttons injected -->
+      <div id="station-list" style="display:flex;flex-direction:column;gap:8px"></div>
+      <div class="nav-foot">
+        ARRAY: GMRT-30 · NCRA-TIFR<br/>
+        MODE: PULSAR&nbsp;SEARCH<br/>
+        OP: S.NAG &nbsp;CLR-9
+      </div>
+    </nav>
+
+    <!-- SKY MAP -->
+    <section class="panel sky">
+      <span class="br-tr"></span><span class="br-bl"></span>
+      <div class="panel-label"><span class="dot"></span>SKY MAP · LIVE</div>
+      <div class="sky-canvas-wrap">
+        <canvas id="skymap"></canvas>
+        <div class="sky-hint">click pulsar to inspect<br/>select a station &rarr;</div>
+        <div class="sky-readout" id="sky-readout">RA --:--:-- · DEC --°--′<br/>PULSE --.--- s · S/N --.-</div>
+
+        <!-- content drawer -->
+        <div class="drawer" id="drawer">
+          <div class="drawer-head">
+            <div class="drawer-title" id="drawer-title">—<small id="drawer-sub">—</small></div>
+            <button class="drawer-close" id="drawer-close">[ CLOSE × ]</button>
+          </div>
+          <div class="drawer-body" id="drawer-body"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SIGNAL SCOPE TICKER -->
+    <section class="panel ticker">
+      <span class="br-tr"></span><span class="br-bl"></span>
+      <div class="panel-label"><span class="dot"></span>SIGNAL STRENGTH · OSCILLOSCOPE</div>
+      <div class="scope-tags">CH-1 &nbsp;|&nbsp; 1.4 GHz &nbsp;|&nbsp; FOLD x256</div>
+      <div class="scope-wrap"><canvas id="scope"></canvas></div>
+    </section>
+
+    <!-- TELEMETRY -->
+    <aside class="panel telemetry" id="telemetry">
+      <span class="br-tr"></span><span class="br-bl"></span>
+      <div class="panel-label"><span class="dot"></span>TELEMETRY</div>
+      <!-- metrics injected -->
+    </aside>
+  </main>
+
+  <div id="vignette"></div>
+  <div id="scanlines"></div>
+  <div class="reduced-note">reduced-motion: static frame</div>
+
+<script>
+(function(){
+  "use strict";
+  var prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------------- CONTENT DATA ---------------- */
+  var STATIONS = [
+    {id:'log',    name:'MISSION LOG',     sub:'Experience',       sub2:'OPERATIONAL HISTORY'},
+    {id:'systems',name:'DEPLOYED SYSTEMS',sub:'Projects',         sub2:'ACTIVE BUILDS'},
+    {id:'diag',   name:'DIAGNOSTICS',     sub:'Skills',           sub2:'CAPABILITY MATRIX'},
+    {id:'pubs',   name:'PUBLICATIONS',    sub:'Papers',           sub2:'PUBLISHED RESEARCH'},
+    {id:'edu',    name:'EDUCATION',       sub:'Training',         sub2:'ACADEMIC RECORD'},
+    {id:'comms',  name:'COMMS',           sub:'Contact',          sub2:'UPLINK CHANNELS'}
+  ];
+
+  var CONTENT = {
+    pulsar:{
+      title:'PSR · SAPTARSHI NAG', sub:'Source acquired · object profile',
+      html:''
+        +'<p class="lead">AI/ML Engineer with an <b>M.Tech in Artificial Intelligence</b> from DIAT (DRDO). '
+        +'Research at <b>NCRA-TIFR &amp; GMRT</b> on weak pulsar-signal detection at low SNR. Currently '
+        +'<b>Project Engineer at C-DAC</b> building real-time IoT security — Zero Trust architecture and '
+        +'ML threat detection.</p>'
+        +'<div class="cards">'
+        +card('96.97%','IoT Detection','Attack-detection accuracy on protocol-aware IoT traffic monitoring.','live model')
+        +card('99.8%','Pulsar F1','F1-score for weak pulsar detection at low signal-to-noise ratio.','signal pipeline')
+        +card('4.1×','GPU Speedup','Training acceleration via CUDA / CuPy and physics-informed loss.','hpc')
+        +card('70M+','Samples','Telemetry samples processed across security &amp; astronomy pipelines.','throughput')
+        +'</div>'
+        +'<p class="lead" style="margin-top:20px">Select a <b>STATION</b> at left to open a console, or click any '
+        +'star region on the SKY MAP. The pulsar marker emits one radio pulse every rotation period.</p>'
+    },
+    log:{
+      title:'MISSION LOG', sub:'Operational history · experience',
+      html:''
+        +entry('Project Engineer — AI Research &amp; IoT Security','Jul 2025 – Present','C-DAC · Chennai',
+          'Building real-time IoT security systems combining Zero Trust architecture with ML-based threat detection.',
+          ['Protocol-aware continuous monitoring &amp; anomaly detection across IoT networks',
+           'ML threat-detection models reaching 96.97% attack-detection accuracy',
+           'Processing 70M+ telemetry samples through production security pipelines'])
+        +entry('Research Intern — M.Tech Project','Aug 2024 – Apr 2025','NCRA-TIFR · Pune',
+          'Weak pulsar-signal detection at low SNR — the core research thread of the M.Tech thesis.',
+          ['Detection pipeline reaching 99.8% F1-score on weak pulsar candidates',
+           'GPU-accelerated folding &amp; classification (CUDA / CuPy), 4.1× training speedup',
+           'Low-SNR signal modelling under realistic radio-frequency interference'])
+        +entry('Winter Intern — HPC &amp; Signal Processing','Dec 2023 – Jan 2024','GMRT · Pune',
+          'Optimisation of high-performance computing and signal-processing routines on the GMRT array.',
+          ['Cut signal-pipeline latency by 50% through HPC optimisation',
+           'Hands-on work with radio-astronomy data acquisition at the GMRT-30 array'])
+    },
+    systems:{
+      title:'DEPLOYED SYSTEMS', sub:'Active builds · projects',
+      html:'<div class="cards" style="grid-template-columns:1fr 1fr">'
+        +proj('GPU F1 Tyre Degradation','RACE STRATEGY','Physics-informed model for F1 tyre degradation &amp; race-strategy optimisation. Physics-informed loss couples thermal/wear dynamics with data.',['PyTorch','CUDA','CuPy','XGBoost','PINNs'],'4.1×')
+        +proj('Omniscience Pro','LOCAL RAG','Privacy-first, fully local retrieval-augmented generation. Documents never leave the machine; sub-50ms vector search.',['LangChain','ChromaDB','Docker'],'&lt;50ms')
+        +proj('ARO','MULTI-AGENT','Autonomous Research Operator — a multi-agent LLM platform orchestrating research tasks over a graph of agents.',['Flask','NetworkX','React','LLM'],'agents')
+        +proj('Llama 3.2 Optimisation','FINE-TUNE','Efficient fine-tuning of Llama 3.2 with Unsloth and 4-bit quantisation for low-resource deployment.',['Unsloth','4-bit','LLM'],'4-bit')
+        +'</div>'
+    },
+    diag:{
+      title:'DIAGNOSTICS', sub:'Capability matrix · skills',
+      html:'<div class="skillgrid">'
+        +skillblock('LANGUAGES',[['Python',97],['C++',86],['C',82],['CUDA',88]])
+        +skillblock('ML / DL',[['PyTorch',94],['XGBoost',88],['scikit-learn',90],['PINNs',82]])
+        +skillblock('GPU / HPC',[['CuPy',86],['CUDA Kernels',84],['Linux',92],['Docker',85]])
+        +skillblock('LLM / SYSTEMS',[['RAG',90],['LLM Fine-tune',88],['Flask',84],['Vector DB',86]])
+        +'</div>'
+    },
+    pubs:{
+      title:'PUBLICATIONS', sub:'Published research · IoTaIS 2025',
+      html:''
+        +pub('IoTaIS 2025 · Bali','Protocol-Aware Continuous Monitoring and Anomaly Detection in IoT Networks','Conference paper · IEEE IoTaIS 2025, Bali, Indonesia')
+        +pub('IoTaIS 2025 · Bali','A Comprehensive Survey on Zero Trust Architecture in IoT Networks','Conference paper · IEEE IoTaIS 2025, Bali, Indonesia')
+    },
+    edu:{
+      title:'EDUCATION', sub:'Academic record · training',
+      html:''
+        +entry('M.Tech — Artificial Intelligence','2023 – 2025','DIAT (DRDO)','Defence Institute of Advanced Technology.',['CGPA 8.64','Thesis: weak pulsar detection at low SNR (NCRA-TIFR)'])
+        +entry('B.Tech — Computer Science &amp; Engineering','2019 – 2023','Academy of Technology','Undergraduate degree in CSE.',['CGPA 9.44'])
+        +entry('GATE 2024 — Data Science &amp; AI','2024','Graduate Aptitude Test','National-level examination.',['All-India Rank 1790','Top 5% percentile band'])
+    },
+    comms:{
+      title:'COMMS', sub:'Uplink channels · contact',
+      html:'<div class="commsgrid">'
+        +comm('MAIL','saptarshinag18@gmail.com','Primary uplink','mailto:saptarshinag18@gmail.com')
+        +comm('LINK','linkedin.com/in/saptarshi18','Professional channel','https://www.linkedin.com/in/saptarshi18')
+        +comm('REPO','github.com/Saptarshi-Nag189','Source &amp; deployments','https://github.com/Saptarshi-Nag189')
+        +comm('DOC','saptarshi_resume_linkedin_2026.pdf','Full mission dossier (CV)','../../saptarshi_resume_linkedin_2026.pdf')
+        +'</div>'
+    }
+  };
+
+  function entry(h,when,org,p,items){
+    var li = (items||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
+    return '<div class="entry"><div class="e-head"><h3>'+h+'</h3><span class="when">'+when+'</span></div>'
+      +'<div class="org">'+org+'</div><p>'+p+'</p>'+(li?'<ul>'+li+'</ul>':'')+'</div>';
+  }
+  function card(stat,name,desc,tag){
+    return '<div class="card"><span class="stat">'+stat+'</span><span class="tag">'+tag+'</span>'
+      +'<h4>'+name+'</h4><p>'+desc+'</p></div>';
+  }
+  function proj(name,tag,desc,chips,stat){
+    var c = chips.map(function(x){return '<span class="chip">'+x+'</span>';}).join('');
+    return '<div class="card"><span class="stat">'+stat+'</span><span class="tag">'+tag+'</span>'
+      +'<h4>'+name+'</h4><p>'+desc+'</p><div class="chips">'+c+'</div></div>';
+  }
+  function skillblock(title,rows){
+    var r = rows.map(function(x){
+      return '<div class="srow"><span class="sn">'+x[0]+'</span><span class="sb"><i style="width:'+x[1]+'%"></i></span></div>';
+    }).join('');
+    return '<div class="skillblock"><h5>'+title+'</h5>'+r+'</div>';
+  }
+  function pub(ph,h,meta){
+    return '<div class="pubrow"><div class="ph">'+ph+'</div><h4>'+h+'</h4><div class="meta">'+meta+'</div></div>';
+  }
+  function comm(ico,val,sub,href){
+    var ext = href.indexOf('http')===0 ? ' target="_blank" rel="noopener"' : '';
+    return '<a class="comm" href="'+href+'"'+ext+'><span class="ico">'+ico+'</span>'
+      +'<span class="cval">'+val+'<small>'+sub+'</small></span></a>';
+  }
+
+  /* ---------------- BUILD STATIONS NAV ---------------- */
+  var stationList = document.getElementById('station-list');
+  STATIONS.forEach(function(s,i){
+    var b = document.createElement('button');
+    b.className='station-btn';
+    b.setAttribute('data-id',s.id);
+    b.innerHTML='<span class="idx">'+String(i+1).padStart(2,'0')+'</span>'+s.name
+      +'<span class="sub">'+s.sub2+'</span>';
+    b.addEventListener('click',function(){ openStation(s.id); });
+    stationList.appendChild(b);
+  });
+
+  /* ---------------- DRAWER ---------------- */
+  var drawer = document.getElementById('drawer');
+  var drawerTitle = document.getElementById('drawer-title');
+  var drawerSub = document.getElementById('drawer-sub');
+  var drawerBody = document.getElementById('drawer-body');
+  var closeBtn = document.getElementById('drawer-close');
+
+  function setActive(id){
+    var btns = stationList.querySelectorAll('.station-btn');
+    btns.forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-id')===id); });
+  }
+  function openStation(id){
+    var c = CONTENT[id]; if(!c) return;
+    setActive(id);
+    drawerTitle.childNodes[0].nodeValue = c.title;
+    drawerSub.textContent = c.sub;
+    drawerBody.innerHTML = c.html;
+    drawer.classList.add('open');
+    drawerBody.scrollTop = 0;
+    animateSkillBars();
+  }
+  function closeDrawer(){
+    drawer.classList.remove('open');
+    setActive(null);
+  }
+  closeBtn.addEventListener('click', closeDrawer);
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeDrawer(); });
+
+  function animateSkillBars(){
+    if(prefersReduced) return;
+    requestAnimationFrame(function(){
+      var bars = drawerBody.querySelectorAll('.srow .sb > i');
+      bars.forEach(function(el){
+        var w = el.style.width; el.style.transition='width 1s ease'; el.style.width='0';
+        requestAnimationFrame(function(){ requestAnimationFrame(function(){ el.style.width=w; }); });
+      });
+    });
+  }
+
+  /* ---------------- CLOCK ---------------- */
+  var clockEl = document.getElementById('clock');
+  function tickClock(){
+    var d=new Date();
+    function p(n){return String(n).padStart(2,'0');}
+    clockEl.textContent = p(d.getUTCHours())+':'+p(d.getUTCMinutes())+':'+p(d.getUTCSeconds())+' UTC';
+  }
+  tickClock(); setInterval(tickClock,1000);
+
+  /* ---------------- TELEMETRY METRICS ---------------- */
+  var tel = document.getElementById('telemetry');
+  var METRICS = [
+    {name:'IoT DETECTION ACC', target:96.97, unit:'%', dec:2, type:'bar', max:100},
+    {name:'PULSAR F1-SCORE',   target:99.8,  unit:'%', dec:1, type:'bar', max:100},
+    {name:'PIPELINE LATENCY',  target:50,    unit:'% cut', dec:0, type:'bar', max:100}
+  ];
+  var metricEls=[];
+  METRICS.forEach(function(m){
+    var wrap=document.createElement('div'); wrap.className='metric';
+    wrap.innerHTML='<div class="metric-top"><span class="metric-name">'+m.name+'</span>'
+      +'<span class="metric-val">0<span class="u">'+m.unit+'</span></span></div>'
+      +'<div class="bar"><i></i></div>';
+    tel.appendChild(wrap);
+    metricEls.push({m:m, val:wrap.querySelector('.metric-val'), bar:wrap.querySelector('.bar > i')});
+  });
+
+  // gauges row (speedup + samples)
+  var gwrap=document.createElement('div'); gwrap.className='gauge-row';
+  gwrap.innerHTML=''
+    +gaugeHTML('g-speed','4.1×','GPU TRAIN<b>4.1× speedup</b>')
+    +gaugeHTML('g-samp','70M+','PROCESSED<b>70M+ samples</b>');
+  tel.appendChild(gwrap);
+  function gaugeHTML(id,center,cap){
+    return '<div class="gauge"><svg width="58" height="58" viewBox="0 0 58 58">'
+      +'<circle cx="29" cy="29" r="24" fill="none" stroke="rgba(54,224,255,0.12)" stroke-width="4"/>'
+      +'<circle id="'+id+'" cx="29" cy="29" r="24" fill="none" stroke="#36e0ff" stroke-width="4" '
+      +'stroke-linecap="round" stroke-dasharray="150.8" stroke-dashoffset="150.8" '
+      +'style="filter:drop-shadow(0 0 4px rgba(54,224,255,.6))"/></svg>'
+      +'<div class="gtxt" data-final="'+center+'">0</div></div>'
+      +'<div class="gauge-cap">'+cap+'</div>';
+  }
+
+  function fmt(v,dec){ return v.toFixed(dec); }
+
+  // counter animation (loops gently unless reduced motion)
+  function runCounters(){
+    var dur=2200, start=null;
+    var gauges=[
+      {el:document.getElementById('g-speed'), txt:document.querySelector('#g-speed').parentNode.parentNode.querySelector('.gtxt'), frac:4.1/5, label:'4.1×'},
+      {el:document.getElementById('g-samp'), txt:document.querySelector('#g-samp').parentNode.parentNode.querySelector('.gtxt'), frac:0.7, label:'70M+'}
+    ];
+    function step(ts){
+      if(!start) start=ts;
+      var t=Math.min(1,(ts-start)/dur);
+      var e=1-Math.pow(1-t,3); // easeOutCubic
+      metricEls.forEach(function(o){
+        var v=o.m.target*e;
+        o.val.innerHTML=fmt(v,o.m.dec)+'<span class="u">'+o.m.unit+'</span>';
+        o.bar.style.transition='none';
+        o.bar.style.width=((o.m.target/o.m.max)*e*100)+'%';
+      });
+      gauges.forEach(function(g){
+        var off=150.8*(1-(g.frac*e));
+        g.el.style.strokeDashoffset=off;
+        if(t>=0.98) g.txt.textContent=g.label;
+        else g.txt.textContent = (g.label.indexOf('×')>=0)
+          ? (4.1*e).toFixed(1)+'×'
+          : Math.round(70*e)+'M';
+      });
+      if(t<1){ counterRAF=requestAnimationFrame(step); }
+      else if(!prefersReduced){
+        // pause then loop softly
+        setTimeout(function(){ start=null; counterRAF=requestAnimationFrame(step); }, 5200);
+      }
+    }
+    counterRAF=requestAnimationFrame(step);
+  }
+  var counterRAF=null;
+  // kick off after slight delay for the smooth bar transition baseline
+  setTimeout(runCounters, 350);
+
+  /* ---------------- SKY MAP CANVAS ---------------- */
+  var sky=document.getElementById('skymap');
+  var sctx=sky.getContext('2d');
+  var readout=document.getElementById('sky-readout');
+  var stars=[], pulses=[], pulsar={x:0,y:0,r:5}, sweepAng=0, period=0.714, lastPulse=0;
+  var W=0,H=0, DPR=Math.min(window.devicePixelRatio||1, 2);
+
+  function sizeSky(){
+    var r=sky.parentNode.getBoundingClientRect();
+    W=Math.max(10,r.width); H=Math.max(10,r.height);
+    sky.width=W*DPR; sky.height=H*DPR;
+    sctx.setTransform(DPR,0,0,DPR,0,0);
+    // pulsar position ~ upper-left-of-center
+    pulsar.x=W*0.40; pulsar.y=H*0.42;
+    buildStars();
+  }
+  function buildStars(){
+    stars=[];
+    var n=Math.round(W*H/5200);
+    n=Math.max(60,Math.min(360,n));
+    for(var i=0;i<n;i++){
+      stars.push({
+        x:Math.random()*W, y:Math.random()*H,
+        z:Math.random()*0.8+0.2,            // depth -> parallax + size
+        tw:Math.random()*Math.PI*2,
+        tws:0.8+Math.random()*1.6
+      });
+    }
+  }
+
+  function drawSky(time){
+    sctx.clearRect(0,0,W,H);
+    // background gradient wash
+    var g=sctx.createRadialGradient(pulsar.x,pulsar.y,4, pulsar.x,pulsar.y, Math.max(W,H)*0.7);
+    g.addColorStop(0,'rgba(20,46,80,0.35)');
+    g.addColorStop(1,'rgba(3,7,16,0)');
+    sctx.fillStyle=g; sctx.fillRect(0,0,W,H);
+
+    // parallax offset from mouse
+    var px=(mouseX-0.5)*16, py=(mouseY-0.5)*16;
+
+    // stars
+    for(var i=0;i<stars.length;i++){
+      var s=stars[i];
+      var tw = prefersReduced ? 0.7 : (0.45+0.55*Math.abs(Math.sin(s.tw + time*0.001*s.tws)));
+      var size = s.z*1.6;
+      var sx=s.x + px*s.z, sy=s.y + py*s.z;
+      sctx.beginPath();
+      sctx.arc(sx,sy,size,0,Math.PI*2);
+      sctx.fillStyle='rgba('+ (170+Math.round(60*s.z)) +','+ (200+Math.round(40*s.z)) +',255,'+ (0.35+0.55*tw*s.z) +')';
+      sctx.fill();
+    }
+
+    // radar sweep
+    if(!prefersReduced) sweepAng += 0.0065;
+    var cx=pulsar.x, cy=pulsar.y;
+    var maxR=Math.max(W,H)*0.85;
+    // range rings
+    sctx.strokeStyle='rgba(54,224,255,0.08)'; sctx.lineWidth=1;
+    for(var rr=60; rr<maxR; rr+=70){
+      sctx.beginPath(); sctx.arc(cx,cy,rr,0,Math.PI*2); sctx.stroke();
+    }
+    // crosshair lines
+    sctx.strokeStyle='rgba(54,224,255,0.10)';
+    sctx.beginPath(); sctx.moveTo(cx-maxR,cy); sctx.lineTo(cx+maxR,cy);
+    sctx.moveTo(cx,cy-maxR); sctx.lineTo(cx,cy+maxR); sctx.stroke();
+
+    // sweep gradient wedge
+    var sweepGrad=sctx.createConicGradient ? null : null;
+    sctx.save();
+    sctx.translate(cx,cy);
+    sctx.rotate(sweepAng);
+    var lg=sctx.createLinearGradient(0,0,maxR,0);
+    lg.addColorStop(0,'rgba(54,224,255,0.0)');
+    lg.addColorStop(1,'rgba(54,224,255,0.22)');
+    sctx.beginPath();
+    sctx.moveTo(0,0);
+    sctx.arc(0,0,maxR,-0.28,0);
+    sctx.closePath();
+    sctx.fillStyle=lg; sctx.fill();
+    // leading edge
+    sctx.beginPath(); sctx.moveTo(0,0); sctx.lineTo(maxR,0);
+    sctx.strokeStyle='rgba(54,224,255,0.5)'; sctx.lineWidth=1.4; sctx.stroke();
+    sctx.restore();
+
+    // emit pulse rings periodically
+    if(!prefersReduced && time-lastPulse > period*1000){
+      lastPulse=time;
+      pulses.push({t:time, life:0});
+    }
+    if(prefersReduced && pulses.length===0){
+      // static frame: a couple of frozen rings
+      pulses.push({t:0,life:0.35,frozen:true});
+      pulses.push({t:0,life:0.7,frozen:true});
+    }
+    // draw + age pulses
+    for(var p=pulses.length-1;p>=0;p--){
+      var pl=pulses[p];
+      if(!pl.frozen && !prefersReduced) pl.life=(time-pl.t)/2600;
+      if(pl.life>=1){ pulses.splice(p,1); continue; }
+      var pr=pl.life*maxR*0.95;
+      var alpha=(1-pl.life)*0.55;
+      sctx.beginPath(); sctx.arc(cx,cy,pr,0,Math.PI*2);
+      sctx.strokeStyle='rgba(54,224,255,'+alpha+')';
+      sctx.lineWidth=2; sctx.stroke();
+      // inner softer ring
+      sctx.beginPath(); sctx.arc(cx,cy,pr*0.6,0,Math.PI*2);
+      sctx.strokeStyle='rgba(106,167,255,'+(alpha*0.5)+')';
+      sctx.lineWidth=1; sctx.stroke();
+    }
+
+    // pulsar core (pulsing)
+    var beat = prefersReduced ? 1 : (0.7+0.3*Math.abs(Math.sin(time*0.004)));
+    var glow=sctx.createRadialGradient(cx,cy,0,cx,cy,18*beat+8);
+    glow.addColorStop(0,'rgba(255,255,255,0.95)');
+    glow.addColorStop(0.3,'rgba(54,224,255,0.8)');
+    glow.addColorStop(1,'rgba(54,224,255,0)');
+    sctx.fillStyle=glow;
+    sctx.beginPath(); sctx.arc(cx,cy,18*beat+8,0,Math.PI*2); sctx.fill();
+    sctx.beginPath(); sctx.arc(cx,cy,3.2,0,Math.PI*2);
+    sctx.fillStyle='#ffffff'; sctx.fill();
+
+    // pulsar label bracket
+    sctx.strokeStyle='rgba(54,224,255,0.55)'; sctx.lineWidth=1;
+    sctx.strokeRect(cx-22,cy-22,44,44);
+    sctx.fillStyle='rgba(54,224,255,0.9)';
+    sctx.font='9px "JetBrains Mono", monospace';
+    sctx.fillText('PSR · SAPTARSHI', cx+26, cy-14);
+    sctx.fillStyle='rgba(125,147,173,0.9)';
+    sctx.fillText('CLICK TO INSPECT', cx+26, cy-3);
+  }
+
+  var mouseX=0.5, mouseY=0.5;
+  sky.addEventListener('mousemove',function(e){
+    var r=sky.getBoundingClientRect();
+    mouseX=(e.clientX-r.left)/r.width;
+    mouseY=(e.clientY-r.top)/r.height;
+    // hover readout
+    var ra = ((mouseX*24)%24);
+    var dec = (90 - mouseY*120);
+    var sn = (6 + Math.abs(Math.sin(performance.now()*0.003))*22).toFixed(1);
+    var rh=Math.floor(ra), rm=Math.floor((ra%1)*60), rs=Math.floor((((ra%1)*60)%1)*60);
+    function p2(n){return String(n).padStart(2,'0');}
+    readout.innerHTML='RA '+p2(rh)+':'+p2(rm)+':'+p2(rs)+' · DEC '+(dec>=0?'+':'')+dec.toFixed(0)+'°'+'<br/>PULSE '+period.toFixed(3)+' s · S/N '+sn;
+  });
+  sky.addEventListener('click',function(e){
+    var r=sky.getBoundingClientRect();
+    var x=e.clientX-r.left, y=e.clientY-r.top;
+    var dx=x-pulsar.x, dy=y-pulsar.y;
+    if(Math.sqrt(dx*dx+dy*dy) < 34){
+      // clicked pulsar -> open profile drawer
+      var c=CONTENT.pulsar;
+      setActive(null);
+      drawerTitle.childNodes[0].nodeValue=c.title;
+      drawerSub.textContent=c.sub;
+      drawerBody.innerHTML=c.html;
+      drawer.classList.add('open');
+      drawerBody.scrollTop=0;
+    }
+  });
+
+  /* ---------------- SCOPE CANVAS ---------------- */
+  var scope=document.getElementById('scope');
+  var pctx=scope.getContext('2d');
+  var SW=0,SH=0, scopeBuf=[];
+  function sizeScope(){
+    var r=scope.parentNode.getBoundingClientRect();
+    SW=Math.max(10,r.width); SH=Math.max(10,r.height);
+    scope.width=SW*DPR; scope.height=SH*DPR;
+    pctx.setTransform(DPR,0,0,DPR,0,0);
+  }
+  function drawScope(time){
+    pctx.clearRect(0,0,SW,SH);
+    // grid
+    pctx.strokeStyle='rgba(54,224,255,0.06)'; pctx.lineWidth=1;
+    for(var gx=0; gx<SW; gx+=28){ pctx.beginPath(); pctx.moveTo(gx,0); pctx.lineTo(gx,SH); pctx.stroke(); }
+    for(var gy=0; gy<SH; gy+=18){ pctx.beginPath(); pctx.moveTo(0,gy); pctx.lineTo(SW,gy); pctx.stroke(); }
+    // center baseline
+    pctx.strokeStyle='rgba(54,224,255,0.14)';
+    pctx.beginPath(); pctx.moveTo(0,SH/2); pctx.lineTo(SW,SH/2); pctx.stroke();
+
+    var mid=SH/2;
+    var t = prefersReduced ? 0 : time*0.001;
+    // pulsar-like folded profile: baseline noise + periodic sharp pulse
+    pctx.beginPath();
+    var phase = (time*0.0006)%1; // scroll position of the pulse
+    for(var x=0;x<=SW;x+=2){
+      var u=x/SW;
+      // background noise
+      var noise = prefersReduced
+        ? Math.sin(u*40)*0.04 + Math.sin(u*13)*0.05
+        : (Math.sin(u*40 + t*6)*0.05 + Math.sin(u*13 - t*3)*0.06 + (Math.random()-0.5)*0.05);
+      // sharp gaussian pulse that drifts across
+      var pc = ((u - phase + 1)%1);
+      var gauss = Math.exp(-Math.pow((pc-0.5)/0.025,2));
+      var dgauss = 0.7*Math.exp(-Math.pow((pc-0.5)/0.012,2)); // sharper core
+      var y = mid - (noise + gauss*0.55 + dgauss*0.35)*(SH*0.42);
+      if(x===0) pctx.moveTo(x,y); else pctx.lineTo(x,y);
+    }
+    pctx.strokeStyle='#36e0ff'; pctx.lineWidth=1.6;
+    pctx.shadowColor='rgba(54,224,255,0.6)'; pctx.shadowBlur=6;
+    pctx.stroke();
+    pctx.shadowBlur=0;
+
+    // moving scan dot at pulse peak
+    var peakX = phase*SW;
+    pctx.beginPath(); pctx.arc(peakX, mid-(SH*0.42*0.9), 2.5,0,Math.PI*2);
+    pctx.fillStyle='#fff'; pctx.fill();
+  }
+
+  /* ---------------- ANIMATION LOOP ---------------- */
+  var running=true, raf=null;
+  function loop(time){
+    if(!running) return;
+    drawSky(time);
+    drawScope(time);
+    raf=requestAnimationFrame(loop);
+  }
+  function renderOnce(){
+    drawSky(performance.now());
+    drawScope(performance.now());
+  }
+
+  function startLoop(){
+    if(prefersReduced){ renderOnce(); return; }
+    if(!running){ running=true; raf=requestAnimationFrame(loop); }
+    else if(!raf){ raf=requestAnimationFrame(loop); }
+  }
+  function stopLoop(){
+    running=false;
+    if(raf){ cancelAnimationFrame(raf); raf=null; }
+  }
+
+  // pause when tab hidden
+  document.addEventListener('visibilitychange',function(){
+    if(document.hidden){ stopLoop(); }
+    else { if(!prefersReduced){ running=true; raf=requestAnimationFrame(loop); } else { renderOnce(); } }
+  });
+
+  /* ---------------- RESIZE ---------------- */
+  var resizeT=null;
+  function doResize(){
+    DPR=Math.min(window.devicePixelRatio||1,2);
+    sizeSky(); sizeScope();
+    if(prefersReduced) renderOnce();
+  }
+  window.addEventListener('resize',function(){
+    clearTimeout(resizeT); resizeT=setTimeout(doResize,120);
+  });
+
+  /* ---------------- INIT ---------------- */
+  sizeSky(); sizeScope();
+  if(prefersReduced){
+    running=false;
+    renderOnce();
+  } else {
+    raf=requestAnimationFrame(loop);
+  }
+
+  // open profile by default after a beat for cinematic intro
+  setTimeout(function(){
+    // leave sky visible on load; user explores. (no auto-open to keep "experience" feel)
+  },10);
+
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Signal Decode — Saptarshi Nag</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg: #04070a;
+      --green: #3dff9a;
+      --green-dim: #1c8f57;
+      --amber: #ffb84d;
+      --amber-dim: #a8702a;
+      --text: #bdf6d8;
+      --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(--text); font-family: var(--mono); }
+    body { position: fixed; inset: 0; -webkit-font-smoothing: antialiased; }
+
+    #scope { position: absolute; inset: 0; width: 100%; height: 100%; display: block; z-index: 1; }
+
+    /* CRT overlays */
+    .vignette { position: absolute; inset: 0; z-index: 6; pointer-events: none;
+      background: radial-gradient(ellipse 120% 100% at 50% 50%, transparent 38%, rgba(0, 0, 0, 0.6) 100%); }
+    .scanlines { position: absolute; inset: 0; z-index: 7; pointer-events: none; opacity: 0.5;
+      background: repeating-linear-gradient(0deg, rgba(0,0,0,0) 0 2px, rgba(0,0,0,0.28) 3px, rgba(0,0,0,0) 4px);
+      mix-blend-mode: multiply; }
+
+    /* chrome */
+    .top-left { position: fixed; top: 16px; left: 18px; z-index: 30; font-size: 12px; letter-spacing: 0.08em;
+      color: var(--green); text-decoration: none; opacity: 0.8; transition: 0.2s; }
+    .top-left:hover { opacity: 1; text-shadow: 0 0 8px var(--green); }
+    .concept-tag { position: fixed; top: 14px; right: 18px; z-index: 30; font-size: 10px; letter-spacing: 0.22em;
+      text-transform: uppercase; color: var(--amber-dim); opacity: 0.75; border: 1px solid rgba(168, 112, 42, 0.4);
+      padding: 4px 8px; border-radius: 3px; }
+
+    /* HUD corner readouts */
+    .hud { position: absolute; z-index: 20; pointer-events: none; font-size: 11px; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--green-dim); text-shadow: 0 0 6px rgba(61, 255, 154, 0.35); line-height: 1.9; }
+    .hud-tl { top: 52px; left: 20px; }
+    .hud-tr { top: 52px; right: 20px; text-align: right; }
+    .hud .val { color: var(--green); }
+
+    /* lock meter */
+    .lockwrap { position: absolute; top: 60px; left: 50%; transform: translateX(-50%); z-index: 20;
+      width: min(440px, 74vw); text-align: center; pointer-events: none; }
+    .lock-label { font-size: 11px; letter-spacing: 0.34em; color: var(--amber); text-transform: uppercase;
+      text-shadow: 0 0 10px rgba(255, 184, 77, 0.45); margin-bottom: 7px; }
+    .lock-bar { height: 8px; border: 1px solid rgba(61, 255, 154, 0.35); border-radius: 6px; overflow: hidden;
+      background: rgba(8, 30, 20, 0.5); box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.6); }
+    .lock-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--green-dim), var(--green));
+      box-shadow: 0 0 12px var(--green); transition: width 0.12s linear; }
+    .lock-pct { margin-top: 6px; font-size: 13px; font-weight: 700; letter-spacing: 0.18em; color: var(--green); }
+
+    /* decoded content panel */
+    .panel { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 15;
+      width: min(760px, 88vw); text-align: center; pointer-events: none; opacity: 0; transition: opacity 0.5s; }
+    .panel.show { opacity: 1; pointer-events: auto; }
+    .panel .eyebrow { font-size: 12px; letter-spacing: 0.4em; color: var(--amber); text-transform: uppercase; margin-bottom: 14px; }
+    .panel h1 { font-size: clamp(2.2rem, 7vw, 4.6rem); font-weight: 800; letter-spacing: 0.02em; color: #eafff2;
+      text-shadow: 0 0 20px rgba(61, 255, 154, 0.4); line-height: 1; }
+    .panel .role { font-size: clamp(1rem, 2.4vw, 1.5rem); color: var(--green); letter-spacing: 0.26em;
+      text-transform: uppercase; margin-top: 12px; }
+    .metrics { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px 26px; margin-top: 28px; }
+    .metric { min-width: 120px; }
+    .metric .v { font-size: clamp(1.4rem, 3.4vw, 2.2rem); font-weight: 800; color: var(--green);
+      text-shadow: 0 0 14px rgba(61, 255, 154, 0.45); }
+    .metric .l { font-size: 9.5px; letter-spacing: 0.1em; color: var(--green-dim); text-transform: uppercase; margin-top: 4px; }
+
+    /* channel (transmission) view */
+    .channel { margin-top: 26px; border: 1px solid rgba(61, 255, 154, 0.3); border-radius: 6px;
+      background: rgba(6, 18, 12, 0.72); padding: 22px 26px; text-align: left; min-height: 168px;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.6), inset 0 0 20px rgba(61, 255, 154, 0.04); }
+    .channel .chan-head { font-size: 11px; letter-spacing: 0.22em; color: var(--amber); text-transform: uppercase; margin-bottom: 12px; }
+    .channel .chan-body { font-size: 13.5px; line-height: 1.7; color: var(--text); min-height: 96px; }
+    .channel .chan-body b { color: var(--green); font-weight: 700; }
+    .channel .chan-body .row { padding: 3px 0; }
+    .channel a { color: var(--amber); text-decoration: none; border-bottom: 1px dotted var(--amber-dim); }
+
+    .nav-row { display: flex; gap: 10px; align-items: center; justify-content: space-between; margin-top: 16px; flex-wrap: wrap; }
+    .chips { display: flex; gap: 7px; flex-wrap: wrap; }
+    .chip { font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--green-dim); background: rgba(8, 28, 18, 0.6); border: 1px solid rgba(61, 255, 154, 0.28);
+      padding: 6px 10px; border-radius: 4px; cursor: pointer; transition: 0.15s; }
+    .chip:hover, .chip.active { color: #04110a; background: var(--green); border-color: var(--green); box-shadow: 0 0 12px rgba(61, 255, 154, 0.4); }
+
+    /* tuner */
+    .tuner { position: absolute; bottom: 0; left: 0; right: 0; z-index: 22; padding: 16px 0 30px;
+      display: flex; flex-direction: column; align-items: center; gap: 12px;
+      background: linear-gradient(180deg, transparent, rgba(2, 6, 4, 0.85) 45%); transition: opacity 0.5s; }
+    .tune-hint { font-size: 12px; letter-spacing: 0.2em; color: var(--amber); text-transform: uppercase;
+      text-shadow: 0 0 10px rgba(255, 184, 77, 0.4); animation: hintpulse 1.8s ease-in-out infinite; }
+    @keyframes hintpulse { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
+    .dial-area { position: relative; width: min(720px, 88vw); user-select: none; touch-action: none; cursor: ew-resize; }
+    .dial-track { position: relative; height: 46px; border: 1px solid rgba(61, 255, 154, 0.32); border-radius: 5px;
+      background: repeating-linear-gradient(90deg, rgba(61,255,154,0.06) 0 1px, transparent 1px 20px),
+        linear-gradient(180deg, rgba(10, 28, 20, 0.7), rgba(4, 10, 7, 0.7)); overflow: hidden;
+      box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.7); }
+    .target-zone { position: absolute; top: 0; bottom: 0; background: rgba(255, 184, 77, 0.14);
+      border-left: 1px dashed rgba(255, 184, 77, 0.6); border-right: 1px dashed rgba(255, 184, 77, 0.6); }
+    .needle { position: absolute; top: -6px; bottom: -6px; width: 2px; background: var(--amber);
+      box-shadow: 0 0 12px var(--amber), 0 0 24px rgba(255, 184, 77, 0.5); }
+    .freq-read { display: flex; justify-content: space-between; width: min(720px, 88vw); font-size: 10px;
+      letter-spacing: 0.14em; color: var(--green-dim); text-transform: uppercase; }
+    .freq-now { color: var(--amber); font-weight: 700; }
+    .btn { font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--green); background: rgba(8, 28, 18, 0.6); border: 1px solid rgba(61, 255, 154, 0.34);
+      padding: 8px 14px; border-radius: 4px; cursor: pointer; transition: 0.16s; }
+    .btn:hover { background: rgba(61, 255, 154, 0.14); box-shadow: 0 0 12px rgba(61, 255, 154, 0.3); }
+    .tuner.hidden { opacity: 0; pointer-events: none; }
+  </style>
+</head>
+
+<body>
+  <canvas id="scope"></canvas>
+  <div class="vignette"></div>
+  <div class="scanlines"></div>
+
+  <a class="top-left" href="../index.html">← demos</a>
+  <span class="concept-tag">concept demo · 04</span>
+
+  <div class="hud hud-tl">
+    DEEP SPACE NETWORK<br>
+    SRC: <span class="val">PSR&nbsp;J0740</span><br>
+    BAND: <span class="val">L / 1.4&nbsp;GHz</span>
+  </div>
+  <div class="hud hud-tr">
+    SNR: <span class="val" id="snr">--</span><br>
+    NOISE: <span class="val" id="noise">HIGH</span><br>
+    STATUS: <span class="val" id="status">SCANNING</span>
+  </div>
+
+  <div class="lockwrap">
+    <div class="lock-label">Signal Lock</div>
+    <div class="lock-bar"><div class="lock-fill" id="lockfill"></div></div>
+    <div class="lock-pct" id="lockpct">0%</div>
+  </div>
+
+  <!-- decoded content -->
+  <div class="panel" id="panel">
+    <div class="eyebrow" id="eyebrow">// carrier locked — transmission decoded</div>
+    <h1 id="title"></h1>
+    <div class="role" id="role"></div>
+    <div class="metrics" id="metrics"></div>
+
+    <div class="channel">
+      <div class="chan-head" id="chanHead">TRANSMISSION</div>
+      <div class="chan-body" id="chanBody"></div>
+      <div class="nav-row">
+        <div class="chips" id="chips"></div>
+        <a class="chip" href="../../saptarshi_resume_linkedin_2026.pdf" target="_blank" rel="noopener"
+          style="border-color: var(--amber); color: var(--amber);">⤓ cv.pdf</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- tuner -->
+  <div class="tuner" id="tuner">
+    <div class="tune-hint" id="hint">◂ drag to tune the frequency ▸</div>
+    <div class="dial-area" id="dial">
+      <div class="dial-track">
+        <div class="target-zone" id="targetZone"></div>
+        <div class="needle" id="needle"></div>
+      </div>
+    </div>
+    <div class="freq-read">
+      <span>1.410 GHz</span>
+      <span class="freq-now" id="freqNow">1.420 GHz</span>
+      <span>1.430 GHz</span>
+    </div>
+    <button class="btn" id="autoBtn">▸ auto-tune</button>
+  </div>
+
+  <script>
+    'use strict';
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // ---- content ----
+    const NAME = 'SAPTARSHI NAG';
+    const ROLE = 'AI / ML Engineer';
+    const METRICS = [
+      { v: '96.97%', l: 'IoT attack detection' },
+      { v: '99.8%', l: 'pulsar F1-score' },
+      { v: '4.1×', l: 'GPU speedup' },
+      { v: '50%', l: 'latency cut' },
+      { v: '70M+', l: 'samples' },
+    ];
+    const CHANNELS = {
+      experience: {
+        head: 'CH.01 — EXPERIENCE LOG',
+        rows: [
+          '<b>C-DAC</b> — Project Engineer, AI Research & IoT Security · Jul 2025–Present · Chennai',
+          'Real-time Zero Trust framework + ML threat detection across WiFi/BLE/Zigbee/LoRa — <b>96.97%</b> accuracy.',
+          '<b>NCRA-TIFR</b> — Research Intern · Aug 2024–Apr 2025 · Pune',
+          'Weak pulsar signal detection at low SNR — <b>99.8% F1</b> across 70M+ samples.',
+          '<b>GMRT</b> — Winter Intern · Dec 2023–Jan 2024 · Pune — cut signal-pipeline latency <b>50%</b>.',
+        ],
+      },
+      projects: {
+        head: 'CH.02 — PROJECTS',
+        rows: [
+          '<b>F1 Tyre Degradation & Race Strategy</b> — PyTorch/CUDA/CuPy/XGBoost, physics-informed loss, <b>4.1× speedup</b>.',
+          '<b>Omniscience Pro</b> — privacy-first local RAG · LangChain/ChromaDB/Docker · &lt;50 ms vector search.',
+          '<b>ARO</b> — Autonomous Research Operator · multi-agent LLM · Flask/NetworkX/React.',
+          '<b>Llama 3.2 Optimisation</b> — Unsloth, 4-bit quantisation for consumer GPUs.',
+        ],
+      },
+      skills: {
+        head: 'CH.03 — SKILLS',
+        rows: [
+          'Languages — <b>Python</b>, C++, C, Bash, SQL',
+          'ML / Sci — PyTorch, XGBoost, scikit-learn, <b>PINNs</b>, NumPy, SciPy',
+          'HPC — <b>CUDA</b>, CuPy, parallel processing, model quantisation',
+          'AI / MLOps — <b>RAG</b>, LLM fine-tuning, multi-agent orchestration, Docker, Flask, Linux',
+        ],
+      },
+      publications: {
+        head: 'CH.04 — PUBLICATIONS',
+        rows: [
+          '<b>Protocol-Aware Continuous Monitoring and Anomaly Detection in IoT Networks</b> — IoTaIS 2025, Bali.',
+          '<b>A Comprehensive Survey on Zero Trust Architecture in IoT Networks</b> — IoTaIS 2025, Bali.',
+        ],
+      },
+      education: {
+        head: 'CH.05 — EDUCATION',
+        rows: [
+          '<b>M.Tech, Artificial Intelligence</b> — DIAT (DRDO) · 2023–2025 · CGPA 8.64',
+          '<b>B.Tech, CSE</b> — Academy of Technology · 2019–2023 · CGPA 9.44',
+          'GATE 2024 — Rank <b>1790</b> in Data Science & AI (top 5%).',
+        ],
+      },
+      contact: {
+        head: 'CH.06 — COMMS',
+        rows: [
+          'EMAIL — <a href="mailto:saptarshinag18@gmail.com">saptarshinag18@gmail.com</a>',
+          'LINKEDIN — <a href="https://www.linkedin.com/in/saptarshi18" target="_blank" rel="noopener">/in/saptarshi18</a>',
+          'GITHUB — <a href="https://github.com/Saptarshi-Nag189" target="_blank" rel="noopener">Saptarshi-Nag189</a>',
+        ],
+      },
+    };
+    const CH_ORDER = ['experience', 'projects', 'skills', 'publications', 'education', 'contact'];
+
+    // ---- canvas oscilloscope ----
+    const canvas = document.getElementById('scope');
+    const ctx = canvas.getContext('2d');
+    let W = 0, H = 0, DPR = Math.min(devicePixelRatio || 1, 2);
+    function resize() {
+      W = innerWidth; H = innerHeight;
+      canvas.width = W * DPR; canvas.height = H * DPR;
+      canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    }
+    resize();
+    addEventListener('resize', resize);
+
+    // tuning state: 0..1, target at 0.5
+    let tune = 0.0;            // visitor's position
+    const TARGET = 0.5;
+    let lock = 0;             // 0..1 smoothed lock
+    let phase = 0;
+
+    function lockFromTune(t) {
+      const d = Math.abs(t - TARGET);
+      // within 0.06 of target => approaching full lock
+      return Math.max(0, 1 - d / 0.12);
+    }
+
+    function draw() {
+      phase += 0.05;
+      const targetLock = lockFromTune(tune);
+      lock += (targetLock - lock) * 0.12;
+
+      ctx.clearRect(0, 0, W, H);
+      // faint grid
+      ctx.strokeStyle = 'rgba(61,255,154,0.05)';
+      ctx.lineWidth = 1;
+      for (let x = 0; x < W; x += 48) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
+      for (let y = 0; y < H; y += 48) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+
+      const midY = H * 0.52;
+      const noise = (1 - lock);
+      // waveform: blend of clean pulsar pulse + noise
+      ctx.beginPath();
+      for (let x = 0; x <= W; x += 3) {
+        const tx = x / W;
+        // clean signal: periodic sharp pulsar spike
+        const pulsar = Math.exp(-Math.pow(((tx * 6 % 1) - 0.5) * 7, 2)) * 90;
+        const carrier = Math.sin(tx * 60 + phase) * 10;
+        const clean = -(pulsar) + carrier;
+        const rand = (Math.random() - 0.5) * 160 * noise;
+        const y = midY + clean * lock + rand;
+        if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.strokeStyle = `rgba(61,255,154,${0.35 + lock * 0.55})`;
+      ctx.lineWidth = 1.6;
+      ctx.shadowColor = 'rgba(61,255,154,0.7)';
+      ctx.shadowBlur = 6 + lock * 10;
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+
+      // snow overlay when unlocked
+      if (noise > 0.02 && !reduce) {
+        const count = Math.floor(noise * 220);
+        ctx.fillStyle = `rgba(189,246,216,${0.05 + noise * 0.12})`;
+        for (let i = 0; i < count; i++) {
+          ctx.fillRect(Math.random() * W, Math.random() * H, 2, 2);
+        }
+      }
+      raf = requestAnimationFrame(draw);
+    }
+
+    let raf = null;
+    function start() { if (raf == null) raf = requestAnimationFrame(draw); }
+    function stop() { if (raf != null) { cancelAnimationFrame(raf); raf = null; } }
+    start();
+    document.addEventListener('visibilitychange', () => document.hidden ? stop() : start());
+
+    // ---- UI refs ----
+    const needle = document.getElementById('needle');
+    const targetZone = document.getElementById('targetZone');
+    const lockfill = document.getElementById('lockfill');
+    const lockpct = document.getElementById('lockpct');
+    const freqNow = document.getElementById('freqNow');
+    const snrEl = document.getElementById('snr');
+    const noiseEl = document.getElementById('noise');
+    const statusEl = document.getElementById('status');
+    const panel = document.getElementById('panel');
+    const tuner = document.getElementById('tuner');
+
+    // place target zone (45%..55%)
+    targetZone.style.left = '44%';
+    targetZone.style.width = '12%';
+
+    let locked = false;
+    function updateUI() {
+      const lk = lockFromTune(tune);
+      needle.style.left = (tune * 100) + '%';
+      const pct = Math.round(Math.min(1, lk) * 100);
+      lockfill.style.width = pct + '%';
+      lockpct.textContent = pct + '%';
+      freqNow.textContent = (1.410 + tune * 0.02).toFixed(3) + ' GHz';
+      snrEl.textContent = (lk * 28 + 2).toFixed(1) + ' dB';
+      noiseEl.textContent = lk > 0.6 ? 'LOW' : lk > 0.3 ? 'MED' : 'HIGH';
+      statusEl.textContent = lk >= 0.95 ? 'LOCKED' : 'SCANNING';
+      if (lk >= 0.95 && !locked) onLock();
+      if (lk < 0.9 && locked) { /* stay locked once achieved */ }
+    }
+
+    // ---- scramble/decode text effect ----
+    const GLYPHS = '!<>-_\\/[]{}=+*^?#01';
+    function scrambleTo(el, finalText, dur) {
+      if (reduce) { el.textContent = finalText; return Promise.resolve(); }
+      return new Promise(resolve => {
+        const len = finalText.length;
+        let frame = 0;
+        const total = Math.max(14, Math.round(dur / 16));
+        const id = setInterval(() => {
+          frame++;
+          let out = '';
+          for (let i = 0; i < len; i++) {
+            if (i < (frame / total) * len) out += finalText[i];
+            else if (finalText[i] === ' ') out += ' ';
+            else out += GLYPHS[(Math.random() * GLYPHS.length) | 0];
+          }
+          el.textContent = out;
+          if (frame >= total) { clearInterval(id); el.textContent = finalText; resolve(); }
+        }, 16);
+      });
+    }
+
+    function buildMetrics() {
+      const box = document.getElementById('metrics');
+      box.innerHTML = METRICS.map(m => `<div class="metric"><div class="v">${m.v}</div><div class="l">${m.l}</div></div>`).join('');
+    }
+
+    let currentCh = 'experience';
+    function renderChips() {
+      const chips = document.getElementById('chips');
+      chips.innerHTML = CH_ORDER.map(k =>
+        `<span class="chip${k === currentCh ? ' active' : ''}" data-ch="${k}">${k}</span>`).join('');
+      chips.querySelectorAll('.chip').forEach(c =>
+        c.addEventListener('click', () => showChannel(c.dataset.ch)));
+    }
+    function showChannel(key) {
+      currentCh = key;
+      renderChips();
+      const ch = CHANNELS[key];
+      document.getElementById('chanHead').textContent = ch.head;
+      const body = document.getElementById('chanBody');
+      if (reduce) {
+        body.innerHTML = ch.rows.map(r => `<div class="row">${r}</div>`).join('');
+        return;
+      }
+      // glitch-in rows
+      body.innerHTML = ch.rows.map(r => `<div class="row" style="opacity:0">${r}</div>`).join('');
+      const rows = [...body.children];
+      rows.forEach((row, i) => setTimeout(() => {
+        row.style.transition = 'opacity .35s';
+        row.style.opacity = '1';
+      }, 90 * i));
+    }
+
+    let onLockDone = false;
+    function onLock() {
+      locked = true;
+      if (onLockDone) return;
+      onLockDone = true;
+      tuner.classList.add('hidden');
+      panel.classList.add('show');
+      buildMetrics();
+      renderChips();
+      const title = document.getElementById('title');
+      const role = document.getElementById('role');
+      scrambleTo(title, NAME, 700).then(() => scrambleTo(role, ROLE, 500));
+      // decode metrics values
+      if (!reduce) {
+        document.querySelectorAll('#metrics .v').forEach((el, i) => {
+          const fin = METRICS[i].v;
+          el.textContent = '';
+          setTimeout(() => scrambleTo(el, fin, 500), 300 + i * 120);
+        });
+      }
+      setTimeout(() => showChannel('experience'), reduce ? 0 : 900);
+    }
+
+    // ---- input: drag to tune ----
+    const dial = document.getElementById('dial');
+    let dragging = false;
+    function setTuneFromX(clientX) {
+      const rect = dial.getBoundingClientRect();
+      tune = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+      updateUI();
+    }
+    dial.addEventListener('pointerdown', e => { dragging = true; dial.setPointerCapture(e.pointerId); setTuneFromX(e.clientX); document.getElementById('hint').style.display = 'none'; });
+    dial.addEventListener('pointermove', e => { if (dragging) setTuneFromX(e.clientX); });
+    dial.addEventListener('pointerup', () => dragging = false);
+    dial.addEventListener('pointercancel', () => dragging = false);
+    // wheel to fine-tune
+    addEventListener('wheel', e => { if (!locked) { tune = Math.max(0, Math.min(1, tune + (e.deltaY > 0 ? 0.012 : -0.012))); updateUI(); } }, { passive: true });
+    // keyboard
+    addEventListener('keydown', e => {
+      if (locked) return;
+      if (e.key === 'ArrowRight') { tune = Math.min(1, tune + 0.02); updateUI(); }
+      if (e.key === 'ArrowLeft') { tune = Math.max(0, tune - 0.02); updateUI(); }
+    });
+
+    // auto-tune button
+    document.getElementById('autoBtn').addEventListener('click', () => {
+      document.getElementById('hint').style.display = 'none';
+      if (reduce) { tune = TARGET; updateUI(); return; }
+      const id = setInterval(() => {
+        tune += (TARGET - tune) * 0.18;
+        if (Math.abs(tune - TARGET) < 0.004) { tune = TARGET; updateUI(); clearInterval(id); }
+        else updateUI();
+      }, 24);
+    });
+
+    // init
+    if (reduce) { tune = TARGET; updateUI(); }
+    else { tune = 0.06; updateUI(); }
+  </script>
+</body>
+
+</html>
