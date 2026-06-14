@@ -81,7 +81,6 @@ function initBackground() {
   }
 
   function drawGlyphs() {
-    ctx.font = '13px "JetBrains Mono", monospace';
     for (const g of glyphs) {
       ctx.fillStyle = ACCENT + g.alpha + ')';
       ctx.font = g.size + 'px "JetBrains Mono", monospace';
