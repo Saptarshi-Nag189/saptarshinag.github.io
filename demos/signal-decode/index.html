@@ -54,7 +54,8 @@
 
     /* lock meter */
     .lockwrap { position: absolute; top: 60px; left: 50%; transform: translateX(-50%); z-index: 20;
-      width: min(440px, 74vw); text-align: center; pointer-events: none; }
+      width: min(440px, 74vw); text-align: center; pointer-events: none; transition: opacity 0.45s; }
+    .lockwrap.hidden { opacity: 0; }
     .lock-label { font-size: 11px; letter-spacing: 0.34em; color: var(--amber); text-transform: uppercase;
       text-shadow: 0 0 10px rgba(255, 184, 77, 0.45); margin-bottom: 7px; }
     .lock-bar { height: 8px; border: 1px solid rgba(61, 255, 154, 0.35); border-radius: 6px; overflow: hidden;
@@ -617,6 +618,7 @@
       sfx('lock');
       sfx('whoosh');
       tuner.classList.add('hidden');
+      var lw = document.querySelector('.lockwrap'); if (lw) lw.classList.add('hidden'); // avoid overlapping the decoded name
       panel.classList.add('show');
       buildMetrics();
       renderChips();
