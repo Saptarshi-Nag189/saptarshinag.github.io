@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Overworld — Saptarshi Nag</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<script src="../_shared/sfx.js"></script>
+<style>
+  :root{
+    --accent:#ffd34d;
+    --grass1:#3a7d44; --grass2:#326b3c;
+    --path:#caa46a; --water:#2d6fa3;
+    --ink:#0e1411; --panel:#141b18;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;overflow:hidden;background:#0a0f0c;color:#eef3ee;
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    -webkit-tap-highlight-color:transparent;user-select:none}
+  #game{position:fixed;inset:0;display:block;touch-action:none}
+
+  /* ---- chrome ---- */
+  .chrome{position:fixed;z-index:40;font-size:13px;letter-spacing:.02em}
+  #back{top:14px;left:14px;text-decoration:none;color:#eef3ee;
+    background:rgba(8,14,10,.55);border:1px solid rgba(255,255,255,.16);
+    padding:8px 12px;border-radius:10px;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+    transition:border-color .2s,transform .15s}
+  #back:hover{border-color:var(--accent);transform:translateY(-1px)}
+  #tag{top:14px;right:14px;color:#cdd6cf;background:rgba(8,14,10,.5);
+    border:1px solid rgba(255,255,255,.14);padding:6px 11px;border-radius:999px;
+    backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+  #tag i{color:var(--accent);margin-right:6px}
+
+  /* ---- HUD ---- */
+  #hint{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:30;
+    background:rgba(8,14,10,.55);border:1px solid rgba(255,255,255,.14);
+    padding:7px 14px;border-radius:999px;font-size:12.5px;color:#dfe7df;
+    backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);white-space:nowrap;
+    transition:opacity .4s}
+  #hint b{color:var(--accent);font-weight:600}
+  #hint kbd{background:rgba(255,255,255,.12);border-radius:4px;padding:1px 6px;
+    font-family:ui-monospace,monospace;font-size:11px;border:1px solid rgba(255,255,255,.18)}
+
+  #legend{position:fixed;top:54px;right:14px;z-index:30;width:178px;
+    background:rgba(8,14,10,.62);border:1px solid rgba(255,255,255,.14);
+    border-radius:14px;padding:12px 12px 8px;backdrop-filter:blur(8px);
+    -webkit-backdrop-filter:blur(8px);font-size:12px}
+  #legend h4{font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--accent);margin-bottom:8px;opacity:.95}
+  #legend .lz{display:flex;align-items:center;gap:8px;padding:3px 4px;border-radius:7px;
+    cursor:pointer;color:#cfd8d0;transition:background .15s,color .15s}
+  #legend .lz:hover{background:rgba(255,255,255,.07);color:#fff}
+  #legend .lz .dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto}
+  #legend .lz i{width:14px;text-align:center;font-size:11px;opacity:.85}
+
+  /* ---- interaction prompt ---- */
+  #prompt{position:fixed;left:50%;top:50%;transform:translate(-50%,46px);z-index:25;
+    pointer-events:none;opacity:0;transition:opacity .18s,transform .18s}
+  #prompt.show{opacity:1;transform:translate(-50%,40px)}
+  #prompt .pill{background:rgba(10,16,12,.82);border:1px solid var(--accent);
+    color:#fff;padding:9px 16px;border-radius:999px;font-size:13.5px;
+    box-shadow:0 6px 24px rgba(0,0,0,.4);display:flex;align-items:center;gap:9px}
+  #prompt .key{background:var(--accent);color:#1a1206;font-weight:700;border-radius:6px;
+    padding:2px 8px;font-size:12px}
+  #prompt .title{font-weight:600;color:var(--accent)}
+
+  /* ---- panel ---- */
+  #panelWrap{position:fixed;inset:0;z-index:60;display:none;
+    align-items:center;justify-content:center;padding:18px;
+    background:rgba(4,8,6,.55);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+  #panelWrap.open{display:flex}
+  #panel{width:min(640px,100%);max-height:86vh;display:flex;flex-direction:column;
+    background:linear-gradient(180deg,#18211c,#10171300);background-color:#10171300;
+    background:#131c17;border:1px solid rgba(255,211,77,.35);border-radius:18px;
+    box-shadow:0 24px 70px rgba(0,0,0,.6);overflow:hidden;
+    transform:translateY(12px) scale(.98);opacity:0;transition:transform .26s cubic-bezier(.2,.9,.3,1),opacity .26s}
+  #panelWrap.open #panel{transform:none;opacity:1}
+  #phead{display:flex;align-items:center;gap:13px;padding:18px 20px 14px;
+    border-bottom:1px solid rgba(255,255,255,.08);position:relative}
+  #phead .badge{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;
+    justify-content:center;font-size:21px;color:#1a1206;flex:0 0 auto;
+    box-shadow:inset 0 0 0 1px rgba(0,0,0,.15)}
+  #phead h2{font-size:20px;line-height:1.1}
+  #phead .sub{font-size:12.5px;color:#9fb0a4;margin-top:3px;letter-spacing:.02em}
+  #pclose{position:absolute;top:14px;right:14px;width:34px;height:34px;border-radius:10px;
+    border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.05);color:#dfe7df;
+    cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;
+    transition:.15s}
+  #pclose:hover{border-color:var(--accent);color:#fff;background:rgba(255,255,255,.1)}
+  #pbody{padding:18px 22px 24px;overflow-y:auto;font-size:14.5px;line-height:1.6;color:#dde6df}
+  #pbody::-webkit-scrollbar{width:9px}
+  #pbody::-webkit-scrollbar-thumb{background:rgba(255,211,77,.35);border-radius:9px}
+  #pbody h3{color:var(--accent);font-size:13.5px;letter-spacing:.05em;text-transform:uppercase;
+    margin:18px 0 8px;font-weight:700}
+  #pbody h3:first-child{margin-top:0}
+  #pbody p{margin:8px 0}
+  #pbody .lead{color:#eef3ee;font-size:15.5px}
+  #pbody .card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
+    border-left:3px solid var(--accent);border-radius:10px;padding:12px 14px;margin:11px 0}
+  #pbody .card .rowtop{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+  #pbody .card strong{color:#fff;font-size:14.5px}
+  #pbody .card .meta{color:#9fb0a4;font-size:12px;white-space:nowrap}
+  #pbody .card .loc{color:var(--accent);font-size:11.5px;letter-spacing:.04em;
+    text-transform:uppercase;margin-top:2px}
+  #pbody .tags{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 2px}
+  #pbody .tags span{background:rgba(255,211,77,.12);color:#ffe79a;border:1px solid rgba(255,211,77,.25);
+    font-size:11px;padding:2px 9px;border-radius:999px}
+  #pbody ul{margin:6px 0 6px 2px;list-style:none}
+  #pbody li{position:relative;padding-left:18px;margin:5px 0}
+  #pbody li:before{content:"";position:absolute;left:2px;top:9px;width:6px;height:6px;
+    background:var(--accent);border-radius:50%}
+  #pbody a{color:#ffe79a;text-decoration:none;border-bottom:1px dashed rgba(255,211,77,.5)}
+  #pbody a:hover{color:#fff}
+  .metricgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:11px;margin:6px 0}
+  .metric{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
+    border-radius:12px;padding:14px 12px;text-align:center}
+  .metric .v{font-size:24px;font-weight:800;color:var(--accent);line-height:1}
+  .metric .l{font-size:11.5px;color:#aebbb1;margin-top:6px;letter-spacing:.02em}
+  .skillrow{margin:10px 0}
+  .skillrow .cat{font-size:12px;color:var(--accent);text-transform:uppercase;letter-spacing:.06em;
+    font-weight:700;margin-bottom:5px}
+  .contactbtns{display:flex;flex-direction:column;gap:9px;margin-top:6px}
+  .contactbtns a{display:flex;align-items:center;gap:11px;padding:11px 14px;border-radius:11px;
+    background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);color:#eef3ee;
+    text-decoration:none;font-size:14px;transition:.15s}
+  .contactbtns a:hover{border-color:var(--accent);background:rgba(255,211,77,.08)}
+  .contactbtns a i{color:var(--accent);width:18px;text-align:center}
+
+  /* ---- touch controls ---- */
+  #touch{position:fixed;inset:0;z-index:20;pointer-events:none;display:none}
+  body.touch #touch{display:block}
+  #joy{position:absolute;left:22px;bottom:26px;width:128px;height:128px;border-radius:50%;
+    background:rgba(8,14,10,.4);border:1px solid rgba(255,255,255,.16);pointer-events:auto;
+    backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+  #stick{position:absolute;left:50%;top:50%;width:54px;height:54px;border-radius:50%;
+    transform:translate(-50%,-50%);background:rgba(255,211,77,.55);
+    border:1px solid rgba(255,255,255,.4);box-shadow:0 3px 10px rgba(0,0,0,.4)}
+  #abtn{position:absolute;right:30px;bottom:46px;width:78px;height:78px;border-radius:50%;
+    background:rgba(255,211,77,.18);border:2px solid var(--accent);color:var(--accent);
+    pointer-events:auto;font-size:26px;font-weight:800;display:flex;align-items:center;
+    justify-content:center;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+  #abtn:active{background:rgba(255,211,77,.35)}
+
+  @media (max-width:640px){
+    #legend{display:none}
+    #hint{font-size:11px;padding:6px 11px;max-width:92vw;white-space:normal;text-align:center}
+  }
+  /* intro fade */
+  #intro{position:fixed;inset:0;z-index:80;background:#0a0f0c;display:flex;
+    align-items:center;justify-content:center;flex-direction:column;gap:18px;
+    transition:opacity .6s}
+  #intro.gone{opacity:0;pointer-events:none}
+  #intro h1{font-size:clamp(26px,6vw,46px);color:#fff;letter-spacing:.01em;text-align:center}
+  #intro h1 span{color:var(--accent)}
+  #intro p{color:#9fb0a4;font-size:14px;text-align:center;max-width:340px;padding:0 20px}
+  #intro button{margin-top:6px;background:var(--accent);color:#1a1206;border:none;
+    font-weight:700;font-size:15px;padding:12px 30px;border-radius:12px;cursor:pointer;
+    box-shadow:0 8px 30px rgba(255,211,77,.3);transition:transform .15s}
+  #intro button:hover{transform:translateY(-2px)}
+  #intro .ctrls{display:flex;gap:18px;color:#7e8d83;font-size:12px;margin-top:4px}
+  #intro .ctrls kbd{background:rgba(255,255,255,.1);border-radius:4px;padding:2px 7px;
+    font-family:ui-monospace,monospace;border:1px solid rgba(255,255,255,.18);color:#cfd8d0}
+</style>
+</head>
+<body>
+<canvas id="game"></canvas>
+
+<a id="back" class="chrome" href="../index.html"><i class="fa-solid fa-arrow-left"></i> demos</a>
+<div id="tag" class="chrome"><i class="fa-solid fa-gamepad"></i>concept demo</div>
+
+<div id="hint"><b>WASD</b>/<kbd>↑↓←→</kbd> move · walk to a sign · press <kbd>E</kbd> to enter</div>
+
+<div id="legend">
+  <h4><i class="fa-solid fa-map"></i> Zones</h4>
+  <div id="legendList"></div>
+</div>
+
+<div id="prompt"><div class="pill"><span class="key">E</span><span>Enter <span class="title" id="promptTitle">Zone</span></span></div></div>
+
+<div id="panelWrap">
+  <div id="panel">
+    <div id="phead">
+      <div class="badge" id="pbadge"><i class="fa-solid fa-star"></i></div>
+      <div>
+        <h2 id="ptitle">Title</h2>
+        <div class="sub" id="psub">Subtitle</div>
+      </div>
+      <button id="pclose" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div id="pbody"></div>
+  </div>
+</div>
+
+<div id="touch">
+  <div id="joy"><div id="stick"></div></div>
+  <div id="abtn"><i class="fa-solid fa-hand-pointer"></i></div>
+</div>
+
+<div id="intro">
+  <h1><span>Saptarshi Nag</span> — Overworld</h1>
+  <p>An explorable little world. Walk to each signpost to read a section of the portfolio.</p>
+  <button id="startBtn"><i class="fa-solid fa-play"></i> Enter the World</button>
+  <div class="ctrls"><span><kbd>W A S D</kbd> move</span><span><kbd>E</kbd> enter</span><span><kbd>Esc</kbd> leave</span></div>
+</div>
+
+<script>
+"use strict";
+(function(){
+  /* =================================================================
+     CONTENT
+  ================================================================= */
+  var ZONES = [
+    { id:'hub', name:'About / Hub', icon:'fa-house-user', color:'#ffd34d', x:0,  y:0,  build:aboutPanel,
+      sub:'Saptarshi Nag — AI/ML Engineer' },
+    { id:'exp', name:'Experience', icon:'fa-briefcase', color:'#ff9f6e', x:-8, y:-6, build:expPanel,
+      sub:'Where I have built things' },
+    { id:'proj', name:'Projects', icon:'fa-flask', color:'#7ce0ff', x:8, y:-6, build:projPanel,
+      sub:'Things I have shipped' },
+    { id:'skills', name:'Skills', icon:'fa-layer-group', color:'#9affb0', x:-10, y:4, build:skillsPanel,
+      sub:'Tools of the trade' },
+    { id:'pubs', name:'Publications', icon:'fa-book', color:'#c79bff', x:10, y:4, build:pubsPanel,
+      sub:'Peer-reviewed work' },
+    { id:'edu', name:'Education', icon:'fa-graduation-cap', color:'#ffd9a0', x:-5, y:9, build:eduPanel,
+      sub:'Academic record' },
+    { id:'stats', name:'Stats / Records', icon:'fa-trophy', color:'#ffe27a', x:5, y:9, build:statsPanel,
+      sub:'The numbers' },
+    { id:'contact', name:'Contact', icon:'fa-paper-plane', color:'#7ce0ff', x:0, y:13, build:contactPanel,
+      sub:'Say hello' }
+  ];
+
+  function esc(s){return s;}
+  function aboutPanel(){
+    return ''+
+    '<p class="lead">AI/ML engineer at the intersection of security and systems research.</p>'+
+    '<h3>Bio</h3>'+
+    '<p>M.Tech in Artificial Intelligence (DIAT, DRDO); research at NCRA-TIFR &amp; GMRT; now Project Engineer at C-DAC building real-time IoT security (Zero Trust + ML threat detection).</p>'+
+    '<p>Works across the full ML stack — feature engineering from raw data, model development &amp; optimisation, production deployment under tight performance constraints. Past work spans physics-informed neural networks, GPU-accelerated scientific computing, LLM fine-tuning, and RAG systems.</p>'+
+    '<h3>Explore</h3>'+
+    '<p>Walk this world to discover Experience, Projects, Skills, Publications, Education, the Stats plaza, and Contact. Each signpost opens a full section.</p>';
+  }
+  function expPanel(){
+    var jobs=[
+      {r:'Project Engineer, AI Research &amp; IoT Security',c:'C-DAC',d:'Jul 2025–Present',l:'Chennai',
+       b:'Built a real-time Zero Trust security framework for IoT (WiFi/BLE/Zigbee/LoRa) feeding a continuous 7-pillar device trust score; two-stage hybrid detection (1s window model, 7 attack classes, + flow model); compared RF/XGBoost/SVM/MLP/Voting Ensemble over 6 preprocessing iterations with SMOTE + Optuna(TPE); best 96.97% accuracy (flow/RF), 90.86% acc / 86.78% macro F1 (window/Ensemble); engineered 63 features from raw PCAPs (Scapy/PyShark); live PCAP pipeline (Watchdog, MD5 dedup, multi-threaded); SPIFFE/SPIRE, mTLS, OTP 2FA; two IoTaIS 2025 papers.'},
+      {r:'Research Intern (M.Tech)',c:'NCRA-TIFR',d:'Aug 2024–Apr 2025',l:'Pune',
+       b:'ResNet1D + Squeeze-and-Excitation attention for weak pulsar detection at low SNR; 99.8% F1 across 70M+ samples; adaptive thresholding for non-stationary noise; ran end-to-end independently.'},
+      {r:'Winter Intern, HPC &amp; Signal Processing',c:'GMRT',d:'Dec 2023–Jan 2024',l:'Pune',
+       b:'Profiled legacy CPU signal filtering, refactored for multicore; cut latency 50%, enabling real-time telescope stream processing.'}
+    ];
+    return jobs.map(function(j){
+      return '<div class="card"><div class="rowtop"><strong>'+j.c+' — '+j.r+'</strong>'+
+        '<span class="meta">'+j.d+'</span></div><div class="loc">'+j.l+'</div>'+
+        '<p>'+j.b+'</p></div>';
+    }).join('');
+  }
+  function projPanel(){
+    var ps=[
+      {n:'GPU-Accelerated F1 Tyre Degradation &amp; Race Strategy',
+       t:['Python','PyTorch','CUDA','CuPy','XGBoost'],
+       b:'Hybrid LSTM-XGBoost for tyre wear + pit-stop window prediction from 10 Hz telemetry; PINNs separating thermal/mechanical degradation; custom CUDA/CuPy kernels; 4.1x speedup.'},
+      {n:'Omniscience Pro — Privacy-First Local RAG',
+       t:['Python','LangChain','ChromaDB','Docker'],
+       b:'Multi-modal ingestion; &lt;50 ms vector search (HNSW); &lt;500 ms first-token latency; GPU-aware Docker, CI/CD, POSIX locking.'},
+      {n:'ARO — Autonomous Research Operator',
+       t:['Python','Flask','SQLAlchemy','NetworkX','React'],
+       b:'Multi-agent LLM workflows as directed graphs; Flask SSE streaming; React UI; adversarial audit fixed 16 vulns (auth, SSRF, input validation, CORS).'},
+      {n:'Llama 3.2 Optimisation',
+       t:['Python','Unsloth','Hugging Face','PyTorch'],
+       b:'Fine-tuned Llama 3.2 (1B/3B) on 21.5k interactions; 4-bit quantisation via Unsloth; no meaningful quality drop.'}
+    ];
+    return ps.map(function(p){
+      return '<div class="card"><strong>'+p.n+'</strong>'+
+        '<div class="tags">'+p.t.map(function(x){return '<span>'+x+'</span>';}).join('')+'</div>'+
+        '<p>'+p.b+'</p></div>';
+    }).join('');
+  }
+  function skillsPanel(){
+    var cats=[
+      ['Languages','Python (advanced), C++ (proficient), C, Bash, SQL'],
+      ['ML &amp; Scientific Computing','PyTorch, XGBoost, Scikit-learn, PINNs, NumPy, SciPy'],
+      ['HPC &amp; Systems','CUDA, CuPy, Parallel Processing, Model Quantisation (4/8-bit), Latency Optimisation, Linux'],
+      ['Data &amp; Engineering','Statistical Anomaly Detection, Time-Series Analysis, CI/CD, Docker, Git, Flask, ChromaDB'],
+      ['AI &amp; MLOps','RAG Systems, LLM Fine-Tuning, Multi-Agent Orchestration (NetworkX, LangChain), SQLAlchemy']
+    ];
+    return cats.map(function(c){
+      var chips=c[1].split(', ').map(function(s){return '<span>'+s+'</span>';}).join('');
+      return '<div class="skillrow"><div class="cat">'+c[0]+'</div><div class="tags">'+chips+'</div></div>';
+    }).join('');
+  }
+  function pubsPanel(){
+    var pubs=[
+      {t:'Protocol-Aware Continuous Monitoring and Anomaly Detection in IoT Networks',v:'IoTaIS 2025, Bali'},
+      {t:'A Comprehensive Survey on Zero Trust Architecture in IoT Networks',v:'IoTaIS 2025, Bali'}
+    ];
+    return pubs.map(function(p){
+      return '<div class="card"><strong><i class="fa-solid fa-book" style="color:var(--accent);margin-right:8px"></i>'+p.t+'</strong>'+
+        '<div class="loc">'+p.v+'</div></div>';
+    }).join('');
+  }
+  function eduPanel(){
+    var ed=[
+      {d:'M.Tech CSE (AI)',s:'DIAT (DRDO), Pune',y:'2023–2025',m:'CGPA 8.64'},
+      {d:'B.Tech CSE',s:'Academy of Technology, Kolkata',y:'2019–2023',m:'CGPA 9.44'},
+      {d:'GATE 2024',s:'Data Science &amp; AI',y:'',m:'Rank 1790 (top 5%)'}
+    ];
+    return ed.map(function(e){
+      return '<div class="card"><div class="rowtop"><strong>'+e.d+'</strong>'+
+        (e.y?'<span class="meta">'+e.y+'</span>':'')+'</div>'+
+        '<div class="loc">'+e.s+'</div><p>'+e.m+'</p></div>';
+    }).join('');
+  }
+  function statsPanel(){
+    var ms=[
+      ['96.97%','IoT attack-detection accuracy'],
+      ['99.8%','pulsar-detection F1'],
+      ['4.1x','GPU training speedup'],
+      ['50%','signal-pipeline latency cut'],
+      ['70M+','samples processed']
+    ];
+    return '<h3>Records</h3><div class="metricgrid">'+
+      ms.map(function(m){return '<div class="metric"><div class="v">'+m[0]+'</div><div class="l">'+m[1]+'</div></div>';}).join('')+
+      '</div>';
+  }
+  function contactPanel(){
+    return '<p class="lead">Open to research-leaning ML / security engineering roles and collaborations.</p>'+
+      '<div class="contactbtns">'+
+      '<a href="mailto:saptarshinag18@gmail.com"><i class="fa-solid fa-envelope"></i> saptarshinag18@gmail.com</a>'+
+      '<a href="https://www.linkedin.com/in/saptarshi18" target="_blank" rel="noopener"><i class="fa-brands fa-linkedin"></i> linkedin.com/in/saptarshi18</a>'+
+      '<a href="https://github.com/Saptarshi-Nag189" target="_blank" rel="noopener"><i class="fa-brands fa-github"></i> github.com/Saptarshi-Nag189</a>'+
+      '<a href="../../saptarshi_resume_linkedin_2026.pdf" target="_blank" rel="noopener"><i class="fa-solid fa-file-pdf"></i> Download CV (PDF)</a>'+
+      '</div>';
+  }
+
+  /* =================================================================
+     SETUP
+  ================================================================= */
+  var TILE = 48;                  // world units per "tile"
+  var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var canvas = document.getElementById('game');
+  var ctx2d = canvas.getContext('2d');
+  var DPR = 1, VW = 0, VH = 0;
+
+  // Convert zone grid coords -> world pixel coords (centre of zone)
+  ZONES.forEach(function(z){ z.wx = z.x*TILE*2.4; z.wy = z.y*TILE*2.0; });
+
+  // World bounds (with margin) derived from zones
+  var minX=1e9,maxX=-1e9,minY=1e9,maxY=-1e9;
+  ZONES.forEach(function(z){ minX=Math.min(minX,z.wx);maxX=Math.max(maxX,z.wx);
+    minY=Math.min(minY,z.wy);maxY=Math.max(maxY,z.wy); });
+  var WORLD = { x0:minX-360, y0:minY-360, x1:maxX+360, y1:maxY+520 };
+
+  // Player
+  var P = { x:0, y:0, vx:0, vy:0, dir:'down', moving:false, anim:0, r:13 };
+
+  // Camera
+  var cam = { x:0, y:0 };
+
+  // input
+  var keys = {};
+  var joy = { active:false, dx:0, dy:0 };
+
+  /* ---- decorative props (deterministic, generated once) ---- */
+  var rngSeed = 1337;
+  function rnd(){ rngSeed = (rngSeed*1103515245+12345) & 0x7fffffff; return rngSeed/0x7fffffff; }
+  var trees=[], rocks=[], flowers=[], grassTufts=[];
+  (function buildProps(){
+    for(var i=0;i<120;i++){
+      var tx = WORLD.x0 + rnd()*(WORLD.x1-WORLD.x0);
+      var ty = WORLD.y0 + rnd()*(WORLD.y1-WORLD.y0);
+      // keep trees off zone centres a bit
+      var near=false;
+      for(var z=0;z<ZONES.length;z++){
+        if(Math.abs(tx-ZONES[z].wx)<110 && Math.abs(ty-ZONES[z].wy)<110){near=true;break;}
+      }
+      if(near){i--;continue;}
+      trees.push({x:tx,y:ty,s:0.8+rnd()*0.6,sw:rnd()*6.28});
+    }
+    for(var j=0;j<70;j++){
+      rocks.push({x:WORLD.x0+rnd()*(WORLD.x1-WORLD.x0),y:WORLD.y0+rnd()*(WORLD.y1-WORLD.y0),s:0.6+rnd()*0.7});
+    }
+    for(var f=0;f<160;f++){
+      flowers.push({x:WORLD.x0+rnd()*(WORLD.x1-WORLD.x0),y:WORLD.y0+rnd()*(WORLD.y1-WORLD.y0),
+        c:['#ff6b8a','#ffe27a','#9fb6ff','#ff9f6e'][(rnd()*4)|0]});
+    }
+    for(var g=0;g<260;g++){
+      grassTufts.push({x:WORLD.x0+rnd()*(WORLD.x1-WORLD.x0),y:WORLD.y0+rnd()*(WORLD.y1-WORLD.y0)});
+    }
+    // sort trees by y for draw order
+    trees.sort(function(a,b){return a.y-b.y;});
+  })();
+
+  // collision obstacles: tree trunks + rocks (circular)
+  function blocked(nx,ny){
+    var i,t;
+    for(i=0;i<trees.length;i++){ t=trees[i];
+      var rr = 14*t.s;
+      var dx=nx-t.x, dy=ny-(t.y+18*t.s);
+      if(dx*dx+dy*dy < (rr+P.r)*(rr+P.r)) return true;
+    }
+    for(i=0;i<rocks.length;i++){ t=rocks[i];
+      var r2=13*t.s, dx2=nx-t.x, dy2=ny-t.y;
+      if(dx2*dx2+dy2*dy2 < (r2+P.r)*(r2+P.r)) return true;
+    }
+    return false;
+  }
+
+  /* =================================================================
+     RESIZE
+  ================================================================= */
+  function resize(){
+    DPR = Math.min(window.devicePixelRatio||1, 2);
+    VW = window.innerWidth; VH = window.innerHeight;
+    canvas.width = Math.floor(VW*DPR);
+    canvas.height = Math.floor(VH*DPR);
+    canvas.style.width = VW+'px';
+    canvas.style.height = VH+'px';
+    ctx2d.setTransform(DPR,0,0,DPR,0,0);
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  /* =================================================================
+     INPUT
+  ================================================================= */
+  window.addEventListener('keydown', function(e){
+    var k=e.key.toLowerCase();
+    if(['w','a','s','d','arrowup','arrowdown','arrowleft','arrowright',' '].indexOf(k)>=0){
+      keys[k]=true; e.preventDefault();
+    }
+    if(k==='e'){ tryEnter(); }
+    if(k==='escape'){ closePanel(); }
+  }, {passive:false});
+  window.addEventListener('keyup', function(e){ keys[e.key.toLowerCase()]=false; });
+
+  // touch detection
+  if('ontouchstart' in window || navigator.maxTouchPoints>0){ document.body.classList.add('touch'); }
+
+  // joystick
+  (function(){
+    var joyEl=document.getElementById('joy'), stick=document.getElementById('stick');
+    var cx,cy,id=null;
+    function setStick(dx,dy){
+      var mag=Math.hypot(dx,dy), max=42;
+      if(mag>max){ dx=dx/mag*max; dy=dy/mag*max; }
+      stick.style.transform='translate('+(dx-27)+'px,'+(dy-27)+'px)';
+      joy.dx = dx/max; joy.dy = dy/max; joy.active=true;
+    }
+    function reset(){ stick.style.transform='translate(-27px,-27px)'; joy.dx=0;joy.dy=0;joy.active=false; id=null; }
+    joyEl.addEventListener('touchstart',function(e){
+      var r=joyEl.getBoundingClientRect(); cx=r.left+r.width/2; cy=r.top+r.height/2;
+      var t=e.changedTouches[0]; id=t.identifier; setStick(t.clientX-cx,t.clientY-cy); e.preventDefault();
+    },{passive:false});
+    joyEl.addEventListener('touchmove',function(e){
+      for(var i=0;i<e.changedTouches.length;i++){ var t=e.changedTouches[i];
+        if(t.identifier===id){ setStick(t.clientX-cx,t.clientY-cy); } }
+      e.preventDefault();
+    },{passive:false});
+    joyEl.addEventListener('touchend',function(e){
+      for(var i=0;i<e.changedTouches.length;i++){ if(e.changedTouches[i].identifier===id) reset(); }
+    });
+    joyEl.addEventListener('touchcancel',reset);
+    document.getElementById('abtn').addEventListener('touchstart',function(e){
+      e.preventDefault(); if(panelOpen) closePanel(); else tryEnter();
+    },{passive:false});
+  })();
+
+  /* =================================================================
+     PANEL
+  ================================================================= */
+  var panelWrap=document.getElementById('panelWrap');
+  var panelOpen=false, nearZone=null;
+  function openPanel(z){
+    if(panelOpen) return;
+    panelOpen=true;
+    document.getElementById('ptitle').textContent=z.name.replace(/&amp;/g,'&');
+    document.getElementById('psub').textContent=z.sub;
+    var b=document.getElementById('pbadge');
+    b.style.background='linear-gradient(135deg,'+z.color+','+shade(z.color,-25)+')';
+    b.innerHTML='<i class="fa-solid '+z.icon+'"></i>';
+    document.getElementById('pbody').innerHTML=z.build();
+    document.getElementById('pbody').scrollTop=0;
+    panelWrap.classList.add('open');
+    window.SFX && SFX.play('coin');
+  }
+  function closePanel(){
+    if(!panelOpen) return;
+    panelOpen=false;
+    panelWrap.classList.remove('open');
+    window.SFX && SFX.play('back');
+  }
+  document.getElementById('pclose').addEventListener('click',closePanel);
+  panelWrap.addEventListener('click',function(e){ if(e.target===panelWrap) closePanel(); });
+  document.getElementById('pclose').addEventListener('mouseenter',function(){ window.SFX&&SFX.play('hover'); });
+
+  function tryEnter(){
+    if(panelOpen){ closePanel(); return; }
+    if(nearZone) openPanel(nearZone);
+  }
+
+  function shade(hex,p){
+    var n=parseInt(hex.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255;
+    var f=(p<0?0:255),t=Math.abs(p)/100;
+    r=Math.round((f-r)*t)+r; g=Math.round((f-g)*t)+g; b=Math.round((f-b)*t)+b;
+    return 'rgb('+r+','+g+','+b+')';
+  }
+
+  /* legend */
+  (function(){
+    var L=document.getElementById('legendList');
+    ZONES.forEach(function(z){
+      var d=document.createElement('div'); d.className='lz';
+      d.innerHTML='<span class="dot" style="background:'+z.color+'"></span><i class="fa-solid '+z.icon+'"></i>'+z.name.replace(/&amp;/g,'&');
+      d.addEventListener('mouseenter',function(){ window.SFX&&SFX.play('hover'); });
+      d.addEventListener('click',function(){
+        // teleport-walk: just snap target near zone (nice for quick nav)
+        P.x=z.wx; P.y=z.wy+70; window.SFX&&SFX.play('select');
+      });
+      L.appendChild(d);
+    });
+  })();
+
+  /* =================================================================
+     GAME LOOP (fixed timestep)
+  ================================================================= */
+  var SPEED = 180;                 // world units / sec
+  var DT = 1/60, acc=0, last=0;
+  var stepTimer=0;
+  var hintHidden=false;
+
+  function update(dt){
+    var ix=0, iy=0;
+    if(!panelOpen){
+      if(keys['w']||keys['arrowup']) iy-=1;
+      if(keys['s']||keys['arrowdown']) iy+=1;
+      if(keys['a']||keys['arrowleft']) ix-=1;
+      if(keys['d']||keys['arrowright']) ix+=1;
+      if(joy.active){ ix+=joy.dx; iy+=joy.dy; }
+    }
+    var mag=Math.hypot(ix,iy);
+    P.moving = mag>0.08;
+    if(P.moving){
+      ix/=mag||1; iy/=mag||1;
+      if(joy.active){ ix*=mag; iy*=mag; if(mag>1){ix/=mag;iy/=mag;}}
+      // facing
+      if(Math.abs(ix)>Math.abs(iy)) P.dir = ix<0?'left':'right';
+      else P.dir = iy<0?'up':'down';
+    }
+    var nx = P.x + ix*SPEED*dt;
+    var ny = P.y + iy*SPEED*dt;
+    // bounds
+    nx=Math.max(WORLD.x0+P.r,Math.min(WORLD.x1-P.r,nx));
+    ny=Math.max(WORLD.y0+P.r,Math.min(WORLD.y1-P.r,ny));
+    // collide axis-separated
+    if(!blocked(nx,P.y)) P.x=nx;
+    if(!blocked(P.x,ny)) P.y=ny;
+
+    // walk anim + footsteps
+    if(P.moving){
+      P.anim += dt* (reduced?6:10);
+      stepTimer+=dt;
+      if(stepTimer>0.30){ stepTimer=0; window.SFX&&SFX.play('step'); }
+    } else { P.anim=0; stepTimer=0.3; }
+
+    // nearest zone
+    var best=null,bd=1e9;
+    for(var i=0;i<ZONES.length;i++){
+      var z=ZONES[i], dx=P.x-z.wx, dy=P.y-(z.wy+30), d=dx*dx+dy*dy;
+      if(d<bd){bd=d;best=z;}
+    }
+    var within = bd < 88*88;
+    var newNear = within?best:null;
+    if(newNear!==nearZone){
+      nearZone=newNear;
+      updatePrompt();
+      if(nearZone){ window.SFX&&SFX.play('select'); }
+    }
+
+    // camera follow (smooth) — reduced motion = snappier
+    var lerp = reduced?0.3:0.12;
+    cam.x += (P.x - cam.x)*lerp;
+    cam.y += (P.y - cam.y)*lerp;
+
+    if(P.moving && !hintHidden){ hintHidden=true; document.getElementById('hint').style.opacity='0.0'; }
+  }
+
+  var promptEl=document.getElementById('prompt');
+  function updatePrompt(){
+    if(nearZone && !panelOpen){
+      document.getElementById('promptTitle').textContent=nearZone.name.replace(/&amp;/g,'&');
+      promptEl.classList.add('show');
+    } else { promptEl.classList.remove('show'); }
+  }
+
+  /* =================================================================
+     RENDER
+  ================================================================= */
+  function w2s(wx,wy){ return [wx-cam.x+VW/2, wy-cam.y+VH/2]; }
+
+  function drawGround(){
+    // base grass with subtle vertical gradient
+    var g=ctx2d.createLinearGradient(0,0,0,VH);
+    g.addColorStop(0,'#3f8049'); g.addColorStop(1,'#2f6638');
+    ctx2d.fillStyle=g; ctx2d.fillRect(0,0,VW,VH);
+
+    // checker grass tiles for texture
+    var ts=TILE;
+    var ox = (cam.x-VW/2), oy=(cam.y-VH/2);
+    var startX = Math.floor(ox/ts)*ts, startY=Math.floor(oy/ts)*ts;
+    for(var wx=startX; wx< ox+VW+ts; wx+=ts){
+      for(var wy=startY; wy<oy+VH+ts; wy+=ts){
+        var even = ((Math.floor(wx/ts)+Math.floor(wy/ts))&1)===0;
+        if(even){
+          var s=w2s(wx,wy);
+          ctx2d.fillStyle='rgba(255,255,255,0.025)';
+          ctx2d.fillRect(s[0],s[1],ts,ts);
+        }
+      }
+    }
+  }
+
+  function drawPaths(){
+    // connect hub to each zone with a dirt path
+    ctx2d.lineCap='round';
+    var hub=ZONES[0];
+    for(var i=1;i<ZONES.length;i++){
+      var z=ZONES[i];
+      var a=w2s(hub.wx,hub.wy), b=w2s(z.wx,z.wy);
+      ctx2d.strokeStyle='rgba(180,150,95,0.85)';
+      ctx2d.lineWidth=26; ctx2d.beginPath();
+      ctx2d.moveTo(a[0],a[1]); ctx2d.lineTo(b[0],b[1]); ctx2d.stroke();
+      ctx2d.strokeStyle='rgba(202,164,106,0.95)';
+      ctx2d.lineWidth=18; ctx2d.beginPath();
+      ctx2d.moveTo(a[0],a[1]); ctx2d.lineTo(b[0],b[1]); ctx2d.stroke();
+    }
+  }
+
+  function drawGrassTufts(){
+    ctx2d.strokeStyle='rgba(70,150,80,0.55)'; ctx2d.lineWidth=2;
+    for(var i=0;i<grassTufts.length;i++){
+      var t=grassTufts[i], s=w2s(t.x,t.y);
+      if(s[0]<-10||s[0]>VW+10||s[1]<-10||s[1]>VH+10) continue;
+      ctx2d.beginPath();
+      ctx2d.moveTo(s[0],s[1]); ctx2d.lineTo(s[0]-3,s[1]-7);
+      ctx2d.moveTo(s[0],s[1]); ctx2d.lineTo(s[0],s[1]-9);
+      ctx2d.moveTo(s[0],s[1]); ctx2d.lineTo(s[0]+3,s[1]-7);
+      ctx2d.stroke();
+    }
+  }
+
+  function drawFlowers(){
+    for(var i=0;i<flowers.length;i++){
+      var f=flowers[i], s=w2s(f.x,f.y);
+      if(s[0]<-10||s[0]>VW+10||s[1]<-10||s[1]>VH+10) continue;
+      ctx2d.fillStyle=f.c;
+      ctx2d.beginPath(); ctx2d.arc(s[0],s[1],2.4,0,6.2832); ctx2d.fill();
+      ctx2d.fillStyle='#ffe27a';
+      ctx2d.beginPath(); ctx2d.arc(s[0],s[1],1,0,6.2832); ctx2d.fill();
+    }
+  }
+
+  function drawRocks(){
+    for(var i=0;i<rocks.length;i++){
+      var r=rocks[i], s=w2s(r.x,r.y);
+      if(s[0]<-30||s[0]>VW+30||s[1]<-30||s[1]>VH+30) continue;
+      var sz=12*r.s;
+      ctx2d.fillStyle='rgba(0,0,0,0.18)';
+      ctx2d.beginPath(); ctx2d.ellipse(s[0],s[1]+sz*0.5,sz*1.1,sz*0.45,0,0,6.2832); ctx2d.fill();
+      ctx2d.fillStyle='#8b938c';
+      ctx2d.beginPath(); ctx2d.ellipse(s[0],s[1],sz,sz*0.8,0,0,6.2832); ctx2d.fill();
+      ctx2d.fillStyle='#a7b0a8';
+      ctx2d.beginPath(); ctx2d.ellipse(s[0]-sz*0.25,s[1]-sz*0.25,sz*0.5,sz*0.4,0,0,6.2832); ctx2d.fill();
+    }
+  }
+
+  function drawTree(t,sw){
+    var s=w2s(t.x,t.y), sc=t.s;
+    if(s[0]<-80||s[0]>VW+80||s[1]<-120||s[1]>VH+80) return;
+    var x=s[0], y=s[1];
+    // shadow
+    ctx2d.fillStyle='rgba(0,0,0,0.2)';
+    ctx2d.beginPath(); ctx2d.ellipse(x,y+18*sc,26*sc,9*sc,0,0,6.2832); ctx2d.fill();
+    // trunk
+    ctx2d.fillStyle='#6b4a2f';
+    ctx2d.fillRect(x-4*sc,y,8*sc,20*sc);
+    // canopy (3 blobs), gentle sway
+    var off = reduced?0:Math.sin(sw)*2;
+    ctx2d.fillStyle='#2e6b39';
+    ctx2d.beginPath(); ctx2d.arc(x-14*sc+off,y-6*sc,18*sc,0,6.2832); ctx2d.fill();
+    ctx2d.beginPath(); ctx2d.arc(x+14*sc+off,y-6*sc,18*sc,0,6.2832); ctx2d.fill();
+    ctx2d.fillStyle='#3a8047';
+    ctx2d.beginPath(); ctx2d.arc(x+off,y-22*sc,24*sc,0,6.2832); ctx2d.fill();
+    ctx2d.fillStyle='#46955a';
+    ctx2d.beginPath(); ctx2d.arc(x-6*sc+off,y-26*sc,12*sc,0,6.2832); ctx2d.fill();
+  }
+
+  // zone signpost / building
+  function drawZone(z,t){
+    var s=w2s(z.wx,z.wy);
+    var x=s[0], y=s[1];
+    if(x<-160||x>VW+160||y<-200||y>VH+160) return;
+    var active = (z===nearZone);
+    var pulse = active?(1+Math.sin(t*4)*0.06):1;
+
+    // ground platform
+    ctx2d.fillStyle='rgba(0,0,0,0.22)';
+    ctx2d.beginPath(); ctx2d.ellipse(x,y+34,66,22,0,0,6.2832); ctx2d.fill();
+    // stone plaza
+    ctx2d.fillStyle='rgba(150,140,120,0.5)';
+    ctx2d.beginPath(); ctx2d.ellipse(x,y+30,62,20,0,0,6.2832); ctx2d.fill();
+    ctx2d.fillStyle='rgba(120,112,96,0.55)';
+    ctx2d.beginPath(); ctx2d.ellipse(x,y+30,46,14,0,0,6.2832); ctx2d.fill();
+
+    // glow when active
+    if(active){
+      var gg=ctx2d.createRadialGradient(x,y-10,4,x,y-10,90);
+      gg.addColorStop(0,hexA(z.color,0.45)); gg.addColorStop(1,hexA(z.color,0));
+      ctx2d.fillStyle=gg;
+      ctx2d.fillRect(x-100,y-110,200,200);
+    }
+
+    // post
+    ctx2d.fillStyle='#5b3f29';
+    ctx2d.fillRect(x-5,y-18,10,52);
+    // sign board (rounded rect)
+    var bw=92, bh=58, by=y-78;
+    ctx2d.save();
+    ctx2d.translate(x,by+bh/2); ctx2d.scale(pulse,pulse); ctx2d.translate(-x,-(by+bh/2));
+    roundRect(x-bw/2,by,bw,bh,12);
+    var grad=ctx2d.createLinearGradient(0,by,0,by+bh);
+    grad.addColorStop(0,z.color); grad.addColorStop(1,shade(z.color,-22));
+    ctx2d.fillStyle=grad; ctx2d.fill();
+    ctx2d.lineWidth=3; ctx2d.strokeStyle='rgba(20,15,5,0.55)'; ctx2d.stroke();
+    // inner icon circle
+    ctx2d.fillStyle='rgba(20,15,8,0.18)';
+    ctx2d.beginPath(); ctx2d.arc(x,by+24,19,0,6.2832); ctx2d.fill();
+    // icon via Font Awesome glyph (fallback handled by try)
+    drawIconGlyph(z.icon, x, by+24, 20, '#1a1206');
+    // label text
+    ctx2d.fillStyle='#1a1206'; ctx2d.font='600 11px system-ui,sans-serif';
+    ctx2d.textAlign='center'; ctx2d.textBaseline='middle';
+    ctx2d.fillText(z.name.replace(/&amp;/g,'&'), x, by+47);
+    ctx2d.restore();
+    ctx2d.textAlign='left'; ctx2d.textBaseline='alphabetic';
+  }
+
+  // Font Awesome unicode map for our glyphs (so canvas can show them when FA loaded)
+  var FAU = {
+    'fa-house-user':'','fa-briefcase':'','fa-flask':'',
+    'fa-layer-group':'','fa-book':'','fa-graduation-cap':'',
+    'fa-trophy':'','fa-paper-plane':'','fa-star':''
+  };
+  var faReady=false;
+  function checkFA(){
+    // detect if Font Awesome loaded by measuring a glyph width
+    try{
+      ctx2d.font='900 20px "Font Awesome 6 Free"';
+      var w1=ctx2d.measureText('').width;
+      ctx2d.font='900 20px serif';
+      var w2=ctx2d.measureText('').width;
+      faReady = Math.abs(w1-w2)>0.5;
+    }catch(e){ faReady=false; }
+  }
+  function drawIconGlyph(icon,x,y,size,color){
+    var u=FAU[icon];
+    if(faReady && u){
+      ctx2d.save();
+      ctx2d.font='900 '+size+'px "Font Awesome 6 Free"';
+      ctx2d.fillStyle=color; ctx2d.textAlign='center'; ctx2d.textBaseline='middle';
+      ctx2d.fillText(u,x,y+1);
+      ctx2d.restore();
+    } else {
+      // vector fallback: a simple diamond marker so it still reads as a sign
+      ctx2d.save();
+      ctx2d.fillStyle=color; ctx2d.globalAlpha=0.85;
+      ctx2d.beginPath();
+      ctx2d.moveTo(x,y-size*0.42); ctx2d.lineTo(x+size*0.42,y);
+      ctx2d.lineTo(x,y+size*0.42); ctx2d.lineTo(x-size*0.42,y); ctx2d.closePath();
+      ctx2d.fill(); ctx2d.restore();
+    }
+  }
+
+  function drawPlayer(t){
+    var s=w2s(P.x,P.y);
+    var x=s[0], y=s[1];
+    var bob = (P.moving && !reduced)? Math.abs(Math.sin(P.anim))*3 : 0;
+    var yy=y-bob;
+    // shadow
+    ctx2d.fillStyle='rgba(0,0,0,0.28)';
+    ctx2d.beginPath(); ctx2d.ellipse(x,y+12,13,5,0,0,6.2832); ctx2d.fill();
+    // legs (walk)
+    var swing = P.moving? Math.sin(P.anim)*4 : 0;
+    ctx2d.fillStyle='#2c3b66';
+    ctx2d.fillRect(x-7,yy+4,5,9+ (P.moving?swing:0));
+    ctx2d.fillRect(x+2,yy+4,5,9- (P.moving?swing:0));
+    // body
+    ctx2d.fillStyle='#3a86ff';
+    roundRect(x-9,yy-10,18,18,5); ctx2d.fill();
+    // backpack accent
+    ctx2d.fillStyle='#ffd34d';
+    roundRect(x-7,yy-7,14,5,2); ctx2d.fill();
+    // head
+    ctx2d.fillStyle='#f1c89a';
+    ctx2d.beginPath(); ctx2d.arc(x,yy-16,8,0,6.2832); ctx2d.fill();
+    // hair
+    ctx2d.fillStyle='#2a2018';
+    ctx2d.beginPath(); ctx2d.arc(x,yy-18,8,Math.PI,0); ctx2d.fill();
+    ctx2d.fillRect(x-8,yy-18,16,3);
+    // face direction (eyes)
+    ctx2d.fillStyle='#1a1a1a';
+    if(P.dir==='down'){ dot(x-3,yy-15); dot(x+3,yy-15); }
+    else if(P.dir==='up'){ /* back of head: no eyes */ }
+    else if(P.dir==='left'){ dot(x-4,yy-15); }
+    else { dot(x+4,yy-15); }
+  }
+  function dot(x,y){ ctx2d.beginPath(); ctx2d.arc(x,y,1.4,0,6.2832); ctx2d.fill(); }
+
+  function roundRect(x,y,w,h,r){
+    ctx2d.beginPath();
+    ctx2d.moveTo(x+r,y);
+    ctx2d.arcTo(x+w,y,x+w,y+h,r);
+    ctx2d.arcTo(x+w,y+h,x,y+h,r);
+    ctx2d.arcTo(x,y+h,x,y,r);
+    ctx2d.arcTo(x,y,x+w,y,r);
+    ctx2d.closePath();
+  }
+  function hexA(hex,a){
+    var n=parseInt(hex.slice(1),16);
+    return 'rgba('+((n>>16)&255)+','+((n>>8)&255)+','+(n&255)+','+a+')';
+  }
+
+  function render(t){
+    drawGround();
+    drawPaths();
+    drawGrassTufts();
+    drawFlowers();
+    drawRocks();
+
+    // Build a y-sorted list of "tall" entities: trees, zones, player
+    // (kept simple: trees first sorted, then zones, then player by y)
+    // We interleave by drawing trees & zones & player together sorted by world y.
+    // Compose render list once per frame (small N, allocation acceptable here is avoided by reuse)
+    renderEntities(t);
+  }
+
+  // reusable buffer to avoid per-frame allocations
+  var entBuf=[];
+  (function initEnt(){
+    for(var i=0;i<trees.length;i++) entBuf.push({type:0,ref:trees[i],y:0});
+    for(var z=0;z<ZONES.length;z++) entBuf.push({type:1,ref:ZONES[z],y:0});
+    entBuf.push({type:2,ref:P,y:0});
+  })();
+  function renderEntities(t){
+    var i,e;
+    for(i=0;i<entBuf.length;i++){
+      e=entBuf[i];
+      if(e.type===0) e.y=e.ref.y;
+      else if(e.type===1) e.y=e.ref.wy-40; // sign sorts a bit higher
+      else e.y=P.y;
+      e.ref._sway = e.ref.sw!==undefined ? (e.ref.sw + t*1.2) : 0;
+    }
+    entBuf.sort(cmpY);
+    for(i=0;i<entBuf.length;i++){
+      e=entBuf[i];
+      if(e.type===0) drawTree(e.ref, e.ref.sw + t*1.1);
+      else if(e.type===1) drawZone(e.ref, t);
+      else drawPlayer(t);
+    }
+  }
+  function cmpY(a,b){ return a.y-b.y; }
+
+  /* =================================================================
+     MAIN LOOP
+  ================================================================= */
+  var running=true;
+  function frame(now){
+    if(!running){ return; }
+    if(!last) last=now;
+    var elapsed=(now-last)/1000; last=now;
+    if(elapsed>0.25) elapsed=0.25; // clamp tab-hidden gaps
+    acc+=elapsed;
+    var t=now/1000;
+    while(acc>=DT){ update(DT); acc-=DT; }
+    render(t);
+    requestAnimationFrame(frame);
+  }
+
+  document.addEventListener('visibilitychange', function(){
+    if(document.hidden){ running=false; }
+    else { running=true; last=0; acc=0; requestAnimationFrame(frame); }
+  });
+
+  /* =================================================================
+     START
+  ================================================================= */
+  function start(){
+    document.getElementById('intro').classList.add('gone');
+    try{ window.SFX && SFX.init({accent:'#ffd34d',ambient:true,ambientFreq:88}); }catch(e){}
+    window.SFX && SFX.play('coin');
+    // place player at hub
+    P.x=ZONES[0].wx; P.y=ZONES[0].wy+70; cam.x=P.x; cam.y=P.y;
+    checkFA();
+    // re-check FA after a moment (font may load late)
+    setTimeout(checkFA, 1200);
+    requestAnimationFrame(frame);
+  }
+  document.getElementById('startBtn').addEventListener('click', start);
+  // also allow Enter / space / tap on intro
+  document.getElementById('intro').addEventListener('touchstart',function(e){
+    if(e.target.id!=='startBtn'){ start(); }
+  },{passive:true});
+  window.addEventListener('keydown',function(e){
+    if((e.key==='Enter'||e.key===' ') && !document.getElementById('intro').classList.contains('gone')){
+      start();
+    }
+  });
+
+})();
+</script>
+</body>
+</html>

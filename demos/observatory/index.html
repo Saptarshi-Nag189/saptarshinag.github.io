@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+<script src="../_shared/sfx.js"></script>
 <style>
   :root{
     --bg:#03060e;
@@ -309,7 +310,7 @@
   <div id="grid-overlay"></div>
 
   <div class="topbar">
-    <a class="back-link" href="../index.html"><i class="fa-solid fa-arrow-left" style="margin-right:6px"></i>demos</a>
+    <a class="back-link" id="back-link" href="../index.html"><i class="fa-solid fa-arrow-left" style="margin-right:6px"></i>demos</a>
     <span class="concept-tag"><i class="fa-solid fa-tower-observation" style="margin-right:7px;opacity:.8"></i>concept demo · mission control</span>
   </div>
 
@@ -386,6 +387,14 @@
 (function(){
   "use strict";
   var prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------------- SOUND ---------------- */
+  if (window.SFX && typeof SFX.init === 'function') {
+    try { SFX.init({ accent:'#36e0ff', ambient:true, ambientFreq:90 }); } catch(e){}
+  }
+  function sfx(name){
+    if (window.SFX && typeof SFX.play === 'function'){ try { SFX.play(name); } catch(e){} }
+  }
 
   /* ---------------- CONTENT DATA ---------------- */
   var STATIONS = [
@@ -522,9 +531,19 @@
     b.innerHTML='<span class="idx">'+String(i+1).padStart(2,'0')+'</span>'
       +'<i class="fa-solid '+s.icon+' st-ico"></i>'+s.name
       +'<span class="sub">'+s.sub2+'</span>';
-    b.addEventListener('click',function(){ openStation(s.id); });
+    b.addEventListener('click',function(){ sfx('beep'); sfx('select'); openStation(s.id); });
+    b.addEventListener('mouseenter',function(){ stationHover(); });
     stationList.appendChild(b);
   });
+
+  // throttled hover sound for station buttons
+  var lastHover=0;
+  function stationHover(){
+    var now = (window.performance && performance.now) ? performance.now() : Date.now();
+    if(now - lastHover < 90) return;
+    lastHover = now;
+    sfx('hover');
+  }
 
   /* ---------------- DRAWER ---------------- */
   var drawer = document.getElementById('drawer');
@@ -544,6 +563,7 @@
   }
   function openStation(id){
     var c = CONTENT[id]; if(!c) return;
+    var wasOpen = drawer.classList.contains('open');
     setActive(id);
     drawerTitleTxt.textContent = c.title;
     setDrawerIcon(c.icon);
@@ -551,14 +571,22 @@
     drawerBody.innerHTML = c.html;
     drawer.classList.add('open');
     drawerBody.scrollTop = 0;
+    if(!wasOpen) sfx('whoosh');
     animateSkillBars();
   }
   function closeDrawer(){
+    if(!drawer.classList.contains('open')) return;
     drawer.classList.remove('open');
     setActive(null);
   }
-  closeBtn.addEventListener('click', closeDrawer);
-  document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeDrawer(); });
+  closeBtn.addEventListener('click', function(){ sfx('back'); closeDrawer(); });
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Escape' && drawer.classList.contains('open')){ sfx('back'); closeDrawer(); }
+  });
+
+  // back-to-demos link sound (let navigation proceed normally)
+  var backLink = document.getElementById('back-link');
+  if(backLink){ backLink.addEventListener('click',function(){ sfx('back'); }); }
 
   function animateSkillBars(){
     if(prefersReduced) return;
@@ -616,13 +644,23 @@
   function fmt(v,dec){ return v.toFixed(dec); }
 
   // counter animation (loops gently unless reduced motion)
+  var counterRAF=null, counterTimer=null, counterRunning=false;
+  function stopCounters(){
+    counterRunning=false;
+    if(counterRAF){ cancelAnimationFrame(counterRAF); counterRAF=null; }
+    if(counterTimer){ clearTimeout(counterTimer); counterTimer=null; }
+  }
   function runCounters(){
+    // guard against overlapping loops (e.g. repeated visibility resume during a pause)
+    if(counterRunning) return;
+    counterRunning=true;
     var dur=2200, start=null;
     var gauges=[
       {el:document.getElementById('g-speed'), txt:document.querySelector('#g-speed').parentNode.parentNode.querySelector('.gtxt'), frac:4.1/5, label:'4.1×'},
       {el:document.getElementById('g-samp'), txt:document.querySelector('#g-samp').parentNode.parentNode.querySelector('.gtxt'), frac:0.7, label:'70M+'}
     ];
     function step(ts){
+      if(!counterRunning) return;
       if(!start) start=ts;
       var t=Math.min(1,(ts-start)/dur);
       var e=1-Math.pow(1-t,3); // easeOutCubic
@@ -643,12 +681,14 @@
       if(t<1){ counterRAF=requestAnimationFrame(step); }
       else if(!prefersReduced){
         // pause then loop softly
-        setTimeout(function(){ start=null; counterRAF=requestAnimationFrame(step); }, 5200);
+        counterRAF=null;
+        counterTimer=setTimeout(function(){ counterTimer=null; start=null; counterRAF=requestAnimationFrame(step); }, 5200);
+      } else {
+        counterRunning=false; counterRAF=null;
       }
     }
     counterRAF=requestAnimationFrame(step);
   }
-  var counterRAF=null;
   // kick off after slight delay for the smooth bar transition baseline
   setTimeout(runCounters, 350);
 
@@ -720,7 +760,6 @@
     sctx.moveTo(cx,cy-maxR); sctx.lineTo(cx,cy+maxR); sctx.stroke();
 
     // sweep gradient wedge
-    var sweepGrad=sctx.createConicGradient ? null : null;
     sctx.save();
     sctx.translate(cx,cy);
     sctx.rotate(sweepAng);
@@ -741,6 +780,8 @@
     if(!prefersReduced && time-lastPulse > period*1000){
       lastPulse=time;
       pulses.push({t:time, life:0});
+      // soft sonar ping synced to the pulsar pulse (one per pulse, only when visible)
+      if(!document.hidden) sfx('beep');
     }
     if(prefersReduced && pulses.length===0){
       // static frame: a couple of frozen rings
@@ -785,25 +826,34 @@
   }
 
   var mouseX=0.5, mouseY=0.5;
-  sky.addEventListener('mousemove',function(e){
-    var r=sky.getBoundingClientRect();
-    mouseX=(e.clientX-r.left)/r.width;
-    mouseY=(e.clientY-r.top)/r.height;
-    // hover readout
+  // cached canvas rect — refreshed on resize/scroll to avoid layout thrash per mousemove
+  var skyRect=null;
+  function refreshSkyRect(){ skyRect=sky.getBoundingClientRect(); }
+  refreshSkyRect();
+  function p2(n){return String(n).padStart(2,'0');}
+  // readout is rebuilt inside the RAF loop (throttled) rather than per mousemove
+  function updateReadout(time){
     var ra = ((mouseX*24)%24);
     var dec = (90 - mouseY*120);
-    var sn = (6 + Math.abs(Math.sin(performance.now()*0.003))*22).toFixed(1);
+    var sn = (6 + Math.abs(Math.sin(time*0.003))*22).toFixed(1);
     var rh=Math.floor(ra), rm=Math.floor((ra%1)*60), rs=Math.floor((((ra%1)*60)%1)*60);
-    function p2(n){return String(n).padStart(2,'0');}
     readout.innerHTML='RA '+p2(rh)+':'+p2(rm)+':'+p2(rs)+' · DEC '+(dec>=0?'+':'')+dec.toFixed(0)+'°'+'<br/>PULSE '+period.toFixed(3)+' s · S/N '+sn;
+  }
+  sky.addEventListener('mousemove',function(e){
+    var r = skyRect || (skyRect=sky.getBoundingClientRect());
+    if(!r.width || !r.height) return;
+    mouseX=(e.clientX-r.left)/r.width;
+    mouseY=(e.clientY-r.top)/r.height;
   });
   sky.addEventListener('click',function(e){
-    var r=sky.getBoundingClientRect();
+    var r = skyRect || sky.getBoundingClientRect();
     var x=e.clientX-r.left, y=e.clientY-r.top;
     var dx=x-pulsar.x, dy=y-pulsar.y;
     if(Math.sqrt(dx*dx+dy*dy) < 34){
       // clicked pulsar -> open profile drawer
       var c=CONTENT.pulsar;
+      var wasOpen = drawer.classList.contains('open');
+      sfx('select');
       setActive(null);
       drawerTitleTxt.textContent=c.title;
       setDrawerIcon(c.icon);
@@ -811,6 +861,7 @@
       drawerBody.innerHTML=c.html;
       drawer.classList.add('open');
       drawerBody.scrollTop=0;
+      if(!wasOpen) sfx('whoosh');
       animateSkillBars();
     }
   });
@@ -865,32 +916,42 @@
   }
 
   /* ---------------- ANIMATION LOOP ---------------- */
-  var running=true, raf=null;
+  var running=true, raf=null, lastReadout=0;
   function loop(time){
-    if(!running) return;
+    if(!running){ raf=null; return; }
     drawSky(time);
     drawScope(time);
+    // throttle the DOM readout update to ~12 fps to avoid layout thrash
+    if(time-lastReadout > 80){ lastReadout=time; updateReadout(time); }
     raf=requestAnimationFrame(loop);
   }
   function renderOnce(){
-    drawSky(performance.now());
-    drawScope(performance.now());
+    var now=performance.now();
+    drawSky(now);
+    drawScope(now);
+    updateReadout(now);
   }
 
   function startLoop(){
     if(prefersReduced){ renderOnce(); return; }
-    if(!running){ running=true; raf=requestAnimationFrame(loop); }
-    else if(!raf){ raf=requestAnimationFrame(loop); }
+    running=true;
+    if(!raf){ raf=requestAnimationFrame(loop); }
   }
   function stopLoop(){
     running=false;
     if(raf){ cancelAnimationFrame(raf); raf=null; }
   }
 
-  // pause when tab hidden
+  // pause all animation when tab hidden; resume cleanly when visible
   document.addEventListener('visibilitychange',function(){
-    if(document.hidden){ stopLoop(); }
-    else { if(!prefersReduced){ running=true; raf=requestAnimationFrame(loop); } else { renderOnce(); } }
+    if(document.hidden){
+      stopLoop();
+      stopCounters();
+    } else {
+      refreshSkyRect();
+      if(prefersReduced){ renderOnce(); }
+      else { startLoop(); runCounters(); }
+    }
   });
 
   /* ---------------- RESIZE ---------------- */
@@ -898,11 +959,14 @@
   function doResize(){
     DPR=Math.min(window.devicePixelRatio||1,2);
     sizeSky(); sizeScope();
+    refreshSkyRect();
     if(prefersReduced) renderOnce();
   }
   window.addEventListener('resize',function(){
     clearTimeout(resizeT); resizeT=setTimeout(doResize,120);
   });
+  // keep cached canvas rect in sync when the page scrolls (small-screen stacked layout)
+  window.addEventListener('scroll', refreshSkyRect, {passive:true});
 
   /* ---------------- INIT ---------------- */
   sizeSky(); sizeScope();

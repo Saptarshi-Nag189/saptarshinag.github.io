@@ -12,6 +12,7 @@
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <script src="_shared/sfx.js"></script>
   <style>
     :root {
       --bg: #08080b;
@@ -205,66 +206,90 @@
 <body>
   <div class="wrap">
     <header>
-      <p class="kicker">Concept Lab · Saptarshi Nag</p>
+      <p class="kicker">Saptarshi Nag · AI/ML Engineer</p>
       <h1>Choose your<br><span class="grad">experience.</span></h1>
-      <p class="lede">Six radically different ways to present the same portfolio — not a page you
-        scroll, but a world you explore. Each is a working prototype. <strong>Open them, play, and
-        pick a direction</strong> (or mix a few). The live site stays untouched.</p>
+      <p class="lede">Nine ways to experience the same portfolio — not a page you scroll, but worlds you
+        explore, each with its own sound. <strong>Pick one and dive in</strong> (sound on after your
+        first click; mute anytime, bottom-left).</p>
     </header>
 
     <div class="grid" id="grid"></div>
 
     <footer>
-      <span>// six concept prototypes · cinematic · built from scratch</span>
-      <span>pick one → we build the full site on it</span>
+      <span>// nine experiences · cinematic · sound on · built from scratch</span>
+      <span>one portfolio, told nine ways</span>
     </footer>
   </div>
 
   <script>
     const demos = [
       {
-        slug: 'terminal-os', num: '01', icon: 'fa-terminal', c: '#4aff8f',
+        href: './terminal-os/index.html', num: '01', icon: 'fa-terminal', c: '#4aff8f',
         title: 'Terminal OS', tag: 'boot · type · explore',
         desc: 'The site boots like an operating system, then hands you a live shell. Run commands to reveal everything — no scrolling, you drive it.'
       },
       {
-        slug: 'observatory', num: '02', icon: 'fa-satellite-dish', c: '#36e0ff',
+        href: './observatory/index.html', num: '02', icon: 'fa-satellite-dish', c: '#36e0ff',
         title: 'Mission Control', tag: 'observatory HUD',
         desc: 'A cinematic control room with a radio-telescope sky map, a pulsing pulsar and live telemetry. Jump between stations instead of scrolling.'
       },
       {
-        slug: 'neural-graph', num: '03', icon: 'fa-circle-nodes', c: '#a78bfa',
+        href: './neural-graph/index.html', num: '03', icon: 'fa-circle-nodes', c: '#a78bfa',
         title: 'Neural Graph', tag: 'explorable node map',
         desc: 'A living force-directed galaxy of roles, projects and skills. Click a node to expand it; drag to pan, scroll to zoom. Non-linear discovery.'
       },
       {
-        slug: 'signal-decode', num: '04', icon: 'fa-wave-square', c: '#3dff9a',
+        href: './signal-decode/index.html', num: '04', icon: 'fa-wave-square', c: '#3dff9a',
         title: 'Signal Decode', tag: 'tune · lock · reveal',
         desc: 'An incoming deep-space signal buried in static. Tune the frequency and the portfolio decodes out of the noise as the carrier locks.'
       },
       {
-        slug: 'pit-wall', num: '05', icon: 'fa-flag-checkered', c: '#ff2d2d',
+        href: './pit-wall/index.html', num: '05', icon: 'fa-flag-checkered', c: '#ff2d2d',
         title: 'F1 Pit Wall', tag: 'lights out · go',
         desc: 'A Formula 1 race-engineer HUD: start lights, live tyre telemetry, and a timing board where every lap is a career milestone.'
       },
       {
-        slug: 'cinema', num: '06', icon: 'fa-clapperboard', c: '#e8c170',
+        href: './cinema/index.html', num: '06', icon: 'fa-clapperboard', c: '#e8c170',
         title: 'Movie Premiere', tag: 'now showing',
-        desc: 'Your portfolio as a film: a marquee, an opening title sequence, and selectable reels that play onto the screen. Roll the credits.'
+        desc: 'Your portfolio as a film: marquee, an opening title sequence with reel-projector sound, and selectable reels that play onto the screen.'
+      },
+      {
+        href: './world/index.html', num: '07', icon: 'fa-gamepad', c: '#ffd34d',
+        title: '2D World', tag: 'walk · explore · play',
+        desc: 'A playable top-down world — steer your avatar through zones and step into each part of the portfolio. A little game you actually play.'
+      },
+      {
+        href: './space-3d/index.html', num: '08', icon: 'fa-cube', c: '#7cc8ff',
+        title: '3D Space', tag: 'orbit · zoom · click',
+        desc: 'Real WebGL: orbit a glowing core ringed by floating panels, then click one to fly in and read it. Interactive 3D, right in the browser.'
+      },
+      {
+        href: '../index.html', num: '09', icon: 'fa-window-maximize', c: '#7cff9b',
+        title: 'Classic', tag: 'the standard site',
+        desc: 'The clean, scrollable terminal/brutalist portfolio — every section in one place, no theatrics. The straightforward version.'
       },
     ];
 
     const grid = document.getElementById('grid');
     grid.innerHTML = demos.map(d => `
-      <a class="card" href="./${d.slug}/index.html" style="--c:${d.c}">
-        <span class="card__num">${d.num} / 06</span>
-        <span class="card__icon">${d.icon}</span>
+      <a class="card" href="${d.href}" style="--c:${d.c}">
+        <span class="card__num">${d.num} / 09</span>
+        <span class="card__icon"><i class="fa-solid ${d.icon}"></i></span>
         <h2 class="card__title">${d.title}</h2>
         <p class="card__tag">${d.tag}</p>
         <p class="card__desc">${d.desc}</p>
-        <span class="card__go">Launch demo <span class="arrow">▸</span></span>
+        <span class="card__go">Enter <span class="arrow">▸</span></span>
       </a>
     `).join('');
+
+    // sound: subtle hover / select feedback (engine from _shared/sfx.js)
+    if (window.SFX) {
+      SFX.init({ accent: '#7c5cff', ambient: false });
+      grid.querySelectorAll('.card').forEach(card => {
+        card.addEventListener('mouseenter', () => SFX.play('hover'));
+        card.addEventListener('click', () => SFX.play('select'));
+      });
+    }
   </script>
 </body>
 

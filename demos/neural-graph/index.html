@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+<script src="../_shared/sfx.js"></script>
 <style>
   :root{
     --violet:#a78bfa;
@@ -249,6 +250,18 @@
   "use strict";
 
   var prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // ---------- sound (themed) ----------
+  try {
+    if(window.SFX && typeof window.SFX.init === 'function'){
+      window.SFX.init({ accent:'#a78bfa', ambient:true, ambientFreq:104 });
+    }
+  } catch(e){ /* audio optional; never block the demo */ }
+  function sfx(name){
+    try {
+      if(window.SFX && typeof window.SFX.play === 'function') window.SFX.play(name);
+    } catch(e){ /* ignore */ }
+  }
 
   var canvas = document.getElementById('graph');
   var ctx = canvas.getContext('2d');
@@ -505,6 +518,7 @@
     canvas.style.width = W+'px';
     canvas.style.height = H+'px';
     ctx.setTransform(DPR,0,0,DPR,0,0);
+    bgGrad = null; // size changed -> rebuild cached gradient lazily next draw
   }
 
   // ---------- physics ----------
@@ -585,14 +599,21 @@
     return { x: wx*view.scale + view.x, y: wy*view.scale + view.y };
   }
 
+  // Hit-test in SCREEN space so the clickable area always matches what the
+  // user sees, independent of the current pan offset and zoom scale.
+  // The mouse coords (sx,sy) are canvas-relative screen pixels; each node's
+  // world position is projected to screen via toScreen(), and we compare
+  // against a screen-pixel radius (node radius * scale) plus a constant
+  // padding so even tiny zoomed-out nodes stay easy to click.
   function nodeAt(sx, sy){
-    var w = toWorld(sx, sy);
     var best=null, bestD=Infinity;
     for(var i=NODES.length-1;i>=0;i--){
       var n = NODES[i];
-      var dx = n.x - w.x, dy = n.y - w.y;
-      var rr = n.r + 8;
-      var d2 = dx*dx+dy*dy;
+      var s = toScreen(n.x, n.y);
+      var dx = s.x - sx, dy = s.y - sy;
+      // node radius in screen px (+10px padding, min 14px target)
+      var rr = Math.max(n.r * view.scale + 10, 14);
+      var d2 = dx*dx + dy*dy;
       if(d2 <= rr*rr && d2 < bestD){ bestD = d2; best = n; }
     }
     return best;
@@ -615,16 +636,25 @@
 
   // ---------- rendering ----------
   var t = 0;
-  function draw(){
-    t += 0.016;
+  // Cached background gradient (rebuilt only on resize) to avoid allocating a
+  // fresh radial gradient every single frame.
+  var bgGrad = null;
+  function buildBgGrad(){
+    bgGrad = ctx.createRadialGradient(W*0.5,H*0.42,0, W*0.5,H*0.42, Math.max(W,H)*0.8);
+    bgGrad.addColorStop(0,'#120d24');
+    bgGrad.addColorStop(0.5,'#0a0816');
+    bgGrad.addColorStop(1,'#050409');
+  }
+  function draw(dtMs){
+    // Advance the visual clock by real elapsed time (seconds), clamped so a
+    // stall can't jump animations. Falls back to a nominal frame on first call.
+    var dts = (typeof dtMs === 'number' ? dtMs : 16) / 1000;
+    if(dts > 0.1) dts = 0.1;
+    t += dts;
     ctx.clearRect(0,0,W,H);
 
-    // background gradient
-    var bg = ctx.createRadialGradient(W*0.5,H*0.42,0, W*0.5,H*0.42, Math.max(W,H)*0.8);
-    bg.addColorStop(0,'#120d24');
-    bg.addColorStop(0.5,'#0a0816');
-    bg.addColorStop(1,'#050409');
-    ctx.fillStyle = bg;
+    if(!bgGrad) buildBgGrad();
+    ctx.fillStyle = bgGrad;
     ctx.fillRect(0,0,W,H);
 
     ctx.save();
@@ -780,16 +810,44 @@
   var settled = false;
   var settleFrames = 0;
 
-  function loop(){
+  // Fixed-timestep accumulator so physics is frame-rate independent and can
+  // never "explode" after a long stall (e.g. tab regains focus). We cap the
+  // number of catch-up steps per frame so a huge dt is dropped, not simulated.
+  var lastT = 0;
+  var STEP_MS = 1000/60;       // one physics tick = ~16.67ms of sim time
+  var MAX_STEPS = 5;           // at most 5 catch-up ticks per rendered frame
+  var accumulator = 0;
+
+  function loop(now){
     if(!running){ return; }
-    if(!settled || dragNode || focusAnim){
-      var mv = step();
-      settleFrames++;
-      if(mv < 0.12 && !dragNode && settleFrames>40){ settled = true; }
-      if(settleFrames > 1400){ settled = true; }
+    if(typeof now !== 'number') now = performance.now();
+    var dt = now - lastT;
+    lastT = now;
+    // Clamp dt: anything above ~100ms (stall/tab-switch) is treated as one
+    // capped chunk so the accumulator never balloons.
+    if(dt > 100) dt = STEP_MS;
+    accumulator += dt;
+
+    var active = (!settled || dragNode || focusAnim);
+    if(active){
+      var steps = 0;
+      var mv = 0;
+      while(accumulator >= STEP_MS && steps < MAX_STEPS){
+        mv = step();
+        accumulator -= STEP_MS;
+        steps++;
+        settleFrames++;
+        if(mv < 0.12 && !dragNode && settleFrames > 40){ settled = true; break; }
+        if(settleFrames > 1400){ settled = true; break; }
+      }
+      // Drop any leftover backlog so we don't spiral after a slow frame.
+      if(accumulator > STEP_MS) accumulator = 0;
+    } else {
+      accumulator = 0; // idle: don't carry time forward
     }
+
     if(focusAnim) applyFocusAnim();
-    draw();
+    draw(dt);
     rafId = requestAnimationFrame(loop);
   }
   var rafId = null;
@@ -922,12 +980,16 @@
 
   function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
 
-  closeBtn.addEventListener('click', closePanel);
+  closeBtn.addEventListener('click', function(){ sfx('back'); closePanel(); });
 
   // ---------- pointer events ----------
   function getXY(ev){
     var r = canvas.getBoundingClientRect();
-    var src = ev.touches ? ev.touches[0] : ev;
+    // On touchend the `touches` list is empty — fall back to changedTouches
+    // so taps still resolve to a coordinate.
+    var src = ev;
+    if(ev.touches && ev.touches.length){ src = ev.touches[0]; }
+    else if(ev.changedTouches && ev.changedTouches.length){ src = ev.changedTouches[0]; }
     return { x: src.clientX - r.left, y: src.clientY - r.top };
   }
 
@@ -947,28 +1009,39 @@
       canvas.classList.add('grabbing');
     }
   }
+  // Movement under this many screen px counts as a click, not a drag — gives
+  // a forgiving tap target so minor jitter never swallows a node click.
+  var CLICK_SLOP = 6;
   function onMove(ev){
     var p = getXY(ev);
     if(dragNode){
-      if(ev.cancelable) ev.preventDefault();
-      var w = toWorld(p.x, p.y);
-      dragNode.x = w.x; dragNode.y = w.y;
-      dragNode.vx = 0; dragNode.vy = 0;
-      settled = false; settleFrames = 0;
-      if(dist(p, pointerDownPos)>4) dragMoved = true;
+      // Only start actually moving the node once the press passes the slop;
+      // a tiny jitter on press still resolves as a click on release.
+      if(pointerDownPos && dist(p, pointerDownPos) > CLICK_SLOP) dragMoved = true;
+      if(dragMoved){
+        if(ev.cancelable) ev.preventDefault();
+        var w = toWorld(p.x, p.y);
+        dragNode.x = w.x; dragNode.y = w.y;
+        dragNode.vx = 0; dragNode.vy = 0;
+        settled = false; settleFrames = 0;
+      }
     } else if(panning){
       if(ev.cancelable) ev.preventDefault();
       view.x += (p.x - lastPanX);
       view.y += (p.y - lastPanY);
       lastPanX = p.x; lastPanY = p.y;
-      if(dist(p, pointerDownPos)>4) dragMoved = true;
+      if(pointerDownPos && dist(p, pointerDownPos) > CLICK_SLOP) dragMoved = true;
       // panning cancels any focus animation
       focusAnim = null;
     } else {
       // hover
       var n = nodeAt(p.x, p.y);
-      hovered = n;
-      canvas.classList.toggle('hovering', !!n);
+      if(n !== hovered){
+        hovered = n;
+        canvas.classList.toggle('hovering', !!n);
+        // throttle: only when the hovered node actually changes (and is a node)
+        if(n) sfx('hover');
+      }
     }
   }
   function onUp(ev){
@@ -984,10 +1057,11 @@
       // it's a click/tap
       var n = wasDragNode || nodeAt(pointerDownPos.x, pointerDownPos.y);
       if(n){
-        if(selected === n) { /* keep */ }
+        sfx('select');         // node opened
         selectNode(n);
-      } else {
-        if(selected) selectNode(null);
+      } else if(selected){
+        sfx('back');           // tap empty space dismisses the card
+        selectNode(null);
       }
     }
     pointerDownPos = null;
@@ -1003,16 +1077,31 @@
   canvas.addEventListener('touchend', function(ev){ onUp(ev); });
 
   // wheel zoom (toward cursor)
+  var zoomAccum = 0;          // accumulated |log-scale| change since last whoosh
+  var lastWhoosh = 0;         // timestamp throttle
   canvas.addEventListener('wheel', function(ev){
     ev.preventDefault();
     var p = getXY(ev);
     var before = toWorld(p.x, p.y);
     var factor = ev.deltaY < 0 ? 1.12 : 1/1.12;
+    var prevScale = view.scale;
     view.scale = Math.max(0.4, Math.min(3.2, view.scale*factor));
     var after = toWorld(p.x, p.y);
     view.x += (after.x - before.x)*view.scale;
     view.y += (after.y - before.y)*view.scale;
     focusAnim = null;
+
+    // Soft whoosh on a big, throttled zoom change: accumulate the relative
+    // scale change and fire once it crosses a threshold (and >450ms apart).
+    if(view.scale !== prevScale){
+      zoomAccum += Math.abs(Math.log(view.scale / prevScale));
+      var nowTs = performance.now();
+      if(zoomAccum > 0.45 && nowTs - lastWhoosh > 450){
+        sfx('whoosh');
+        lastWhoosh = nowTs;
+        zoomAccum = 0;
+      }
+    }
   }, {passive:false});
 
   window.addEventListener('keydown', function(ev){
@@ -1047,7 +1136,9 @@
     } else {
       if(!running){
         running = true;
-        loop();
+        lastT = performance.now(); // reset clock so resume dt isn't a huge jump
+        accumulator = 0;
+        rafId = requestAnimationFrame(loop);
       }
     }
   });
@@ -1055,18 +1146,18 @@
   // ---------- init ----------
   resize();
   seedPositions();
+  lastT = performance.now();
 
   if(prefersReduced){
     // pre-settle: run many physics steps without rendering
     for(var s=0;s<700;s++){ step(); }
     settled = true;
-    draw();
+    draw(16);
     // still render (one frame loop kept for interaction redraws)
     running = true;
-    loop();
-    // override loop's continuous stepping is handled by settled flag
+    rafId = requestAnimationFrame(loop);
   } else {
-    loop();
+    rafId = requestAnimationFrame(loop);
   }
 
 })();

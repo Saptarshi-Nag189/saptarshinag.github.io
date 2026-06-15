@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+<script src="../_shared/sfx.js"></script>
 <style>
   :root{
     --red:#ff2d2d;
@@ -370,7 +371,7 @@
   </aside>
 
   <!-- gauges -->
-  <section class="panel gauges" style="display:contents">
+  <section class="gauges">
     <div class="panel gauge">
       <span class="c-bl corner"></span>
       <div class="glab"><i class="fa-solid fa-gauge-high"></i> SPEED · KM/H</div>
@@ -383,7 +384,7 @@
       <div class="gval" id="vRpm">0<small>rpm</small></div>
     </div>
     <div class="panel gauge">
-      <div class="glab"><i class="fa-solid fa-bolt"></i> ERS DEPLOY · kJ</div>
+      <div class="glab"><i class="fa-solid fa-bolt"></i> ERS DEPLOY · MJ</div>
       <canvas data-g="ers"></canvas>
       <div class="gval" id="vErs">0<small>kJ</small></div>
     </div>
@@ -405,6 +406,16 @@
   var REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion:reduce)').matches;
   var $ = function(s,r){return (r||document).querySelector(s);};
   var $$ = function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s));};
+
+  /* ---------------- SOUND ---------------- */
+  // SFX is loaded from ../_shared/sfx.js. Guard every call so a missing/blocked
+  // file (e.g. offline sandbox) can never throw a runtime error.
+  var sfx = function(name){ try{ if(window.SFX && SFX.play) SFX.play(name); }catch(e){} };
+  try{ if(window.SFX && SFX.init) SFX.init({ accent:'#ff2d2d', ambient:true, ambientFreq:55 }); }catch(e){}
+  // throttle for hover sounds so rapid pointer moves don't machine-gun
+  var _lastHover = 0;
+  function sfxHover(){ var n=(window.performance&&performance.now)?performance.now():Date.now();
+    if(n-_lastHover>70){ _lastHover=n; sfx('hover'); } }
 
   /* ---------------- DATA ---------------- */
   var ITEMS = [
@@ -600,9 +611,12 @@
   var stageLabel = $('#stageLabel');
   var lapCounter = $('#lapCounter');
 
-  function show(i){
+  function show(i, opts){
+    opts = opts || {};
     current = i;
     $$('.lap').forEach(function(el){el.classList.toggle('active', +el.dataset.i===i);});
+    // panel transition sound (skip on the very first/silent render)
+    if(!opts.silent){ sfx('whoosh'); }
     // wipe transition
     if(!REDUCED){
       wipeEl.classList.remove('go'); void wipeEl.offsetWidth; wipeEl.classList.add('go');
@@ -620,7 +634,15 @@
   }
 
   lapsEl.addEventListener('click', function(e){
-    var lap = e.target.closest('.lap'); if(!lap) return; show(+lap.dataset.i);
+    var lap = e.target.closest('.lap'); if(!lap) return;
+    var idx = +lap.dataset.i;
+    if(idx===current) return; // already open, no-op (avoids redundant transition)
+    sfx('select');
+    show(idx);
+  });
+  // throttled hover beep on lap rows
+  lapsEl.addEventListener('pointermove', function(e){
+    if(e.target.closest('.lap')) sfxHover();
   });
 
   /* ---------------- GAUGES (canvas) ---------------- */
@@ -699,7 +721,7 @@
       '<div class="ttemp" id="tt'+i+'">'+t.temp+'°</div>'+
       '<div class="twear"><i id="tw'+i+'" style="width:'+(t.wear*100)+'%"></i></div>';
     tyreGrid.appendChild(d);
-    var c=$('#tc'+i+''); var r=c.getBoundingClientRect();
+    var c=$('#tc'+i+'');
     c.width=54*DPR; c.height=54*DPR;
   });
   function tempColor(t){ if(t<92) return '#22d3ee'; if(t<104) return '#27e06a'; if(t<114) return '#ffd02e'; return '#ff2d2d'; }
@@ -723,6 +745,8 @@
 
   /* ---------------- ANIMATION LOOP ---------------- */
   var state = {speed:0, rpm:0, ers:0, thr:0, brk:0, t:0, sec:[0,0,0], paused:false};
+  var running=false; // guards against scheduling two concurrent rAF loops
+  function startLoop(){ if(running) return; running=true; last=0; requestAnimationFrame(frame); }
   var vSpeed=$('#vSpeed'),vRpm=$('#vRpm'),vErs=$('#vErs'),vThr=$('#vThr');
   var drsPill=$('#drsPill'),ersPill=$('#ersPill'),clockEl=$('#clock');
   var secA=$('#secA'),secB=$('#secB'),secC=$('#secC');
@@ -742,7 +766,7 @@
   }
 
   function frame(ts){
-    if(state.paused){ return; }
+    if(state.paused){ running=false; return; }
     if(!last) last=ts; var dt=Math.min(0.05,(ts-last)/1000); last=ts; state.t+=dt;
 
     // synthesise a lap: speed oscillates with corners
@@ -751,7 +775,6 @@
     var straight=Math.pow(0.5+0.5*Math.sin(lapPhase*Math.PI*2),3);
     var tgtSpeed=80+ (320-80)*(0.35+0.65*straight);
     state.speed += (tgtSpeed-state.speed)*Math.min(1,dt*3);
-    var gear=(state.speed/320);
     state.rpm += ( (6000+9000*( (state.speed%55)/55 )) - state.rpm)*Math.min(1,dt*4);
     var braking = corner<0.28;
     state.thr += ((braking?0.05:0.6+0.4*straight) - state.thr)*Math.min(1,dt*5);
@@ -776,7 +799,14 @@
     vSpeed.innerHTML=Math.round(state.speed)+'<small>km/h</small>';
     vRpm.innerHTML=Math.round(state.rpm).toLocaleString()+'<small>rpm</small>';
     vErs.innerHTML=state.ers.toFixed(1)+'<small>MJ</small>';
-    vThr.innerHTML=Math.round((state.thr-state.brk)*100)+'<small>%</small>';
+    // throttle vs brake: show whichever pedal dominates, never a negative %
+    if(state.brk>state.thr){
+      vThr.style.color='#ff2d2d';
+      vThr.innerHTML=Math.round(state.brk*100)+'<small>brake</small>';
+    } else {
+      vThr.style.color='#27e06a';
+      vThr.innerHTML=Math.round(state.thr*100)+'<small>thr</small>';
+    }
 
     if(deployDRS){ drsPill.classList.remove('off'); drsPill.classList.add('drs'); drsPill.innerHTML='<i class="fa-solid fa-wind"></i>DRS OPEN'; }
     else{ drsPill.classList.add('off'); drsPill.classList.remove('drs'); drsPill.innerHTML='<i class="fa-solid fa-wind"></i>DRS'; }
@@ -805,7 +835,7 @@
   /* ---------------- PAUSE ON HIDDEN ---------------- */
   document.addEventListener('visibilitychange', function(){
     if(document.hidden){ state.paused=true; }
-    else if(!REDUCED && started){ state.paused=false; last=0; requestAnimationFrame(frame); }
+    else if(!REDUCED && started){ state.paused=false; startLoop(); }
   });
 
   /* ---------------- RESIZE ---------------- */
@@ -814,6 +844,9 @@
     clearTimeout(rzT);
     rzT=setTimeout(function(){
       canvases.forEach(function(g){ g.size(); });
+      // tyre canvases are fixed-size but resizing clears them; repaint now so they
+      // don't blank out until the next ~120ms telemetry tick
+      TYRES.forEach(function(t,i){ drawTyre(i,t); });
       if(REDUCED) setStatics();
     },150);
   });
@@ -828,9 +861,9 @@
     if(started) return; started=true;
     intro.classList.add('gone');
     hud.classList.add('live');
-    show(-1); // overview
+    show(-1, {silent:true}); // overview (first render — no transition sound)
     if(REDUCED){ setStatics(); }
-    else{ last=0; requestAnimationFrame(frame); }
+    else{ startLoop(); }
     setTimeout(function(){ intro.style.display='none'; }, 800);
   }
 
@@ -844,6 +877,7 @@
       introTimers.push(setTimeout(function(){
         $$('.lamp',col).forEach(function(l){ l.classList.add('on'); });
         introStatus.textContent='LIGHTS · '+(ci+1)+' / 5';
+        sfx('beep'); // each of the 5 lights illuminating
       }, 700 + ci*step));
     });
     // hold, then OUT
@@ -856,21 +890,33 @@
       introStatus.textContent='';
       lightsOut.classList.add('show');
       driverLine.textContent='RACE START';
+      sfx('rev'); // lights out — and away we go
     }, holdAt));
     introTimers.push(setTimeout(startHUD, holdAt+1600));
   }
 
-  $('#skipBtn').addEventListener('click', function(){ clearIntro(); startHUD(); });
+  $('#skipBtn').addEventListener('click', function(){ sfx('click'); clearIntro(); startHUD(); });
+  // ← demos : play 'back' then let navigation proceed
+  var backLink = $('.nav a');
+  if(backLink){ backLink.addEventListener('click', function(){ sfx('back'); }); }
+  // hover sounds on right-column cards (records + tyre wheels)
+  var rightcol = $('.rightcol');
+  if(rightcol){
+    rightcol.addEventListener('pointermove', function(e){
+      if(e.target.closest('.rec') || e.target.closest('.twheel')) sfxHover();
+    });
+  }
   document.addEventListener('keydown', function(e){
-    if((e.key==='Enter'||e.key===' ') && !started){ e.preventDefault(); clearIntro(); startHUD(); }
-    if(e.key==='Escape' && !started){ clearIntro(); startHUD(); }
+    if((e.key==='Enter'||e.key===' '||e.key==='Escape') && !started){
+      e.preventDefault(); sfx('click'); clearIntro(); startHUD();
+    }
   });
 
   // boot
   if(REDUCED){
     // skip lights, show HUD directly
     intro.style.display='none';
-    hud.classList.add('live'); started=true; show(-1); setStatics();
+    hud.classList.add('live'); started=true; show(-1, {silent:true}); setStatics();
   } else {
     runLights();
   }

@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;0,900;1,600&family=Oswald:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+<script src="../_shared/sfx.js"></script>
 <style>
   :root {
     --gold: #e8c170;
@@ -413,6 +414,13 @@
 (function () {
   "use strict";
 
+  // ---------- sound (synthesized, see ../_shared/sfx.js) ----------
+  var SFX = window.SFX || null;
+  function sfx(name) { if (SFX) try { SFX.play(name); } catch (e) {} }
+  function projOn() { if (SFX) try { SFX.startProjector(); } catch (e) {} }
+  function projOff() { if (SFX) try { SFX.stopProjector(); } catch (e) {} }
+  if (SFX) try { SFX.init({ accent: "#e8c170", ambient: false }); } catch (e) {}
+
   var REDUCED = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var $ = function (s, r) { return (r || document).querySelector(s); };
   var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
@@ -479,8 +487,10 @@
   var leaderCanvas = $("#leaderCanvas");
   var lctx = leaderCanvas.getContext("2d");
   var leaderRAF = null;
-  var leaderStart = 0;
+  var leaderElapsed = 0; // accumulated VISIBLE seconds (pauses when tab hidden)
+  var leaderLastTs = 0;
   var leaderDone = false;
+  var lastNum = 0; // last countdown digit beeped
 
   function sizeLeader() {
     var dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -490,9 +500,13 @@
   }
 
   function drawLeader(ts) {
-    if (document.hidden) { leaderRAF = requestAnimationFrame(drawLeader); return; }
-    if (!leaderStart) leaderStart = ts;
-    var t = (ts - leaderStart) / 1000; // seconds
+    // Pause when hidden: keep the timeline frozen, just re-anchor on return so
+    // the countdown never "fast-forwards" through the hidden gap (and beeps fire).
+    if (document.hidden) { leaderLastTs = 0; leaderRAF = requestAnimationFrame(drawLeader); return; }
+    if (!leaderLastTs) leaderLastTs = ts;
+    leaderElapsed += Math.min((ts - leaderLastTs) / 1000, 0.1); // clamp huge gaps
+    leaderLastTs = ts;
+    var t = leaderElapsed; // seconds (visible-only)
     var W = leaderCanvas.clientWidth, H = leaderCanvas.clientHeight;
     var cx = W / 2, cy = H / 2;
     var R = Math.min(W, H) * 0.42;
@@ -509,6 +523,7 @@
     var num = 3 - Math.floor(t);
     if (num < 1) { finishLeader(); return; }
     var frac = t - Math.floor(t); // 0..1 within this second
+    if (num !== lastNum) { lastNum = num; sfx("beep"); } // beep on each 3-2-1
 
     // crosshair lines
     lctx.strokeStyle = "rgba(232,193,112,0.35)";
@@ -530,7 +545,6 @@
 
     // sweeping wiper hand
     var ang = -Math.PI / 2 + frac * Math.PI * 2;
-    var grad = lctx.createConicGradient ? null : null;
     lctx.save();
     lctx.translate(cx, cy);
     lctx.fillStyle = "rgba(232,193,112,0.10)";
@@ -569,13 +583,14 @@
     showScene("leader");
     letterbox(true);
     sizeLeader();
-    leaderStart = 0;
+    leaderElapsed = 0;
+    leaderLastTs = 0;
     leaderDone = false;
+    lastNum = 0;
     leaderRAF = requestAnimationFrame(drawLeader);
   }
 
   // ---------- title sequence ----------
-  var titleTimers = [];
   function runTitleSequence() {
     showScene("titleSeq");
     letterbox(true);
@@ -587,7 +602,10 @@
       { i: 2, on: 5800, off: 8800 }
     ];
     seq.forEach(function (s) {
-      later(function () { if (cards[s.i]) cards[s.i].classList.add("show"); }, s.on);
+      later(function () {
+        if (cards[s.i]) cards[s.i].classList.add("show");
+        if (s.i === 1) sfx("success"); // big title reveal
+      }, s.on);
       later(function () { if (cards[s.i]) cards[s.i].classList.remove("show"); }, s.off);
     });
     later(enterTheatre, 9300);
@@ -599,6 +617,7 @@
 
   function curtainSweep(midFn, done) {
     if (REDUCED) { midFn(); if (done) done(); return; }
+    sfx("whoosh");
     curtains.classList.add("closed");
     later(function () {
       midFn();
@@ -611,6 +630,7 @@
 
   function irisTransition(midFn, done) {
     if (REDUCED) { midFn(); if (done) done(); return; }
+    sfx("whoosh");
     iris.classList.add("closed");
     later(function () {
       midFn();
@@ -762,6 +782,14 @@
     return h + '</div><div style="height:24px"></div>';
   }
 
+  var lastHover = 0;
+  function reelHover() {
+    var now = (window.performance && performance.now) ? performance.now() : Date.now();
+    if (now - lastHover < 90) return; // throttle
+    lastHover = now;
+    sfx("hover");
+  }
+
   function buildReels() {
     var wrap = $("#reels");
     wrap.innerHTML = "";
@@ -774,8 +802,9 @@
         '<div class="reel-icon">' + r.icon + '</div>' +
         '<div class="reel-name">' + r.name + '</div>' +
         '<div class="reel-tag">' + r.tag + '</div>';
-      el.addEventListener("click", function () { playReel(idx); });
-      el.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); playReel(idx); } });
+      el.addEventListener("click", function () { sfx("select"); playReel(idx); });
+      el.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); sfx("select"); playReel(idx); } });
+      el.addEventListener("mouseenter", reelHover);
       wrap.appendChild(el);
     });
   }
@@ -851,6 +880,7 @@
   }
 
   function backToTheatre() {
+    sfx("back");
     screenEl.classList.remove("shown");
     curtainSweep(function () {
       $("#creditsRoll").classList.remove("active");
@@ -868,6 +898,7 @@
   // ---------- flow control ----------
   function enterTheatre() {
     clearTimers();
+    projOff(); // projector clatter runs marquee->leader->title, stops at the menu
     irisTransition(function () {
       showScene("theatre");
       letterbox(false);
@@ -877,14 +908,16 @@
 
   function beginShow() {
     if (marqueeRAF) { cancelAnimationFrame(marqueeRAF); marqueeRAF = null; }
+    sfx("click");
     showSkip(true);
     if (REDUCED) {
-      // skip the cinematic intro entirely
+      // skip the cinematic intro entirely (no projector — no leader to score)
       showScene("theatre");
       letterbox(false);
       showSkip(false);
       return;
     }
+    projOn(); // old film-reel clatter through marquee->leader->title
     curtainSweep(function () {
       startLeader();
     });
@@ -894,6 +927,7 @@
     clearTimers();
     if (leaderRAF) { cancelAnimationFrame(leaderRAF); leaderRAF = null; }
     leaderDone = true;
+    projOff(); // stop projector on SKIP INTRO (enterTheatre also stops it — idempotent)
     enterTheatre();
   }
 
@@ -901,7 +935,11 @@
   $("#startBtn").addEventListener("click", beginShow);
   skipBtn.addEventListener("click", skipIntro);
   $("#backToTheatre").addEventListener("click", backToTheatre);
-  $("#nextReel").addEventListener("click", nextReel);
+  $("#nextReel").addEventListener("click", function () { sfx("click"); nextReel(); });
+
+  // back link navigates away — play on pointerdown so it sounds before unload
+  var backLink = $("#backLink");
+  if (backLink) backLink.addEventListener("pointerdown", function () { projOff(); sfx("back"); });
 
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape") {
