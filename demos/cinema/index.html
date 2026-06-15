@@ -112,7 +112,8 @@
   .scene.active { display: block; }
 
   /* ===== 1. MARQUEE ===== */
-  #marquee { display: flex; align-items: center; justify-content: center; z-index: 200; }
+  #marquee { z-index: 200; }
+  #marquee.active { display: flex; align-items: center; justify-content: center; }
   .marquee-board {
     position: relative; text-align: center; padding: 48px 64px;
     border: 3px solid var(--gold-dim);
@@ -900,6 +901,7 @@
     clearTimers();
     projOff(); // projector clatter runs marquee->leader->title, stops at the menu
     irisTransition(function () {
+      if (curtains) curtains.classList.remove("closed"); // never leave curtains stuck closed (e.g. skip during opening sweep)
       showScene("theatre");
       letterbox(false);
       showSkip(false);
