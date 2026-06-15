@@ -582,6 +582,7 @@
     if(c === 'cat'){ catFile(arg); return 'ok'; }
     if(c === 'about'){ commands.whoami(); return 'ok'; }
     if(c === 'clear'){ commands.clear(); return 'clear'; }
+    if(c === 'projects'){ commands.ls('projects/'); return 'ok'; }
     if(commands[c]){
       let r = commands[c](arg);
       if(r && typeof r.then === 'function') r = await r;
@@ -600,7 +601,7 @@
   const history = [];
   let histIdx = 0;
   const VOCAB = ['help','whoami','about','ls','ls projects/','cat experience.log','cat projects/',
-    'experience','skills','publications','education','contact','run pulsar-detect',
+    'experience','projects','skills','publications','education','contact','run pulsar-detect',
     'clear','sudo hire-me'];
 
   function syncMirror(){ mtext.textContent = input.value; }

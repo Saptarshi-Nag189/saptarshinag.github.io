@@ -897,7 +897,9 @@
   }
 
   // ---------- flow control ----------
+  var introFailsafe = null;
   function enterTheatre() {
+    if (introFailsafe) { clearTimeout(introFailsafe); introFailsafe = null; }
     clearTimers();
     projOff(); // projector clatter runs marquee->leader->title, stops at the menu
     irisTransition(function () {
@@ -920,6 +922,10 @@
       return;
     }
     projOn(); // old film-reel clatter through marquee->leader->title
+    // failsafe: always reach the menu even if the intro stalls or a frame breaks
+    introFailsafe = setTimeout(function () {
+      if (!scenes.theatre.classList.contains("active") && !scenes.screen.classList.contains("active")) enterTheatre();
+    }, 14000);
     curtainSweep(function () {
       startLeader();
     });

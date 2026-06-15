@@ -895,7 +895,6 @@
   ================================================================= */
   function start(){
     document.getElementById('intro').classList.add('gone');
-    try{ window.SFX && SFX.init({accent:'#ffd34d',ambient:true,ambientFreq:88}); }catch(e){}
     window.SFX && SFX.play('coin');
     // place player at hub
     P.x=ZONES[0].wx; P.y=ZONES[0].wy+70; cam.x=P.x; cam.y=P.y;
@@ -905,6 +904,8 @@
     requestAnimationFrame(frame);
   }
   document.getElementById('startBtn').addEventListener('click', start);
+  // initialise sound on load so the mute button is present on the intro screen too
+  try{ window.SFX && SFX.init({accent:'#ffd34d',ambient:true,ambientFreq:88}); }catch(e){}
   // also allow Enter / space / tap on intro
   document.getElementById('intro').addEventListener('touchstart',function(e){
     if(e.target.id!=='startBtn'){ start(); }

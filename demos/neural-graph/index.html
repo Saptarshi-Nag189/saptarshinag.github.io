@@ -69,8 +69,10 @@
 
   /* title block top-center-ish */
   .brand{
-    position:fixed;top:20px;left:50%;transform:translateX(-50%);
+    position:fixed;top:14px;left:50%;transform:translateX(-50%);
     z-index:5;text-align:center;pointer-events:none;
+    background:rgba(13,10,24,.55);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);
+    padding:9px 22px 10px;border-radius:16px;border:1px solid var(--line);
   }
   .brand h1{
     font-size:13px;font-weight:600;letter-spacing:.34em;text-transform:uppercase;
@@ -575,6 +577,7 @@
       n = NODES[i];
       if(n.fixed){ n.vx=0; n.vy=0; continue; }
       n.vx *= DAMP; n.vy *= DAMP;
+      if(n === hovered || n === selected){ n.vx *= 0.25; n.vy *= 0.25; } // hold still under the cursor so it's easy to click
       n.x += n.vx; n.y += n.vy;
       var v = Math.abs(n.vx)+Math.abs(n.vy);
       if(v>maxV) maxV = v;
@@ -611,8 +614,8 @@
       var n = NODES[i];
       var s = toScreen(n.x, n.y);
       var dx = s.x - sx, dy = s.y - sy;
-      // node radius in screen px (+10px padding, min 14px target)
-      var rr = Math.max(n.r * view.scale + 10, 14);
+      // node radius in screen px (generous padding + min target for easy clicks)
+      var rr = Math.max(n.r * view.scale + 18, 22);
       var d2 = dx*dx + dy*dy;
       if(d2 <= rr*rr && d2 < bestD){ bestD = d2; best = n; }
     }

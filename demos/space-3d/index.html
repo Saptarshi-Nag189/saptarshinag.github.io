@@ -371,6 +371,9 @@ window.addEventListener('load', function(){
       window.showFallback('script failed to load');
     }
   }, true);
+  // init sound here (non-module) so the mute button + sound work even if the
+  // WebGL module fails to load and we fall back to plain HTML.
+  try { window.SFX && SFX.init({ accent:'#7cc8ff', ambient:true, ambientFreq:70 }); } catch(e){}
 </script>
 
 <script type="module">
@@ -396,7 +399,7 @@ try {
   window.__SPACE_OK__ = true;
   const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  window.SFX && SFX.init({ accent:'#7cc8ff', ambient:true, ambientFreq:70 });
+  // SFX.init is called from the non-module script above (works in fallback too)
 
   /* ====================== scene setup ====================== */
   const canvas = document.getElementById('scene-canvas');
