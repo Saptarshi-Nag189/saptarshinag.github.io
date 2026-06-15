@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<script src="../_shared/sfx.js"></script>
 <style>
   :root{
     --bg:#04060a;
@@ -98,6 +99,7 @@
     animation:blink 1.05s steps(1) infinite;}
   @keyframes blink{50%{opacity:0}}
   .mirror{position:absolute;top:0;left:0;color:transparent;white-space:pre;pointer-events:none;}
+  .caret{vertical-align:baseline;transform:translateY(2px);will-change:opacity;}
 
   /* ---------- Chips ---------- */
   .chips{display:flex;flex-wrap:wrap;gap:7px;padding:10px 0 4px;flex-shrink:0;z-index:11;}
@@ -143,7 +145,7 @@
   <div class="crt-flicker"></div>
 
   <div class="topbar">
-    <a href="../index.html"><i class="fa-solid fa-arrow-left"></i>demos</a>
+    <a href="../index.html" id="backlink"><i class="fa-solid fa-arrow-left"></i>demos</a>
     <span class="spacer"></span>
     <span class="tag"><i class="fa-solid fa-flask"></i>concept demo</span>
   </div>
@@ -169,7 +171,7 @@
       <div class="field">
         <input id="cmd" type="text" autocomplete="off" autocapitalize="off"
                autocorrect="off" spellcheck="false" aria-label="terminal input">
-        <span class="mirror" id="mirror"></span>
+        <span class="mirror" id="mirror"><span id="mtext"></span><span class="caret">&nbsp;</span></span>
       </div>
     </div>
   </div>
@@ -181,8 +183,14 @@
   const sb     = document.getElementById('scrollback');
   const input  = document.getElementById('cmd');
   const mirror = document.getElementById('mirror');
+  const mtext  = document.getElementById('mtext');
   const inputrow = document.getElementById('inputrow');
   const chips  = document.getElementById('chips');
+
+  /* ---------- Sound (shared engine; guarded if script absent) ---------- */
+  const hasSFX = (typeof window.SFX !== 'undefined' && window.SFX);
+  function sfx(name){ if(hasSFX){ try{ window.SFX.play(name); }catch(_){} } }
+  if(hasSFX){ try{ window.SFX.init({ accent:'#4aff8f', ambient:true, ambientFreq:62 }); }catch(_){} }
 
   /* ---------- DOM helpers ---------- */
   function el(html, cls){
@@ -194,9 +202,34 @@
     return d;
   }
   function blank(){ el('&nbsp;'); }
-  function scroll(){ sb.scrollTop = sb.scrollHeight; }
+  let scrollRAF = 0;
+  let pinned = true; // stick to bottom unless the user scrolls up to read
+  sb.addEventListener('scroll', ()=>{
+    // distance from the bottom; treat "within 24px" as pinned
+    pinned = (sb.scrollHeight - sb.scrollTop - sb.clientHeight) < 24;
+  }, {passive:true});
+  function scroll(){
+    if(scrollRAF || !pinned) return;
+    scrollRAF = requestAnimationFrame(()=>{
+      scrollRAF = 0;
+      if(pinned) sb.scrollTop = sb.scrollHeight;
+    });
+  }
   function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
+  /* advance index past any open tag (<...>) or entity (&...;) so a partial
+     slice never renders broken markup */
+  function safeCut(html, i){
+    if(i >= html.length) return html.length;
+    // walk back to find an unfinished '<' or '&' to the left of i
+    const lt = html.lastIndexOf('<', i - 1);
+    const gt = html.lastIndexOf('>', i - 1);
+    if(lt > gt){ const close = html.indexOf('>', i); return close === -1 ? html.length : close + 1; }
+    const amp = html.lastIndexOf('&', i - 1);
+    const semi = html.lastIndexOf(';', i - 1);
+    if(amp > semi && i - amp <= 8){ const close = html.indexOf(';', i); return close === -1 ? html.length : close + 1; }
+    return i;
+  }
   /* type a single line out character-by-character, returns a Promise */
   function typeLine(html, cls, cps){
     return new Promise(res=>{
@@ -206,10 +239,10 @@
       const speed = cps || 1; // chars per tick
       const tick = ()=>{
         i += speed;
-        node.innerHTML = html.slice(0, i);
-        // avoid leaving a broken html entity mid-render — only flush full text on done
+        const cut = safeCut(html, i);
+        node.innerHTML = html.slice(0, cut);
         scroll();
-        if(i < html.length){ setTimeout(tick, 12); }
+        if(cut < html.length){ setTimeout(tick, 12); }
         else { node.innerHTML = html; scroll(); res(); }
       };
       tick();
@@ -445,17 +478,19 @@
         ['  <span class="dim">cv      </span> <a class="link" href="../../saptarshi_resume_linkedin_2026.pdf" download>download résumé (pdf)</a>',''],
       ]);
     },
-    clear(){ sb.innerHTML=''; },
+    clear(){ sb.innerHTML=''; pinned = true; },
     async run(arg){
       const t = (arg||'').trim();
-      if(t === 'pulsar-detect'){ await pulsarDetect(); return; }
+      if(t === 'pulsar-detect'){ await pulsarDetect(); return 'routine'; }
       out([['<span class="red">run: unknown routine: '+esc(t||'(none)')+'</span>',''],
            ['<span class="dim">try: run pulsar-detect</span>','']]);
+      return 'error';
     },
     async sudo(arg){
-      if((arg||'').trim() === 'hire-me'){ await hireMe(); return; }
+      if((arg||'').trim() === 'hire-me'){ await hireMe(); return 'routine'; }
       out([['<span class="red">sudo: '+esc((arg||'').trim()||'(missing command)')+': command not found</span>',''],
            ['<span class="dim">[sudo] the only privileged op here is:</span> <span class="a">sudo hire-me</span>','']]);
+      return 'error';
     }
   };
 
@@ -512,6 +547,7 @@
       ['  <span class="g">▸ pulsar locked</span>  ·  period <span class="a">1.337 ms</span>  ·  DM <span class="a">26.8</span>',''],
       ['  <span class="hl">99.8% F1</span> — pulsar-detect: <span class="g">SUCCESS</span>','']
     ]));
+    sfx('success');
   }
   async function hireMe(){
     out([['<span class="dim">[sudo] authenticating recruiter...</span>','']]);
@@ -527,6 +563,7 @@
       ['  → <a class="link" href="mailto:saptarshinag18@gmail.com?subject=Let%27s%20talk">email me</a>'
        + '   → <a class="link" href="../../saptarshi_resume_linkedin_2026.pdf" download>résumé</a>'
        + '   → <a class="link" target="_blank" rel="noopener" href="https://www.linkedin.com/in/saptarshi18">linkedin</a>','']]));
+    sfx('success');
   }
 
   /* ---------- Parser ---------- */
@@ -534,27 +571,29 @@
     const line = raw.trim();
     // echo the command into scrollback
     el('<span class="ps"><b>saptarshi</b>@os:~$</span> ' + esc(raw), '');
-    if(!line) return;
+    if(!line) return 'empty';
 
     history.push(line); histIdx = history.length;
 
-    const [cmd, ...rest] = line.split(/\s+/);
+    const cmd = line.split(/\s+/)[0];
     const arg = line.slice(cmd.length).trim();
     const c = cmd.toLowerCase();
 
-    if(c === 'cat'){ catFile(arg); return; }
-    if(c === 'about'){ commands.whoami(); return; }
-    if(c === 'clear'){ commands.clear(); return; }
+    if(c === 'cat'){ catFile(arg); return 'ok'; }
+    if(c === 'about'){ commands.whoami(); return 'ok'; }
+    if(c === 'clear'){ commands.clear(); return 'clear'; }
     if(commands[c]){
-      const r = commands[c](arg);
-      if(r && typeof r.then === 'function') await r;
-      return;
+      let r = commands[c](arg);
+      if(r && typeof r.then === 'function') r = await r;
+      // routines (run/sudo) ring their own 'success'; suppress the generic beep
+      return (r === 'routine' || r === 'error') ? r : 'ok';
     }
     // unknown
     out([
       ['<span class="red">command not found: '+esc(cmd)+'</span>',''],
       ['<span class="dim">type</span> <span class="g">help</span> <span class="dim">for the list of commands.</span>','']
     ]);
+    return 'error';
   }
 
   /* ---------- History + autocomplete ---------- */
@@ -564,7 +603,7 @@
     'experience','skills','publications','education','contact','run pulsar-detect',
     'clear','sudo hire-me'];
 
-  function syncMirror(){ mirror.textContent = input.value; }
+  function syncMirror(){ mtext.textContent = input.value; }
 
   let busy = false;
   async function submit(value){
@@ -572,13 +611,24 @@
     busy = true;
     input.value = '';
     syncMirror();
-    await execute(value);
+    const status = await execute(value);
+    if(status === 'error') sfx('error');
+    else if(status === 'ok') sfx('beep');        // subtle: normal commands that printed output
+    else if(status === 'clear') sfx('whoosh');   // screen wiped
+    // 'routine' -> the routine already rang 'success'; 'empty' -> silent
     busy = false;
     focusInput();
   }
 
   input.addEventListener('input', syncMirror);
+  let lastType = 0;
   input.addEventListener('keydown', (e)=>{
+    // throttled typewriter click on printable characters (and backspace edits)
+    if(!e.ctrlKey && !e.metaKey && !e.altKey &&
+       (e.key.length === 1 || e.key === 'Backspace')){
+      const now = (window.performance ? performance.now() : Date.now());
+      if(now - lastType >= 25){ lastType = now; sfx('type'); }
+    }
     if(e.key === 'Enter'){ e.preventDefault(); submit(input.value); }
     else if(e.key === 'ArrowUp'){
       e.preventDefault();
@@ -611,8 +661,22 @@
   chips.addEventListener('click', (e)=>{
     const b = e.target.closest('.chip');
     if(!b) return;
+    sfx('click');
     submit(b.dataset.cmd);
   });
+  let lastHover = 0;
+  chips.addEventListener('mouseover', (e)=>{
+    if(!e.target.closest('.chip')) return;
+    const now = (window.performance ? performance.now() : Date.now());
+    if(now - lastHover >= 60){ lastHover = now; sfx('hover'); }
+  });
+
+  /* ---------- Back link ---------- */
+  const backlink = document.getElementById('backlink');
+  if(backlink){
+    backlink.addEventListener('mouseover', ()=> sfx('hover'));
+    backlink.addEventListener('click', ()=>{ sfx('back'); });
+  }
 
   /* ---------- Focus management ---------- */
   function focusInput(){
@@ -629,7 +693,7 @@
 
   /* ---------- Boot sequence ---------- */
   async function boot(){
-    sb.innerHTML='';
+    sb.innerHTML=''; pinned = true;
     const seq = [
       ['<span class="dim">saptarshi-os</span> <span class="g">v5.0</span> <span class="dim">— phosphor build</span>', 12],
       ['<span class="dim">[ 0.000000 ] booting saptarshi-os...</span>', 30],
