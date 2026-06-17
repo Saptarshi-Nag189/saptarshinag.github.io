@@ -113,9 +113,36 @@
 
   /* ============ HUD ============ */
   #hud{position:relative;z-index:10;height:100vh;display:grid;
-    grid-template-columns:300px 1fr 340px;grid-template-rows:auto 1fr auto;
-    gap:12px;padding:56px 16px 14px;opacity:0;transition:opacity .6s ease}
+    grid-template-columns:300px 1fr 340px;grid-template-rows:auto auto 1fr auto;
+    gap:12px;padding:52px 16px 14px;opacity:0;transition:opacity .6s ease}
   #hud.live{opacity:1}
+
+  /* ---- F1 shift-light / RPM LED strip ---- */
+  .shiftstrip{grid-column:1/-1;display:flex;align-items:center;gap:14px;
+    padding:7px 16px;border-radius:12px;
+    background:linear-gradient(180deg,#0e0e12,#070709);
+    border:1px solid var(--line);position:relative;overflow:hidden}
+  .shiftstrip::after{content:"";position:absolute;inset:0;pointer-events:none;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.05)}
+  .ss-cap{font-family:var(--mono);font-size:12px;letter-spacing:.16em;color:var(--mut);
+    white-space:nowrap;display:flex;align-items:center;gap:6px}
+  .ss-cap.right{min-width:34px;justify-content:center;font-weight:800;font-size:20px;
+    color:#fff;letter-spacing:0;
+    text-shadow:0 0 14px rgba(255,45,45,.5)}
+  .ss-leds{flex:1;display:flex;gap:5px;align-items:center;justify-content:center}
+  .ss-led{flex:1;max-width:34px;height:15px;border-radius:3px;
+    background:#15151a;border:1px solid rgba(255,255,255,.06);
+    transition:background .05s linear,box-shadow .05s linear}
+  .ss-led.on-g{background:radial-gradient(circle at 50% 35%,#9bffc2,var(--green));
+    box-shadow:0 0 12px 1px rgba(39,224,106,.8)}
+  .ss-led.on-a{background:radial-gradient(circle at 50% 35%,#ffe9a8,var(--yellow));
+    box-shadow:0 0 12px 1px rgba(255,208,46,.8)}
+  .ss-led.on-r{background:radial-gradient(circle at 50% 35%,#ffb0b0,var(--red));
+    box-shadow:0 0 14px 2px rgba(255,45,45,.9)}
+  .ss-led.on-b{background:radial-gradient(circle at 50% 35%,#cfe8ff,#3aa0ff);
+    box-shadow:0 0 16px 3px rgba(58,160,255,.95)}
+  .shiftstrip.redline{animation:redblink .12s steps(1) 6}
+  @keyframes redblink{50%{filter:brightness(2.2)}}
 
   .panel{background:linear-gradient(180deg,var(--panel),var(--panel2));
     border:1px solid var(--line);border-radius:12px;position:relative;overflow:hidden}
@@ -147,7 +174,7 @@
   .clock{font-family:var(--mono);font-size:13px;letter-spacing:.12em;color:var(--cyan)}
 
   /* left: lap list */
-  .laplist{grid-row:2/4;display:flex;flex-direction:column}
+  .laplist{grid-row:3/5;display:flex;flex-direction:column}
   .laps{overflow-y:auto;padding:8px;display:flex;flex-direction:column;gap:7px;flex:1}
   .laps::-webkit-scrollbar{width:6px}.laps::-webkit-scrollbar-thumb{background:#2a2a30;border-radius:4px}
   .lap{display:grid;grid-template-columns:34px 1fr auto;align-items:center;gap:10px;
@@ -167,7 +194,14 @@
     padding:6px 10px 2px;text-transform:uppercase}
 
   /* center main */
-  .mainwrap{grid-row:2/3;display:flex;flex-direction:column}
+  .mainwrap{grid-row:3/4;display:flex;flex-direction:column}
+
+  /* circuit / track map bar */
+  .trackbar{position:relative;padding:8px 12px 4px;border-bottom:1px solid var(--line)}
+  .trackbar canvas{width:100%;height:84px;display:block}
+  .track-cap{position:absolute;top:10px;left:14px;font-family:var(--mono);font-size:9px;
+    letter-spacing:.18em;color:var(--mut);text-transform:uppercase;pointer-events:none}
+  .track-cap i{color:var(--red);margin-right:5px}
   .stage{flex:1;position:relative;overflow:hidden}
   .wipe{position:absolute;inset:0;background:linear-gradient(100deg,transparent,var(--red),transparent);
     transform:translateX(-130%);pointer-events:none;z-index:5;opacity:0}
@@ -200,16 +234,25 @@
   .tyre-dot{width:14px;height:14px;border-radius:50%;border:2px solid currentColor}
   .soft{color:var(--red)}.medium{color:var(--yellow)}.hard{color:#dfe3e8}.inter{color:var(--green)}
 
-  /* gauges row */
-  .gauges{grid-column:2/4;grid-row:3/4;display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-  .gauge{padding:10px 12px 12px;display:flex;flex-direction:column;gap:8px}
+  /* onboard telemetry cluster */
+  .cluster{grid-column:2/4;grid-row:4/5;display:flex;flex-direction:column}
+  .cluster .ph{justify-content:space-between}
+  .cluster-gear{display:flex;align-items:center;gap:8px;color:var(--txt)}
+  .cluster-gear .cg-lab{font-family:var(--mono);font-size:9px;letter-spacing:.2em;color:var(--mut)}
+  .cluster-gear .cg-val{font-family:var(--mono);font-weight:800;font-size:18px;color:#fff;
+    min-width:22px;text-align:center;border:1px solid var(--line2);border-radius:6px;
+    padding:1px 6px;background:rgba(255,45,45,.08);text-shadow:0 0 10px rgba(255,45,45,.5)}
+  .gauges{display:grid;grid-template-columns:repeat(4,1fr);gap:0;flex:1}
+  .gauge{padding:10px 12px 12px;display:flex;flex-direction:column;gap:8px;
+    border-right:1px solid var(--line)}
+  .gauge:last-child{border-right:0}
   .gauge .glab{font-family:var(--mono);font-size:9px;letter-spacing:.2em;color:var(--mut);text-transform:uppercase}
-  .gauge canvas{width:100%;height:96px;display:block}
+  .gauge canvas{width:100%;height:92px;display:block}
   .gval{font-family:var(--mono);font-weight:800;font-size:22px;letter-spacing:.02em}
   .gval small{font-size:11px;color:var(--mut);font-weight:500;margin-left:3px}
 
   /* right column: records + tyres */
-  .rightcol{grid-row:2/4;display:flex;flex-direction:column;gap:12px;overflow-y:auto}
+  .rightcol{grid-row:3/5;display:flex;flex-direction:column;gap:12px;overflow-y:auto}
   .rightcol::-webkit-scrollbar{width:6px}.rightcol::-webkit-scrollbar-thumb{background:#2a2a30;border-radius:4px}
   .records{padding:8px 10px 12px;display:flex;flex-direction:column;gap:7px}
   .rec{display:flex;align-items:center;justify-content:space-between;gap:10px;
@@ -280,11 +323,15 @@
   @media (max-width:1100px){
     body{overflow-y:auto;overflow-x:hidden}
     #hud{height:auto;grid-template-columns:1fr;grid-template-rows:none;padding:54px 12px 24px}
-    .laplist,.mainwrap,.gauges,.rightcol{grid-row:auto !important;grid-column:auto !important}
+    .laplist,.mainwrap,.cluster,.rightcol{grid-row:auto !important;grid-column:auto !important}
     .gauges{grid-template-columns:repeat(2,1fr)}
+    .gauge:nth-child(2){border-right:0}
+    .gauge{border-bottom:1px solid var(--line)}
+    .gauge:nth-child(3),.gauge:nth-child(4){border-bottom:0}
     .stage{min-height:420px}
     .laps{max-height:340px}
     .topstrip{flex-wrap:wrap}
+    .ss-led{height:12px}
   }
   @media (prefers-reduced-motion:reduce){
     *{animation-duration:.001s !important;transition-duration:.001s !important}
@@ -315,6 +362,13 @@
 
 <!-- ===================== HUD ===================== -->
 <main id="hud">
+  <!-- F1 steering-wheel shift-light / RPM LED strip -->
+  <section class="shiftstrip" id="shiftStrip" aria-hidden="true">
+    <span class="ss-cap left"><i class="fa-solid fa-gauge-high"></i> RPM</span>
+    <div class="ss-leds" id="ssLeds"></div>
+    <span class="ss-cap right" id="ssGear">N</span>
+  </section>
+
   <!-- top strip -->
   <section class="panel topstrip">
     <span class="c-tl corner"></span><span class="c-tr corner"></span>
@@ -341,6 +395,11 @@
     <div class="ph">
       <span><i class="fa-solid fa-tower-broadcast"></i><span id="stageLabel">RACE CONTROL · OVERVIEW</span></span>
       <span class="lapcount" id="lapCounter">LAP 0 / 6</span>
+    </div>
+    <!-- circuit map: selecting a lap/stint drives the car around the track -->
+    <div class="trackbar">
+      <canvas id="trackMap"></canvas>
+      <div class="track-cap"><i class="fa-solid fa-map-location-dot"></i> CIRCUIT · CAREER LAP MAP</div>
     </div>
     <div class="sectors">
       <div class="sec s1"><i id="secA"></i></div>
@@ -370,29 +429,33 @@
     </section>
   </aside>
 
-  <!-- gauges -->
-  <section class="gauges">
-    <div class="panel gauge">
-      <span class="c-bl corner"></span>
-      <div class="glab"><i class="fa-solid fa-gauge-high"></i> SPEED · KM/H</div>
-      <canvas data-g="speed"></canvas>
-      <div class="gval" id="vSpeed">0<small>km/h</small></div>
+  <!-- onboard telemetry cluster -->
+  <section class="panel cluster">
+    <span class="c-bl corner"></span><span class="c-br corner"></span>
+    <div class="ph"><span><i class="fa-solid fa-car-side"></i>ONBOARD TELEMETRY · CAR 18</span>
+      <span class="cluster-gear"><span class="cg-lab">GEAR</span><span class="cg-val" id="clGear">N</span></span>
     </div>
-    <div class="panel gauge">
-      <div class="glab"><i class="fa-solid fa-gears"></i> ENGINE · RPM</div>
-      <canvas data-g="rpm"></canvas>
-      <div class="gval" id="vRpm">0<small>rpm</small></div>
-    </div>
-    <div class="panel gauge">
-      <div class="glab"><i class="fa-solid fa-bolt"></i> ERS DEPLOY · MJ</div>
-      <canvas data-g="ers"></canvas>
-      <div class="gval" id="vErs">0<small>kJ</small></div>
-    </div>
-    <div class="panel gauge">
-      <span class="c-br corner"></span>
-      <div class="glab"><i class="fa-solid fa-shoe-prints"></i> THROTTLE / BRAKE</div>
-      <canvas data-g="thr"></canvas>
-      <div class="gval" id="vThr">0<small>%</small></div>
+    <div class="gauges">
+      <div class="gauge">
+        <div class="glab"><i class="fa-solid fa-gauge-high"></i> SPEED · KM/H</div>
+        <canvas data-g="speed"></canvas>
+        <div class="gval" id="vSpeed">0<small>km/h</small></div>
+      </div>
+      <div class="gauge">
+        <div class="glab"><i class="fa-solid fa-gears"></i> ENGINE · RPM</div>
+        <canvas data-g="rpm"></canvas>
+        <div class="gval" id="vRpm">0<small>rpm</small></div>
+      </div>
+      <div class="gauge">
+        <div class="glab"><i class="fa-solid fa-bolt"></i> ERS DEPLOY · MJ</div>
+        <canvas data-g="ers"></canvas>
+        <div class="gval" id="vErs">0<small>kJ</small></div>
+      </div>
+      <div class="gauge">
+        <div class="glab"><i class="fa-solid fa-shoe-prints"></i> THROTTLE / BRAKE</div>
+        <canvas data-g="thr"></canvas>
+        <div class="gval" id="vThr">0<small>%</small></div>
+      </div>
     </div>
   </section>
 </main>
@@ -411,11 +474,79 @@
   // SFX is loaded from ../_shared/sfx.js. Guard every call so a missing/blocked
   // file (e.g. offline sandbox) can never throw a runtime error.
   var sfx = function(name){ try{ if(window.SFX && SFX.play) SFX.play(name); }catch(e){} };
-  try{ if(window.SFX && SFX.init) SFX.init({ accent:'#ff2d2d', ambient:true, ambientFreq:55 }); }catch(e){}
-  // throttle for hover sounds so rapid pointer moves don't machine-gun
+  // fire up the V8 idle (no generic ambient drone — the engine IS our ambient)
+  try{ if(window.SFX && SFX.init) SFX.init({ accent:'#ff2d2d', ambient:false }); }catch(e){}
+  function engineStart(){ try{ if(window.SFX && SFX.startEngine) SFX.startEngine(); }catch(e){} }
+  function engineThrottle(t){ try{ if(window.SFX && SFX.setThrottle) SFX.setThrottle(t); }catch(e){} }
+  function engineRev(t,ms){ try{ if(window.SFX && SFX.revTo) SFX.revTo(t,ms); }catch(e){} }
+  // fire the engine up on the very first user gesture, exactly once
+  (function(){
+    var fired=false;
+    function boot(){ if(fired) return; fired=true; engineStart(); }
+    window.addEventListener('pointerdown', boot);
+    window.addEventListener('keydown', boot);
+    window.addEventListener('touchstart', boot, {passive:true});
+  })();
+  // throttle for hover blips so rapid pointer moves don't machine-gun
   var _lastHover = 0;
   function sfxHover(){ var n=(window.performance&&performance.now)?performance.now():Date.now();
-    if(n-_lastHover>70){ _lastHover=n; sfx('hover'); } }
+    if(n-_lastHover>120){ _lastHover=n; sfx('blip_throttle'); } }
+
+  /* ---------- shift-light LED strip + circuit track map ---------- */
+  var ssGearEl = $('#ssGear');
+  var SS_N = 15, ssLeds = [];
+  (function(){ var box=$('#ssLeds'); if(!box) return;
+    for(var i=0;i<SS_N;i++){ var s=document.createElement('span'); s.className='ss-led'; box.appendChild(s); ssLeds.push(s); }
+  })();
+  function ssZone(i){ var f=i/(SS_N-1); return f<0.55?'on-g':(f<0.82?'on-a':'on-r'); }
+  function setShiftLights(frac){
+    frac=Math.max(0,Math.min(1,frac)); var lit=Math.round(frac*SS_N);
+    for(var i=0;i<ssLeds.length;i++){ ssLeds[i].className='ss-led'+(i<lit?(' '+ssZone(i)):''); }
+    if(ssGearEl){ ssGearEl.textContent = frac<0.04?'N':String(Math.min(8,1+Math.floor(frac*7.5))); }
+  }
+  var _ssFlash=null;
+  function flashShiftLights(){
+    var strip=$('#shiftStrip'); if(!strip) return;
+    for(var i=0;i<ssLeds.length;i++) ssLeds[i].className='ss-led on-r';
+    strip.classList.remove('redline'); void strip.offsetWidth; strip.classList.add('redline');
+    if(ssGearEl) ssGearEl.textContent='8';
+    clearTimeout(_ssFlash);
+    _ssFlash=setTimeout(function(){ strip.classList.remove('redline'); setShiftLights(0.16); }, 820);
+  }
+
+  var trackCv=$('#trackMap'), tctx=trackCv?trackCv.getContext('2d'):null;
+  var trackPts=[], carT=0, carTarget=0, trackRAF=null, trackInit=false;
+  function buildTrack(w,h){
+    trackPts=[]; var cx=w/2, cy=h/2, rx=w*0.43, ry=h*0.34, N=220;
+    for(var i=0;i<N;i++){ var a=(i/N)*Math.PI*2;
+      var r=1+0.16*Math.sin(a*3+0.6)+0.09*Math.cos(a*2);
+      trackPts.push({x:cx+Math.cos(a)*rx*r, y:cy+Math.sin(a)*ry*r}); }
+  }
+  function sizeTrack(){ if(!tctx) return; var dpr=Math.min(window.devicePixelRatio||1,2);
+    var w=trackCv.clientWidth||600, h=trackCv.clientHeight||84;
+    trackCv.width=w*dpr; trackCv.height=h*dpr; tctx.setTransform(dpr,0,0,dpr,0,0); buildTrack(w,h); }
+  function drawTrack(){ if(!tctx||!trackPts.length) return;
+    var w=trackCv.clientWidth, h=trackCv.clientHeight; tctx.clearRect(0,0,w,h);
+    tctx.beginPath(); for(var i=0;i<=trackPts.length;i++){ var p=trackPts[i%trackPts.length]; if(i){tctx.lineTo(p.x,p.y);}else{tctx.moveTo(p.x,p.y);} } tctx.closePath();
+    tctx.lineJoin='round'; tctx.strokeStyle='rgba(255,255,255,0.12)'; tctx.lineWidth=7; tctx.stroke();
+    tctx.strokeStyle='rgba(255,45,45,0.55)'; tctx.lineWidth=2; tctx.stroke();
+    var n=(typeof ITEMS!=='undefined')?ITEMS.length:6;
+    for(var k=0;k<n;k++){ var t=((k+1)/(n+1)); var pp=trackPts[Math.floor(t*trackPts.length)%trackPts.length];
+      tctx.beginPath(); tctx.arc(pp.x,pp.y,2.5,0,Math.PI*2); tctx.fillStyle='rgba(255,208,46,0.85)'; tctx.fill(); }
+    var s=trackPts[0]; tctx.fillStyle='#fff'; tctx.fillRect(s.x-1,s.y-7,2,14);
+    var idx=Math.floor(carT*trackPts.length)%trackPts.length; if(idx<0) idx+=trackPts.length;
+    var c=trackPts[idx]; tctx.beginPath(); tctx.arc(c.x,c.y,4.5,0,Math.PI*2);
+    tctx.fillStyle='#27e06a'; tctx.shadowColor='#27e06a'; tctx.shadowBlur=12; tctx.fill(); tctx.shadowBlur=0;
+  }
+  function trackFrame(){ if(document.hidden){ trackRAF=requestAnimationFrame(trackFrame); return; }
+    carT += (carTarget-carT)*0.07; drawTrack(); trackRAF=requestAnimationFrame(trackFrame); }
+  function driveTrackTo(i){ if(!tctx) return;
+    var n=(typeof ITEMS!=='undefined')?ITEMS.length:6;
+    carTarget=(i<0)?0:((i+1)/(n+1));
+    if(!trackInit){ trackInit=true; sizeTrack(); if(!REDUCED){ trackRAF=requestAnimationFrame(trackFrame); } }
+    if(REDUCED){ carT=carTarget; drawTrack(); }
+  }
+  window.addEventListener('resize', function(){ if(trackInit){ sizeTrack(); drawTrack(); } });
 
   /* ---------------- DATA ---------------- */
   var ITEMS = [
@@ -615,8 +746,11 @@
     opts = opts || {};
     current = i;
     $$('.lap').forEach(function(el){el.classList.toggle('active', +el.dataset.i===i);});
-    // panel transition sound (skip on the very first/silent render)
-    if(!opts.silent){ sfx('whoosh'); }
+    // panel transition sounds (skip on the very first/silent render):
+    // 'upshift' as the view changes, 'radio' as the team-radio-style detail opens
+    if(!opts.silent){ sfx('upshift'); sfx('radio'); }
+    // drive the circuit car marker to the selected lap/stint
+    driveTrackTo(i);
     // wipe transition
     if(!REDUCED){
       wipeEl.classList.remove('go'); void wipeEl.offsetWidth; wipeEl.classList.add('go');
@@ -638,6 +772,7 @@
     var idx = +lap.dataset.i;
     if(idx===current) return; // already open, no-op (avoids redundant transition)
     sfx('select');
+    if(!REDUCED){ engineRev(0.85, 400); flashShiftLights(); }
     show(idx);
   });
   // throttled hover beep on lap rows
@@ -877,29 +1012,34 @@
       introTimers.push(setTimeout(function(){
         $$('.lamp',col).forEach(function(l){ l.classList.add('on'); });
         introStatus.textContent='LIGHTS · '+(ci+1)+' / 5';
-        sfx('beep'); // each of the 5 lights illuminating
+        sfx('light'); // each of the 5 start lights beeping on
+        // build revs as the lights come on, and light the shift-light strip
+        engineThrottle(0.25 + (ci/4)*0.55);
+        setShiftLights((ci+1)/5);
       }, 700 + ci*step));
     });
     // hold, then OUT
     var holdAt=700+5*step+ (600+Math.random()*900);
     introTimers.push(setTimeout(function(){
       introStatus.textContent='HOLD…';
+      engineThrottle(0.8); // holding on the limiter
     }, 700+5*step+200));
     introTimers.push(setTimeout(function(){
       lamps.forEach(function(l){ l.classList.remove('on'); });
       introStatus.textContent='';
       lightsOut.classList.add('show');
       driverLine.textContent='RACE START';
-      sfx('rev'); // lights out — and away we go
+      engineRev(1, 900);          // LIGHTS OUT — launch to redline
+      flashShiftLights();         // redline flash on the LED strip
     }, holdAt));
     introTimers.push(setTimeout(startHUD, holdAt+1600));
   }
 
-  $('#skipBtn').addEventListener('click', function(){ sfx('click'); clearIntro(); startHUD(); });
+  $('#skipBtn').addEventListener('click', function(){ sfx('upshift'); clearIntro(); startHUD(); });
   // ← demos : play 'back' then let navigation proceed
   var backLink = $('.nav a');
   if(backLink){ backLink.addEventListener('click', function(){ sfx('back'); }); }
-  // hover sounds on right-column cards (records + tyre wheels)
+  // throttle-blip hovers on right-column cards (records + tyre wheels)
   var rightcol = $('.rightcol');
   if(rightcol){
     rightcol.addEventListener('pointermove', function(e){
@@ -908,7 +1048,7 @@
   }
   document.addEventListener('keydown', function(e){
     if((e.key==='Enter'||e.key===' '||e.key==='Escape') && !started){
-      e.preventDefault(); sfx('click'); clearIntro(); startHUD();
+      e.preventDefault(); sfx('upshift'); clearIntro(); startHUD();
     }
   });
 
