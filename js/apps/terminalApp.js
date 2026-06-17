@@ -121,6 +121,13 @@ export async function createTerminalApp({ system, vfs }) {
       }
 
       input.addEventListener('keydown', async (event) => {
+        if (event.ctrlKey && event.key.toLowerCase() === 'l') {
+          event.preventDefault();
+          output.replaceChildren();
+          prompt.textContent = promptLabel(ctx);
+          return;
+        }
+
         if (event.key === 'Enter') {
           const submitted = input.value;
           input.value = '';

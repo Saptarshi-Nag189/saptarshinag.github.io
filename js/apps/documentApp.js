@@ -20,7 +20,47 @@ export async function createDocumentApp({ vfs, payload }) {
     size: { w: 760, h: 520 },
     minSize: { w: 420, h: 280 },
     mount(container) {
+      let searchQuery = '';
       const bodyLines = lines.length ? lines : [content || '(empty file)'];
+      const linesWrap = createElement('div', { className: 'doc-lines' });
+
+      function renderLines() {
+        const query = searchQuery.trim().toLowerCase();
+        const visibleLines = query
+          ? bodyLines.filter((line) => line.toLowerCase().includes(query))
+          : bodyLines;
+
+        linesWrap.replaceChildren();
+
+        if (!visibleLines.length) {
+          linesWrap.appendChild(createElement('div', {
+            className: 'placeholder-state',
+            text: 'No document lines match this filter.',
+          }));
+          return;
+        }
+
+        visibleLines.forEach((line) => {
+          linesWrap.appendChild(createElement('div', {
+            className: 'doc-line',
+            text: line,
+          }));
+        });
+      }
+
+      const searchInput = createElement('input', {
+        className: 'search-input',
+        attrs: {
+          type: 'search',
+          placeholder: 'Filter visible document lines',
+          'aria-label': 'Filter document lines',
+        },
+      });
+      searchInput.addEventListener('input', (event) => {
+        searchQuery = event.target.value;
+        renderLines();
+      });
+
       const doc = createElement('div', {
         className: 'document-app doc-viewer',
         children: [
@@ -33,19 +73,15 @@ export async function createDocumentApp({ vfs, payload }) {
                 className: 'doc-viewer__meta mono',
                 text: isBundle ? `${path} [bundle]` : path,
               }),
+              searchInput,
             ],
           }),
-          createElement('div', {
-            className: 'doc-lines',
-            children: bodyLines.map((line) => createElement('div', {
-              className: 'doc-line',
-              text: line,
-            })),
-          }),
+          linesWrap,
         ],
       });
 
       container.appendChild(doc);
+      renderLines();
     },
   };
 }

@@ -167,10 +167,48 @@ function bindStatusObservers() {
   });
 }
 
+function bindGlobalKeyboardShortcuts() {
+  window.addEventListener('keydown', (event) => {
+    if (document.body.dataset.runtime !== 'ready') {
+      return;
+    }
+
+    if ((event.altKey && event.key === 'Tab') || (event.ctrlKey && event.key === '`')) {
+      event.preventDefault();
+      system.focusNextWindow();
+      return;
+    }
+
+    if (event.key !== 'Escape') {
+      return;
+    }
+
+    const activeElement = document.activeElement;
+    const isTyping = activeElement && (
+      activeElement.tagName === 'INPUT'
+      || activeElement.tagName === 'TEXTAREA'
+      || activeElement.isContentEditable
+    );
+
+    if (isTyping) {
+      return;
+    }
+
+    system.closeFocusedWindow();
+  });
+
+  window.addEventListener('keyup', (event) => {
+    if (event.key === 'Alt') {
+      system.resetWindowCycle();
+    }
+  });
+}
+
 async function boot() {
   document.body.dataset.runtime = 'booting';
   bindDesktopIcons();
   bindStatusObservers();
+  bindGlobalKeyboardShortcuts();
   await runBootSequence();
   mount.focusedWindowLabel.textContent = 'boot complete';
   system.markBootComplete();

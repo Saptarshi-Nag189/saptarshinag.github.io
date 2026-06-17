@@ -15,6 +15,7 @@ function entryIcon(entry) {
 export async function createExplorerApp({ system, vfs, payload }) {
   let currentPath = payload.path || '/home/saptarshi';
   let selectedPath = currentPath;
+  let searchQuery = '';
   let windowApiRef = null;
 
   function opensAsDocumentBundle(path) {
@@ -33,6 +34,16 @@ export async function createExplorerApp({ system, vfs, payload }) {
     }
 
     return resolved.node.children.slice();
+  }
+
+  function matchesSearch(entry, entryPath) {
+    const query = searchQuery.trim().toLowerCase();
+
+    if (!query) {
+      return true;
+    }
+
+    return entry.name.toLowerCase().includes(query) || entryPath.toLowerCase().includes(query);
   }
 
   function buildTree(treeRoot, path, depth = 0) {
@@ -139,12 +150,33 @@ export async function createExplorerApp({ system, vfs, payload }) {
 
     buildTree(treeColumn, '/home/saptarshi');
     const entries = getEntries(currentPath);
+    const visibleEntries = entries.filter((entry) => {
+      const entryPath = `${currentPath}/${entry.name}`.replace('//', '/');
+      return matchesSearch(entry, entryPath);
+    });
 
     contentColumn.appendChild(renderBreadcrumbs());
+    const searchInput = createElement('input', {
+      className: 'search-input',
+      attrs: {
+        type: 'search',
+        value: searchQuery,
+        placeholder: 'Filter filenames in this directory',
+        'aria-label': 'Filter filenames in explorer',
+      },
+    });
+    searchInput.addEventListener('input', (event) => {
+      searchQuery = event.target.value;
+      render();
+      const nextSearchInput = rootElement.querySelector('.search-input');
+      nextSearchInput?.focus();
+      nextSearchInput?.setSelectionRange(searchQuery.length, searchQuery.length);
+    });
+    contentColumn.appendChild(searchInput);
 
     const list = createElement('div', { className: 'file-list' });
 
-    entries.forEach((entry) => {
+    visibleEntries.forEach((entry) => {
       const entryPath = `${currentPath}/${entry.name}`.replace('//', '/');
       const button = createElement('button', {
         className: `file-row${selectedPath === entryPath ? ' is-selected' : ''}`,
@@ -184,10 +216,10 @@ export async function createExplorerApp({ system, vfs, payload }) {
       list.appendChild(button);
     });
 
-    if (!entries.length) {
+    if (!visibleEntries.length) {
       list.appendChild(createElement('div', {
         className: 'placeholder-state',
-        text: 'No entries in this directory.',
+        text: searchQuery.trim() ? 'No filenames match this filter.' : 'No entries in this directory.',
       }));
     }
 

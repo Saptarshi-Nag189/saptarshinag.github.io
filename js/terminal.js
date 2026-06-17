@@ -1,5 +1,13 @@
 import { basename, formatDuration } from './utils.js';
 
+const MAN_NOTES = {
+  clear: 'Useful when you want a clean prompt without closing the terminal session.',
+  exit: 'Closes only the current terminal window, not the whole Browser OS.',
+  open: 'Targets can be app aliases such as about, projects, files, experience, and cv.',
+  ps: 'Shows both simulated services and app processes with Browser OS pids.',
+  tree: 'Prints an ASCII directory tree generated from the live VFS.',
+};
+
 function result(lines = [], extras = {}) {
   return {
     lines: Array.isArray(lines) ? lines : [String(lines)],
@@ -112,6 +120,41 @@ function resolveFileOrDirectory(vfs, path, cwd) {
   return resolved;
 }
 
+function buildTreeLines(vfs, targetPath, prefix = '') {
+  const { node } = resolveFileOrDirectory(vfs, targetPath, '/');
+
+  if (node.type === 'file') {
+    return [basename(targetPath)];
+  }
+
+  const entries = vfs.listDirectory(targetPath)
+    .sort((left, right) => {
+      if (left.type === right.type) {
+        return left.name.localeCompare(right.name);
+      }
+
+      return left.type === 'directory' ? -1 : 1;
+    });
+
+  const lines = [];
+
+  entries.forEach((entry, index) => {
+    const isLast = index === entries.length - 1;
+    const connector = isLast ? '`-- ' : '|-- ';
+    const childPrefix = `${prefix}${isLast ? '    ' : '|   '}`;
+    const childPath = `${targetPath.replace(/\/$/, '')}/${entry.name}`.replace('//', '/');
+    const label = entry.type === 'directory' ? `${entry.name}/` : entry.name;
+
+    lines.push(`${prefix}${connector}${label}`);
+
+    if (entry.type === 'directory') {
+      lines.push(...buildTreeLines(vfs, childPath, childPrefix));
+    }
+  });
+
+  return lines;
+}
+
 export function createCommandRegistry(system, vfs) {
   const commands = {
     ls: {
@@ -160,6 +203,13 @@ export function createCommandRegistry(system, vfs) {
         return result(String(vfs.readFile(path)).split('\n'));
       },
     },
+    echo: {
+      description: 'print text back to the terminal',
+      usage: 'echo <text...>',
+      execute(ctx, args) {
+        return result([args.join(' ')]);
+      },
+    },
     help: {
       description: 'show available commands',
       usage: 'help',
@@ -194,6 +244,36 @@ export function createCommandRegistry(system, vfs) {
         return result();
       },
     },
+    man: {
+      description: 'show a short manual entry for a command',
+      usage: 'man [command]',
+      execute(ctx, args) {
+        if (!args[0]) {
+          return result([
+            'Manual topics:',
+            ...Object.keys(commands).sort().map((name) => `  ${name}`),
+          ]);
+        }
+
+        const topic = args[0];
+        const entry = commands[topic];
+
+        if (!entry) {
+          throw new Error(`No manual entry for ${topic}`);
+        }
+
+        const lines = [
+          `${topic.toUpperCase()} MANUAL`,
+          `${entry.usage}  ${entry.description}`,
+        ];
+
+        if (MAN_NOTES[topic]) {
+          lines.push(MAN_NOTES[topic]);
+        }
+
+        return result(lines);
+      },
+    },
     open: {
       description: 'open an app, file, or directory',
       usage: 'open <target>',
@@ -222,6 +302,21 @@ export function createCommandRegistry(system, vfs) {
         return result(lines);
       },
     },
+    tree: {
+      description: 'print a recursive directory tree',
+      usage: 'tree [path]',
+      execute(ctx, args) {
+        const target = args[0] || ctx.cwd;
+        const { node, path } = resolveFileOrDirectory(vfs, target, ctx.cwd);
+
+        if (node.type === 'file') {
+          return result([basename(path)]);
+        }
+
+        const rootLabel = path === '/' ? '/' : `${basename(path)}/`;
+        return result([rootLabel, ...buildTreeLines(vfs, path)]);
+      },
+    },
     uptime: {
       description: 'show system uptime',
       usage: 'uptime',
@@ -234,6 +329,13 @@ export function createCommandRegistry(system, vfs) {
       usage: 'pwd',
       execute(ctx) {
         return result([ctx.cwd]);
+      },
+    },
+    whoami: {
+      description: 'print the active Browser OS user',
+      usage: 'whoami',
+      execute(ctx) {
+        return result([ctx.env.USER]);
       },
     },
   };

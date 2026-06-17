@@ -35,6 +35,13 @@ export function createWindowManager({
   let focusedId = null;
   let windowCounter = 0;
   let topZ = 30;
+  let focusCycleOrder = [];
+  let focusCycleIndex = -1;
+
+  function resetFocusCycle() {
+    focusCycleOrder = [];
+    focusCycleIndex = -1;
+  }
 
   function emit(type, record, meta) {
     bus.dispatchEvent(new CustomEvent(type, {
@@ -94,11 +101,15 @@ export function createWindowManager({
       .sort((left, right) => right.zIndex - left.zIndex)[0] || null;
   }
 
-  function focusWindow(id, { emitEvent = true } = {}) {
+  function focusWindow(id, { emitEvent = true, preserveCycle = false } = {}) {
     const target = records.get(id);
 
     if (!target || target.state === 'minimised') {
       return null;
+    }
+
+    if (!preserveCycle) {
+      resetFocusCycle();
     }
 
     records.forEach((record, recordId) => {
@@ -120,6 +131,33 @@ export function createWindowManager({
 
     metadata.get(id).instance?.onFocus?.(cloneRecord(target));
     return cloneRecord(target);
+  }
+
+  function getFocusedWindow() {
+    return focusedId ? cloneRecord(records.get(focusedId)) : null;
+  }
+
+  function focusNextWindow() {
+    const focusable = Array.from(records.values())
+      .filter((record) => record.state !== 'minimised')
+      .sort((left, right) => right.zIndex - left.zIndex);
+
+    if (!focusable.length) {
+      return null;
+    }
+
+    const orderIds = focusable.map((record) => record.id);
+    const sameOrder = focusCycleOrder.length === orderIds.length
+      && focusCycleOrder.every((id) => orderIds.includes(id));
+
+    if (!sameOrder) {
+      focusCycleOrder = orderIds;
+      focusCycleIndex = focusedId ? Math.max(orderIds.indexOf(focusedId), 0) : -1;
+    }
+
+    const nextIndex = (focusCycleIndex + 1) % focusCycleOrder.length;
+    focusCycleIndex = nextIndex;
+    return focusWindow(focusCycleOrder[nextIndex], { preserveCycle: true });
   }
 
   function notifyUpdate(id, eventName = 'window:updated') {
@@ -602,10 +640,13 @@ export function createWindowManager({
     createWindow,
     closeWindow,
     focusWindow,
+    focusNextWindow,
+    resetFocusCycle,
     minimiseWindow,
     maximiseWindow,
     restoreWindow,
     updateTitle,
+    getFocusedWindow,
     listWindows,
     getWindowMeta,
   };

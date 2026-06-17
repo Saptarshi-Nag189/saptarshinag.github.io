@@ -841,6 +841,25 @@ pre,
   margin-bottom: 18px;
 }
 
+.search-input {
+  width: 100%;
+  margin-bottom: 18px;
+  padding: 11px 12px;
+  border: 1px solid rgba(132, 185, 195, 0.16);
+  background: rgba(9, 17, 23, 0.82);
+  color: var(--text);
+  outline: none;
+}
+
+.search-input::placeholder {
+  color: var(--text-muted);
+}
+
+.search-input:focus {
+  border-color: rgba(79, 212, 218, 0.32);
+  box-shadow: 0 0 0 1px rgba(79, 212, 218, 0.14);
+}
+
 .breadcrumbs__button {
   padding: 6px 10px;
   border: 1px solid rgba(132, 185, 195, 0.12);

@@ -257,6 +257,29 @@ export function createSystem({ mount, vfs, apps, scene = null }) {
     return windowManager.focusWindow(windowId);
   }
 
+  function focusNextWindow() {
+    return windowManager.focusNextWindow();
+  }
+
+  function resetWindowCycle() {
+    return windowManager.resetFocusCycle();
+  }
+
+  function getFocusedWindow() {
+    return windowManager.getFocusedWindow();
+  }
+
+  function closeFocusedWindow() {
+    const focusedWindow = getFocusedWindow();
+
+    if (!focusedWindow) {
+      return null;
+    }
+
+    closeApp(focusedWindow.id);
+    return focusedWindow;
+  }
+
   function minimiseWindow(windowId) {
     return windowManager.minimiseWindow(windowId);
   }
@@ -366,6 +389,10 @@ export function createSystem({ mount, vfs, apps, scene = null }) {
     launchApp,
     closeApp,
     focusWindow,
+    focusNextWindow,
+    resetWindowCycle,
+    getFocusedWindow,
+    closeFocusedWindow,
     minimiseWindow,
     maximiseWindow,
     restoreWindow,
