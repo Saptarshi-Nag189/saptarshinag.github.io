@@ -531,7 +531,7 @@
     b.innerHTML='<span class="idx">'+String(i+1).padStart(2,'0')+'</span>'
       +'<i class="fa-solid '+s.icon+' st-ico"></i>'+s.name
       +'<span class="sub">'+s.sub2+'</span>';
-    b.addEventListener('click',function(){ sfx('beep'); sfx('select'); openStation(s.id); });
+    b.addEventListener('click',function(){ sfx('sonar'); sfx('select'); openStation(s.id); });
     b.addEventListener('mouseenter',function(){ stationHover(); });
     stationList.appendChild(b);
   });
@@ -781,7 +781,7 @@
       lastPulse=time;
       pulses.push({t:time, life:0});
       // soft sonar ping synced to the pulsar pulse (one per pulse, only when visible)
-      if(!document.hidden) sfx('beep');
+      if(!document.hidden) sfx('pulse');
     }
     if(prefersReduced && pulses.length===0){
       // static frame: a couple of frozen rings

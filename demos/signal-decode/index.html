@@ -650,7 +650,7 @@
     function tuningTick() {
       if (locked) return;
       const now = performance.now();
-      if (now - lastTick >= 50) { lastTick = now; sfx('type'); }
+      if (now - lastTick >= 50) { lastTick = now; sfx(Math.random() < 0.5 ? 'static' : 'tick'); }
     }
 
     function setTuneFromX(clientX) {

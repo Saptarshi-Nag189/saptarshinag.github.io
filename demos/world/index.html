@@ -481,7 +481,7 @@
     document.getElementById('pbody').innerHTML=z.build();
     document.getElementById('pbody').scrollTop=0;
     panelWrap.classList.add('open');
-    window.SFX && SFX.play('coin');
+    window.SFX && SFX.play('pickup');
   }
   function closePanel(){
     if(!panelOpen) return;
@@ -895,7 +895,8 @@
   ================================================================= */
   function start(){
     document.getElementById('intro').classList.add('gone');
-    window.SFX && SFX.play('coin');
+    window.SFX && SFX.play('power');          // retro power-up on start
+    window.SFX && SFX.startChiptune();         // 8-bit background music
     // place player at hub
     P.x=ZONES[0].wx; P.y=ZONES[0].wy+70; cam.x=P.x; cam.y=P.y;
     checkFA();
@@ -905,7 +906,7 @@
   }
   document.getElementById('startBtn').addEventListener('click', start);
   // initialise sound on load so the mute button is present on the intro screen too
-  try{ window.SFX && SFX.init({accent:'#ffd34d',ambient:true,ambientFreq:88}); }catch(e){}
+  try{ window.SFX && SFX.init({accent:'#ffd34d',ambient:false,ambientFreq:88}); }catch(e){}
   // also allow Enter / space / tap on intro
   document.getElementById('intro').addEventListener('touchstart',function(e){
     if(e.target.id!=='startBtn'){ start(); }

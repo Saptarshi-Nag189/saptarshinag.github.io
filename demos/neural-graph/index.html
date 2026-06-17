@@ -1060,7 +1060,7 @@
       // it's a click/tap
       var n = wasDragNode || nodeAt(pointerDownPos.x, pointerDownPos.y);
       if(n){
-        sfx('select');         // node opened
+        sfx('pulse');          // node opened — synaptic blip
         selectNode(n);
       } else if(selected){
         sfx('back');           // tap empty space dismisses the card
