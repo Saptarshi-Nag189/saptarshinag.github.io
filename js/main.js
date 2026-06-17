@@ -1,4 +1,3 @@
-import { createDesktopScene } from './desktopScene.js';
 import { createSystem } from './system.js';
 import { formatDuration } from './utils.js';
 import { createVfs } from './vfs.js';
@@ -43,17 +42,30 @@ const apps = {
 const system = createSystem({ mount, vfs, apps });
 let scene = null;
 
-try {
-  scene = createDesktopScene({ canvas: mount.canvas, bus: system.bus });
-  system.attachScene(scene);
-  document.body.dataset.scene = 'active';
-} catch (error) {
-  mount.canvas.dataset.renderMode = 'init-fallback';
-  document.body.dataset.scene = 'fallback';
-  console.warn('Desktop scene failed to initialise; continuing with the DOM runtime only.', error);
+document.body.dataset.runtime = 'initialising';
+document.body.dataset.scene = 'pending';
+
+function importWithTimeout(importPromise, timeoutMs) {
+  return Promise.race([
+    importPromise,
+    new Promise((_, reject) => {
+      window.setTimeout(() => reject(new Error('desktop scene import timed out')), timeoutMs);
+    }),
+  ]);
 }
 
-document.body.dataset.runtime = 'initialising';
+async function initialiseDesktopScene() {
+  try {
+    const { createDesktopScene } = await importWithTimeout(import('./desktopScene.js'), 1800);
+    scene = createDesktopScene({ canvas: mount.canvas, bus: system.bus });
+    system.attachScene(scene);
+    document.body.dataset.scene = 'active';
+  } catch (error) {
+    mount.canvas.dataset.renderMode = 'init-fallback';
+    document.body.dataset.scene = 'fallback';
+    console.warn('Desktop scene failed to initialise; continuing with the DOM runtime only.', error);
+  }
+}
 
 function updateClock() {
   mount.systemClock.textContent = new Date().toLocaleTimeString('en-GB', {
@@ -206,10 +218,12 @@ function bindGlobalKeyboardShortcuts() {
 
 async function boot() {
   document.body.dataset.runtime = 'booting';
+  const sceneReady = initialiseDesktopScene();
   bindDesktopIcons();
   bindStatusObservers();
   bindGlobalKeyboardShortcuts();
   await runBootSequence();
+  await sceneReady;
   mount.focusedWindowLabel.textContent = 'boot complete';
   system.markBootComplete();
   system.startBackgroundServices();
