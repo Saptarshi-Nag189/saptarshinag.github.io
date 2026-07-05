@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Night Drive — Saptarshi Nag</title>
+<meta name="description" content="A first-person night drive through the career of Saptarshi Nag, AI/ML Engineer.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="stylesheet" href="../_shared/chrome.css">
+<script src="../_shared/chrome.js" data-accent="#7fe08f" data-tag="night drive"></script>
+<script src="../_shared/sfx.js"></script>
+<style>
+  :root{
+    --green:#7fe08f;          /* highway sign green */
+    --sign:#1d6b3c;
+    --amber:#ffd27f;          /* headlight amber   */
+    --red:#ff5349;            /* taillight red     */
+    --ink:#e9edf2;
+    --dim:#93a0b4;
+    --line:rgba(127,224,143,.22);
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+    --sans:'Inter',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;overflow:hidden;background:#05070e;color:var(--ink);
+    font-family:var(--sans);-webkit-font-smoothing:antialiased}
+  #road{position:fixed;inset:0;display:block;touch-action:none;cursor:pointer}
+
+  /* ---------- intro splash ---------- */
+  #intro{position:fixed;inset:0;z-index:70;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;text-align:center;
+    background:radial-gradient(ellipse 90% 70% at 50% 42%, rgba(10,16,30,.42), rgba(4,6,12,.86));
+    transition:opacity .9s;padding:0 20px}
+  #intro.gone{opacity:0;pointer-events:none}
+  #intro .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.4em;
+    text-transform:uppercase;color:var(--amber);margin-bottom:16px}
+  #intro h1{font-size:clamp(38px,7.5vw,84px);font-weight:700;letter-spacing:-.02em;line-height:1.02;
+    text-shadow:0 0 50px rgba(127,224,143,.25)}
+  #intro h1 b{color:var(--green);font-weight:700}
+  #intro .sub{margin-top:12px;color:var(--dim);font-size:clamp(13px,1.6vw,16px);max-width:52ch}
+  #intro .go{margin-top:30px;font-family:var(--mono);font-size:12.5px;letter-spacing:.14em;
+    color:#04110a;background:var(--green);border:none;border-radius:9px;
+    padding:13px 26px;cursor:pointer;text-transform:uppercase;
+    box-shadow:0 0 34px rgba(127,224,143,.35);transition:transform .15s}
+  #intro .go:hover{transform:translateY(-2px)}
+  #intro .keys{margin-top:18px;font-family:var(--mono);font-size:11px;color:var(--dim)}
+  #intro .keys b{color:var(--ink);border:1px solid rgba(255,255,255,.25);border-radius:5px;
+    padding:2px 8px;font-weight:500;margin:0 2px}
+
+  /* ---------- route strip (the only HUD) ---------- */
+  #route{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:50;
+    display:flex;align-items:center;gap:0;
+    background:rgba(6,10,18,.66);border:1px solid rgba(255,255,255,.14);border-radius:14px;
+    padding:11px 18px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+    max-width:94vw;overflow-x:auto;scrollbar-width:none}
+  #route::-webkit-scrollbar{display:none}
+  .stopdot{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;
+    padding:0 clamp(9px,1.7vw,19px);cursor:pointer;flex:none}
+  .stopdot .d{width:11px;height:11px;border-radius:50%;background:#232c3c;
+    border:2px solid #39465d;transition:.25s}
+  .stopdot .l{font-family:var(--mono);font-size:9px;letter-spacing:.09em;color:var(--dim);
+    text-transform:uppercase;white-space:nowrap;transition:.25s}
+  .stopdot:hover .d{border-color:var(--green)}
+  .stopdot.visited .d{background:var(--green);border-color:var(--green);box-shadow:0 0 10px rgba(127,224,143,.6)}
+  .stopdot.here .d{background:var(--amber);border-color:var(--amber);box-shadow:0 0 12px rgba(255,210,127,.8)}
+  .stopdot.here .l{color:var(--amber)}
+  .stopdot:not(:last-child)::after{content:"";position:absolute;top:5px;right:calc(-1 * clamp(9px,1.7vw,19px));
+    width:calc(2 * clamp(9px,1.7vw,19px));height:1px;background:#2b3548;pointer-events:none}
+
+  #hint{position:fixed;left:50%;bottom:72px;transform:translateX(-50%);z-index:49;
+    font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--dim);
+    background:rgba(6,10,18,.55);border:1px solid rgba(255,255,255,.1);border-radius:999px;
+    padding:6px 15px;transition:opacity .6s;pointer-events:none;white-space:nowrap}
+  #hint b{color:var(--amber);font-weight:500}
+  #hint.gone{opacity:0}
+
+  /* ---------- content card ---------- */
+  #cardWrap{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;
+    background:rgba(3,5,10,.55);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+  #cardWrap.open{display:flex;animation:cfade .3s ease}
+  @keyframes cfade{from{opacity:0}to{opacity:1}}
+  #card{position:relative;width:min(640px,92vw);max-height:82vh;overflow-y:auto;
+    background:linear-gradient(175deg,rgba(13,20,32,.97),rgba(7,11,19,.98));
+    border:1px solid var(--line);border-radius:16px;
+    box-shadow:0 30px 90px rgba(0,0,0,.65),0 0 50px rgba(127,224,143,.08);
+    padding:0 0 28px;animation:crise .35s cubic-bezier(.2,.85,.25,1)}
+  @keyframes crise{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
+  #card::-webkit-scrollbar{width:8px}
+  #card::-webkit-scrollbar-thumb{background:rgba(127,224,143,.3);border-radius:6px}
+  /* the card header styled as a highway sign board */
+  .signhead{background:linear-gradient(180deg,#227a46,#175c33);border-bottom:3px solid #0f4023;
+    border-radius:15px 15px 0 0;padding:22px 30px 18px;position:relative}
+  .signhead .exitno{position:absolute;top:14px;right:18px;font-family:var(--mono);font-size:10.5px;
+    letter-spacing:.18em;color:rgba(255,255,255,.75);border:1.5px solid rgba(255,255,255,.5);
+    border-radius:6px;padding:4px 9px;text-transform:uppercase}
+  .signhead .kick{font-family:var(--mono);font-size:10.5px;letter-spacing:.24em;
+    text-transform:uppercase;color:#cdeed8;margin-bottom:7px;display:flex;align-items:center;gap:8px}
+  .signhead h2{font-size:clamp(20px,3vw,27px);font-weight:700;color:#fff;letter-spacing:-.01em;line-height:1.15}
+  .signhead .sub{margin-top:5px;font-size:13px;color:#bfe3cb}
+  .cbody{padding:22px 30px 0;font-size:14.5px;line-height:1.62;color:#ccd6e4}
+  .cbody p{margin-bottom:13px}
+  .cbody .item{border-left:2px solid var(--line);padding:3px 0 3px 16px;margin-bottom:18px}
+  .cbody .item h3{font-size:16px;font-weight:600;color:#fff;margin-bottom:2px}
+  .cbody .item .meta{font-family:var(--mono);font-size:11px;color:var(--dim);margin-bottom:8px}
+  .cbody ul{list-style:none;margin:4px 0 10px}
+  .cbody ul li{position:relative;padding:5px 0 5px 20px;font-size:13.5px;line-height:1.55}
+  .cbody ul li::before{content:"\f105";font-family:"Font Awesome 6 Free";font-weight:900;
+    position:absolute;left:2px;top:6px;color:var(--green);font-size:11px}
+  .cbody b{color:#fff;font-weight:600}
+  .tags{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 14px}
+  .tag{font-family:var(--mono);font-size:10.5px;color:var(--green);background:rgba(127,224,143,.08);
+    border:1px solid var(--line);border-radius:5px;padding:3px 9px}
+  .mgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:11px;margin:8px 0 6px}
+  .mtile{background:rgba(127,224,143,.05);border:1px solid var(--line);border-radius:11px;padding:13px}
+  .mtile .v{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--green);line-height:1}
+  .mtile .l{font-size:11px;color:var(--dim);margin-top:5px;line-height:1.35}
+  .skillg{margin-bottom:13px}
+  .skillg h4{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--green);margin-bottom:7px}
+  .links a{display:inline-flex;align-items:center;gap:9px;color:var(--amber);text-decoration:none;
+    font-size:14px;margin:5px 20px 5px 0;transition:.18s}
+  .links a:hover{text-shadow:0 0 12px rgba(255,210,127,.6)}
+  .links a i{width:18px;text-align:center}
+  #cardClose{position:absolute;top:14px;left:16px;width:34px;height:34px;border-radius:9px;
+    border:1px solid rgba(255,255,255,.3);background:rgba(0,0,0,.25);color:#fff;cursor:pointer;
+    font-size:13px;display:flex;align-items:center;justify-content:center;transition:.18s;z-index:2}
+  #cardClose:hover{background:rgba(0,0,0,.45)}
+  #cardNext{margin:20px 30px 0;font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;
+    text-transform:uppercase;color:#04110a;background:var(--green);border:none;border-radius:9px;
+    padding:11px 20px;cursor:pointer;transition:transform .15s}
+  #cardNext:hover{transform:translateY(-2px)}
+
+  @media (prefers-reduced-motion: reduce){
+    #intro,#cardWrap,#card{animation:none !important;transition:none !important}
+  }
+  @media (max-width:640px){
+    .stopdot .l{display:none}
+    .signhead{padding:20px 20px 15px}
+    .cbody{padding:18px 20px 0}
+    #cardNext{margin-left:20px}
+  }
+</style>
+</head>
+<body>
+
+<canvas id="road"></canvas>
+
+<div id="intro">
+  <div class="kicker"><i class="fa-solid fa-road"></i>&nbsp; route 2019 → present</div>
+  <h1>Drive the <b>night.</b></h1>
+  <p class="sub">One highway, eight exits — every exit is a chapter of Saptarshi Nag's story.
+    Hold to accelerate, ease off to coast, and pull over wherever the signs interest you.</p>
+  <button class="go" id="startBtn"><i class="fa-solid fa-car-side"></i>&nbsp; start the engine</button>
+  <div class="keys">hold <b>W</b> / <b>↑</b> / <b>touch</b> to drive &nbsp;·&nbsp; <b>click a stop</b> below to fast-travel</div>
+</div>
+
+<div id="hint"><b>hold</b> to drive — the next exit is ahead</div>
+<div id="route" aria-label="Route stops"></div>
+
+<div id="cardWrap">
+  <div id="card">
+    <button id="cardClose" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+    <div class="signhead">
+      <span class="exitno" id="cExit"></span>
+      <div class="kick" id="cKick"></div>
+      <h2 id="cTitle"></h2>
+      <div class="sub" id="cSub"></div>
+    </div>
+    <div class="cbody" id="cBody"></div>
+    <button id="cardNext"><i class="fa-solid fa-road"></i>&nbsp; back on the road</button>
+  </div>
+</div>
+
+<script>
+(function(){
+'use strict';
+var REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+var sfx = function(n){ try{ window.SFX && SFX.play(n); }catch(e){} };
+try{ window.SFX && SFX.init({ accent:'#7fe08f', ambient:false }); }catch(e){}
+
+/* ================= CONTENT ================= */
+function esc(s){ return s; }
+var STOPS = [
+ { id:'origins', label:'Origins', icon:'fa-graduation-cap', exit:'EXIT 1', kick:'where the road begins',
+   title:'Origins — Education', sub:'Kolkata → Pune · 2019 → 2025',
+   body:'<div class="item"><h3>B.Tech, Computer Science & Engineering</h3><div class="meta">Academy of Technology, Kolkata · 2019–2023 · CGPA 9.44/10.0</div></div>'+
+        '<div class="item"><h3>M.Tech, CSE (Artificial Intelligence)</h3><div class="meta">Defence Institute of Advanced Technology (DIAT, DRDO), Pune · 2023–2025 · CGPA 8.64/10.0</div></div>'+
+        '<div class="item"><h3>GATE 2024</h3><div class="meta">Rank 1790 · Data Science &amp; AI · top 5%</div></div>' },
+ { id:'gmrt', label:'GMRT', icon:'fa-satellite-dish', exit:'EXIT 2', kick:'career · winter internship',
+   title:'GMRT — Giant Metrewave Radio Telescope', sub:'NCRA-TIFR · Pune · Dec 2023 – Jan 2024 · HPC & Signal Processing',
+   body:'<p>First stint at one of the world\'s largest radio telescope arrays — optimising the signal-processing path everything else depends on.</p>'+
+        '<ul><li>Profiled legacy <b>CPU signal-filtering pipelines</b> and refactored them for <b>multicore execution</b>.</li>'+
+        '<li>Cut latency by <b>50%</b>, unblocking <b>real-time processing</b> of continuous telescope data streams.</li></ul>' },
+ { id:'ncra', label:'NCRA-TIFR', icon:'fa-star', exit:'EXIT 3', kick:'career · research internship',
+   title:'NCRA-TIFR — Weak Pulsar Detection', sub:'M.Tech project · Pune · Aug 2024 – Apr 2025',
+   body:'<ul><li>Designed a <b>ResNet1D + Squeeze-and-Excitation attention</b> architecture for weak pulsar signal detection at low SNR.</li>'+
+        '<li>Achieved <b>99.8% F1-score</b> across <b>70M+ samples</b>; adaptive thresholding for non-stationary noise floors.</li>'+
+        '<li>Ran the project end-to-end independently — scoping through deployment and write-up.</li></ul>'+
+        '<div class="mgrid"><div class="mtile"><div class="v">99.8%</div><div class="l">pulsar F1-score</div></div>'+
+        '<div class="mtile"><div class="v">70M+</div><div class="l">samples processed</div></div></div>' },
+ { id:'cdac', label:'C-DAC', icon:'fa-shield-halved', exit:'EXIT 4', kick:'career · current role',
+   title:'C-DAC — AI Research & IoT Security', sub:'Project Engineer · Chennai · Jul 2025 – present',
+   body:'<ul><li>Built a real-time <b>Zero Trust security framework</b> for IoT networks — WiFi (802.11), BLE, Zigbee, LoRa — feeding a continuous <b>7-pillar device trust score</b> engine.</li>'+
+        '<li>Two-stage hybrid detection: <b>window model</b> (1-second windows, 7 attack classes) + <b>flow model</b>; RF, XGBoost, SVM, MLP and Voting Ensemble compared over 6 preprocessing iterations with SMOTE + Optuna (TPE).</li>'+
+        '<li>Best results: <b>96.97% accuracy</b> (flow/RF); <b>90.86% accuracy / 86.78% macro F1</b> (window/Ensemble).</li>'+
+        '<li>Engineered <b>63 features</b> from raw PCAPs (Scapy/PyShark); live PCAP drop-folder pipeline (Watchdog, MD5 dedup, multi-threaded).</li>'+
+        '<li><b>SPIFFE/SPIRE</b> workload identity, mTLS, OTP-based 2FA. Two papers at <b>IoTaIS 2025</b>.</li></ul>'+
+        '<div class="mgrid"><div class="mtile"><div class="v">96.97%</div><div class="l">attack-detection accuracy</div></div>'+
+        '<div class="mtile"><div class="v">63</div><div class="l">features from raw PCAPs</div></div></div>' },
+ { id:'projects', label:'Projects', icon:'fa-diagram-project', exit:'EXIT 5', kick:'the workshop',
+   title:'Featured Projects', sub:'four builds worth pulling over for',
+   body:'<div class="item"><h3>GPU-Accelerated F1 Tyre Degradation & Race Strategy</h3><div class="meta">the reason this road exists</div>'+
+        '<div class="tags"><span class="tag">Python</span><span class="tag">PyTorch</span><span class="tag">CUDA</span><span class="tag">CuPy</span><span class="tag">XGBoost</span></div>'+
+        '<ul><li>Hybrid <b>LSTM-XGBoost</b> for tyre wear + pit-stop windows from 10 Hz telemetry.</li>'+
+        '<li><b>Physics-informed loss (PINNs)</b> separating thermal and mechanical degradation.</li>'+
+        '<li>Custom CUDA/CuPy kernels — <b>4.1× training speedup</b>.</li></ul></div>'+
+        '<div class="item"><h3>Omniscience Pro — Privacy-First Local RAG</h3>'+
+        '<div class="tags"><span class="tag">Python</span><span class="tag">LangChain</span><span class="tag">ChromaDB</span><span class="tag">Docker</span></div>'+
+        '<ul><li>Local multi-modal ingestion; <b>&lt;50 ms</b> vector search (HNSW); <b>&lt;500 ms</b> first-token latency.</li>'+
+        '<li>GPU-aware Docker, CI/CD, POSIX file locking.</li></ul></div>'+
+        '<div class="item"><h3>ARO — Autonomous Research Operator</h3>'+
+        '<div class="tags"><span class="tag">Python</span><span class="tag">Flask</span><span class="tag">SQLAlchemy</span><span class="tag">NetworkX</span><span class="tag">React</span></div>'+
+        '<ul><li>Multi-agent LLM workflows as directed graphs; Flask SSE streaming; React UI.</li>'+
+        '<li>Adversarial audit found &amp; fixed <b>16 vulnerabilities</b> (auth, SSRF, input validation, CORS).</li></ul></div>'+
+        '<div class="item"><h3>Llama 3.2 Optimisation for Efficient Inference</h3>'+
+        '<div class="tags"><span class="tag">Python</span><span class="tag">Unsloth</span><span class="tag">Hugging Face</span><span class="tag">PyTorch</span></div>'+
+        '<ul><li>Fine-tuned Llama 3.2 (1B/3B) on <b>21.5k</b> interactions; <b>4-bit quantisation</b> with no meaningful quality drop.</li></ul></div>' },
+ { id:'skills', label:'Skills', icon:'fa-microchip', exit:'EXIT 6', kick:'the toolkit',
+   title:'Skills', sub:'what\'s in the trunk',
+   body:'<div class="skillg"><h4>Languages</h4><div class="tags"><span class="tag">Python (advanced)</span><span class="tag">C++ (proficient)</span><span class="tag">C</span><span class="tag">Bash</span><span class="tag">SQL</span></div></div>'+
+        '<div class="skillg"><h4>ML & Scientific Computing</h4><div class="tags"><span class="tag">PyTorch</span><span class="tag">XGBoost</span><span class="tag">Scikit-learn</span><span class="tag">PINNs</span><span class="tag">NumPy</span><span class="tag">SciPy</span></div></div>'+
+        '<div class="skillg"><h4>HPC & Systems</h4><div class="tags"><span class="tag">CUDA</span><span class="tag">CuPy</span><span class="tag">Parallel Processing</span><span class="tag">Quantisation (4/8-bit)</span><span class="tag">Latency Optimisation</span><span class="tag">Linux</span></div></div>'+
+        '<div class="skillg"><h4>Data & Engineering</h4><div class="tags"><span class="tag">Statistical Anomaly Detection</span><span class="tag">Time-Series</span><span class="tag">CI/CD</span><span class="tag">Docker</span><span class="tag">Git</span><span class="tag">Flask</span><span class="tag">ChromaDB</span></div></div>'+
+        '<div class="skillg"><h4>AI & MLOps</h4><div class="tags"><span class="tag">RAG Systems</span><span class="tag">LLM Fine-Tuning</span><span class="tag">Multi-Agent Orchestration</span><span class="tag">SQLAlchemy</span></div></div>' },
+ { id:'papers', label:'Papers', icon:'fa-book', exit:'EXIT 7', kick:'published work',
+   title:'Publications', sub:'IoTaIS 2025 · Bali, Indonesia',
+   body:'<div class="item"><h3>Protocol-Aware Continuous Monitoring and Anomaly Detection in IoT Networks</h3><div class="meta">IoTaIS 2025 · Bali</div></div>'+
+        '<div class="item"><h3>A Comprehensive Survey on Zero Trust Architecture in IoT Networks</h3><div class="meta">IoTaIS 2025 · Bali</div></div>' },
+ { id:'dest', label:'Contact', icon:'fa-flag-checkered', exit:'DESTINATION', kick:'journey\'s end — for now',
+   title:'Saptarshi Nag — AI/ML Engineer', sub:'trip records & how to reach the driver',
+   body:'<p>AI/ML engineer at the intersection of security and systems research. The odometer so far:</p>'+
+        '<div class="mgrid"><div class="mtile"><div class="v">96.97%</div><div class="l">IoT attack detection</div></div>'+
+        '<div class="mtile"><div class="v">99.8%</div><div class="l">pulsar F1-score</div></div>'+
+        '<div class="mtile"><div class="v">4.1×</div><div class="l">GPU speedup</div></div>'+
+        '<div class="mtile"><div class="v">50%</div><div class="l">latency cut</div></div>'+
+        '<div class="mtile"><div class="v">70M+</div><div class="l">samples</div></div></div>'+
+        '<div class="links" style="margin-top:16px">'+
+        '<a href="mailto:saptarshinag18@gmail.com"><i class="fa-solid fa-envelope"></i>saptarshinag18@gmail.com</a>'+
+        '<a href="https://www.linkedin.com/in/saptarshi18" target="_blank" rel="noopener"><i class="fa-brands fa-linkedin"></i>/in/saptarshi18</a>'+
+        '<a href="https://github.com/Saptarshi-Nag189" target="_blank" rel="noopener"><i class="fa-brands fa-github"></i>Saptarshi-Nag189</a>'+
+        '<a href="../../saptarshi_resume_linkedin_2026.pdf" target="_blank" rel="noopener"><i class="fa-solid fa-file-arrow-down"></i>download CV</a></div>' }
+];
+
+/* ================= WORLD / DRIVING MODEL ================= */
+var SPACING = 1500;                       // world units between exits
+var stopZ = STOPS.map(function(s,i){ return (i+1)*SPACING; });
+var cam = 0, speed = 0, VMAX = 30;
+var holding = false, autopilot = -1;      // autopilot: index of stop being fast-travelled to
+var current = -1;                          // stop we are stopped at (card open)
+var visited = {};
+var passedWhoosh = {};
+
+var cv = document.getElementById('road');
+var ctx = cv.getContext('2d');
+var W=0,H=0,DPR=Math.min(devicePixelRatio||1,2),HOR=0;
+function resize(){ W=innerWidth; H=innerHeight;
+  cv.width=W*DPR; cv.height=H*DPR; cv.style.width=W+'px'; cv.style.height=H+'px';
+  ctx.setTransform(DPR,0,0,DPR,0,0); HOR=H*0.42; }
+resize(); addEventListener('resize', resize);
+
+/* stars (static per resize) */
+var stars=[];
+function seedStars(){ stars=[]; for(var i=0;i<140;i++) stars.push({x:Math.random(),y:Math.random()*0.9,a:0.2+Math.random()*0.6,r:Math.random()<0.12?1.6:1}); }
+seedStars();
+
+/* rain streaks */
+var drops=[]; for(var i=0;i<110;i++) drops.push({x:Math.random(),y:Math.random(),v:0.6+Math.random()*0.9});
+
+/* oncoming traffic */
+var oncoming=null, nextCarAt=600;
+
+var ZS = 160;                             // projection constant
+function curveAt(z){ return Math.sin(z*0.0011)*230 + Math.sin(z*0.00042)*140; }
+
+function project(dz){                     // world distance ahead -> screen t (0 horizon .. 1 bottom)
+  if(dz<=2) dz=2;
+  var t = ZS/dz; return t>1?1:t;
+}
+
+function draw(){
+  ctx.clearRect(0,0,W,H);
+
+  /* sky */
+  var sky=ctx.createLinearGradient(0,0,0,HOR);
+  sky.addColorStop(0,'#04060f'); sky.addColorStop(0.75,'#0a1226'); sky.addColorStop(1,'#141d33');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,HOR+1);
+  /* moon */
+  ctx.beginPath(); ctx.arc(W*0.78,HOR*0.32,26,0,7);
+  ctx.fillStyle='rgba(230,238,255,0.9)'; ctx.shadowColor='rgba(200,220,255,0.8)'; ctx.shadowBlur=40; ctx.fill(); ctx.shadowBlur=0;
+  ctx.beginPath(); ctx.arc(W*0.78-9,HOR*0.32-4,22,0,7); ctx.fillStyle='#0a1226'; ctx.fill();
+  /* stars */
+  for(var i=0;i<stars.length;i++){ var s=stars[i];
+    ctx.globalAlpha=s.a; ctx.fillStyle='#dfe8ff'; ctx.fillRect(s.x*W, s.y*HOR, s.r, s.r); }
+  ctx.globalAlpha=1;
+
+  /* city glow + skyline (parallax with curve) */
+  var cshift = -curveAt(cam+ZS*6)*0.12;
+  var glow=ctx.createRadialGradient(W/2+cshift,HOR,10,W/2+cshift,HOR,W*0.55);
+  glow.addColorStop(0,'rgba(64,120,190,0.30)'); glow.addColorStop(1,'rgba(64,120,190,0)');
+  ctx.fillStyle=glow; ctx.fillRect(0,0,W,HOR+2);
+  ctx.fillStyle='#0b1122';
+  var bseed=1234;
+  for(var bx=-2;bx<26;bx++){
+    bseed=(bseed*16807)%2147483647;
+    var bw=28+(bseed%42), bh=14+(bseed%56);
+    ctx.fillRect(((bx*54+cshift*0.8)%(W+120))-60, HOR-bh, bw, bh);
+  }
+
+  /* road — row raster */
+  var roadHalfBase=W*0.44;
+  var step = W<700?2:1;
+  for(var y=Math.ceil(HOR)+1;y<H;y+=step){
+    var t=(y-HOR)/(H-HOR);                 // 0..1
+    var dz=ZS/t;                            // distance ahead of this row
+    var wz=cam+dz;
+    var half=t*roadHalfBase;
+    var cx=W/2 + curveAt(wz)*(1-t)*(1-t);
+    /* offroad */
+    var night=(Math.sin(wz*0.02)>0)?'#070b12':'#060a10';
+    ctx.fillStyle=night; ctx.fillRect(0,y,W,step);
+    /* asphalt */
+    ctx.fillStyle=(Math.sin(wz*0.35)>0)?'#161a24':'#141822';
+    ctx.fillRect(cx-half,y,half*2,step);
+    /* edge lines */
+    var el=Math.max(1,half*0.02);
+    ctx.fillStyle='rgba(222,228,240,0.5)';
+    ctx.fillRect(cx-half,y,el,step); ctx.fillRect(cx+half-el,y,el,step);
+    /* center dashes */
+    if(Math.sin(wz*0.09)>0.25){
+      ctx.fillStyle='rgba(255,214,140,0.75)';
+      ctx.fillRect(cx-half*0.012,y,Math.max(1,half*0.024),step);
+    }
+    /* wet reflection smear under gantries: subtle vertical light streak */
+  }
+
+  /* streetlights every 300 units, alternating sides */
+  for(var li=0;li<14;li++){
+    var lz=(Math.floor(cam/300)+li)*300+150;
+    var dzl=lz-cam; if(dzl<8||dzl>ZS/0.055) continue;
+    var tl=project(dzl), yl=HOR+tl*(H-HOR);
+    var halfl=tl*roadHalfBase, cxl=W/2+curveAt(lz)*(1-tl)*(1-tl);
+    var side=(Math.floor(lz/300)%2===0)?-1:1;
+    var px=cxl+side*(halfl+18*tl);
+    ctx.strokeStyle='rgba(120,130,150,'+(0.5*tl)+')'; ctx.lineWidth=Math.max(1,3*tl);
+    ctx.beginPath(); ctx.moveTo(px,yl); ctx.lineTo(px,yl-90*tl); ctx.lineTo(px-side*26*tl,yl-90*tl); ctx.stroke();
+    var lg=ctx.createRadialGradient(px-side*26*tl,yl-88*tl,1,px-side*26*tl,yl-88*tl,44*tl);
+    lg.addColorStop(0,'rgba(255,196,110,'+(0.85*tl)+')'); lg.addColorStop(1,'rgba(255,196,110,0)');
+    ctx.fillStyle=lg; ctx.beginPath(); ctx.arc(px-side*26*tl,yl-88*tl,44*tl,0,7); ctx.fill();
+  }
+
+  /* oncoming car */
+  if(oncoming){
+    var dzo=oncoming.z-cam;
+    if(dzo<4){ oncoming=null; sfx('whoosh'); }
+    else{
+      var to=project(dzo), yo=HOR+to*(H-HOR);
+      var halfo=to*roadHalfBase, cxo=W/2+curveAt(oncoming.z)*(1-to)*(1-to);
+      var lx=cxo-halfo*0.5;
+      [[-9,''],[9,'']].forEach(function(o){
+        var hg=ctx.createRadialGradient(lx+o[0]*to*3,yo-10*to,0,lx+o[0]*to*3,yo-10*to,26*to);
+        hg.addColorStop(0,'rgba(255,255,240,'+Math.min(1,0.95*to+0.2)+')'); hg.addColorStop(1,'rgba(255,255,240,0)');
+        ctx.fillStyle=hg; ctx.beginPath(); ctx.arc(lx+o[0]*to*3,yo-10*to,26*to,0,7); ctx.fill();
+      });
+      oncoming.z-=(speed+34);
+    }
+  } else if(cam>nextCarAt && !REDUCED){
+    oncoming={ z: cam+ZS/0.06 };
+    nextCarAt=cam+2600+Math.random()*3600;
+  }
+
+  /* exit gantries */
+  for(var gi=0;gi<STOPS.length;gi++){
+    var dzg=stopZ[gi]-cam;
+    if(dzg<-40||dzg>ZS/0.045) continue;
+    if(dzg<10 && !passedWhoosh[gi] && current!==gi){ passedWhoosh[gi]=true; sfx('whoosh'); }
+    if(dzg<10) continue;
+    var tg=project(dzg), yg=HOR+tg*(H-HOR);
+    var halfg=tg*roadHalfBase, cxg=W/2+curveAt(stopZ[gi])*(1-tg)*(1-tg);
+    var pw=Math.max(1.5,6*tg), bh=Math.max(10,62*tg), bw=halfg*1.5;
+    var postT=yg-150*tg;
+    ctx.fillStyle='rgba(150,160,178,'+Math.min(1,tg+0.25)+')';
+    ctx.fillRect(cxg-halfg-14*tg,postT,pw,yg-postT);
+    ctx.fillRect(cxg+halfg+14*tg-pw,postT,pw,yg-postT);
+    ctx.fillRect(cxg-halfg-14*tg,postT,(halfg+14*tg)*2,Math.max(1.2,4*tg));
+    /* sign board */
+    var sx=cxg-bw/2, sy=postT-bh+4*tg;
+    ctx.fillStyle=visited[gi]?'#174a2c':'#1d6b3c';
+    ctx.strokeStyle='rgba(255,255,255,0.75)'; ctx.lineWidth=Math.max(0.8,2.4*tg);
+    ctx.beginPath(); ctx.roundRect(sx,sy,bw,bh,6*tg); ctx.fill(); ctx.stroke();
+    if(tg>0.09){
+      ctx.fillStyle='#f2fff5';
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.font='600 '+Math.max(7,20*tg)+'px Inter, sans-serif';
+      ctx.fillText(STOPS[gi].label, cxg, sy+bh*0.42);
+      ctx.font='500 '+Math.max(5,11.5*tg)+'px "JetBrains Mono", monospace';
+      ctx.fillStyle='rgba(230,255,238,0.75)';
+      ctx.fillText(STOPS[gi].exit+' · '+Math.max(0,Math.round(dzg/15))+'m', cxg, sy+bh*0.78);
+    }
+    /* wet reflection */
+    var rg=ctx.createLinearGradient(0,yg,0,Math.min(H,yg+120*tg));
+    rg.addColorStop(0,'rgba(127,224,143,'+(0.15*tg)+')'); rg.addColorStop(1,'rgba(127,224,143,0)');
+    ctx.fillStyle=rg; ctx.fillRect(sx,yg,bw,120*tg);
+  }
+
+  /* rain */
+  if(!REDUCED){
+    ctx.strokeStyle='rgba(180,200,230,0.28)'; ctx.lineWidth=1;
+    for(var di=0;di<drops.length;di++){
+      var d=drops[di];
+      var dx=d.x*W, dy=d.y*H;
+      var len=8+speed*0.5;
+      ctx.beginPath(); ctx.moveTo(dx,dy); ctx.lineTo(dx-2-speed*0.12,dy+len); ctx.stroke();
+      d.y+=d.v*(0.012+speed*0.0012); d.x-=0.0006+speed*0.00004;
+      if(d.y>1){ d.y=-0.05; d.x=Math.random()*1.1; }
+    }
+  }
+
+  /* headlight cone + vignette */
+  var hl=ctx.createRadialGradient(W/2,H*1.05,W*0.05,W/2,H*1.05,H*0.9);
+  hl.addColorStop(0,'rgba(255,214,150,0.14)'); hl.addColorStop(0.5,'rgba(255,214,150,0.045)'); hl.addColorStop(1,'rgba(255,214,150,0)');
+  ctx.fillStyle=hl; ctx.fillRect(0,0,W,H);
+  var vg=ctx.createRadialGradient(W/2,H*0.55,H*0.28,W/2,H*0.55,H*0.95);
+  vg.addColorStop(0,'rgba(0,0,0,0)'); vg.addColorStop(1,'rgba(0,0,0,0.62)');
+  ctx.fillStyle=vg; ctx.fillRect(0,0,W,H);
+}
+
+/* ================= GAME LOOP ================= */
+var raf=null, started=false;
+function tick(){
+  raf=requestAnimationFrame(tick);
+  if(document.hidden) return;
+
+  var target=0;
+  if(autopilot>=0){
+    var dzA=stopZ[autopilot]-40-cam;
+    if(dzA<=Math.max(8,speed*1.5)){ cam=stopZ[autopilot]-40; speed=0; var ap=autopilot; autopilot=-1; arrive(ap); }
+    else target=Math.min(VMAX*1.7, Math.max(8,dzA*0.05));
+  } else if(holding && current<0){
+    target=VMAX;
+    /* auto-brake into the next unvisited exit (speed-aware so we can't step past it) */
+    var nx=nextStop();
+    if(nx>=0){ var dzn=stopZ[nx]-40-cam;
+      if(dzn<520) target=Math.max(1.6, VMAX*(dzn-20)/520);
+      if(dzn<=Math.max(8,speed*1.5)){ cam=stopZ[nx]-40; speed=0; arrive(nx); target=0; }
+    }
+  }
+  speed+=(target-speed)*(target>speed?0.045:0.16);
+  if(speed<0.02&&target===0) speed=0;
+  cam+=speed;
+  try{ window.SFX && SFX.setThrottle(Math.min(1,speed/VMAX)*0.75+(speed>0.3?0.06:0)); }catch(e){}
+  draw();
+  updateRoute();
+}
+function nextStop(){ for(var i=0;i<STOPS.length;i++){ if(cam<stopZ[i]-46) return i; } return -1; }
+
+/* ================= ROUTE STRIP ================= */
+var routeEl=document.getElementById('route');
+routeEl.innerHTML=STOPS.map(function(s,i){
+  return '<div class="stopdot" data-i="'+i+'" role="button" tabindex="0" aria-label="'+s.label+'">'+
+    '<span class="d"></span><span class="l">'+s.label+'</span></div>';
+}).join('');
+var dots=[].slice.call(routeEl.children);
+dots.forEach(function(d){
+  d.addEventListener('click',function(){ fastTravel(+d.dataset.i); });
+  d.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); fastTravel(+d.dataset.i);} });
+  d.addEventListener('mouseenter',function(){ sfx('hover'); });
+});
+function updateRoute(){
+  var nx=nextStop();
+  dots.forEach(function(d,i){
+    d.classList.toggle('visited',!!visited[i]);
+    d.classList.toggle('here',current===i||(nx===i&&stopZ[i]-cam<520));
+  });
+}
+function fastTravel(i){
+  sfx('select'); closeCard(true);
+  if(Math.abs((stopZ[i]-40)-cam)<10){ arrive(i); return; }
+  if(stopZ[i]-40<cam){ cam=Math.max(0,stopZ[i]-460); }  /* wormhole back, then drive in */
+  autopilot=i;
+  try{ window.SFX && SFX.revTo(0.85,500); }catch(e){}
+  hintEl.classList.add('gone');
+}
+
+/* ================= CARD ================= */
+var wrapEl=document.getElementById('cardWrap');
+function arrive(i){
+  current=i; visited[i]=true;
+  sfx('radio');
+  document.getElementById('cExit').textContent=STOPS[i].exit;
+  document.getElementById('cKick').innerHTML='<i class="fa-solid '+STOPS[i].icon+'"></i> '+STOPS[i].kick;
+  document.getElementById('cTitle').textContent=STOPS[i].title;
+  document.getElementById('cSub').textContent=STOPS[i].sub;
+  document.getElementById('cBody').innerHTML=STOPS[i].body;
+  document.getElementById('card').scrollTop=0;
+  wrapEl.classList.add('open');
+  updateRoute();
+}
+function closeCard(silent){
+  if(current<0) return;
+  if(!silent) sfx('back');
+  current=-1; wrapEl.classList.remove('open'); updateRoute();
+}
+document.getElementById('cardClose').addEventListener('click',function(){ closeCard(); });
+document.getElementById('cardNext').addEventListener('click',function(){
+  closeCard(true); sfx('select');
+  try{ window.SFX && SFX.revTo(0.7,420); }catch(e){}
+});
+wrapEl.addEventListener('click',function(e){ if(e.target===wrapEl) closeCard(); });
+addEventListener('keydown',function(e){ if(e.key==='Escape') closeCard(); });
+
+/* ================= INPUT ================= */
+var hintEl=document.getElementById('hint');
+function down(){ holding=true; if(cam>60) hintEl.classList.add('gone'); }
+function up(){ holding=false; }
+addEventListener('keydown',function(e){
+  if(e.key==='w'||e.key==='W'||e.key==='ArrowUp'||e.key===' '){ if(current<0) down(); }
+});
+addEventListener('keyup',function(e){
+  if(e.key==='w'||e.key==='W'||e.key==='ArrowUp'||e.key===' ') up();
+});
+cv.addEventListener('pointerdown',down);
+addEventListener('pointerup',up);
+addEventListener('pointercancel',up);
+
+/* ================= START ================= */
+var intro=document.getElementById('intro');
+function start(){
+  if(started) return; started=true;
+  intro.classList.add('gone');
+  try{ if(window.SFX){ SFX.startEngine(); if(!REDUCED) SFX.startRain(0.7); } }catch(e){}
+  if(REDUCED){ speed=0; draw(); updateRoute();
+    hintEl.innerHTML='<b>click a stop</b> below to visit each exit';
+  } else {
+    raf=requestAnimationFrame(tick);
+  }
+}
+document.getElementById('startBtn').addEventListener('click',function(){ sfx('select'); start(); });
+intro.addEventListener('click',function(e){ if(e.target===intro) start(); });
+addEventListener('keydown',function once(e){ if(!started&&(e.key==='Enter'||e.key===' ')){ start(); } });
+
+document.addEventListener('visibilitychange',function(){
+  if(!started||REDUCED) return;
+  /* rAF keeps running but tick() no-ops while hidden; nothing extra needed */
+});
+
+/* initial static frame behind the intro */
+draw();
+/* introspection hook (used by automated tests; harmless in production) */
+window.__nd = function(){ return { cam:cam, speed:speed, holding:holding, started:started, current:current, autopilot:autopilot, raf:raf!=null }; };
+})();
+</script>
+</body>
+</html>

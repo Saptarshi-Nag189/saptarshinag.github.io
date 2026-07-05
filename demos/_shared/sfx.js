@@ -18,7 +18,7 @@
   var ctx = null, master = null;
   var muted = (localStorage.getItem(KEY) === '1');
   var unlocked = false;
-  var ambient = null, projector = null, engine = null, chiptune = null;
+  var ambient = null, projector = null, engine = null, chiptune = null, rain = null, clack = null;
   var accent = '#9aa0ff';
 
   function ensure() {
@@ -108,7 +108,17 @@
 
     // ---- signal-decode (radio) ----
     static:  function () { noise({ dur: 0.05, gain: 0.045, filter: 'highpass', freq: 2200 }); },
-    tick:    function () { tone({ freq: 1500 + Math.random() * 400, type: 'square', dur: 0.012, gain: 0.03 }); }
+    tick:    function () { tone({ freq: 1500 + Math.random() * 400, type: 'square', dur: 0.012, gain: 0.03 }); },
+
+    // ---- water / liquid ----
+    drip:    function () { tone({ freq: 900 + Math.random() * 500, type: 'sine', dur: 0.16, gain: 0.09, slideTo: 300 + Math.random() * 200 }); },
+    splash:  function () { noise({ dur: 0.32, gain: 0.11, filter: 'bandpass', freq: 900, q: 0.7 }); tone({ freq: 420, type: 'sine', dur: 0.2, gain: 0.05, slideTo: 180 }); },
+
+    // ---- night worlds ----
+    horn:    function () { [220, 277].forEach(function (f) { tone({ freq: f, type: 'triangle', dur: 1.4, gain: 0.06, attack: 0.25 }); }); },
+    whale:   function () { tone({ freq: 180, type: 'sine', dur: 2.2, gain: 0.08, attack: 0.5, slideTo: 420 }); },
+    page:    function () { noise({ dur: 0.22, gain: 0.08, filter: 'bandpass', freq: 2600, q: 0.5 }); },
+    chime:   function () { [1047, 1319, 1568].forEach(function (f, i) { tone({ freq: f, type: 'sine', dur: 0.9, gain: 0.05, delay: i * 0.12, attack: 0.02 }); }); }
   };
 
   function play(name, o) {
@@ -334,12 +344,77 @@
     c.out.gain.linearRampToValueAtTime(0.0001, ctx.currentTime + 0.8);
   }
 
+  // ---- rain loop (filtered noise wash + sparse droplet ticks) ----
+  function startRain(intensity) {
+    ensure();
+    if (!ctx || rain || muted) return;
+    var out = ctx.createGain(); out.gain.value = 0; out.connect(master);
+    out.gain.linearRampToValueAtTime(0.12 * (intensity || 1), ctx.currentTime + 1.5);
+    var nb = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 2.5), ctx.sampleRate);
+    var nd = nb.getChannelData(0); for (var i = 0; i < nd.length; i++) nd[i] = Math.random() * 2 - 1;
+    var src = ctx.createBufferSource(); src.buffer = nb; src.loop = true;
+    var hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 900;
+    var lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 6500;
+    src.connect(hp); hp.connect(lp); lp.connect(out); src.start();
+    function droplet() {
+      if (!rain) return;
+      if (!muted && !document.hidden) lib.drip();
+      rain.timer = setTimeout(droplet, 900 + Math.random() * 2600);
+    }
+    rain = { out: out, src: src, timer: null };
+    rain.timer = setTimeout(droplet, 1500);
+  }
+  function stopRain() {
+    if (!rain || !ctx) return;
+    var r = rain; rain = null; clearTimeout(r.timer);
+    r.out.gain.linearRampToValueAtTime(0.0001, ctx.currentTime + 1.0);
+    setTimeout(function () { try { r.src.stop(); } catch (e) {} }, 1200);
+  }
+
+  // ---- train clack loop (da-dun … da-dun rhythm) ----
+  function startClack(period) {
+    ensure();
+    if (!ctx || clack || muted) return;
+    var out = ctx.createGain(); out.gain.value = 0; out.connect(master);
+    out.gain.linearRampToValueAtTime(0.5, ctx.currentTime + 1.2);
+    var buf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 0.06), ctx.sampleRate);
+    var d = buf.getChannelData(0);
+    for (var i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / d.length, 2.5);
+    var bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 480; bp.Q.value = 1.1; bp.connect(out);
+    var per = period || 1.9, nextTime = ctx.currentTime + 0.4;
+    function hit(t, g) {
+      var s = ctx.createBufferSource(); s.buffer = buf;
+      var gg = ctx.createGain(); gg.gain.value = g;
+      s.playbackRate.value = 0.9 + Math.random() * 0.2;
+      s.connect(gg); gg.connect(bp); s.start(t);
+    }
+    function schedule() {
+      if (!clack) return;
+      var ahead = ctx.currentTime + 0.5;
+      while (nextTime < ahead) {
+        hit(nextTime, 0.55); hit(nextTime + 0.14, 0.4);            // da-dun
+        hit(nextTime + per * 0.5, 0.45); hit(nextTime + per * 0.5 + 0.14, 0.32); // …da-dun
+        nextTime += per;
+      }
+      clack.timer = setTimeout(schedule, 160);
+    }
+    clack = { out: out, timer: null };
+    schedule();
+  }
+  function stopClack() {
+    if (!clack || !ctx) return;
+    var c = clack; clack = null; clearTimeout(c.timer);
+    c.out.gain.linearRampToValueAtTime(0.0001, ctx.currentTime + 0.8);
+  }
+
   window.SFX = {
     init: init, play: play,
     startAmbient: startAmbient, stopAmbient: stopAmbient,
     startProjector: startProjector, stopProjector: stopProjector,
     startEngine: startEngine, setThrottle: setThrottle, revTo: revTo, stopEngine: stopEngine,
     startChiptune: startChiptune, stopChiptune: stopChiptune,
+    startRain: startRain, stopRain: stopRain,
+    startClack: startClack, stopClack: stopClack,
     toggleMute: toggleMute, setMuted: setMuted,
     get muted() { return muted; },
     get unlocked() { return unlocked; }
