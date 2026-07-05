@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Night Train — Saptarshi Nag</title>
+<meta name="description" content="A slow train across a mirror-still sea. Every window is a chapter of Saptarshi Nag's story.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="stylesheet" href="../_shared/chrome.css">
+<script src="../_shared/chrome.js" data-accent="#ffb2d3" data-tag="the night train"></script>
+<script src="../_shared/sfx.js"></script>
+<style>
+  :root{
+    --rose:#ffb2d3; --amber:#ffd9a0; --ink:#eef0fa; --dim:#9aa4c6;
+    --line:rgba(255,178,211,.22);
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+    --sans:'Inter',system-ui,sans-serif;
+    --serif:'Cormorant Garamond',Georgia,serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;overflow:hidden;background:#070b1e;color:var(--ink);
+    font-family:var(--sans);-webkit-font-smoothing:antialiased}
+  #sea{position:fixed;inset:0;display:block;touch-action:none}
+
+  /* poem-title top center */
+  #poem{position:fixed;left:50%;top:9%;transform:translateX(-50%);z-index:5;text-align:center;
+    pointer-events:none;transition:opacity 1.2s}
+  #poem .k{font-family:var(--mono);font-size:10.5px;letter-spacing:.5em;text-transform:uppercase;
+    color:rgba(255,178,211,.7);margin-bottom:10px}
+  #poem h1{font-family:var(--serif);font-weight:500;font-style:italic;
+    font-size:clamp(26px,4.6vw,52px);color:#f4ecf5;letter-spacing:.01em;
+    text-shadow:0 0 40px rgba(255,178,211,.25)}
+  #poem .s{margin-top:8px;font-family:var(--mono);font-size:11px;letter-spacing:.24em;
+    text-transform:uppercase;color:var(--dim)}
+  #poem.gone{opacity:0}
+  #whisper{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:5;
+    font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;color:var(--dim);
+    pointer-events:none;transition:opacity .8s;white-space:nowrap}
+  #whisper b{color:var(--amber);font-weight:500}
+  #whisper.gone{opacity:0}
+
+  /* ticket panel */
+  #tWrap{position:fixed;inset:0;z-index:20;display:none;align-items:center;justify-content:center;
+    background:rgba(4,6,16,.5);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+  #tWrap.open{display:flex;animation:tf .35s ease}
+  @keyframes tf{from{opacity:0}to{opacity:1}}
+  #ticket{position:relative;width:min(600px,92vw);max-height:80vh;overflow-y:auto;
+    background:linear-gradient(172deg,#171c38 0%,#101430 55%,#0c102a 100%);
+    border:1px solid var(--line);border-radius:16px;
+    box-shadow:0 30px 90px rgba(0,0,0,.7), 0 0 70px -20px rgba(255,178,211,.35);
+    padding:0 0 26px;animation:tr .45s cubic-bezier(.2,.85,.25,1)}
+  @keyframes tr{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:none}}
+  #ticket::-webkit-scrollbar{width:8px}
+  #ticket::-webkit-scrollbar-thumb{background:rgba(255,178,211,.28);border-radius:6px}
+  .thead{padding:24px 30px 18px;border-bottom:1px dashed rgba(255,217,160,.3);position:relative}
+  .thead::after,.thead::before{content:"";position:absolute;bottom:-9px;width:18px;height:18px;
+    border-radius:50%;background:#070b1e}
+  .thead::before{left:-9px} .thead::after{right:-9px}
+  .thead .no{position:absolute;top:18px;right:22px;font-family:var(--mono);font-size:10px;
+    letter-spacing:.2em;color:var(--amber);border:1px solid rgba(255,217,160,.4);
+    border-radius:6px;padding:4px 9px;text-transform:uppercase}
+  .thead .kk{font-family:var(--mono);font-size:10px;letter-spacing:.28em;text-transform:uppercase;
+    color:var(--rose);margin-bottom:7px;display:flex;align-items:center;gap:8px}
+  .thead h2{font-family:var(--serif);font-weight:600;font-size:clamp(24px,3.4vw,32px);
+    color:#fdf6ee;line-height:1.1}
+  .thead .ss{margin-top:4px;font-size:13px;color:var(--dim)}
+  .tbody{padding:20px 30px 0;font-size:14.5px;line-height:1.64;color:#cdd4ec}
+  .tbody p{margin-bottom:13px}
+  .tbody .item{border-left:2px solid rgba(255,217,160,.25);padding:3px 0 3px 15px;margin-bottom:17px}
+  .tbody .item h3{font-size:15.5px;font-weight:600;color:#fff;margin-bottom:2px}
+  .tbody .item .meta{font-family:var(--mono);font-size:11px;color:var(--dim);margin-bottom:7px}
+  .tbody ul{list-style:none;margin:4px 0 8px}
+  .tbody ul li{position:relative;padding:5px 0 5px 20px;font-size:13.5px;line-height:1.55}
+  .tbody ul li::before{content:"\f005";font-family:"Font Awesome 6 Free";font-weight:900;
+    position:absolute;left:0;top:7px;color:rgba(255,217,160,.8);font-size:8px}
+  .tbody b{color:#fff;font-weight:600}
+  .tags{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 12px}
+  .tag{font-family:var(--mono);font-size:10.5px;color:#ffdff0;background:rgba(255,178,211,.09);
+    border:1px solid var(--line);border-radius:6px;padding:3px 9px}
+  .mgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(115px,1fr));gap:11px;margin:8px 0 4px}
+  .mtile{background:rgba(255,217,160,.06);border:1px solid rgba(255,217,160,.2);border-radius:12px;padding:12px}
+  .mtile .v{font-family:var(--mono);font-size:19px;font-weight:700;color:var(--amber);line-height:1}
+  .mtile .l{font-size:10.5px;color:var(--dim);margin-top:5px;line-height:1.35}
+  .skillg{margin-bottom:12px}
+  .skillg h4{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--rose);margin-bottom:7px}
+  .links a{display:inline-flex;align-items:center;gap:9px;color:var(--amber);text-decoration:none;
+    font-size:14px;margin:5px 20px 5px 0;transition:.18s}
+  .links a:hover{text-shadow:0 0 12px rgba(255,217,160,.7)}
+  .links a i{width:18px;text-align:center}
+  #tClose{position:absolute;top:14px;left:16px;width:33px;height:33px;border-radius:10px;
+    border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.05);color:#fff;
+    cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;transition:.18s;z-index:2}
+  #tClose:hover{background:rgba(255,255,255,.13)}
+
+  @media (prefers-reduced-motion: reduce){ #tWrap,#ticket{animation:none !important} }
+  @media (max-width:640px){ .thead{padding:20px 20px 15px} .tbody{padding:16px 20px 0} }
+</style>
+</head>
+<body>
+
+<canvas id="sea"></canvas>
+
+<div id="poem">
+  <div class="k">the night train</div>
+  <h1>Somewhere over still water,<br>a life rides by.</h1>
+  <div class="s">eight windows · eight chapters</div>
+</div>
+<div id="whisper"><b>click a lit window</b> — each carriage carries a chapter</div>
+
+<div id="tWrap">
+  <div id="ticket">
+    <button id="tClose" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+    <div class="thead">
+      <span class="no" id="tNo"></span>
+      <div class="kk" id="tKick"></div>
+      <h2 id="tTitle"></h2>
+      <div class="ss" id="tSub"></div>
+    </div>
+    <div class="tbody" id="tBody"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+'use strict';
+var REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+var sfx = function(n){ try{ window.SFX && SFX.play(n); }catch(e){} };
+try{ window.SFX && SFX.init({ accent:'#ffb2d3', ambient:false }); }catch(e){}
+
+/* start the rail clack + occasional horn after first gesture */
+var soundStarted=false;
+function startWorldSound(){
+  if(soundStarted) return; soundStarted=true;
+  try{ if(window.SFX && !REDUCED){ SFX.startClack(2.1); setTimeout(function(){ sfx('horn'); }, 4000); } }catch(e){}
+}
+addEventListener('pointerdown', startWorldSound);
+addEventListener('keydown', startWorldSound);
+
+/* ================= CONTENT (8 carriages) ================= */
+var CARS = [
+ { no:'Carriage 1', icon:'fa-user', kick:'the passenger', title:'Saptarshi Nag', sub:'AI/ML Engineer — the one by the window',
+   body:'<p>AI/ML engineer at the intersection of <b>security and systems research</b>. M.Tech in Artificial Intelligence (DIAT, DRDO); research at NCRA-TIFR &amp; GMRT; now a Project Engineer at C-DAC building real-time IoT security — Zero Trust with ML threat detection.</p>'+
+        '<p>Works the full ML stack: feature engineering from raw data, model development and optimisation, production deployment under tight constraints. Past work spans physics-informed neural networks, GPU-accelerated scientific computing, LLM fine-tuning and RAG systems.</p>' },
+ { no:'Carriage 2', icon:'fa-graduation-cap', kick:'where he boarded', title:'Education', sub:'Kolkata → Pune · 2019 → 2025',
+   body:'<div class="item"><h3>B.Tech, Computer Science &amp; Engineering</h3><div class="meta">Academy of Technology, Kolkata · 2019–2023 · CGPA 9.44/10.0</div></div>'+
+        '<div class="item"><h3>M.Tech, CSE (Artificial Intelligence)</h3><div class="meta">DIAT (DRDO), Pune · 2023–2025 · CGPA 8.64/10.0</div></div>'+
+        '<div class="item"><h3>GATE 2024</h3><div class="meta">Rank 1790 · Data Science &amp; AI · top 5%</div></div>' },
+ { no:'Carriage 3', icon:'fa-satellite-dish', kick:'first stop', title:'GMRT', sub:'Winter Intern · HPC & Signal Processing · Dec 2023 – Jan 2024 · Pune',
+   body:'<p>A winter at one of the world\'s largest radio telescope arrays.</p>'+
+        '<ul><li>Profiled legacy <b>CPU signal-filtering pipelines</b>, refactored for <b>multicore execution</b>.</li>'+
+        '<li>Cut latency by <b>50%</b>, unblocking <b>real-time processing</b> of continuous telescope streams.</li></ul>' },
+ { no:'Carriage 4', icon:'fa-star', kick:'listening for pulsars', title:'NCRA-TIFR', sub:'Research Intern (M.Tech project) · Aug 2024 – Apr 2025 · Pune',
+   body:'<ul><li><b>ResNet1D + Squeeze-and-Excitation attention</b> for weak pulsar signals at low SNR.</li>'+
+        '<li><b>99.8% F1</b> across <b>70M+ samples</b>; adaptive thresholding for non-stationary noise floors.</li>'+
+        '<li>Ran end-to-end independently — scoping through deployment and write-up.</li></ul>'+
+        '<div class="mgrid"><div class="mtile"><div class="v">99.8%</div><div class="l">pulsar F1-score</div></div>'+
+        '<div class="mtile"><div class="v">70M+</div><div class="l">samples</div></div></div>' },
+ { no:'Carriage 5', icon:'fa-shield-halved', kick:'the present day', title:'C-DAC', sub:'Project Engineer · AI Research & IoT Security · Jul 2025 – present · Chennai',
+   body:'<ul><li>Real-time <b>Zero Trust framework</b> for IoT (WiFi 802.11, BLE, Zigbee, LoRa) feeding a continuous <b>7-pillar device trust score</b>.</li>'+
+        '<li>Two-stage hybrid detection: 1-second <b>window model</b> (7 attack classes) + <b>flow model</b>; RF/XGBoost/SVM/MLP/Voting Ensemble across 6 preprocessing iterations with SMOTE + Optuna (TPE).</li>'+
+        '<li>Best: <b>96.97% accuracy</b> (flow/RF); <b>90.86% acc / 86.78% macro F1</b> (window/Ensemble).</li>'+
+        '<li><b>63 features</b> from raw PCAPs (Scapy/PyShark); live PCAP pipeline (Watchdog, MD5 dedup, multi-threaded); SPIFFE/SPIRE, mTLS, OTP 2FA.</li>'+
+        '<li>Two papers at <b>IoTaIS 2025</b>, Bali: <b>“Protocol-Aware Continuous Monitoring and Anomaly Detection in IoT Networks”</b> and <b>“A Comprehensive Survey on Zero Trust Architecture in IoT Networks.”</b></li></ul>' },
+ { no:'Carriage 6', icon:'fa-diagram-project', kick:'the luggage car', title:'Projects', sub:'four builds riding along',
+   body:'<div class="item"><h3>GPU-Accelerated F1 Tyre Degradation &amp; Race Strategy</h3>'+
+        '<div class="tags"><span class="tag">Python</span><span class="tag">PyTorch</span><span class="tag">CUDA</span><span class="tag">CuPy</span><span class="tag">XGBoost</span></div>'+
+        '<ul><li>Hybrid <b>LSTM-XGBoost</b> for tyre wear + pit-stop windows from 10 Hz telemetry.</li>'+
+        '<li><b>PINNs</b> separating thermal and mechanical degradation; custom CUDA/CuPy kernels — <b>4.1× speedup</b>.</li></ul></div>'+
+        '<div class="item"><h3>Omniscience Pro — Privacy-First Local RAG</h3>'+
+        '<div class="tags"><span class="tag">Python</span><span class="tag">LangChain</span><span class="tag">ChromaDB</span><span class="tag">Docker</span></div>'+
+        '<ul><li>Multi-modal ingestion; <b>&lt;50 ms</b> vector search (HNSW); <b>&lt;500 ms</b> first token; GPU-aware Docker, CI/CD, POSIX locking.</li></ul></div>'+
+        '<div class="item"><h3>ARO — Autonomous Research Operator</h3>'+
+        '<div class="tags"><span class="tag">Python</span><span class="tag">Flask</span><span class="tag">SQLAlchemy</span><span class="tag">NetworkX</span><span class="tag">React</span></div>'+
+        '<ul><li>Multi-agent LLM workflows as directed graphs; SSE streaming; React UI; adversarial audit fixed <b>16 vulnerabilities</b>.</li></ul></div>'+
+        '<div class="item"><h3>Llama 3.2 Optimisation</h3>'+
+        '<div class="tags"><span class="tag">Python</span><span class="tag">Unsloth</span><span class="tag">Hugging Face</span><span class="tag">PyTorch</span></div>'+
+        '<ul><li>Fine-tuned 1B/3B on <b>21.5k</b> interactions; <b>4-bit quantisation</b>, no meaningful quality drop.</li></ul></div>' },
+ { no:'Carriage 7', icon:'fa-microchip', kick:'the toolbox under the seat', title:'Skills', sub:'everything he travels with',
+   body:'<div class="skillg"><h4>Languages</h4><div class="tags"><span class="tag">Python (advanced)</span><span class="tag">C++ (proficient)</span><span class="tag">C</span><span class="tag">Bash</span><span class="tag">SQL</span></div></div>'+
+        '<div class="skillg"><h4>ML &amp; Scientific Computing</h4><div class="tags"><span class="tag">PyTorch</span><span class="tag">XGBoost</span><span class="tag">Scikit-learn</span><span class="tag">PINNs</span><span class="tag">NumPy</span><span class="tag">SciPy</span></div></div>'+
+        '<div class="skillg"><h4>HPC &amp; Systems</h4><div class="tags"><span class="tag">CUDA</span><span class="tag">CuPy</span><span class="tag">Parallel Processing</span><span class="tag">Quantisation (4/8-bit)</span><span class="tag">Latency Optimisation</span><span class="tag">Linux</span></div></div>'+
+        '<div class="skillg"><h4>Data &amp; Engineering</h4><div class="tags"><span class="tag">Statistical Anomaly Detection</span><span class="tag">Time-Series</span><span class="tag">CI/CD</span><span class="tag">Docker</span><span class="tag">Git</span><span class="tag">Flask</span><span class="tag">ChromaDB</span></div></div>'+
+        '<div class="skillg"><h4>AI &amp; MLOps</h4><div class="tags"><span class="tag">RAG Systems</span><span class="tag">LLM Fine-Tuning</span><span class="tag">Multi-Agent Orchestration</span><span class="tag">SQLAlchemy</span></div></div>'+
+        '<div class="mgrid"><div class="mtile"><div class="v">96.97%</div><div class="l">IoT attack detection</div></div>'+
+        '<div class="mtile"><div class="v">99.8%</div><div class="l">pulsar F1</div></div>'+
+        '<div class="mtile"><div class="v">4.1×</div><div class="l">GPU speedup</div></div>'+
+        '<div class="mtile"><div class="v">50%</div><div class="l">latency cut</div></div>'+
+        '<div class="mtile"><div class="v">70M+</div><div class="l">samples</div></div></div>' },
+ { no:'Last Carriage', icon:'fa-envelope', kick:'leave a note on the seat', title:'Write to him', sub:'the train always comes back around',
+   body:'<p>Open to research collaborations, engineering roles, and interesting problems.</p>'+
+        '<div class="links"><a href="mailto:saptarshinag18@gmail.com"><i class="fa-solid fa-envelope"></i>saptarshinag18@gmail.com</a>'+
+        '<a href="https://www.linkedin.com/in/saptarshi18" target="_blank" rel="noopener"><i class="fa-brands fa-linkedin"></i>/in/saptarshi18</a>'+
+        '<a href="https://github.com/Saptarshi-Nag189" target="_blank" rel="noopener"><i class="fa-brands fa-github"></i>Saptarshi-Nag189</a>'+
+        '<a href="../../saptarshi_resume_linkedin_2026.pdf" target="_blank" rel="noopener"><i class="fa-solid fa-file-arrow-down"></i>download CV</a></div>' }
+];
+
+/* ================= SCENE ================= */
+var cv=document.getElementById('sea'), ctx=cv.getContext('2d');
+var W=0,H=0,DPR=Math.min(devicePixelRatio||1,2);
+var seaY=0, trainY=0, trainH=0, carW=0, carGap=0, trainX0=0;
+function resize(){
+  W=innerWidth; H=innerHeight;
+  cv.width=W*DPR; cv.height=H*DPR; cv.style.width=W+'px'; cv.style.height=H+'px';
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  seaY=H*0.66;
+  trainH=Math.min(120,H*0.16);
+  trainY=seaY-trainH-10;
+  var usable=Math.min(W*0.86,1180);
+  carGap=6;
+  carW=(usable-carGap*(CARS.length-1))/CARS.length;
+  trainX0=(W-usable)/2;
+  seedStars();
+}
+var stars=[];
+function seedStars(){ stars=[]; for(var i=0;i<170;i++) stars.push({x:Math.random(),y:Math.random(),a:0.15+Math.random()*0.7,tw:Math.random()*7,r:Math.random()<0.1?1.7:1}); }
+resize(); addEventListener('resize',resize);
+
+var shooting=null, nextShootAt=4000;
+var steam=[];
+var t0=performance.now();
+
+function windowRect(i){
+  var x=trainX0+i*(carW+carGap);
+  var wpad=carW*0.18, wh=trainH*0.44;
+  return { cx:x, x:x+wpad, y:trainY+trainH*0.22, w:carW-wpad*2, h:wh };
+}
+
+function draw(t){
+  var tt=(t-t0)/1000;
+  ctx.clearRect(0,0,W,H);
+
+  /* sky */
+  var sky=ctx.createLinearGradient(0,0,0,seaY);
+  sky.addColorStop(0,'#05081c'); sky.addColorStop(0.7,'#0b1130'); sky.addColorStop(1,'#141a40');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,seaY);
+
+  /* moon */
+  var mx=W*0.16,my=H*0.18;
+  ctx.beginPath(); ctx.arc(mx,my,34,0,7);
+  ctx.fillStyle='#f4ecdf'; ctx.shadowColor='rgba(244,236,223,.9)'; ctx.shadowBlur=60; ctx.fill(); ctx.shadowBlur=0;
+
+  /* stars (twinkle) */
+  for(var i=0;i<stars.length;i++){ var s=stars[i];
+    var a=s.a*(0.7+0.3*Math.sin(tt*1.4+s.tw));
+    ctx.globalAlpha=a; ctx.fillStyle='#e8ecff';
+    ctx.fillRect(s.x*W,s.y*seaY*0.92,s.r,s.r);
+  }
+  ctx.globalAlpha=1;
+
+  /* shooting star */
+  if(!REDUCED){
+    if(!shooting && t>nextShootAt){ shooting={x:Math.random()*W*0.7+W*0.15,y:H*0.06+Math.random()*H*0.2,vx:-7-Math.random()*5,vy:2.4+Math.random()*1.6,life:1}; nextShootAt=t+7000+Math.random()*9000; }
+    if(shooting){
+      ctx.strokeStyle='rgba(255,240,220,'+(0.8*shooting.life)+')'; ctx.lineWidth=1.6;
+      ctx.beginPath(); ctx.moveTo(shooting.x,shooting.y);
+      ctx.lineTo(shooting.x-shooting.vx*8,shooting.y-shooting.vy*8); ctx.stroke();
+      shooting.x+=shooting.vx; shooting.y+=shooting.vy; shooting.life-=0.02;
+      if(shooting.life<=0) shooting=null;
+    }
+  }
+
+  /* sea */
+  var sea=ctx.createLinearGradient(0,seaY,0,H);
+  sea.addColorStop(0,'#0d1334'); sea.addColorStop(1,'#04061a');
+  ctx.fillStyle=sea; ctx.fillRect(0,seaY,W,H-seaY);
+  /* moon reflection */
+  var mg=ctx.createLinearGradient(0,seaY,0,H);
+  mg.addColorStop(0,'rgba(244,236,223,.30)'); mg.addColorStop(1,'rgba(244,236,223,0)');
+  ctx.fillStyle=mg;
+  for(var ry=seaY;ry<H;ry+=4){
+    var sway=Math.sin(tt*1.1+ry*0.06)*(2+(ry-seaY)*0.06);
+    var wdt=10+(ry-seaY)*0.05;
+    ctx.globalAlpha=0.5*(1-(ry-seaY)/(H-seaY));
+    ctx.fillRect(mx-wdt/2+sway,ry,wdt,3);
+  }
+  ctx.globalAlpha=1;
+
+  /* rails */
+  var bob=REDUCED?0:Math.sin(tt*1.8)*1.4;
+  ctx.fillStyle='rgba(150,160,200,.35)';
+  ctx.fillRect(0,trainY+trainH+8+bob*0.4,W,1.6);
+  ctx.fillRect(0,trainY+trainH+13+bob*0.4,W,1);
+
+  /* ===== the train ===== */
+  ctx.save();
+  ctx.translate(0,bob);
+  for(var c=0;c<CARS.length;c++){
+    var x=trainX0+c*(carW+carGap);
+    /* body */
+    var bodyG=ctx.createLinearGradient(0,trainY,0,trainY+trainH);
+    bodyG.addColorStop(0,'#242a4e'); bodyG.addColorStop(0.5,'#1a1f40'); bodyG.addColorStop(1,'#101430');
+    ctx.fillStyle=bodyG;
+    ctx.beginPath(); ctx.roundRect(x,trainY,carW,trainH,7); ctx.fill();
+    ctx.strokeStyle='rgba(255,178,211,.16)'; ctx.lineWidth=1; ctx.stroke();
+    /* roof line */
+    ctx.fillStyle='rgba(255,217,160,.14)';
+    ctx.fillRect(x+4,trainY+4,carW-8,2);
+    /* window */
+    var wr=windowRect(c);
+    var lit = (hoverCar===c) ? 1.18 : 1;
+    var flick = REDUCED?1:(0.94+0.06*Math.sin(tt*2.7+c*1.7));
+    var wg=ctx.createLinearGradient(0,wr.y,0,wr.y+wr.h);
+    wg.addColorStop(0,'rgba(255,222,170,'+(0.98*flick*lit)+')');
+    wg.addColorStop(1,'rgba(255,180,120,'+(0.88*flick*lit)+')');
+    ctx.fillStyle=wg;
+    ctx.beginPath(); ctx.roundRect(wr.x,wr.y,wr.w,wr.h,4); ctx.fill();
+    ctx.shadowColor='rgba(255,210,150,.8)'; ctx.shadowBlur=hoverCar===c?26:14;
+    ctx.fill(); ctx.shadowBlur=0;
+    /* tiny silhouette in some windows */
+    if(c%3===1){
+      ctx.fillStyle='rgba(30,26,50,.85)';
+      ctx.beginPath(); ctx.arc(wr.x+wr.w*0.3,wr.y+wr.h*0.62,wr.h*0.2,Math.PI,0); ctx.fill();
+      ctx.fillRect(wr.x+wr.w*0.3-wr.h*0.2,wr.y+wr.h*0.62,wr.h*0.4,wr.h*0.38);
+    }
+    /* icon-ish glyph label under window */
+    ctx.fillStyle='rgba(255,178,211,.5)';
+    ctx.font='500 '+Math.max(8,carW*0.075)+'px "JetBrains Mono", monospace';
+    ctx.textAlign='center';
+    ctx.fillText(String(c+1).padStart(2,'0'), x+carW/2, trainY+trainH-8);
+    /* wheels */
+    ctx.fillStyle='#0a0d20';
+    ctx.beginPath(); ctx.arc(x+carW*0.24,trainY+trainH+6,5.5,0,7); ctx.fill();
+    ctx.beginPath(); ctx.arc(x+carW*0.76,trainY+trainH+6,5.5,0,7); ctx.fill();
+  }
+  /* engine nose (in front of carriage 1, to the right) */
+  var ex=trainX0+CARS.length*(carW+carGap)-carGap;
+  ctx.fillStyle='#1a1f40';
+  ctx.beginPath(); ctx.roundRect(ex+2,trainY+trainH*0.28,Math.min(46,W*0.05),trainH*0.72,7); ctx.fill();
+  /* headlamp */
+  ctx.fillStyle='rgba(255,240,200,.95)';
+  ctx.beginPath(); ctx.arc(ex+Math.min(46,W*0.05)-4,trainY+trainH*0.55,4,0,7);
+  ctx.shadowColor='rgba(255,240,200,.9)'; ctx.shadowBlur=18; ctx.fill(); ctx.shadowBlur=0;
+  ctx.restore();
+
+  /* steam puffs */
+  if(!REDUCED){
+    if(Math.random()<0.14) steam.push({x:ex+10,y:trainY-4,r:3+Math.random()*3,a:0.35,vy:-0.5-Math.random()*0.4,vx:-0.7-Math.random()*0.5});
+    for(var si=steam.length-1;si>=0;si--){ var sp=steam[si];
+      ctx.beginPath(); ctx.arc(sp.x,sp.y,sp.r,0,7);
+      ctx.fillStyle='rgba(220,225,245,'+sp.a+')'; ctx.fill();
+      sp.x+=sp.vx; sp.y+=sp.vy; sp.r+=0.12; sp.a-=0.004;
+      if(sp.a<=0) steam.splice(si,1);
+    }
+  }
+
+  /* train reflection in the sea (lit windows smear) */
+  for(var c2=0;c2<CARS.length;c2++){
+    var wr2=windowRect(c2);
+    var rgrad=ctx.createLinearGradient(0,seaY,0,Math.min(H,seaY+120));
+    rgrad.addColorStop(0,'rgba(255,205,145,.20)'); rgrad.addColorStop(1,'rgba(255,205,145,0)');
+    ctx.fillStyle=rgrad;
+    for(var ry2=seaY;ry2<Math.min(H,seaY+110);ry2+=4){
+      var sw=REDUCED?0:Math.sin(tt*1.3+ry2*0.07+c2)*2.4;
+      ctx.globalAlpha=0.5*(1-(ry2-seaY)/110);
+      ctx.fillRect(wr2.x+sw,ry2,wr2.w,3);
+    }
+    ctx.globalAlpha=1;
+  }
+}
+
+/* ================= INTERACTION ================= */
+var hoverCar=-1;
+function carAt(mx,my){
+  var bobPad=8;
+  if(my<trainY-bobPad||my>trainY+trainH+bobPad) return -1;
+  for(var i=0;i<CARS.length;i++){
+    var x=trainX0+i*(carW+carGap);
+    if(mx>=x&&mx<=x+carW) return i;
+  }
+  return -1;
+}
+cv.addEventListener('pointermove',function(e){
+  var c=carAt(e.clientX,e.clientY);
+  if(c!==hoverCar){ hoverCar=c; cv.style.cursor=c>=0?'pointer':'default'; if(c>=0) sfx('hover'); }
+});
+cv.addEventListener('click',function(e){
+  var c=carAt(e.clientX,e.clientY);
+  if(c>=0) openTicket(c);
+});
+addEventListener('keydown',function(e){
+  var n=parseInt(e.key,10);
+  if(n>=1&&n<=8) openTicket(n-1);
+  if(e.key==='Escape') closeTicket();
+});
+
+var wrapEl=document.getElementById('tWrap'), poemEl=document.getElementById('poem'), whisperEl=document.getElementById('whisper');
+function openTicket(i){
+  var c=CARS[i];
+  document.getElementById('tNo').textContent=c.no;
+  document.getElementById('tKick').innerHTML='<i class="fa-solid '+c.icon+'"></i> '+c.kick;
+  document.getElementById('tTitle').textContent=c.title;
+  document.getElementById('tSub').textContent=c.sub;
+  document.getElementById('tBody').innerHTML=c.body;
+  document.getElementById('ticket').scrollTop=0;
+  wrapEl.classList.add('open');
+  poemEl.classList.add('gone'); whisperEl.classList.add('gone');
+  sfx('chime');
+}
+function closeTicket(){
+  if(!wrapEl.classList.contains('open')) return;
+  wrapEl.classList.remove('open'); poemEl.classList.remove('gone');
+  sfx('back');
+}
+document.getElementById('tClose').addEventListener('click',closeTicket);
+wrapEl.addEventListener('click',function(e){ if(e.target===wrapEl) closeTicket(); });
+
+/* ================= LOOP ================= */
+var raf=null;
+function loop(t){ raf=requestAnimationFrame(loop); if(document.hidden) return; draw(t); }
+if(REDUCED){ draw(performance.now());
+  whisperEl.innerHTML='<b>click a window</b> (or press 1–8) — each carriage carries a chapter';
+  addEventListener('resize',function(){ draw(performance.now()); });
+} else { raf=requestAnimationFrame(loop); }
+window.__train=function(){ return { cars:CARS.length, hover:hoverCar }; };
+})();
+</script>
+</body>
+</html>
