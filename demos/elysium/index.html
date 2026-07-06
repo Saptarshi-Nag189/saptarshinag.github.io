@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vaporwave Elysium — Saptarshi Nag</title>
+<meta name="description" content="A marble-and-neon afterlife — the portfolio of Saptarshi Nag, drifting in glass.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="stylesheet" href="../_shared/chrome.css">
+<script src="../_shared/chrome.js" data-accent="#ff71ce" data-tag="elysium"></script>
+<script src="../_shared/sfx.js"></script>
+<style>
+  :root{
+    --pink:#ff71ce; --cyan:#01cdfe; --purp:#b967ff; --ink:#fdeffa; --dim:#c39ac0;
+    --line:rgba(255,113,206,.28);
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+    --sans:'Inter',system-ui,sans-serif;
+    --serif:'Playfair Display',Georgia,serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;overflow:hidden;background:#12041f;color:var(--ink);
+    font-family:var(--sans);-webkit-font-smoothing:antialiased}
+  #ely{position:fixed;inset:0;display:block;touch-action:none}
+
+  #epigraph{position:fixed;left:50%;top:7.5%;transform:translateX(-50%);z-index:5;text-align:center;
+    pointer-events:none;transition:opacity 1s}
+  #epigraph .k{font-family:var(--mono);font-size:10px;letter-spacing:.52em;text-transform:uppercase;
+    color:rgba(1,205,254,.85);margin-bottom:10px}
+  #epigraph h1{font-family:var(--serif);font-weight:700;font-style:italic;
+    font-size:clamp(26px,4.4vw,50px);
+    background:linear-gradient(92deg,var(--pink),#ffd9f2 45%,var(--cyan));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    filter:drop-shadow(0 0 26px rgba(255,113,206,.35))}
+  #epigraph .s{margin-top:8px;font-family:var(--mono);font-size:10.5px;letter-spacing:.28em;
+    text-transform:uppercase;color:var(--dim)}
+  #epigraph.gone{opacity:0}
+  #whisper{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:5;
+    font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;color:var(--dim);
+    pointer-events:none;transition:opacity .8s;white-space:nowrap}
+  #whisper b{color:var(--cyan);font-weight:500}
+  #whisper.gone{opacity:0}
+
+  /* glass frame panel */
+  #gWrap{position:fixed;inset:0;z-index:20;display:none;align-items:center;justify-content:center;
+    background:rgba(10,2,20,.5);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px)}
+  #gWrap.open{display:flex;animation:gf .35s ease}
+  @keyframes gf{from{opacity:0}to{opacity:1}}
+  #glass{position:relative;width:min(620px,92vw);max-height:80vh;overflow-y:auto;
+    background:linear-gradient(165deg,rgba(50,14,74,.82),rgba(24,6,44,.9));
+    border:1px solid var(--line);border-radius:20px;
+    box-shadow:0 30px 100px rgba(0,0,0,.7), 0 0 80px -18px rgba(255,113,206,.5),
+      inset 0 1px 0 rgba(255,255,255,.14);
+    padding:30px 32px 28px;animation:gr .45s cubic-bezier(.2,.85,.25,1)}
+  @keyframes gr{from{opacity:0;transform:translateY(28px) scale(.98)}to{opacity:1;transform:none}}
+  #glass::-webkit-scrollbar{width:8px}
+  #glass::-webkit-scrollbar-thumb{background:rgba(255,113,206,.35);border-radius:6px}
+  #gKick{font-family:var(--mono);font-size:10.5px;letter-spacing:.26em;text-transform:uppercase;
+    color:var(--cyan);margin-bottom:7px;display:flex;align-items:center;gap:8px}
+  #gTitle{font-family:var(--serif);font-weight:700;font-size:clamp(23px,3.2vw,30px);
+    background:linear-gradient(92deg,#ffd9f2,var(--pink));
+    -webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:16px}
+  #gBody{font-size:14.5px;line-height:1.62;color:#ecd8ea}
+  #gBody p{margin-bottom:13px}
+  #gBody .item{border-left:2px solid var(--line);padding:3px 0 3px 15px;margin-bottom:17px}
+  #gBody .item h3{font-size:15.5px;font-weight:600;color:#fff;margin-bottom:2px}
+  #gBody .item .meta{font-family:var(--mono);font-size:11px;color:var(--dim);margin-bottom:7px}
+  #gBody ul{list-style:none;margin:4px 0 8px}
+  #gBody ul li{position:relative;padding:5px 0 5px 20px;font-size:13.5px;line-height:1.55}
+  #gBody ul li::before{content:"\f005";font-family:"Font Awesome 6 Free";font-weight:900;
+    position:absolute;left:0;top:7px;color:var(--cyan);font-size:8px}
+  #gBody b{color:#fff;font-weight:600}
+  .tags{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 12px}
+  .tag{font-family:var(--mono);font-size:10.5px;color:#ffd9f2;background:rgba(255,113,206,.1);
+    border:1px solid var(--line);border-radius:6px;padding:3px 9px}
+  .mgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(115px,1fr));gap:11px;margin:8px 0 4px}
+  .mtile{background:rgba(1,205,254,.07);border:1px solid rgba(1,205,254,.25);border-radius:12px;padding:12px}
+  .mtile .v{font-family:var(--mono);font-size:19px;font-weight:700;color:var(--cyan);line-height:1}
+  .mtile .l{font-size:10.5px;color:var(--dim);margin-top:5px;line-height:1.35}
+  .skillg{margin-bottom:12px}
+  .skillg h4{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--purp);margin-bottom:7px}
+  .links a{display:inline-flex;align-items:center;gap:9px;color:var(--cyan);text-decoration:none;
+    font-size:14px;margin:5px 20px 5px 0;transition:.18s}
+  .links a:hover{text-shadow:0 0 12px rgba(1,205,254,.8)}
+  .links a i{width:18px;text-align:center}
+  #gClose{position:absolute;top:14px;right:16px;width:33px;height:33px;border-radius:10px;
+    border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.06);color:#fff;
+    cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;transition:.18s}
+  #gClose:hover{background:rgba(255,255,255,.16)}
+
+  @media (prefers-reduced-motion: reduce){ #gWrap,#glass{animation:none !important} }
+  @media (max-width:640px){ #glass{padding:24px 20px} }
+</style>
+</head>
+<body>
+
+<canvas id="ely"></canvas>
+
+<div id="epigraph">
+  <div class="k">vaporwave elysium</div>
+  <h1>Marble remembers.<br>Neon never sleeps.</h1>
+  <div class="s">eight frames drifting in the forever-sunset</div>
+</div>
+<div id="whisper"><b>click a drifting frame</b> — or press 1–8 — the glass remembers everything</div>
+
+<div id="gWrap">
+  <div id="glass">
+    <button id="gClose" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+    <div id="gKick"></div>
+    <h2 id="gTitle"></h2>
+    <div id="gBody"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+'use strict';
+var REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+var sfx = function(n){ try{ window.SFX && SFX.play(n); }catch(e){} };
+try{ window.SFX && SFX.init({ accent:'#ff71ce', ambient:true, ambientFreq:65 }); }catch(e){}
+
+/* ================= FRAMES ================= */
+var FRAMES = [
+ { label:'About', icon:'fa-user', kick:'the statue with his face', title:'Saptarshi Nag — AI/ML Engineer',
+   body:'<p>AI/ML engineer at the intersection of <b>security and systems research</b>. M.Tech in Artificial Intelligence (DIAT, DRDO); research at NCRA-TIFR &amp; GMRT; now a Project Engineer at C-DAC building real-time IoT security — Zero Trust with ML threat detection.</p>'+
+        '<p>Works the full ML stack: feature engineering from raw data, model development &amp; optimisation, production deployment under tight constraints. Past work spans physics-informed neural networks, GPU-accelerated scientific computing, LLM fine-tuning and RAG systems.</p>'+
+        '<div class="mgrid"><div class="mtile"><div class="v">96.97%</div><div class="l">IoT attack detection</div></div>'+
+        '<div class="mtile"><div class="v">99.8%</div><div class="l">pulsar F1</div></div>'+
+        '<div class="mtile"><div class="v">4.1×</div><div class="l">GPU speedup</div></div>'+
+        '<div class="mtile"><div class="v">50%</div><div class="l">latency cut</div></div>'+
+        '<div class="mtile"><div class="v">70M+</div><div class="l">samples</div></div></div>' },
+ { label:'Education', icon:'fa-graduation-cap', kick:'carved at the beginning', title:'Education',
+   body:'<div class="item"><h3>B.Tech, Computer Science &amp; Engineering</h3><div class="meta">Academy of Technology, Kolkata · 2019–2023 · CGPA 9.44/10.0</div></div>'+
+        '<div class="item"><h3>M.Tech, CSE (Artificial Intelligence)</h3><div class="meta">DIAT (DRDO), Pune · 2023–2025 · CGPA 8.64/10.0</div></div>'+
+        '<div class="item"><h3>GATE 2024</h3><div class="meta">Rank 1790 · Data Science &amp; AI · top 5%</div></div>' },
+ { label:'GMRT', icon:'fa-satellite-dish', kick:'echoes across the marble', title:'GMRT — HPC & Signal Processing',
+   body:'<p>Winter Intern · Dec 2023 – Jan 2024 · Pune. A season at one of the world\'s largest radio telescope arrays.</p>'+
+        '<ul><li>Profiled legacy <b>CPU signal-filtering pipelines</b>, refactored for <b>multicore execution</b>.</li>'+
+        '<li>Cut latency by <b>50%</b>, unblocking <b>real-time processing</b> of continuous telescope data streams.</li></ul>' },
+ { label:'NCRA-TIFR', icon:'fa-star', kick:'a star kept blinking', title:'NCRA-TIFR — Weak Pulsar Detection',
+   body:'<p>Research Intern (M.Tech project) · Aug 2024 – Apr 2025 · Pune.</p>'+
+        '<ul><li><b>ResNet1D + Squeeze-and-Excitation attention</b> for weak pulsar signals at low SNR.</li>'+
+        '<li><b>99.8% F1</b> across <b>70M+ samples</b>; adaptive thresholding for non-stationary noise floors.</li>'+
+        '<li>Ran end-to-end independently — scoping through deployment and write-up.</li></ul>' },
+ { label:'C-DAC', icon:'fa-shield-halved', kick:'the sentinel of the sunset', title:'C-DAC — AI Research & IoT Security',
+   body:'<p>Project Engineer · Jul 2025 – present · Chennai.</p>'+
+        '<ul><li>Real-time <b>Zero Trust framework</b> for IoT (WiFi 802.11, BLE, Zigbee, LoRa) feeding a continuous <b>7-pillar device trust score</b>.</li>'+
+        '<li>Two-stage hybrid detection: 1-second <b>window model</b> (7 attack classes) + <b>flow model</b>; RF/XGBoost/SVM/MLP/Voting Ensemble over 6 preprocessing iterations with SMOTE + Optuna (TPE).</li>'+
+        '<li>Best: <b>96.97% accuracy</b> (flow/RF); <b>90.86% acc / 86.78% macro F1</b> (window/Ensemble).</li>'+
+        '<li><b>63 features</b> from raw PCAPs (Scapy/PyShark); live PCAP pipeline (Watchdog, MD5 dedup, multi-threaded); SPIFFE/SPIRE, mTLS, OTP 2FA.</li>'+
+        '<li>Two papers at <b>IoTaIS 2025</b>, Bali: <b>“Protocol-Aware Continuous Monitoring and Anomaly Detection in IoT Networks”</b> and <b>“A Comprehensive Survey on Zero Trust Architecture in IoT Networks.”</b></li></ul>' },
+ { label:'Projects', icon:'fa-diagram-project', kick:'four monuments', title:'Projects',
+   body:'<div class="item"><h3>GPU-Accelerated F1 Tyre Degradation &amp; Race Strategy</h3>'+
+        '<div class="tags"><span class="tag">Python</span><span class="tag">PyTorch</span><span class="tag">CUDA</span><span class="tag">CuPy</span><span class="tag">XGBoost</span></div>'+
+        '<ul><li>Hybrid <b>LSTM-XGBoost</b> for tyre wear + pit-stop windows from 10 Hz telemetry.</li>'+
+        '<li><b>PINNs</b> separating thermal and mechanical degradation; custom CUDA/CuPy kernels — <b>4.1× speedup</b>.</li></ul></div>'+
+        '<div class="item"><h3>Omniscience Pro — Privacy-First Local RAG</h3>'+
+        '<div class="tags"><span class="tag">Python</span><span class="tag">LangChain</span><span class="tag">ChromaDB</span><span class="tag">Docker</span></div>'+
+        '<ul><li>Multi-modal ingestion; <b>&lt;50 ms</b> vector search (HNSW); <b>&lt;500 ms</b> first token; GPU-aware Docker, CI/CD, POSIX locking.</li></ul></div>'+
+        '<div class="item"><h3>ARO — Autonomous Research Operator</h3>'+
+        '<div class="tags"><span class="tag">Python</span><span class="tag">Flask</span><span class="tag">SQLAlchemy</span><span class="tag">NetworkX</span><span class="tag">React</span></div>'+
+        '<ul><li>Multi-agent LLM workflows as directed graphs; SSE streaming; React UI; adversarial audit fixed <b>16 vulnerabilities</b>.</li></ul></div>'+
+        '<div class="item"><h3>Llama 3.2 Optimisation</h3>'+
+        '<div class="tags"><span class="tag">Python</span><span class="tag">Unsloth</span><span class="tag">Hugging Face</span><span class="tag">PyTorch</span></div>'+
+        '<ul><li>Fine-tuned 1B/3B on <b>21.5k</b> interactions; <b>4-bit quantisation</b>, no meaningful quality drop.</li></ul></div>' },
+ { label:'Skills', icon:'fa-microchip', kick:'inscriptions on the columns', title:'Skills',
+   body:'<div class="skillg"><h4>Languages</h4><div class="tags"><span class="tag">Python (advanced)</span><span class="tag">C++ (proficient)</span><span class="tag">C</span><span class="tag">Bash</span><span class="tag">SQL</span></div></div>'+
+        '<div class="skillg"><h4>ML &amp; Scientific Computing</h4><div class="tags"><span class="tag">PyTorch</span><span class="tag">XGBoost</span><span class="tag">Scikit-learn</span><span class="tag">PINNs</span><span class="tag">NumPy</span><span class="tag">SciPy</span></div></div>'+
+        '<div class="skillg"><h4>HPC &amp; Systems</h4><div class="tags"><span class="tag">CUDA</span><span class="tag">CuPy</span><span class="tag">Parallel Processing</span><span class="tag">Quantisation (4/8-bit)</span><span class="tag">Latency Optimisation</span><span class="tag">Linux</span></div></div>'+
+        '<div class="skillg"><h4>Data &amp; Engineering</h4><div class="tags"><span class="tag">Statistical Anomaly Detection</span><span class="tag">Time-Series</span><span class="tag">CI/CD</span><span class="tag">Docker</span><span class="tag">Git</span><span class="tag">Flask</span><span class="tag">ChromaDB</span></div></div>'+
+        '<div class="skillg"><h4>AI &amp; MLOps</h4><div class="tags"><span class="tag">RAG Systems</span><span class="tag">LLM Fine-Tuning</span><span class="tag">Multi-Agent Orchestration</span><span class="tag">SQLAlchemy</span></div></div>' },
+ { label:'Contact', icon:'fa-envelope', kick:'a message beyond the sunset', title:'Reach the Real One',
+   body:'<p>Open to research collaborations, engineering roles, and interesting problems.</p>'+
+        '<div class="links"><a href="mailto:saptarshinag18@gmail.com"><i class="fa-solid fa-envelope"></i>saptarshinag18@gmail.com</a>'+
+        '<a href="https://www.linkedin.com/in/saptarshi18" target="_blank" rel="noopener"><i class="fa-brands fa-linkedin"></i>/in/saptarshi18</a>'+
+        '<a href="https://github.com/Saptarshi-Nag189" target="_blank" rel="noopener"><i class="fa-brands fa-github"></i>Saptarshi-Nag189</a>'+
+        '<a href="../../saptarshi_resume_linkedin_2026.pdf" target="_blank" rel="noopener"><i class="fa-solid fa-file-arrow-down"></i>download CV</a></div>' }
+];
+
+/* ================= SCENE ================= */
+var cv=document.getElementById('ely'), ctx=cv.getContext('2d');
+var W=0,H=0,DPR=Math.min(devicePixelRatio||1,2),HOR=0;
+var frames=[];
+function resize(){
+  W=innerWidth; H=innerHeight;
+  cv.width=W*DPR; cv.height=H*DPR; cv.style.width=W+'px'; cv.style.height=H+'px';
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  HOR=H*0.62;
+  layoutFrames();
+}
+function layoutFrames(){
+  frames=[];
+  /* two arcs of four glass frames floating in the sky */
+  for(var i=0;i<FRAMES.length;i++){
+    var row=Math.floor(i/4), col=i%4;
+    var fx=W*(0.17+col*0.22), fy=H*(0.30+row*0.20);
+    frames.push({ i:i, x:fx, y:fy, w:Math.min(120,W*0.11), h:Math.min(88,W*0.082), ph:Math.random()*7 });
+  }
+}
+resize(); addEventListener('resize',resize);
+
+var hoverFrame=-1, floorScroll=0;
+var t0=performance.now();
+
+function draw(now){
+  var t=(now-t0)/1000;
+  ctx.clearRect(0,0,W,H);
+
+  /* sunset sky */
+  var sky=ctx.createLinearGradient(0,0,0,HOR);
+  sky.addColorStop(0,'#1c0433'); sky.addColorStop(0.45,'#4a0f63');
+  sky.addColorStop(0.78,'#a52a7d'); sky.addColorStop(1,'#ff5e78');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,HOR+1);
+
+  /* the vaporwave sun with scanline slits */
+  var sx=W/2, sy=HOR-8, sr=Math.min(W,H)*0.21;
+  var sg=ctx.createLinearGradient(0,sy-sr,0,sy+sr*0.2);
+  sg.addColorStop(0,'#ffe36b'); sg.addColorStop(0.55,'#ff9a3d'); sg.addColorStop(1,'#ff2a6d');
+  ctx.save();
+  ctx.beginPath(); ctx.arc(sx,sy,sr,Math.PI,0); ctx.closePath(); ctx.clip();
+  ctx.fillStyle=sg; ctx.fillRect(sx-sr,sy-sr,sr*2,sr*2);
+  /* slits widen toward the bottom */
+  ctx.fillStyle='rgba(28,4,51,.96)';
+  for(var sl=0;sl<7;sl++){
+    var ly=sy-sr*0.52+sl*(sr*0.105);
+    ctx.fillRect(sx-sr,ly,sr*2,2+sl*1.7);
+  }
+  ctx.restore();
+  var halo=ctx.createRadialGradient(sx,sy-sr*0.3,sr*0.4,sx,sy-sr*0.3,sr*2.1);
+  halo.addColorStop(0,'rgba(255,120,90,.30)'); halo.addColorStop(1,'rgba(255,120,90,0)');
+  ctx.fillStyle=halo; ctx.fillRect(0,0,W,HOR);
+
+  /* distant chrome mountains */
+  ctx.fillStyle='rgba(30,6,54,.9)';
+  ctx.beginPath(); ctx.moveTo(0,HOR);
+  for(var mx=0;mx<=W;mx+=W/14){
+    ctx.lineTo(mx, HOR - (16+((mx*2654435761)%97)) * 0.7);
+  }
+  ctx.lineTo(W,HOR); ctx.closePath(); ctx.fill();
+
+  /* checkerboard infinity floor */
+  if(!REDUCED) floorScroll+=0.35;
+  var rows=26;
+  for(var r=0;r<rows;r++){
+    var t1=r/rows, t2=(r+1)/rows;
+    /* perspective: near rows tall, far rows squashed */
+    var y1=HOR+(H-HOR)*(1-Math.pow(1-t1,2.1));
+    var y2=HOR+(H-HOR)*(1-Math.pow(1-t2,2.1));
+    var depth=1-t1;                      /* 1 far … 0 near */
+    var cols=18;
+    var rowOff=Math.floor(floorScroll/22);
+    for(var q=0;q<cols;q++){
+      var even=((q+((r+rowOff)%2))%2===0);
+      var scale=(1-depth*0.86);
+      var cw=(W*1.7/cols)*scale===0?1:(W*1.7/cols);
+      var x1=W/2+(q-cols/2)*cw*(1-depth*0.82);
+      var x2=W/2+(q+1-cols/2)*cw*(1-depth*0.82);
+      ctx.fillStyle=even
+        ? 'rgba(24,5,44,'+(0.94)+')'
+        : 'rgba('+(180-100*depth)+','+(30+20*depth)+','+(160-40*depth)+','+(0.5+0.28*(1-depth))+')';
+      ctx.fillRect(x1,y1,x2-x1+0.7,y2-y1+0.7);
+    }
+  }
+  /* neon grid lines over the floor */
+  ctx.strokeStyle='rgba(1,205,254,.34)'; ctx.lineWidth=1;
+  for(var g2=0;g2<=14;g2++){
+    var gx=W/2+(g2-7)*(W*0.115);
+    ctx.beginPath(); ctx.moveTo(W/2+(g2-7)*W*0.02, HOR); ctx.lineTo(gx,H); ctx.stroke();
+  }
+  /* floor glow at horizon */
+  var fgl=ctx.createLinearGradient(0,HOR,0,HOR+90);
+  fgl.addColorStop(0,'rgba(255,94,120,.5)'); fgl.addColorStop(1,'rgba(255,94,120,0)');
+  ctx.fillStyle=fgl; ctx.fillRect(0,HOR,W,90);
+
+  /* marble columns (left + right) */
+  drawColumn(W*0.075, HOR, Math.min(150,H*0.24), t);
+  drawColumn(W*0.925, HOR, Math.min(190,H*0.30), t);
+  /* a floating bust silhouette */
+  drawBust(W*0.86, H*0.24, t);
+
+  /* drifting glass frames */
+  for(var f=0;f<frames.length;f++){
+    var fr=frames[f];
+    var driftX=REDUCED?0:Math.sin(t*0.5+fr.ph)*10;
+    var driftY=REDUCED?0:Math.cos(t*0.42+fr.ph*1.3)*8;
+    var x=fr.x+driftX, y=fr.y+driftY;
+    fr._x=x; fr._y=y;
+    var hov=hoverFrame===f;
+    ctx.save();
+    ctx.translate(x,y); ctx.rotate(REDUCED?0:Math.sin(t*0.4+fr.ph)*0.04);
+    /* glow */
+    var gg=ctx.createRadialGradient(0,0,4,0,0,fr.w*1.15);
+    gg.addColorStop(0,'rgba(255,113,206,'+(hov?0.4:0.18)+')'); gg.addColorStop(1,'rgba(255,113,206,0)');
+    ctx.fillStyle=gg; ctx.beginPath(); ctx.arc(0,0,fr.w*1.15,0,7); ctx.fill();
+    /* glass */
+    ctx.fillStyle='rgba(255,255,255,'+(hov?0.16:0.09)+')';
+    ctx.strokeStyle=hov?'rgba(255,183,240,.95)':'rgba(255,183,240,.5)';
+    ctx.lineWidth=1.4;
+    ctx.beginPath(); ctx.roundRect(-fr.w/2,-fr.h/2,fr.w,fr.h,10); ctx.fill(); ctx.stroke();
+    /* shine */
+    ctx.strokeStyle='rgba(255,255,255,.35)';
+    ctx.beginPath(); ctx.moveTo(-fr.w/2+8,-fr.h/2+14); ctx.lineTo(-fr.w/2+26,-fr.h/2+5); ctx.stroke();
+    /* label */
+    ctx.fillStyle=hov?'#fff':'rgba(253,239,250,.92)';
+    ctx.font='600 '+Math.max(10,fr.w*0.115)+'px "JetBrains Mono",monospace';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(FRAMES[f].label.toUpperCase(),0,fr.h*0.12);
+    ctx.fillStyle=hov?'#ffd9f2':'rgba(195,154,192,.9)';
+    ctx.font='500 '+Math.max(8,fr.w*0.08)+'px "JetBrains Mono",monospace';
+    ctx.fillText('0'+(f+1),0,-fr.h*0.24);
+    ctx.restore();
+  }
+
+  /* floating sparkles */
+  ctx.fillStyle='rgba(255,220,250,.7)';
+  for(var sp=0;sp<26;sp++){
+    var spx=((sp*467)%100)/100*W;
+    var spy=(((sp*911)%100)/100*H*0.55)+(REDUCED?0:Math.sin(t*0.8+sp)*6);
+    ctx.globalAlpha=0.2+0.4*Math.abs(Math.sin(t*0.7+sp*2.4));
+    ctx.fillRect(spx,spy,1.6,1.6);
+  }
+  ctx.globalAlpha=1;
+
+  /* vignette */
+  var vg=ctx.createRadialGradient(W/2,H*0.5,H*0.3,W/2,H*0.5,H);
+  vg.addColorStop(0,'rgba(0,0,0,0)'); vg.addColorStop(1,'rgba(10,0,20,.5)');
+  ctx.fillStyle=vg; ctx.fillRect(0,0,W,H);
+}
+function drawColumn(cx,baseY,h,t){
+  var w=h*0.23;
+  var m=ctx.createLinearGradient(cx-w/2,0,cx+w/2,0);
+  m.addColorStop(0,'#efe6f2'); m.addColorStop(0.5,'#cbb8d8'); m.addColorStop(1,'#8f7aa6');
+  ctx.fillStyle=m;
+  ctx.fillRect(cx-w/2,baseY-h,w,h);
+  /* flutes */
+  ctx.strokeStyle='rgba(90,60,120,.35)'; ctx.lineWidth=1;
+  for(var f2=1;f2<4;f2++){ ctx.beginPath();
+    ctx.moveTo(cx-w/2+f2*(w/4),baseY-h+6); ctx.lineTo(cx-w/2+f2*(w/4),baseY-4); ctx.stroke(); }
+  /* capital + base */
+  ctx.fillStyle='#f4ecf7';
+  ctx.fillRect(cx-w*0.7,baseY-h-8,w*1.4,8);
+  ctx.fillRect(cx-w*0.7,baseY-2,w*1.4,6);
+  /* pink rim light */
+  ctx.fillStyle='rgba(255,113,206,.35)';
+  ctx.fillRect(cx+w/2-2,baseY-h,2,h);
+}
+function drawBust(cx,cy,t){
+  var s=Math.min(46,W*0.04);
+  var bob=REDUCED?0:Math.sin(t*0.6)*6;
+  ctx.save(); ctx.translate(cx,cy+bob);
+  var m=ctx.createLinearGradient(-s,0,s,0);
+  m.addColorStop(0,'#f2eaf6'); m.addColorStop(1,'#a08ab8');
+  ctx.fillStyle=m;
+  /* head */
+  ctx.beginPath(); ctx.arc(0,-s*0.55,s*0.42,0,7); ctx.fill();
+  /* neck + shoulders */
+  ctx.fillRect(-s*0.14,-s*0.25,s*0.28,s*0.3);
+  ctx.beginPath(); ctx.moveTo(-s*0.75,s*0.55); ctx.quadraticCurveTo(0,-s*0.12,s*0.75,s*0.55);
+  ctx.closePath(); ctx.fill();
+  /* cyan rim */
+  ctx.strokeStyle='rgba(1,205,254,.55)'; ctx.lineWidth=1.4;
+  ctx.beginPath(); ctx.arc(0,-s*0.55,s*0.42,-0.6,1.4); ctx.stroke();
+  ctx.restore();
+}
+
+/* ================= INTERACTION ================= */
+function frameAt(mx,my){
+  for(var i=0;i<frames.length;i++){ var fr=frames[i];
+    if(fr._x==null) continue;
+    if(Math.abs(mx-fr._x)<fr.w*0.62 && Math.abs(my-fr._y)<fr.h*0.72) return i;
+  }
+  return -1;
+}
+cv.addEventListener('pointermove',function(e){
+  var i=frameAt(e.clientX,e.clientY);
+  if(i!==hoverFrame){ hoverFrame=i; cv.style.cursor=i>=0?'pointer':'default'; if(i>=0) sfx('hover'); }
+});
+cv.addEventListener('click',function(e){
+  var i=frameAt(e.clientX,e.clientY);
+  if(i>=0) openFrame(i);
+});
+addEventListener('keydown',function(e){
+  var n=parseInt(e.key,10);
+  if(n>=1&&n<=8) openFrame(n-1);
+  if(e.key==='Escape') closeFrame();
+});
+
+var wrapEl=document.getElementById('gWrap'), epiEl=document.getElementById('epigraph'), whisperEl=document.getElementById('whisper');
+function openFrame(i){
+  var f=FRAMES[i];
+  document.getElementById('gKick').innerHTML='<i class="fa-solid '+f.icon+'"></i> '+f.kick;
+  document.getElementById('gTitle').textContent=f.title;
+  document.getElementById('gBody').innerHTML=f.body;
+  document.getElementById('glass').scrollTop=0;
+  wrapEl.classList.add('open');
+  epiEl.classList.add('gone'); whisperEl.classList.add('gone');
+  sfx('chime');
+}
+function closeFrame(){
+  if(!wrapEl.classList.contains('open')) return;
+  wrapEl.classList.remove('open'); epiEl.classList.remove('gone');
+  sfx('click'); sfx('back');
+}
+document.getElementById('gClose').addEventListener('click',closeFrame);
+wrapEl.addEventListener('click',function(e){ if(e.target===wrapEl) closeFrame(); });
+
+/* ================= LOOP ================= */
+var raf=null;
+function loop(now){ raf=requestAnimationFrame(loop); if(document.hidden) return; draw(now); }
+if(REDUCED){ draw(performance.now());
+  addEventListener('resize',function(){ draw(performance.now()); });
+} else { raf=requestAnimationFrame(loop); }
+window.__elysium=function(){ return { frames:FRAMES.length, hover:hoverFrame }; };
+})();
+</script>
+</body>
+</html>

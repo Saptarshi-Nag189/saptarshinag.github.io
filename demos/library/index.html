@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Infinite Library — Saptarshi Nag</title>
+<meta name="description" content="An endless night library — every book is a chapter of Saptarshi Nag's story.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="stylesheet" href="../_shared/chrome.css">
+<script src="../_shared/chrome.js" data-accent="#e8b06a" data-tag="the infinite library"></script>
+<script src="../_shared/sfx.js"></script>
+<style>
+  :root{
+    --candle:#e8b06a; --flame:#ffd9a0; --ink:#efe6d2; --dim:#a89878;
+    --line:rgba(232,176,106,.24);
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+    --sans:'Inter',system-ui,sans-serif;
+    --serif:'Cormorant Garamond',Georgia,serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;overflow:hidden;background:#0d0804;color:var(--ink);
+    font-family:var(--sans);-webkit-font-smoothing:antialiased}
+  #hall{position:fixed;inset:0;display:block;touch-action:none}
+
+  #plaque{position:fixed;left:50%;top:8%;transform:translateX(-50%);z-index:5;text-align:center;
+    pointer-events:none;transition:opacity 1s}
+  #plaque .k{font-family:var(--mono);font-size:10px;letter-spacing:.5em;text-transform:uppercase;
+    color:rgba(232,176,106,.75);margin-bottom:10px}
+  #plaque h1{font-family:var(--serif);font-weight:600;font-style:italic;
+    font-size:clamp(26px,4.4vw,50px);color:#f6ecd8;
+    text-shadow:0 0 40px rgba(232,176,106,.3)}
+  #plaque .s{margin-top:8px;font-family:var(--mono);font-size:10.5px;letter-spacing:.26em;
+    text-transform:uppercase;color:var(--dim)}
+  #plaque.gone{opacity:0}
+  #whisper{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:5;
+    font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;color:var(--dim);
+    pointer-events:none;transition:opacity .8s;white-space:nowrap}
+  #whisper b{color:var(--candle);font-weight:500}
+  #whisper.gone{opacity:0}
+
+  /* the open book — parchment (the one light panel in the whole set) */
+  #bWrap{position:fixed;inset:0;z-index:20;display:none;align-items:center;justify-content:center;
+    background:rgba(8,5,2,.6);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+  #bWrap.open{display:flex;animation:bf .4s ease}
+  @keyframes bf{from{opacity:0}to{opacity:1}}
+  #book{position:relative;width:min(640px,93vw);max-height:82vh;overflow-y:auto;
+    background:linear-gradient(100deg,#f4e8ce 0%,#eeddbc 48%,#e6d2a8 52%,#f0e2c4 100%);
+    border-radius:8px 14px 14px 8px;
+    border-left:14px solid #4a2f18;
+    box-shadow:0 40px 100px rgba(0,0,0,.85), inset 0 0 60px rgba(120,80,30,.18);
+    padding:34px 40px 34px 36px;color:#2c1e10;
+    animation:br .5s cubic-bezier(.2,.85,.25,1)}
+  @keyframes br{from{opacity:0;transform:translateY(30px) rotate(.6deg)}to{opacity:1;transform:none}}
+  #book::-webkit-scrollbar{width:8px}
+  #book::-webkit-scrollbar-thumb{background:rgba(74,47,24,.4);border-radius:6px}
+  #book::before{content:"";position:absolute;top:0;bottom:0;left:48%;width:2px;
+    background:linear-gradient(180deg,transparent,rgba(90,60,25,.16),transparent);pointer-events:none}
+  #bChap{font-family:var(--mono);font-size:10px;letter-spacing:.3em;text-transform:uppercase;
+    color:#8a6534;margin-bottom:8px}
+  #bKick{font-family:var(--serif);font-style:italic;font-size:16px;color:#6a4b22;margin-bottom:4px}
+  #bTitle{font-family:var(--serif);font-weight:700;font-size:clamp(26px,3.6vw,34px);
+    color:#241708;line-height:1.08;margin-bottom:6px}
+  #bTitle::after{content:"";display:block;width:74px;height:2px;background:#8a6534;margin-top:10px;opacity:.5}
+  #bBody{margin-top:14px;font-size:14.5px;line-height:1.66;color:#3a2917;
+    font-family:var(--sans)}
+  #bBody p{margin-bottom:13px}
+  #bBody .item{border-left:2px solid rgba(138,101,52,.4);padding:3px 0 3px 15px;margin-bottom:16px}
+  #bBody .item h3{font-family:var(--serif);font-size:19px;font-weight:700;color:#241708;margin-bottom:1px}
+  #bBody .item .meta{font-family:var(--mono);font-size:10.5px;color:#7c5c2e;margin-bottom:6px}
+  #bBody ul{list-style:none;margin:4px 0 8px}
+  #bBody ul li{position:relative;padding:4px 0 4px 20px;font-size:13.5px;line-height:1.55}
+  #bBody ul li::before{content:"\f02d";font-family:"Font Awesome 6 Free";font-weight:900;
+    position:absolute;left:0;top:6px;color:#8a6534;font-size:9px}
+  #bBody b{color:#1d1206;font-weight:700}
+  .tags{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 12px}
+  .tag{font-family:var(--mono);font-size:10.5px;color:#5c3f1a;background:rgba(138,101,52,.12);
+    border:1px solid rgba(138,101,52,.3);border-radius:5px;padding:3px 9px}
+  .mgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(112px,1fr));gap:10px;margin:8px 0 4px}
+  .mtile{background:rgba(138,101,52,.1);border:1px solid rgba(138,101,52,.28);border-radius:9px;padding:11px}
+  .mtile .v{font-family:var(--mono);font-size:18px;font-weight:700;color:#5c3a10;line-height:1}
+  .mtile .l{font-size:10.5px;color:#7c5c2e;margin-top:4px;line-height:1.35}
+  .skillg{margin-bottom:12px}
+  .skillg h4{font-family:var(--serif);font-style:italic;font-size:15px;color:#6a4b22;margin-bottom:6px}
+  .links a{display:inline-flex;align-items:center;gap:9px;color:#7c4a12;text-decoration:none;
+    font-size:14px;margin:5px 20px 5px 0;border-bottom:1px solid rgba(138,101,52,.4);transition:.18s}
+  .links a:hover{color:#3a2003;border-bottom-color:#3a2003}
+  .links a i{width:18px;text-align:center}
+  #bClose{position:absolute;top:14px;right:14px;width:33px;height:33px;border-radius:9px;
+    border:1px solid rgba(74,47,24,.4);background:rgba(74,47,24,.08);color:#4a2f18;
+    cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;transition:.18s}
+  #bClose:hover{background:rgba(74,47,24,.2)}
+
+  @media (prefers-reduced-motion: reduce){ #bWrap,#book{animation:none !important} }
+  @media (max-width:640px){ #book{padding:26px 22px 26px 20px;border-left-width:10px} }
+</style>
+</head>
+<body>
+
+<canvas id="hall"></canvas>
+
+<div id="plaque">
+  <div class="k">the infinite library</div>
+  <h1>Every life is shelved somewhere.<br>This one glows.</h1>
+  <div class="s">eight volumes · reach for the light</div>
+</div>
+<div id="whisper"><b>click a glowing book</b> — or press 1–8 — and it opens on the lectern</div>
+
+<div id="bWrap">
+  <div id="book">
+    <button id="bClose" aria-label="Close the book"><i class="fa-solid fa-xmark"></i></button>
+    <div id="bChap"></div>
+    <div id="bKick"></div>
+    <h2 id="bTitle"></h2>
+    <div id="bBody"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+'use strict';
+var REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+var sfx = function(n){ try{ window.SFX && SFX.play(n); }catch(e){} };
+try{ window.SFX && SFX.init({ accent:'#e8b06a', ambient:true, ambientFreq:52 }); }catch(e){}
+
+/* ================= VOLUMES ================= */
+var VOLS = [
+ { chap:'Volume I', kick:'in which we meet the author', title:'Saptarshi Nag', spine:'#a33b2e',
+   body:'<p><b>AI/ML Engineer</b> at the intersection of security and systems research. M.Tech in Artificial Intelligence (DIAT, DRDO); research at NCRA-TIFR &amp; GMRT; now a Project Engineer at C-DAC building real-time IoT security — Zero Trust with ML threat detection.</p>'+
+        '<p>He works the full ML stack: feature engineering from raw data, model development and optimisation, and production deployment under tight constraints. Earlier chapters include physics-informed neural networks, GPU-accelerated scientific computing, LLM fine-tuning and RAG systems.</p>'+
+        '<div class="mgrid"><div class="mtile"><div class="v">96.97%</div><div class="l">IoT attack detection</div></div>'+
+        '<div class="mtile"><div class="v">99.8%</div><div class="l">pulsar F1</div></div>'+
+        '<div class="mtile"><div class="v">4.1×</div><div class="l">GPU speedup</div></div>'+
+        '<div class="mtile"><div class="v">50%</div><div class="l">latency cut</div></div>'+
+        '<div class="mtile"><div class="v">70M+</div><div class="l">samples</div></div></div>' },
+ { chap:'Volume II', kick:'the early folios', title:'Education', spine:'#2e5aa3',
+   body:'<div class="item"><h3>B.Tech, Computer Science &amp; Engineering</h3><div class="meta">Academy of Technology, Kolkata · 2019–2023 · CGPA 9.44/10.0</div></div>'+
+        '<div class="item"><h3>M.Tech, CSE (Artificial Intelligence)</h3><div class="meta">DIAT (DRDO), Pune · 2023–2025 · CGPA 8.64/10.0</div></div>'+
+        '<div class="item"><h3>GATE 2024</h3><div class="meta">Rank 1790 · Data Science &amp; AI · top 5%</div></div>' },
+ { chap:'Volume III', kick:'a winter among telescopes', title:'GMRT', spine:'#31703e',
+   body:'<p>Winter Intern · HPC &amp; Signal Processing · Dec 2023 – Jan 2024 · Pune. A season at one of the world\'s largest radio telescope arrays.</p>'+
+        '<ul><li>Profiled legacy <b>CPU signal-filtering pipelines</b>, refactored for <b>multicore execution</b>.</li>'+
+        '<li>Cut latency by <b>50%</b>, unblocking <b>real-time processing</b> of continuous telescope data streams.</li></ul>' },
+ { chap:'Volume IV', kick:'faint signals, patient listening', title:'NCRA-TIFR', spine:'#7c4a9e',
+   body:'<p>Research Intern (M.Tech project) · Aug 2024 – Apr 2025 · Pune.</p>'+
+        '<ul><li><b>ResNet1D + Squeeze-and-Excitation attention</b> for weak pulsar signals at low SNR.</li>'+
+        '<li><b>99.8% F1</b> across <b>70M+ samples</b>; adaptive thresholding for non-stationary noise floors.</li>'+
+        '<li>Written, run and defended end-to-end, alone.</li></ul>' },
+ { chap:'Volume V', kick:'the present chapter', title:'C-DAC', spine:'#9e2f5c',
+   body:'<p>Project Engineer · AI Research &amp; IoT Security · Jul 2025 – present · Chennai.</p>'+
+        '<ul><li>Real-time <b>Zero Trust framework</b> for IoT (WiFi 802.11, BLE, Zigbee, LoRa) feeding a continuous <b>7-pillar device trust score</b>.</li>'+
+        '<li>Two-stage hybrid detection: 1-second <b>window model</b> (7 attack classes) + <b>flow model</b>; RF/XGBoost/SVM/MLP/Voting Ensemble across 6 preprocessing iterations with SMOTE + Optuna (TPE).</li>'+
+        '<li>Best: <b>96.97% accuracy</b> (flow/RF); <b>90.86% acc / 86.78% macro F1</b> (window/Ensemble).</li>'+
+        '<li><b>63 features</b> from raw PCAPs (Scapy/PyShark); live PCAP pipeline (Watchdog, MD5 dedup, multi-threaded); SPIFFE/SPIRE, mTLS, OTP 2FA.</li>'+
+        '<li>Two papers at <b>IoTaIS 2025</b>, Bali: <b>“Protocol-Aware Continuous Monitoring and Anomaly Detection in IoT Networks”</b> and <b>“A Comprehensive Survey on Zero Trust Architecture in IoT Networks.”</b></li></ul>' },
+ { chap:'Volume VI', kick:'four tales of building', title:'Projects', spine:'#b06f1e',
+   body:'<div class="item"><h3>GPU-Accelerated F1 Tyre Degradation &amp; Race Strategy</h3>'+
+        '<div class="tags"><span class="tag">Python</span><span class="tag">PyTorch</span><span class="tag">CUDA</span><span class="tag">CuPy</span><span class="tag">XGBoost</span></div>'+
+        '<ul><li>Hybrid <b>LSTM-XGBoost</b> for tyre wear + pit-stop windows from 10 Hz telemetry.</li>'+
+        '<li><b>PINNs</b> separating thermal and mechanical degradation; custom CUDA/CuPy kernels — <b>4.1× speedup</b>.</li></ul></div>'+
+        '<div class="item"><h3>Omniscience Pro — Privacy-First Local RAG</h3>'+
+        '<div class="tags"><span class="tag">Python</span><span class="tag">LangChain</span><span class="tag">ChromaDB</span><span class="tag">Docker</span></div>'+
+        '<ul><li>Multi-modal ingestion; <b>&lt;50 ms</b> vector search (HNSW); <b>&lt;500 ms</b> first token; GPU-aware Docker, CI/CD, POSIX locking.</li></ul></div>'+
+        '<div class="item"><h3>ARO — Autonomous Research Operator</h3>'+
+        '<div class="tags"><span class="tag">Python</span><span class="tag">Flask</span><span class="tag">SQLAlchemy</span><span class="tag">NetworkX</span><span class="tag">React</span></div>'+
+        '<ul><li>Multi-agent LLM workflows as directed graphs; SSE streaming; React UI; adversarial audit fixed <b>16 vulnerabilities</b>.</li></ul></div>'+
+        '<div class="item"><h3>Llama 3.2 Optimisation</h3>'+
+        '<div class="tags"><span class="tag">Python</span><span class="tag">Unsloth</span><span class="tag">Hugging Face</span><span class="tag">PyTorch</span></div>'+
+        '<ul><li>Fine-tuned 1B/3B on <b>21.5k</b> interactions; <b>4-bit quantisation</b>, no meaningful quality drop.</li></ul></div>' },
+ { chap:'Volume VII', kick:'the appendix of instruments', title:'Skills', spine:'#2f7c86',
+   body:'<div class="skillg"><h4>Languages</h4><div class="tags"><span class="tag">Python (advanced)</span><span class="tag">C++ (proficient)</span><span class="tag">C</span><span class="tag">Bash</span><span class="tag">SQL</span></div></div>'+
+        '<div class="skillg"><h4>ML &amp; Scientific Computing</h4><div class="tags"><span class="tag">PyTorch</span><span class="tag">XGBoost</span><span class="tag">Scikit-learn</span><span class="tag">PINNs</span><span class="tag">NumPy</span><span class="tag">SciPy</span></div></div>'+
+        '<div class="skillg"><h4>HPC &amp; Systems</h4><div class="tags"><span class="tag">CUDA</span><span class="tag">CuPy</span><span class="tag">Parallel Processing</span><span class="tag">Quantisation (4/8-bit)</span><span class="tag">Latency Optimisation</span><span class="tag">Linux</span></div></div>'+
+        '<div class="skillg"><h4>Data &amp; Engineering</h4><div class="tags"><span class="tag">Statistical Anomaly Detection</span><span class="tag">Time-Series</span><span class="tag">CI/CD</span><span class="tag">Docker</span><span class="tag">Git</span><span class="tag">Flask</span><span class="tag">ChromaDB</span></div></div>'+
+        '<div class="skillg"><h4>AI &amp; MLOps</h4><div class="tags"><span class="tag">RAG Systems</span><span class="tag">LLM Fine-Tuning</span><span class="tag">Multi-Agent Orchestration</span><span class="tag">SQLAlchemy</span></div></div>' },
+ { chap:'Final Volume', kick:'a letter left between pages', title:'Write to the Author', spine:'#5a5f9e',
+   body:'<p>Open to research collaborations, engineering roles, and interesting problems.</p>'+
+        '<div class="links"><a href="mailto:saptarshinag18@gmail.com"><i class="fa-solid fa-envelope"></i>saptarshinag18@gmail.com</a>'+
+        '<a href="https://www.linkedin.com/in/saptarshi18" target="_blank" rel="noopener"><i class="fa-brands fa-linkedin"></i>/in/saptarshi18</a>'+
+        '<a href="https://github.com/Saptarshi-Nag189" target="_blank" rel="noopener"><i class="fa-brands fa-github"></i>Saptarshi-Nag189</a>'+
+        '<a href="../../saptarshi_resume_linkedin_2026.pdf" target="_blank" rel="noopener"><i class="fa-solid fa-file-arrow-down"></i>the author\'s CV</a></div>' }
+];
+
+/* ================= SCENE ================= */
+var cv=document.getElementById('hall'), ctx=cv.getContext('2d');
+var W=0,H=0,DPR=Math.min(devicePixelRatio||1,2);
+var books=[], candles=[], motes=[];
+function resize(){
+  W=innerWidth; H=innerHeight;
+  cv.width=W*DPR; cv.height=H*DPR; cv.style.width=W+'px'; cv.style.height=H+'px';
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  layoutBooks(); seedAtmos();
+}
+function layoutBooks(){
+  books=[];
+  /* two shelf rows of four glowing volumes */
+  var rows=[H*0.47, H*0.68];
+  var usable=Math.min(W*0.72, 900), x0=(W-usable)/2;
+  for(var i=0;i<VOLS.length;i++){
+    var row=Math.floor(i/4), col=i%4;
+    var bw=Math.min(58, usable*0.06+34);
+    var x=x0+ (col+0.5)*(usable/4);
+    books.push({ i:i, x:x, y:rows[row], w:bw, h:bw*1.5, ph:Math.random()*7 });
+  }
+}
+function seedAtmos(){
+  candles=[]; motes=[];
+  for(var i=0;i<9;i++) candles.push({x:0.06+Math.random()*0.88, y:0.12+Math.random()*0.5, ph:Math.random()*7, drift:Math.random()*0.5+0.2});
+  for(var i2=0;i2<70;i2++) motes.push({x:Math.random(),y:Math.random(),r:0.5+Math.random()*1.3,v:0.06+Math.random()*0.2,ph:Math.random()*7});
+}
+resize(); addEventListener('resize',resize);
+
+var hoverBook=-1;
+var t0=performance.now();
+
+function drawShelves(t){
+  /* receding hall: vanishing point center */
+  var vx=W/2, vy=H*0.42;
+  /* floor */
+  var floor=ctx.createLinearGradient(0,vy,0,H);
+  floor.addColorStop(0,'#170f07'); floor.addColorStop(1,'#0a0603');
+  ctx.fillStyle=floor; ctx.fillRect(0,vy,W,H-vy);
+  /* floor boards toward vanishing point */
+  ctx.strokeStyle='rgba(232,176,106,.05)'; ctx.lineWidth=1;
+  for(var k=-8;k<=8;k++){
+    ctx.beginPath(); ctx.moveTo(vx+k*W*0.09,H); ctx.lineTo(vx+k*W*0.014,vy+8); ctx.stroke();
+  }
+  /* ceiling */
+  var ceil=ctx.createLinearGradient(0,0,0,vy);
+  ceil.addColorStop(0,'#0b0703'); ceil.addColorStop(1,'#140c05');
+  ctx.fillStyle=ceil; ctx.fillRect(0,0,W,vy);
+  /* receding shelf walls: nested trapezoids */
+  for(var d=7;d>=1;d--){
+    var s=d/7;                        /* 1 near … small far */
+    var half=W*0.5*s, top=vy-(vy-H*0.06)*s, bot=vy+(H-vy)*s*0.96;
+    var shade=0.05+0.13*s;
+    /* left wall */
+    ctx.fillStyle='rgba(46,28,12,'+shade+')';
+    ctx.fillRect(vx-half,top,half*0.16,bot-top);
+    /* right wall */
+    ctx.fillRect(vx+half-half*0.16,top,half*0.16,bot-top);
+    /* shelf lines on walls */
+    ctx.fillStyle='rgba(232,176,106,'+(0.05+0.09*s)+')';
+    for(var sh=1;sh<5;sh++){
+      var sy=top+(bot-top)*sh/5;
+      ctx.fillRect(vx-half,sy,half*0.16,1.2);
+      ctx.fillRect(vx+half-half*0.16,sy,half*0.16,1.2);
+    }
+    /* tiny book spines flickering on far shelves */
+    if(d<6){
+      for(var bk=0;bk<9;bk++){
+        var lx=vx-half+4+bk*(half*0.16-8)/9;
+        var rx2=vx+half-half*0.16+4+bk*(half*0.16-8)/9;
+        var hgt=5+((bk*31+d*17)%7);
+        var warm=0.10+0.18*s*(0.7+0.3*Math.sin(t+bk*2+d));
+        ctx.fillStyle='rgba(232,176,106,'+warm+')';
+        ctx.fillRect(lx,top+(bot-top)*0.22-hgt,2.2,hgt);
+        ctx.fillRect(rx2,top+(bot-top)*0.62-hgt,2.2,hgt);
+      }
+    }
+  }
+  /* glow at the vanishing point — the library goes on forever */
+  var g=ctx.createRadialGradient(vx,vy,4,vx,vy,W*0.2);
+  g.addColorStop(0,'rgba(255,217,160,.22)'); g.addColorStop(1,'rgba(255,217,160,0)');
+  ctx.fillStyle=g; ctx.beginPath(); ctx.arc(vx,vy,W*0.2,0,7); ctx.fill();
+}
+function drawCandles(t){
+  for(var i=0;i<candles.length;i++){ var c=candles[i];
+    var cx=c.x*W, cy=(c.y+(REDUCED?0:Math.sin(t*c.drift+c.ph)*0.012))*H;
+    var fl=REDUCED?1:(0.8+0.2*Math.sin(t*9+c.ph)+0.06*Math.sin(t*23+c.ph*3));
+    var g=ctx.createRadialGradient(cx,cy,0,cx,cy,40*fl);
+    g.addColorStop(0,'rgba(255,220,160,'+(0.5*fl)+')'); g.addColorStop(1,'rgba(255,220,160,0)');
+    ctx.fillStyle=g; ctx.beginPath(); ctx.arc(cx,cy,40*fl,0,7); ctx.fill();
+    ctx.fillStyle='rgba(255,240,200,.95)';
+    ctx.beginPath(); ctx.ellipse(cx,cy,1.8,4.2*fl,0,0,7); ctx.fill();
+    ctx.fillStyle='rgba(240,230,210,.8)';
+    ctx.fillRect(cx-1.6,cy+4,3.2,7);
+  }
+}
+function drawMotes(t){
+  ctx.fillStyle='rgba(240,220,180,.5)';
+  for(var i=0;i<motes.length;i++){ var m=motes[i];
+    var my=(m.y+(REDUCED?0:t*0.004*m.v))%1;
+    ctx.globalAlpha=0.1+0.25*Math.abs(Math.sin(t*0.4+m.ph));
+    ctx.beginPath(); ctx.arc(m.x*W+Math.sin(t*0.5+m.ph)*8, my*H, m.r,0,7); ctx.fill();
+  }
+  ctx.globalAlpha=1;
+}
+function drawBooks(t){
+  for(var i=0;i<books.length;i++){ var b=books[i];
+    var hov=hoverBook===i;
+    var lift=REDUCED?0:Math.sin(t*1.1+b.ph)*5-(hov?9:0);
+    var y=b.y+lift;
+    var glowA=hov?0.55:0.3+0.1*Math.sin(t*1.6+b.ph);
+    var g=ctx.createRadialGradient(b.x,y,4,b.x,y,b.w*1.9);
+    g.addColorStop(0,'rgba(255,217,160,'+glowA+')'); g.addColorStop(1,'rgba(255,217,160,0)');
+    ctx.fillStyle=g; ctx.beginPath(); ctx.arc(b.x,y,b.w*1.9,0,7); ctx.fill();
+    /* the book */
+    ctx.save();
+    ctx.translate(b.x,y); ctx.rotate(REDUCED?0:Math.sin(t*0.9+b.ph)*0.05+(hov?0.06:0));
+    ctx.fillStyle=VOLS[i].spine;
+    ctx.beginPath(); ctx.roundRect(-b.w/2,-b.h/2,b.w,b.h,4); ctx.fill();
+    ctx.strokeStyle='rgba(255,230,190,.55)'; ctx.lineWidth=1.4; ctx.stroke();
+    /* gold bands + numeral */
+    ctx.fillStyle='rgba(255,220,160,.75)';
+    ctx.fillRect(-b.w/2+4,-b.h/2+7,b.w-8,2);
+    ctx.fillRect(-b.w/2+4,b.h/2-11,b.w-8,2);
+    ctx.font='700 '+Math.round(b.w*0.34)+'px "Cormorant Garamond",serif';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillStyle='rgba(255,236,200,.95)';
+    var numerals=['I','II','III','IV','V','VI','VII','∞'];
+    ctx.fillText(numerals[i],0,1);
+    ctx.restore();
+    /* label under */
+    var titles=['About','Education','GMRT','NCRA','C-DAC','Projects','Skills','Contact'];
+    ctx.globalAlpha=hov?1:0.65;
+    ctx.fillStyle='#e8d9b8';
+    ctx.font='600 11px "JetBrains Mono",monospace'; ctx.textAlign='center';
+    ctx.fillText(titles[i].toUpperCase(), b.x, b.y+b.h/2+22);
+    ctx.globalAlpha=1;
+  }
+}
+function draw(now){
+  var t=(now-t0)/1000;
+  ctx.clearRect(0,0,W,H);
+  drawShelves(t);
+  drawMotes(t);
+  drawCandles(t);
+  drawBooks(t);
+  /* vignette */
+  var vg=ctx.createRadialGradient(W/2,H*0.5,H*0.25,W/2,H*0.5,H*0.95);
+  vg.addColorStop(0,'rgba(0,0,0,0)'); vg.addColorStop(1,'rgba(0,0,0,.55)');
+  ctx.fillStyle=vg; ctx.fillRect(0,0,W,H);
+}
+
+/* ================= INTERACTION ================= */
+function bookAt(mx,my){
+  for(var i=0;i<books.length;i++){ var b=books[i];
+    if(Math.abs(mx-b.x)<b.w*1.1 && Math.abs(my-b.y)<b.h*0.85) return i;
+  }
+  return -1;
+}
+cv.addEventListener('pointermove',function(e){
+  var i=bookAt(e.clientX,e.clientY);
+  if(i!==hoverBook){ hoverBook=i; cv.style.cursor=i>=0?'pointer':'default'; if(i>=0) sfx('hover'); }
+});
+cv.addEventListener('click',function(e){
+  var i=bookAt(e.clientX,e.clientY);
+  if(i>=0) openBook(i);
+});
+addEventListener('keydown',function(e){
+  var n=parseInt(e.key,10);
+  if(n>=1&&n<=8) openBook(n-1);
+  if(e.key==='Escape') closeBook();
+});
+
+var wrapEl=document.getElementById('bWrap'), plaqueEl=document.getElementById('plaque'), whisperEl=document.getElementById('whisper');
+function openBook(i){
+  var v=VOLS[i];
+  document.getElementById('bChap').textContent=v.chap;
+  document.getElementById('bKick').textContent=v.kick;
+  document.getElementById('bTitle').textContent=v.title;
+  document.getElementById('bBody').innerHTML=v.body;
+  document.getElementById('book').scrollTop=0;
+  wrapEl.classList.add('open');
+  plaqueEl.classList.add('gone'); whisperEl.classList.add('gone');
+  sfx('page');
+}
+function closeBook(){
+  if(!wrapEl.classList.contains('open')) return;
+  wrapEl.classList.remove('open'); plaqueEl.classList.remove('gone');
+  sfx('page'); sfx('back');
+}
+document.getElementById('bClose').addEventListener('click',closeBook);
+wrapEl.addEventListener('click',function(e){ if(e.target===wrapEl) closeBook(); });
+
+/* ================= LOOP ================= */
+var raf=null;
+function loop(now){ raf=requestAnimationFrame(loop); if(document.hidden) return; draw(now); }
+if(REDUCED){ draw(performance.now());
+  addEventListener('resize',function(){ draw(performance.now()); });
+} else { raf=requestAnimationFrame(loop); }
+window.__library=function(){ return { vols:VOLS.length, hover:hoverBook }; };
+})();
+</script>
+</body>
+</html>
