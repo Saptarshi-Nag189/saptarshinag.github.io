@@ -1,846 +1,439 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<title>SPACE // Saptarshi Nag — 3D Portfolio Constellation</title>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>The Constellation — Saptarshi Nag</title>
+<meta name="description" content="An interactive 3D constellation — the portfolio of Saptarshi Nag as eight crystals of light.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 <link rel="stylesheet" href="../_shared/chrome.css">
-<script src="../_shared/chrome.js" data-accent="#7cc8ff" data-tag="3d space"></script>
+<script src="../_shared/chrome.js" data-accent="#7cc8ff" data-tag="the constellation"></script>
 <script src="../_shared/sfx.js"></script>
 <style>
   :root{
-    --bg:#01030a;
-    --accent:#7cc8ff;
-    --accent-dim:#3a6f9e;
-    --gold:#ffcd72;
-    --green:#67ffb0;
-    --panel:rgba(8,15,30,0.86);
-    --line:rgba(124,200,255,0.22);
-    --line-soft:rgba(124,200,255,0.10);
-    --txt:#e3effc;
-    --txt-dim:#8aa0bd;
+    --accent:#7cc8ff; --ink:#e8f2fd; --dim:#8aa0bd;
+    --line:rgba(124,200,255,.22);
     --mono:'JetBrains Mono',ui-monospace,monospace;
     --sans:'Inter',system-ui,sans-serif;
   }
   *{box-sizing:border-box;margin:0;padding:0}
-  html,body{height:100%}
-  body{
-    background:var(--bg);
-    color:var(--txt);
-    font-family:var(--sans);
-    overflow:hidden;
-    -webkit-font-smoothing:antialiased;
-  }
-  #scene-canvas{position:fixed;inset:0;z-index:1;display:block;touch-action:none}
+  html,body{height:100%;overflow:hidden;background:#02040c;color:var(--ink);
+    font-family:var(--sans);-webkit-font-smoothing:antialiased}
+  #stage{position:fixed;inset:0;display:block;touch-action:none}
+  #vig{position:fixed;inset:0;z-index:2;pointer-events:none;
+    background:radial-gradient(ellipse 78% 72% at 50% 48%, transparent 46%, rgba(0,2,8,.7) 100%)}
 
-  #bg-fade{
-    position:fixed;inset:0;z-index:0;pointer-events:none;
-    background:radial-gradient(ellipse 90% 80% at 50% 45%, #07122a 0%, #020611 55%, #01030a 100%);
-  }
-  #vignette{
-    position:fixed;inset:0;z-index:40;pointer-events:none;
-    background:radial-gradient(ellipse 75% 70% at 50% 50%, transparent 52%, rgba(0,0,0,0.6) 100%);
-  }
+  #titleBlock{position:fixed;left:50%;top:8%;transform:translateX(-50%);z-index:5;text-align:center;
+    pointer-events:none;transition:opacity .9s}
+  #titleBlock .k{font-family:var(--mono);font-size:10px;letter-spacing:.5em;text-transform:uppercase;
+    color:rgba(124,200,255,.8);margin-bottom:10px}
+  #titleBlock h1{font-size:clamp(26px,4.4vw,50px);font-weight:700;letter-spacing:-.02em;color:#fff;
+    text-shadow:0 0 46px rgba(124,200,255,.35)}
+  #titleBlock .s{margin-top:8px;font-family:var(--mono);font-size:10.5px;letter-spacing:.26em;
+    text-transform:uppercase;color:var(--dim)}
+  #titleBlock.gone{opacity:0}
+  #hint{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:5;
+    font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;color:var(--dim);
+    pointer-events:none;transition:opacity .8s;white-space:nowrap;
+    background:rgba(3,8,18,.5);border:1px solid var(--line);border-radius:999px;padding:7px 16px;
+    backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+  #hint b{color:var(--accent);font-weight:500}
+  #hint.gone{opacity:0}
 
-  /* ---------- chrome ---------- */
-  .back-link{
-    position:fixed;top:14px;left:16px;z-index:60;
-    font-family:var(--mono);font-size:12px;letter-spacing:.06em;
-    color:var(--accent);text-decoration:none;border:1px solid var(--line);
-    padding:6px 12px;border-radius:4px;background:rgba(3,8,18,.62);backdrop-filter:blur(6px);
-    transition:.2s;
-  }
-  .back-link:hover{background:rgba(124,200,255,.14);box-shadow:0 0 14px rgba(124,200,255,.3)}
-  .concept-tag{
-    position:fixed;top:18px;right:18px;z-index:60;
-    font-family:var(--mono);font-size:9.5px;letter-spacing:.22em;
-    color:var(--txt-dim);text-transform:uppercase;opacity:.72;pointer-events:none;
-  }
-  .hint{
-    position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:60;
-    font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--txt-dim);
-    background:rgba(3,8,18,.55);border:1px solid var(--line-soft);border-radius:20px;
-    padding:7px 16px;backdrop-filter:blur(6px);white-space:nowrap;
-    transition:opacity .6s;text-align:center;
-  }
-  .hint b{color:var(--accent);font-weight:600}
-  @media (max-width:560px){ .hint{font-size:10px;padding:6px 11px} }
+  /* hover label */
+  #label{position:fixed;z-index:6;pointer-events:none;opacity:0;transform:translate(-50%,-160%);
+    font-family:var(--mono);font-size:12px;letter-spacing:.08em;color:#fff;
+    background:rgba(4,10,22,.9);border:1px solid var(--line);border-radius:8px;
+    padding:7px 13px;white-space:nowrap;transition:opacity .15s;
+    box-shadow:0 6px 22px rgba(0,0,0,.5)}
+  #label i{color:var(--accent);margin-right:7px}
 
-  /* hovering label that follows the pointer/object */
-  #hover-label{
-    position:fixed;z-index:55;pointer-events:none;opacity:0;transform:translate(-50%,-140%);
-    font-family:var(--mono);font-size:12px;letter-spacing:.05em;
-    color:var(--txt);background:rgba(4,10,22,.9);border:1px solid var(--line);
-    padding:6px 12px;border-radius:5px;white-space:nowrap;transition:opacity .15s;
-    box-shadow:0 4px 18px rgba(0,0,0,.5);
-  }
-  #hover-label i{color:var(--accent);margin-right:7px}
-
-  /* ---------- overlay panel ---------- */
-  #overlay{
-    position:fixed;inset:0;z-index:80;display:none;
-    align-items:center;justify-content:center;
-    background:radial-gradient(ellipse at 50% 50%, rgba(2,5,14,.4) 0%, rgba(1,3,10,.78) 100%);
-    backdrop-filter:blur(3px);
-  }
-  #overlay.open{display:flex;animation:fade .25s ease}
-  @keyframes fade{from{opacity:0}to{opacity:1}}
-  .card{
-    position:relative;width:min(680px,92vw);max-height:84vh;overflow-y:auto;
-    background:var(--panel);border:1px solid var(--line);border-radius:14px;
-    box-shadow:0 0 60px rgba(124,200,255,.12),0 24px 70px rgba(0,0,0,.6);
-    padding:30px 34px 34px;animation:rise .3s cubic-bezier(.2,.8,.2,1);
-  }
-  @keyframes rise{from{opacity:0;transform:translateY(22px) scale(.98)}to{opacity:1;transform:none}}
-  .card::-webkit-scrollbar{width:9px}
-  .card::-webkit-scrollbar-thumb{background:var(--accent-dim);border-radius:6px}
-  .card-icon{
-    width:46px;height:46px;border-radius:11px;display:flex;align-items:center;justify-content:center;
-    background:linear-gradient(140deg,rgba(124,200,255,.22),rgba(124,200,255,.05));
-    border:1px solid var(--line);color:var(--accent);font-size:20px;margin-bottom:14px;
-  }
-  .card h2{font-size:23px;font-weight:700;letter-spacing:-.01em;margin-bottom:4px}
-  .card .sub{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:18px}
-  .card p{font-size:14.5px;line-height:1.62;color:#cfdcec;margin-bottom:14px}
-  .card .close{
-    position:absolute;top:16px;right:16px;width:34px;height:34px;border-radius:8px;
-    border:1px solid var(--line);background:rgba(124,200,255,.06);color:var(--accent);
-    cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:.18s;
-  }
-  .card .close:hover{background:rgba(124,200,255,.18)}
-
-  .item{border-left:2px solid var(--line);padding:2px 0 2px 16px;margin-bottom:18px}
-  .item h3{font-size:15.5px;font-weight:600;margin-bottom:3px}
-  .item .meta{font-family:var(--mono);font-size:11px;color:var(--txt-dim);margin-bottom:7px;letter-spacing:.03em}
-  .item p{font-size:13.5px;margin-bottom:0;color:#bccbdd}
-  .tags{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 2px}
-  .tag{font-family:var(--mono);font-size:10.5px;color:var(--accent);background:rgba(124,200,255,.08);
-    border:1px solid var(--line-soft);border-radius:4px;padding:3px 8px}
-  .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-top:6px}
-  .metric{background:rgba(124,200,255,.05);border:1px solid var(--line-soft);border-radius:10px;padding:14px}
-  .metric .v{font-family:var(--mono);font-size:21px;font-weight:700;color:var(--accent);line-height:1}
-  .metric .l{font-size:11.5px;color:var(--txt-dim);margin-top:6px;line-height:1.35}
-  .skillgrp{margin-bottom:14px}
-  .skillgrp h4{font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:7px}
-  .links a{display:inline-flex;align-items:center;gap:8px;color:var(--accent);text-decoration:none;
-    font-size:14px;margin:5px 18px 5px 0;border-bottom:1px solid transparent;transition:.18s}
-  .links a:hover{border-bottom-color:var(--accent)}
+  /* panel */
+  #pWrap{position:fixed;inset:0;z-index:20;display:none;align-items:center;justify-content:center;
+    background:rgba(1,4,12,.5);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+  #pWrap.open{display:flex;animation:sf .3s ease}
+  @keyframes sf{from{opacity:0}to{opacity:1}}
+  #panel{position:relative;width:min(620px,92vw);max-height:80vh;overflow-y:auto;
+    background:linear-gradient(170deg,rgba(8,16,32,.92),rgba(3,8,18,.96));
+    border:1px solid var(--pc,var(--line));border-radius:18px;
+    box-shadow:0 30px 90px rgba(0,0,0,.7), 0 0 70px -18px var(--pc,rgba(124,200,255,.45));
+    padding:28px 30px 26px;animation:sr .4s cubic-bezier(.2,.85,.25,1)}
+  @keyframes sr{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
+  #panel::-webkit-scrollbar{width:8px}
+  #panel::-webkit-scrollbar-thumb{background:rgba(124,200,255,.3);border-radius:6px}
+  #pKick{font-family:var(--mono);font-size:10.5px;letter-spacing:.26em;text-transform:uppercase;
+    color:var(--pc,var(--accent));margin-bottom:6px;display:flex;align-items:center;gap:8px}
+  #pTitle{font-size:clamp(21px,3vw,27px);font-weight:700;letter-spacing:-.01em;margin-bottom:16px;color:#fff}
+  #pBody{font-size:14.5px;line-height:1.62;color:#c6d6e8}
+  #pBody p{margin-bottom:13px}
+  #pBody .item{border-left:2px solid var(--line);padding:3px 0 3px 15px;margin-bottom:17px}
+  #pBody .item h3{font-size:15.5px;font-weight:600;color:#fff;margin-bottom:2px}
+  #pBody .item .meta{font-family:var(--mono);font-size:11px;color:var(--dim);margin-bottom:7px}
+  #pBody ul{list-style:none;margin:4px 0 8px}
+  #pBody ul li{position:relative;padding:5px 0 5px 20px;font-size:13.5px;line-height:1.55}
+  #pBody ul li::before{content:"\f005";font-family:"Font Awesome 6 Free";font-weight:900;
+    position:absolute;left:0;top:7px;color:var(--pc,var(--accent));font-size:8px}
+  #pBody b{color:#fff;font-weight:600}
+  .tags{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 12px}
+  .tag{font-family:var(--mono);font-size:10.5px;color:#cfe6ff;background:rgba(124,200,255,.09);
+    border:1px solid var(--line);border-radius:6px;padding:3px 9px}
+  .mgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(115px,1fr));gap:11px;margin:8px 0 4px}
+  .mtile{background:rgba(124,200,255,.06);border:1px solid var(--line);border-radius:12px;padding:12px}
+  .mtile .v{font-family:var(--mono);font-size:19px;font-weight:700;color:var(--pc,var(--accent));line-height:1}
+  .mtile .l{font-size:10.5px;color:var(--dim);margin-top:5px;line-height:1.35}
+  .skillg{margin-bottom:12px}
+  .skillg h4{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--pc,var(--accent));margin-bottom:7px}
+  .links a{display:inline-flex;align-items:center;gap:9px;color:var(--accent);text-decoration:none;
+    font-size:14px;margin:5px 20px 5px 0;transition:.18s}
+  .links a:hover{text-shadow:0 0 12px rgba(124,200,255,.8)}
   .links a i{width:18px;text-align:center}
+  #pClose{position:absolute;top:14px;right:16px;width:33px;height:33px;border-radius:10px;
+    border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.06);color:#fff;
+    cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;transition:.18s}
+  #pClose:hover{background:rgba(255,255,255,.16)}
 
-  /* ---------- fallback (no webgl / no three) ---------- */
-  #fallback{
-    position:fixed;inset:0;z-index:90;display:none;overflow-y:auto;
-    background:radial-gradient(ellipse 90% 80% at 50% 30%, #07122a 0%, #01030a 70%);
-    padding:70px 20px 60px;
-  }
+  /* fallback (no WebGL / CDN failure) */
+  #fallback{position:fixed;inset:0;z-index:3;display:none;overflow-y:auto;padding:110px 20px 80px;
+    background:radial-gradient(ellipse 90% 80% at 50% 25%, #071228 0%, #02040c 70%)}
   #fallback.show{display:block}
-  .fb-wrap{max-width:760px;margin:0 auto}
-  .fb-head{text-align:center;margin-bottom:30px}
-  .fb-head .core{
-    width:78px;height:78px;border-radius:50%;margin:0 auto 18px;
-    background:radial-gradient(circle at 40% 35%,#bfe2ff,#2f7fc4 55%,#0b2a48);
-    box-shadow:0 0 50px rgba(124,200,255,.55);display:flex;align-items:center;justify-content:center;
-    font-size:30px;color:#04121f;
-  }
-  .fb-head h1{font-size:26px;font-weight:700}
-  .fb-head .tl{color:var(--accent);font-family:var(--mono);font-size:13px;margin-top:6px}
-  .fb-note{font-size:12px;color:var(--txt-dim);margin-top:12px;font-family:var(--mono)}
-  .fb-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
-  .fb-sec{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 20px}
-  .fb-sec h3{font-size:16px;margin-bottom:10px;display:flex;align-items:center;gap:9px}
-  .fb-sec h3 i{color:var(--accent)}
-  .fb-sec .body{font-size:13px;line-height:1.6;color:#c4d3e4}
-  .fb-sec .body strong{color:#e3effc}
+  #fallback .fbw{max-width:720px;margin:0 auto}
+  #fallback .note{font-family:var(--mono);font-size:11px;color:var(--dim);margin-bottom:26px}
+  #fallback .sec{margin-bottom:34px}
+  #fallback .sec .sh{font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;
+    margin-bottom:9px}
+
+  @media (prefers-reduced-motion: reduce){ #pWrap,#panel{animation:none !important} }
+  @media (max-width:640px){ #panel{padding:22px 18px} }
 </style>
 </head>
 <body>
-<div id="bg-fade"></div>
-<canvas id="scene-canvas"></canvas>
-<div id="vignette"></div>
 
-<a class="back-link" href="../index.html"><i class="fa-solid fa-arrow-left"></i> demos</a>
-<div class="concept-tag">concept demo</div>
-<div class="hint" id="hint"><b>drag</b> to orbit &middot; <b>scroll</b> to zoom &middot; <b>click</b> a node</div>
-<div id="hover-label"><i class="fa-solid fa-circle-dot"></i><span></span></div>
+<canvas id="stage"></canvas>
+<div id="vig"></div>
 
-<div id="overlay"><div class="card" id="card"></div></div>
-<div id="fallback"></div>
+<div id="titleBlock">
+  <div class="k">the constellation</div>
+  <h1>Eight crystals. One story.</h1>
+  <div class="s">drag to orbit · scroll to zoom · click a crystal</div>
+</div>
+<div id="hint"><b>drag</b> to orbit · <b>scroll</b> to zoom · <b>click a crystal</b> to read it</div>
+<div id="label"></div>
 
-<!-- =================== DATA (shared by 3D + fallback) =================== -->
+<div id="pWrap">
+  <div id="panel">
+    <button id="pClose" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+    <div id="pKick"></div>
+    <h2 id="pTitle"></h2>
+    <div id="pBody"></div>
+  </div>
+</div>
+
+<div id="fallback"><div class="fbw">
+  <p class="note"><i class="fa-solid fa-circle-info"></i>&nbsp; 3D is unavailable here — showing the flat star chart. All content below.</p>
+  <div id="fbBody"></div>
+</div></div>
+
 <script>
-window.PORTFOLIO = {
-  name: "Saptarshi Nag",
-  role: "AI/ML Engineer",
-  tagline: "AI/ML engineer at the intersection of security and systems research.",
-  bio: "M.Tech in Artificial Intelligence (DIAT, DRDO); research at NCRA-TIFR & GMRT; now Project Engineer at C-DAC building real-time IoT security (Zero Trust + ML threat detection). Works across the full ML stack — feature engineering, model development & optimisation, production deployment under tight constraints. Past work spans physics-informed neural networks, GPU-accelerated scientific computing, LLM fine-tuning, and RAG systems.",
-  metrics: [
-    {v:"96.97%", l:"IoT attack-detection accuracy"},
-    {v:"99.8%",  l:"pulsar-detection F1"},
-    {v:"4.1x",   l:"GPU training speedup"},
-    {v:"50%",    l:"signal-pipeline latency cut"},
-    {v:"70M+",   l:"samples processed"}
-  ],
-  experience: [
-    {role:"Project Engineer, AI Research & IoT Security", org:"C-DAC", when:"Jul 2025–Present", where:"Chennai",
-     desc:"Real-time Zero Trust IoT security (WiFi/BLE/Zigbee/LoRa) feeding a 7-pillar device trust score; two-stage hybrid detection (1s window model, 7 classes, + flow model); compared RF/XGBoost/SVM/MLP/Voting Ensemble over 6 preprocessing iterations with SMOTE + Optuna; best 96.97% accuracy (flow/RF), 90.86% acc / 86.78% macro F1 (window/Ensemble); 63 features from raw PCAPs (Scapy/PyShark); live PCAP pipeline (Watchdog, MD5 dedup, multi-threaded); SPIFFE/SPIRE, mTLS, OTP 2FA; two IoTaIS 2025 papers."},
-    {role:"Research Intern (M.Tech)", org:"NCRA-TIFR", when:"Aug 2024–Apr 2025", where:"Pune",
-     desc:"ResNet1D + Squeeze-and-Excitation attention for weak pulsar detection at low SNR; 99.8% F1 across 70M+ samples; adaptive thresholding; end-to-end independently."},
-    {role:"Winter Intern, HPC & Signal Processing", org:"GMRT", when:"Dec 2023–Jan 2024", where:"Pune",
-     desc:"Profiled legacy CPU signal filtering, refactored for multicore; cut latency 50% for real-time telescope streams."}
-  ],
-  projects: [
-    {name:"GPU-Accelerated F1 Tyre Degradation & Race Strategy", tags:["Python","PyTorch","CUDA","CuPy","XGBoost"],
-     desc:"Hybrid LSTM-XGBoost from 10 Hz telemetry; PINNs separating thermal/mechanical degradation; custom CUDA/CuPy kernels; 4.1x speedup."},
-    {name:"Omniscience Pro — Privacy-First Local RAG", tags:["Python","LangChain","ChromaDB","Docker"],
-     desc:"Multi-modal ingestion; <50 ms vector search (HNSW); <500 ms first-token latency; GPU-aware Docker, CI/CD, POSIX locking."},
-    {name:"ARO — Autonomous Research Operator", tags:["Python","Flask","SQLAlchemy","NetworkX","React"],
-     desc:"Multi-agent LLM workflows as directed graphs; Flask SSE streaming; React UI; adversarial audit fixed 16 vulns."},
-    {name:"Llama 3.2 Optimisation", tags:["Python","Unsloth","Hugging Face","PyTorch"],
-     desc:"Fine-tuned Llama 3.2 (1B/3B) on 21.5k interactions; 4-bit quantisation via Unsloth; no meaningful quality drop."}
-  ],
-  publications: [
-    {title:"Protocol-Aware Continuous Monitoring and Anomaly Detection in IoT Networks", venue:"IoTaIS 2025, Bali"},
-    {title:"A Comprehensive Survey on Zero Trust Architecture in IoT Networks", venue:"IoTaIS 2025, Bali"}
-  ],
-  education: [
-    {deg:"M.Tech CSE (AI)", school:"DIAT (DRDO), Pune", when:"2023–2025", extra:"CGPA 8.64"},
-    {deg:"B.Tech CSE", school:"Academy of Technology, Kolkata", when:"2019–2023", extra:"CGPA 9.44"},
-    {deg:"GATE 2024", school:"Data Science & AI", when:"Rank 1790", extra:"top 5%"}
-  ],
-  skills: [
-    {g:"Languages", items:"Python (advanced), C++ (proficient), C, Bash, SQL"},
-    {g:"ML & Scientific Computing", items:"PyTorch, XGBoost, Scikit-learn, PINNs, NumPy, SciPy"},
-    {g:"HPC & Systems", items:"CUDA, CuPy, Parallel Processing, Model Quantisation (4/8-bit), Latency Optimisation, Linux"},
-    {g:"Data & Engineering", items:"Statistical Anomaly Detection, Time-Series Analysis, CI/CD, Docker, Git, Flask, ChromaDB"},
-    {g:"AI & MLOps", items:"RAG Systems, LLM Fine-Tuning, Multi-Agent Orchestration (NetworkX, LangChain), SQLAlchemy"}
-  ],
-  contact: {
-    email:"saptarshinag18@gmail.com",
-    linkedin:"https://www.linkedin.com/in/saptarshi18",
-    github:"https://github.com/Saptarshi-Nag189",
-    cv:"../../saptarshi_resume_linkedin_2026.pdf"
-  }
-};
-
-/* node definitions: order + visual placement + icon */
-window.NODES = [
-  {key:"stats",        label:"Mission Stats", icon:"fa-gauge-high",     color:0xffcd72, kind:"core"},
-  {key:"about",        label:"About",         icon:"fa-user-astronaut", color:0x7cc8ff},
-  {key:"experience",   label:"Experience",    icon:"fa-briefcase",      color:0x67ffb0},
-  {key:"projects",     label:"Projects",      icon:"fa-cubes",          color:0xff8db4},
-  {key:"skills",       label:"Skills",        icon:"fa-microchip",      color:0x9d8bff},
-  {key:"publications", label:"Publications",  icon:"fa-book-open",      color:0x7cc8ff},
-  {key:"education",    label:"Education",      icon:"fa-graduation-cap", color:0xffcd72},
-  {key:"contact",      label:"Contact",       icon:"fa-paper-plane",    color:0x67ffb0}
+/* ---------- shared content (3D + fallback), non-module so it always runs ---------- */
+window.SECTIONS = [
+ { id:'about', icon:'fa-user', label:'About', hex:0x7cc8ff, css:'#7cc8ff',
+   kick:'the core star', title:'Saptarshi Nag — AI/ML Engineer',
+   body:'<p>AI/ML engineer at the intersection of <b>security and systems research</b>. M.Tech in Artificial Intelligence (DIAT, DRDO); research at NCRA-TIFR &amp; GMRT; now a Project Engineer at C-DAC building real-time IoT security — Zero Trust with ML threat detection.</p>'+
+        '<p>Works the full ML stack: feature engineering from raw data, model development &amp; optimisation, production deployment under tight constraints. Past work spans physics-informed neural networks, GPU-accelerated scientific computing, LLM fine-tuning and RAG systems.</p>'+
+        '<div class="mgrid"><div class="mtile"><div class="v">96.97%</div><div class="l">IoT attack detection</div></div>'+
+        '<div class="mtile"><div class="v">99.8%</div><div class="l">pulsar F1</div></div>'+
+        '<div class="mtile"><div class="v">4.1×</div><div class="l">GPU speedup</div></div>'+
+        '<div class="mtile"><div class="v">50%</div><div class="l">latency cut</div></div>'+
+        '<div class="mtile"><div class="v">70M+</div><div class="l">samples</div></div></div>' },
+ { id:'edu', icon:'fa-graduation-cap', label:'Education', hex:0x6be9ff, css:'#6be9ff',
+   kick:'where the light was lit', title:'Education',
+   body:'<div class="item"><h3>B.Tech, Computer Science &amp; Engineering</h3><div class="meta">Academy of Technology, Kolkata · 2019–2023 · CGPA 9.44/10.0</div></div>'+
+        '<div class="item"><h3>M.Tech, CSE (Artificial Intelligence)</h3><div class="meta">DIAT (DRDO), Pune · 2023–2025 · CGPA 8.64/10.0</div></div>'+
+        '<div class="item"><h3>GATE 2024</h3><div class="meta">Rank 1790 · Data Science &amp; AI · top 5%</div></div>' },
+ { id:'gmrt', icon:'fa-satellite-dish', label:'GMRT', hex:0x4dffa8, css:'#4dffa8',
+   kick:'first signal', title:'GMRT — HPC & Signal Processing',
+   body:'<p>Winter Intern · Dec 2023 – Jan 2024 · Pune. A winter at one of the world\'s largest radio telescope arrays.</p>'+
+        '<ul><li>Profiled legacy <b>CPU signal-filtering pipelines</b>, refactored for <b>multicore execution</b>.</li>'+
+        '<li>Cut latency by <b>50%</b>, unblocking <b>real-time processing</b> of continuous telescope data streams.</li></ul>' },
+ { id:'ncra', icon:'fa-star', label:'NCRA-TIFR', hex:0xffe28a, css:'#ffe28a',
+   kick:'the pulsar hunter', title:'NCRA-TIFR — Weak Pulsar Detection',
+   body:'<p>Research Intern (M.Tech project) · Aug 2024 – Apr 2025 · Pune.</p>'+
+        '<ul><li><b>ResNet1D + Squeeze-and-Excitation attention</b> for weak pulsar signals at low SNR.</li>'+
+        '<li><b>99.8% F1</b> across <b>70M+ samples</b>; adaptive thresholding for non-stationary noise floors.</li>'+
+        '<li>Ran end-to-end independently — scoping through deployment and write-up.</li></ul>' },
+ { id:'cdac', icon:'fa-shield-halved', label:'C-DAC', hex:0xff8a7a, css:'#ff8a7a',
+   kick:'the shield star', title:'C-DAC — AI Research & IoT Security',
+   body:'<p>Project Engineer · Jul 2025 – present · Chennai.</p>'+
+        '<ul><li>Real-time <b>Zero Trust framework</b> for IoT (WiFi 802.11, BLE, Zigbee, LoRa) feeding a continuous <b>7-pillar device trust score</b>.</li>'+
+        '<li>Two-stage hybrid detection: 1-second <b>window model</b> (7 attack classes) + <b>flow model</b>; RF/XGBoost/SVM/MLP/Voting Ensemble over 6 preprocessing iterations with SMOTE + Optuna (TPE).</li>'+
+        '<li>Best: <b>96.97% accuracy</b> (flow/RF); <b>90.86% acc / 86.78% macro F1</b> (window/Ensemble).</li>'+
+        '<li><b>63 features</b> from raw PCAPs (Scapy/PyShark); live PCAP pipeline (Watchdog, MD5 dedup, multi-threaded); SPIFFE/SPIRE, mTLS, OTP 2FA.</li>'+
+        '<li>Two papers at <b>IoTaIS 2025</b>, Bali: <b>“Protocol-Aware Continuous Monitoring and Anomaly Detection in IoT Networks”</b> and <b>“A Comprehensive Survey on Zero Trust Architecture in IoT Networks.”</b></li></ul>' },
+ { id:'proj', icon:'fa-diagram-project', label:'Projects', hex:0xffab54, css:'#ffab54',
+   kick:'the forge', title:'Projects',
+   body:'<div class="item"><h3>GPU-Accelerated F1 Tyre Degradation &amp; Race Strategy</h3>'+
+        '<div class="tags"><span class="tag">Python</span><span class="tag">PyTorch</span><span class="tag">CUDA</span><span class="tag">CuPy</span><span class="tag">XGBoost</span></div>'+
+        '<ul><li>Hybrid <b>LSTM-XGBoost</b> for tyre wear + pit-stop windows from 10 Hz telemetry.</li>'+
+        '<li><b>PINNs</b> separating thermal and mechanical degradation; custom CUDA/CuPy kernels — <b>4.1× speedup</b>.</li></ul></div>'+
+        '<div class="item"><h3>Omniscience Pro — Privacy-First Local RAG</h3>'+
+        '<div class="tags"><span class="tag">Python</span><span class="tag">LangChain</span><span class="tag">ChromaDB</span><span class="tag">Docker</span></div>'+
+        '<ul><li>Multi-modal ingestion; <b>&lt;50 ms</b> vector search (HNSW); <b>&lt;500 ms</b> first token; GPU-aware Docker, CI/CD, POSIX locking.</li></ul></div>'+
+        '<div class="item"><h3>ARO — Autonomous Research Operator</h3>'+
+        '<div class="tags"><span class="tag">Python</span><span class="tag">Flask</span><span class="tag">SQLAlchemy</span><span class="tag">NetworkX</span><span class="tag">React</span></div>'+
+        '<ul><li>Multi-agent LLM workflows as directed graphs; SSE streaming; React UI; adversarial audit fixed <b>16 vulnerabilities</b>.</li></ul></div>'+
+        '<div class="item"><h3>Llama 3.2 Optimisation</h3>'+
+        '<div class="tags"><span class="tag">Python</span><span class="tag">Unsloth</span><span class="tag">Hugging Face</span><span class="tag">PyTorch</span></div>'+
+        '<ul><li>Fine-tuned 1B/3B on <b>21.5k</b> interactions; <b>4-bit quantisation</b>, no meaningful quality drop.</li></ul></div>' },
+ { id:'skills', icon:'fa-microchip', label:'Skills', hex:0xb28cff, css:'#b28cff',
+   kick:'the toolbelt nebula', title:'Skills',
+   body:'<div class="skillg"><h4>Languages</h4><div class="tags"><span class="tag">Python (advanced)</span><span class="tag">C++ (proficient)</span><span class="tag">C</span><span class="tag">Bash</span><span class="tag">SQL</span></div></div>'+
+        '<div class="skillg"><h4>ML &amp; Scientific Computing</h4><div class="tags"><span class="tag">PyTorch</span><span class="tag">XGBoost</span><span class="tag">Scikit-learn</span><span class="tag">PINNs</span><span class="tag">NumPy</span><span class="tag">SciPy</span></div></div>'+
+        '<div class="skillg"><h4>HPC &amp; Systems</h4><div class="tags"><span class="tag">CUDA</span><span class="tag">CuPy</span><span class="tag">Parallel Processing</span><span class="tag">Quantisation (4/8-bit)</span><span class="tag">Latency Optimisation</span><span class="tag">Linux</span></div></div>'+
+        '<div class="skillg"><h4>Data &amp; Engineering</h4><div class="tags"><span class="tag">Statistical Anomaly Detection</span><span class="tag">Time-Series</span><span class="tag">CI/CD</span><span class="tag">Docker</span><span class="tag">Git</span><span class="tag">Flask</span><span class="tag">ChromaDB</span></div></div>'+
+        '<div class="skillg"><h4>AI &amp; MLOps</h4><div class="tags"><span class="tag">RAG Systems</span><span class="tag">LLM Fine-Tuning</span><span class="tag">Multi-Agent Orchestration</span><span class="tag">SQLAlchemy</span></div></div>' },
+ { id:'contact', icon:'fa-envelope', label:'Contact', hex:0x7dffcf, css:'#7dffcf',
+   kick:'signal home', title:'Contact',
+   body:'<p>Open to research collaborations, engineering roles, and interesting problems.</p>'+
+        '<div class="links"><a href="mailto:saptarshinag18@gmail.com"><i class="fa-solid fa-envelope"></i>saptarshinag18@gmail.com</a>'+
+        '<a href="https://www.linkedin.com/in/saptarshi18" target="_blank" rel="noopener"><i class="fa-brands fa-linkedin"></i>/in/saptarshi18</a>'+
+        '<a href="https://github.com/Saptarshi-Nag189" target="_blank" rel="noopener"><i class="fa-brands fa-github"></i>Saptarshi-Nag189</a>'+
+        '<a href="../../saptarshi_resume_linkedin_2026.pdf" target="_blank" rel="noopener"><i class="fa-solid fa-file-arrow-down"></i>download CV</a></div>' }
 ];
+
+/* ---------- panel + fallback plumbing (non-module) ---------- */
+window.openSection = function(i){
+  var s=window.SECTIONS[i];
+  var panel=document.getElementById('panel');
+  panel.style.setProperty('--pc',s.css);
+  document.getElementById('pKick').innerHTML='<i class="fa-solid '+s.icon+'"></i> '+s.kick;
+  document.getElementById('pTitle').textContent=s.title;
+  document.getElementById('pBody').innerHTML=s.body;
+  panel.scrollTop=0;
+  document.getElementById('pWrap').classList.add('open');
+  document.getElementById('titleBlock').classList.add('gone');
+  try{ window.SFX && SFX.play('select'); }catch(e){}
+};
+window.closeSection = function(){
+  var w=document.getElementById('pWrap');
+  if(!w.classList.contains('open')) return;
+  w.classList.remove('open');
+  document.getElementById('titleBlock').classList.remove('gone');
+  try{ window.SFX && SFX.play('back'); }catch(e){}
+};
+document.getElementById('pClose').addEventListener('click',window.closeSection);
+document.getElementById('pWrap').addEventListener('click',function(e){ if(e.target===document.getElementById('pWrap')) window.closeSection(); });
+addEventListener('keydown',function(e){ if(e.key==='Escape') window.closeSection(); });
+
+window.showFallback = function(){
+  if(document.getElementById('fallback').classList.contains('show')) return;
+  document.getElementById('fallback').classList.add('show');
+  document.getElementById('titleBlock').style.display='none';
+  document.getElementById('hint').style.display='none';
+  document.getElementById('fbBody').innerHTML=window.SECTIONS.map(function(s){
+    return '<div class="sec"><div class="sh" style="color:'+s.css+'"><i class="fa-solid '+s.icon+'"></i> '+s.title+'</div>'+s.body+'</div>';
+  }).join('');
+};
+/* init sound (non-module — works in fallback too) */
+try{ window.SFX && SFX.init({ accent:'#7cc8ff', ambient:true, ambientFreq:70 }); }catch(e){}
+/* watchdog: if the module never marks itself OK, show the star chart */
+setTimeout(function(){ if(!window.__SPACE_OK__) window.showFallback(); }, 6000);
+window.addEventListener('error', function(e){
+  if(e && e.target && e.target.tagName==='SCRIPT' && !window.__SPACE_OK__) window.showFallback();
+}, true);
 </script>
 
-<!-- =================== overlay content builder (shared, non-module) =================== -->
-<script>
-window.buildCard = function(key){
-  var P = window.PORTFOLIO, N = window.NODES.filter(function(n){return n.key===key;})[0] || {};
-  var esc = function(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); };
-  var head = '<button class="close" id="card-close" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>'+
-             '<div class="card-icon"><i class="fa-solid '+(N.icon||'fa-circle')+'"></i></div>';
-  var body = '';
-
-  if (key === 'stats') {
-    head += '<h2>Mission Stats</h2><div class="sub">Headline Metrics</div>';
-    body += '<div class="metrics">';
-    P.metrics.forEach(function(m){ body += '<div class="metric"><div class="v">'+esc(m.v)+'</div><div class="l">'+esc(m.l)+'</div></div>'; });
-    body += '</div>';
-  } else if (key === 'about') {
-    head += '<h2>'+esc(P.name)+' — '+esc(P.role)+'</h2><div class="sub">'+esc(P.tagline)+'</div>';
-    body += '<p>'+esc(P.bio)+'</p>';
-  } else if (key === 'experience') {
-    head += '<h2>Experience</h2><div class="sub">Roles &amp; Research</div>';
-    P.experience.forEach(function(e){
-      body += '<div class="item"><h3>'+esc(e.role)+' · '+esc(e.org)+'</h3>'+
-              '<div class="meta">'+esc(e.when)+' &middot; '+esc(e.where)+'</div>'+
-              '<p>'+esc(e.desc)+'</p></div>';
-    });
-  } else if (key === 'projects') {
-    head += '<h2>Projects</h2><div class="sub">Selected Work</div>';
-    P.projects.forEach(function(pr){
-      var t = pr.tags.map(function(x){return '<span class="tag">'+esc(x)+'</span>';}).join('');
-      body += '<div class="item"><h3>'+esc(pr.name)+'</h3><div class="tags">'+t+'</div><p>'+esc(pr.desc)+'</p></div>';
-    });
-  } else if (key === 'skills') {
-    head += '<h2>Skills</h2><div class="sub">Technical Stack</div>';
-    P.skills.forEach(function(s){
-      body += '<div class="skillgrp"><h4>'+esc(s.g)+'</h4><p style="margin:0;color:#bccbdd;font-size:13.5px">'+esc(s.items)+'</p></div>';
-    });
-  } else if (key === 'publications') {
-    head += '<h2>Publications</h2><div class="sub">Peer-Reviewed</div>';
-    P.publications.forEach(function(pb){
-      body += '<div class="item"><h3>'+esc(pb.title)+'</h3><div class="meta">'+esc(pb.venue)+'</div></div>';
-    });
-  } else if (key === 'education') {
-    head += '<h2>Education</h2><div class="sub">Academic Record</div>';
-    P.education.forEach(function(ed){
-      body += '<div class="item"><h3>'+esc(ed.deg)+'</h3><div class="meta">'+esc(ed.school)+' &middot; '+esc(ed.when)+' &middot; '+esc(ed.extra)+'</div></div>';
-    });
-  } else if (key === 'contact') {
-    head += '<h2>Contact</h2><div class="sub">Get In Touch</div>';
-    body += '<div class="links">'+
-      '<a href="mailto:'+esc(P.contact.email)+'"><i class="fa-solid fa-envelope"></i>'+esc(P.contact.email)+'</a><br>'+
-      '<a href="'+esc(P.contact.linkedin)+'" target="_blank" rel="noopener"><i class="fa-brands fa-linkedin"></i>LinkedIn</a>'+
-      '<a href="'+esc(P.contact.github)+'" target="_blank" rel="noopener"><i class="fa-brands fa-github"></i>GitHub</a><br>'+
-      '<a href="'+esc(P.contact.cv)+'" target="_blank" rel="noopener"><i class="fa-solid fa-file-pdf"></i>Download CV</a>'+
-    '</div>';
-  }
-  return head + body;
-};
-
-/* ---- build the plain-HTML fallback (also used as final safety net) ---- */
-window.buildFallback = function(reason){
-  var P = window.PORTFOLIO;
-  var el = document.getElementById('fallback');
-  var H = '<div class="fb-wrap"><div class="fb-head">'+
-    '<div class="core"><i class="fa-solid fa-user-astronaut"></i></div>'+
-    '<h1>'+P.name+' — '+P.role+'</h1>'+
-    '<div class="tl">'+P.tagline+'</div>'+
-    (reason ? '<div class="fb-note"><i class="fa-solid fa-circle-info"></i> 3D view unavailable — '+reason+'. Showing portfolio below.</div>' : '')+
-    '</div><div class="fb-grid">';
-
-  H += '<div class="fb-sec"><h3><i class="fa-solid fa-user-astronaut"></i> About</h3><div class="body">'+P.bio+'</div></div>';
-
-  var mh = P.metrics.map(function(m){return '<strong>'+m.v+'</strong> '+m.l;}).join('<br>');
-  H += '<div class="fb-sec"><h3><i class="fa-solid fa-gauge-high"></i> Stats</h3><div class="body">'+mh+'</div></div>';
-
-  var eh = P.experience.map(function(e){return '<strong>'+e.role+' · '+e.org+'</strong><br>'+e.when+' · '+e.where+'<br>'+e.desc;}).join('<br><br>');
-  H += '<div class="fb-sec"><h3><i class="fa-solid fa-briefcase"></i> Experience</h3><div class="body">'+eh+'</div></div>';
-
-  var ph = P.projects.map(function(p){return '<strong>'+p.name+'</strong> ['+p.tags.join(', ')+']<br>'+p.desc;}).join('<br><br>');
-  H += '<div class="fb-sec"><h3><i class="fa-solid fa-cubes"></i> Projects</h3><div class="body">'+ph+'</div></div>';
-
-  var sh = P.skills.map(function(s){return '<strong>'+s.g+':</strong> '+s.items;}).join('<br>');
-  H += '<div class="fb-sec"><h3><i class="fa-solid fa-microchip"></i> Skills</h3><div class="body">'+sh+'</div></div>';
-
-  var pbh = P.publications.map(function(b){return '<strong>'+b.title+'</strong><br>'+b.venue;}).join('<br><br>');
-  H += '<div class="fb-sec"><h3><i class="fa-solid fa-book-open"></i> Publications</h3><div class="body">'+pbh+'</div></div>';
-
-  var edh = P.education.map(function(d){return '<strong>'+d.deg+'</strong> — '+d.school+' · '+d.when+' · '+d.extra;}).join('<br><br>');
-  H += '<div class="fb-sec"><h3><i class="fa-solid fa-graduation-cap"></i> Education</h3><div class="body">'+edh+'</div></div>';
-
-  H += '<div class="fb-sec"><h3><i class="fa-solid fa-paper-plane"></i> Contact</h3><div class="body">'+
-    '<a style="color:var(--accent)" href="mailto:'+P.contact.email+'">'+P.contact.email+'</a><br>'+
-    '<a style="color:var(--accent)" href="'+P.contact.linkedin+'" target="_blank" rel="noopener">LinkedIn</a><br>'+
-    '<a style="color:var(--accent)" href="'+P.contact.github+'" target="_blank" rel="noopener">GitHub</a><br>'+
-    '<a style="color:var(--accent)" href="'+P.contact.cv+'" target="_blank" rel="noopener">Download CV</a>'+
-    '</div></div>';
-
-  H += '</div></div>';
-  el.innerHTML = H;
-  el.classList.add('show');
-};
-
-window.showFallback = function(reason){
-  try {
-    var c = document.getElementById('scene-canvas'); if (c) c.style.display='none';
-    var hint = document.getElementById('hint'); if (hint) hint.style.display='none';
-    window.buildFallback(reason);
-  } catch(e){ /* last resort: leave page as-is */ }
-};
-
-/* Safety net: if the ES module never runs (blocked CDN / parse fail),
-   show fallback after a short grace period. The module sets window.__SPACE_OK__. */
-window.addEventListener('load', function(){
-  setTimeout(function(){
-    if (!window.__SPACE_OK__ && !document.getElementById('fallback').classList.contains('show')) {
-      window.showFallback('library could not load');
-    }
-  }, 4000);
-});
-</script>
-
-<!-- =================== Three.js import map =================== -->
 <script type="importmap">
 { "imports": {
   "three": "https://cdn.jsdelivr.net/npm/three@0.162.0/build/three.module.js",
   "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.162.0/examples/jsm/"
 } }
 </script>
-
-<!-- if the module itself fails to load/resolve, fall back -->
-<script>
-  window.addEventListener('error', function(e){
-    if (e && e.target && e.target.tagName === 'SCRIPT' && !window.__SPACE_OK__) {
-      window.showFallback('script failed to load');
-    }
-  }, true);
-  // init sound here (non-module) so the mute button + sound work even if the
-  // WebGL module fails to load and we fall back to plain HTML.
-  try { window.SFX && SFX.init({ accent:'#7cc8ff', ambient:true, ambientFreq:70 }); } catch(e){}
-</script>
-
 <script type="module">
-let RUNNING = false;
-try {
-  /* ---- webgl probe before importing anything heavy ---- */
-  (function(){
-    const tc = document.createElement('canvas');
-    const gl = tc.getContext('webgl2') || tc.getContext('webgl') || tc.getContext('experimental-webgl');
-    if (!gl) throw new Error('no-webgl');
-  })();
+try{
+  /* WebGL probe before importing anything heavy */
+  var probe=document.createElement('canvas');
+  if(!(probe.getContext('webgl2')||probe.getContext('webgl'))) throw new Error('no webgl');
 
   const THREE = await import('three');
   const { OrbitControls } = await import('three/addons/controls/OrbitControls.js');
 
-  let bloomPass = null, composer = null, RenderPass = null, UnrealBloomPass = null, EffectComposer = null;
-  try {
-    ({ EffectComposer } = await import('three/addons/postprocessing/EffectComposer.js'));
-    ({ RenderPass }     = await import('three/addons/postprocessing/RenderPass.js'));
-    ({ UnrealBloomPass } = await import('three/addons/postprocessing/UnrealBloomPass.js'));
-  } catch(e){ /* bloom optional — additive sprites still glow */ }
-
-  window.__SPACE_OK__ = true;
-  const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  // SFX.init is called from the non-module script above (works in fallback too)
-
-  /* ====================== scene setup ====================== */
-  const canvas = document.getElementById('scene-canvas');
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:true });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.05;
+  const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const S = window.SECTIONS;
+  const canvas = document.getElementById('stage');
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:false });
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.setSize(innerWidth, innerHeight);
+  renderer.setClearColor(0x02040c, 1);
 
   const scene = new THREE.Scene();
-  scene.fog = new THREE.FogExp2(0x020611, 0.011);
+  scene.fog = new THREE.FogExp2(0x02040c, 0.016);
+  const camera = new THREE.PerspectiveCamera(55, innerWidth/innerHeight, 0.1, 400);
+  camera.position.set(0, 6, 34);
 
-  const camera = new THREE.PerspectiveCamera(55, window.innerWidth/window.innerHeight, 0.1, 600);
-  const HOME = new THREE.Vector3(0, 7, 30);
-  camera.position.copy(HOME);
-
-  const controls = new OrbitControls(camera, renderer.domElement);
+  const controls = new OrbitControls(camera, canvas);
   controls.enableDamping = true;
   controls.dampingFactor = 0.06;
-  controls.minDistance = 8;
+  controls.minDistance = 10;
   controls.maxDistance = 70;
-  controls.autoRotate = !reduceMotion;
-  controls.autoRotateSpeed = 0.45;
-  controls.target.set(0, 0, 0);
+  controls.autoRotate = !REDUCED;
+  controls.autoRotateSpeed = 0.55;
+  controls.enablePan = false;
 
-  /* ---- lighting ---- */
-  scene.add(new THREE.AmbientLight(0x4a6da0, 0.55));
-  const key = new THREE.PointLight(0x7cc8ff, 2.2, 120, 1.6); key.position.set(0,0,0); scene.add(key);
-  const rim = new THREE.DirectionalLight(0x88aaff, 0.5); rim.position.set(10,18,12); scene.add(rim);
+  /* lighting */
+  scene.add(new THREE.AmbientLight(0x223344, 1.6));
+  const key = new THREE.PointLight(0x88bbff, 320, 200); key.position.set(18, 24, 18); scene.add(key);
+  const rim = new THREE.PointLight(0xff9ad5, 140, 160); rim.position.set(-22, -10, -14); scene.add(rim);
 
-  /* ====================== central core (Saptarshi) ====================== */
-  const coreGroup = new THREE.Group(); scene.add(coreGroup);
-  const coreGeo = new THREE.IcosahedronGeometry(2.1, 4);
-  const coreMat = new THREE.MeshStandardMaterial({
-    color:0x9fd4ff, emissive:0x3f8fd6, emissiveIntensity:1.6, roughness:0.25, metalness:0.4
-  });
-  const core = new THREE.Mesh(coreGeo, coreMat); coreGroup.add(core);
-
-  const coreWire = new THREE.Mesh(
-    new THREE.IcosahedronGeometry(2.55, 1),
-    new THREE.MeshBasicMaterial({ color:0x7cc8ff, wireframe:true, transparent:true, opacity:0.22 })
-  );
-  coreGroup.add(coreWire);
-
-  // additive glow sprite around the core for bloom-like halo
-  function radialTexture(){
-    const s = 128, cv = document.createElement('canvas'); cv.width = cv.height = s;
-    const g = cv.getContext('2d');
-    const grad = g.createRadialGradient(s/2,s/2,0,s/2,s/2,s/2);
-    grad.addColorStop(0,'rgba(180,225,255,1)');
-    grad.addColorStop(0.25,'rgba(120,200,255,0.55)');
-    grad.addColorStop(1,'rgba(120,200,255,0)');
-    g.fillStyle = grad; g.fillRect(0,0,s,s);
-    const t = new THREE.CanvasTexture(cv); t.needsUpdate = true; return t;
-  }
-  const glowTex = radialTexture();
-  const coreHalo = new THREE.Sprite(new THREE.SpriteMaterial({
-    map: glowTex, color:0x7cc8ff, blending:THREE.AdditiveBlending, transparent:true, opacity:0.9, depthWrite:false
-  }));
-  coreHalo.scale.set(10,10,1); coreGroup.add(coreHalo);
-
-  /* ====================== section nodes (orbiting) ====================== */
-  const NODES = window.NODES;
-  const sectionNodes = NODES.filter(n => n.kind !== 'core');
-  const pickables = [];               // meshes hit by raycaster
-  const labelSprites = [];            // text-label sprites
-  const ringRadius = 12;
-
-  function makeLabelSprite(text){
-    const pad = 24, fs = 44, font = '600 '+fs+'px Inter, sans-serif';
-    const mcv = document.createElement('canvas'); const mg = mcv.getContext('2d');
-    mg.font = font; const w = Math.ceil(mg.measureText(text).width) + pad*2;
-    const h = fs + pad*1.2;
-    mcv.width = w; mcv.height = h;
-    const g = mcv.getContext('2d');
-    g.font = font; g.textBaseline = 'middle'; g.textAlign = 'center';
-    g.fillStyle = 'rgba(4,10,22,0.0)'; g.fillRect(0,0,w,h);
-    g.fillStyle = '#e3effc';
-    g.shadowColor = 'rgba(124,200,255,0.9)'; g.shadowBlur = 16;
-    g.fillText(text, w/2, h/2);
-    const tex = new THREE.CanvasTexture(mcv); tex.minFilter = THREE.LinearFilter;
-    const spr = new THREE.Sprite(new THREE.SpriteMaterial({ map:tex, transparent:true, depthWrite:false, opacity:0 }));
-    spr.scale.set(w/h * 2.2, 2.2, 1);
-    spr.userData.baseW = w/h * 2.2;
-    return spr;
-  }
-
-  // build the Stats core node closer in, plus the ring sections
-  const allLayout = [];
-  // stats sits just above the core
-  allLayout.push({ def: NODES[0], pos: new THREE.Vector3(0, 5.2, 0), shape:'stats' });
-
-  sectionNodes.forEach((def, i) => {
-    const a = (i / sectionNodes.length) * Math.PI * 2;
-    const y = Math.sin(i * 1.7) * 2.4;
-    const pos = new THREE.Vector3(Math.cos(a)*ringRadius, y, Math.sin(a)*ringRadius);
-    allLayout.push({ def, pos, shape:'panel', angle:a });
-  });
-
-  const shapeFor = (i) => {
-    const opts = [
-      () => new THREE.BoxGeometry(2.3, 3.0, 0.4),       // monolith panel
-      () => new THREE.OctahedronGeometry(1.7, 0),
-      () => new THREE.TorusGeometry(1.4, 0.42, 16, 40),
-      () => new THREE.IcosahedronGeometry(1.6, 0),
-      () => new THREE.BoxGeometry(2.8, 2.0, 0.4),
-      () => new THREE.TetrahedronGeometry(1.9, 0)
-    ];
-    return opts[i % opts.length]();
-  };
-
-  allLayout.forEach((L, idx) => {
-    const group = new THREE.Group();
-    group.position.copy(L.pos);
-
-    let geo;
-    if (L.shape === 'stats') {
-      geo = new THREE.TorusKnotGeometry(1.0, 0.32, 80, 12);
-    } else {
-      geo = shapeFor(idx-1);
+  /* ---------- starfield ---------- */
+  {
+    const N = 2600, pos = new Float32Array(N*3), col = new Float32Array(N*3);
+    const tints = [[0.72,0.82,1],[1,0.92,0.8],[0.85,0.8,1],[1,1,1]];
+    for(let i=0;i<N;i++){
+      const r = 90 + Math.random()*160;
+      const th = Math.random()*Math.PI*2, ph = Math.acos(2*Math.random()-1);
+      pos[i*3]   = r*Math.sin(ph)*Math.cos(th);
+      pos[i*3+1] = r*Math.cos(ph)*0.7;
+      pos[i*3+2] = r*Math.sin(ph)*Math.sin(th);
+      const t = tints[(Math.random()*tints.length)|0], b = 0.4+Math.random()*0.6;
+      col[i*3]=t[0]*b; col[i*3+1]=t[1]*b; col[i*3+2]=t[2]*b;
     }
-    const col = L.def.color;
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(pos,3));
+    g.setAttribute('color', new THREE.BufferAttribute(col,3));
+    const m = new THREE.PointsMaterial({ size:0.9, vertexColors:true, transparent:true, opacity:0.9, sizeAttenuation:true, depthWrite:false });
+    scene.add(new THREE.Points(g,m));
+  }
+
+  /* ---------- soft glow texture (shared) ---------- */
+  function glowTexture(){
+    const c=document.createElement('canvas'); c.width=c.height=128;
+    const x=c.getContext('2d');
+    const g=x.createRadialGradient(64,64,0,64,64,64);
+    g.addColorStop(0,'rgba(255,255,255,1)');
+    g.addColorStop(0.35,'rgba(255,255,255,0.45)');
+    g.addColorStop(1,'rgba(255,255,255,0)');
+    x.fillStyle=g; x.fillRect(0,0,128,128);
+    return new THREE.CanvasTexture(c);
+  }
+  const glowTex = glowTexture();
+
+  /* ---------- nebula sprites ---------- */
+  [[0x35508a,-30,10,-40,60],[0x6a2f74,26,-14,-52,72],[0x1e5a66,4,22,-64,80]].forEach(a=>{
+    const sm = new THREE.SpriteMaterial({ map:glowTex, color:a[0], transparent:true, opacity:0.16, blending:THREE.AdditiveBlending, depthWrite:false });
+    const sp = new THREE.Sprite(sm);
+    sp.position.set(a[1],a[2],a[3]); sp.scale.setScalar(a[4]);
+    scene.add(sp);
+  });
+
+  /* ---------- the eight crystals ---------- */
+  const crystals = [];
+  const ringR = 13;
+  const crystalGroup = new THREE.Group();
+  scene.add(crystalGroup);
+  S.forEach((s,i)=>{
+    const a = (i/S.length)*Math.PI*2;
+    const y = Math.sin(a*2)*3.4;
+    const pos = new THREE.Vector3(Math.cos(a)*ringR, y, Math.sin(a)*ringR);
+    const geo = new THREE.OctahedronGeometry(1.55, 0);
     const mat = new THREE.MeshStandardMaterial({
-      color: col, emissive: col, emissiveIntensity: 0.55,
-      roughness: 0.35, metalness: 0.5, transparent:true, opacity:0.96
+      color:s.hex, emissive:s.hex, emissiveIntensity:0.55,
+      metalness:0.25, roughness:0.18, flatShading:true, transparent:true, opacity:0.96
     });
     const mesh = new THREE.Mesh(geo, mat);
-    mesh.userData = {
-      key: L.def.key, label: L.def.label, icon: L.def.icon,
-      baseScale: 1, baseEmissive: 0.55, group, hovered:false
-    };
-    group.add(mesh);
-
-    // little additive glow behind each node
+    mesh.position.copy(pos);
+    mesh.userData.i = i;
+    crystalGroup.add(mesh);
+    /* halo sprite */
     const halo = new THREE.Sprite(new THREE.SpriteMaterial({
-      map: glowTex, color: col, blending: THREE.AdditiveBlending, transparent:true, opacity:0.5, depthWrite:false
-    }));
-    halo.scale.set(5,5,1); group.add(halo);
-    mesh.userData.halo = halo;
-
-    // label
-    const lab = makeLabelSprite(L.def.label);
-    lab.position.set(0, L.shape==='stats' ? 2.2 : 2.6, 0);
-    group.add(lab);
-    mesh.userData.labelSprite = lab;
-    labelSprites.push(lab);
-
-    // connecting line core -> node
-    const lineGeo = new THREE.BufferGeometry().setFromPoints([ new THREE.Vector3(0,0,0), L.pos.clone() ]);
-    const line = new THREE.Line(lineGeo, new THREE.LineBasicMaterial({ color: col, transparent:true, opacity:0.14 }));
-    scene.add(line);
-
-    mesh.userData.spin = new THREE.Vector3(
-      (Math.random()-0.5)*0.4, (Math.random()-0.5)*0.5, (Math.random()-0.5)*0.3
-    );
-    mesh.userData.floatPhase = Math.random()*Math.PI*2;
-    mesh.userData.basePos = L.pos.clone();
-
-    scene.add(group);
-    pickables.push(mesh);
+      map:glowTex, color:s.hex, transparent:true, opacity:0.5,
+      blending:THREE.AdditiveBlending, depthWrite:false }));
+    halo.scale.setScalar(6.4);
+    mesh.add(halo);
+    crystals.push({ mesh, halo, base:pos.clone(), spin:0.24+Math.random()*0.3, ph:Math.random()*7 });
   });
 
-  /* ====================== starfield ====================== */
-  function makeStars(count, spread, size, color){
-    const g = new THREE.BufferGeometry();
-    const arr = new Float32Array(count*3);
-    for (let i=0;i<count;i++){
-      const r = spread * (0.35 + Math.random()*0.65);
-      const th = Math.random()*Math.PI*2, ph = Math.acos(2*Math.random()-1);
-      arr[i*3]   = r*Math.sin(ph)*Math.cos(th);
-      arr[i*3+1] = r*Math.cos(ph);
-      arr[i*3+2] = r*Math.sin(ph)*Math.sin(th);
+  /* constellation lines connecting the story in order */
+  {
+    const pts=[];
+    for(let i=0;i<S.length;i++){
+      const a=crystals[i].base, b=crystals[(i+1)%S.length].base;
+      const mid=a.clone().add(b).multiplyScalar(0.5); mid.y+=2.2;
+      const curve=new THREE.QuadraticBezierCurve3(a,mid,b);
+      curve.getPoints(22).forEach((p,k,arr)=>{ if(k<arr.length-1){ pts.push(p, arr[k+1]); } });
     }
-    g.setAttribute('position', new THREE.BufferAttribute(arr,3));
-    const m = new THREE.PointsMaterial({ color, size, sizeAttenuation:true, transparent:true, opacity:0.9, depthWrite:false });
-    return new THREE.Points(g, m);
-  }
-  const stars1 = makeStars(2400, 220, 0.6, 0xbcd6ff); scene.add(stars1);
-  const stars2 = makeStars(1200, 160, 1.1, 0x88a8ff); scene.add(stars2);
-
-  /* drifting particles near the core */
-  const driftCount = reduceMotion ? 200 : 600;
-  const driftGeo = new THREE.BufferGeometry();
-  const driftPos = new Float32Array(driftCount*3);
-  const driftVel = new Float32Array(driftCount*3);
-  for (let i=0;i<driftCount;i++){
-    driftPos[i*3]   = (Math.random()-0.5)*36;
-    driftPos[i*3+1] = (Math.random()-0.5)*24;
-    driftPos[i*3+2] = (Math.random()-0.5)*36;
-    driftVel[i*3]   = (Math.random()-0.5)*0.01;
-    driftVel[i*3+1] = (Math.random()-0.5)*0.01;
-    driftVel[i*3+2] = (Math.random()-0.5)*0.01;
-  }
-  driftGeo.setAttribute('position', new THREE.BufferAttribute(driftPos,3));
-  const drift = new THREE.Points(driftGeo, new THREE.PointsMaterial({
-    map: glowTex, color:0x7cc8ff, size:0.9, transparent:true, opacity:0.4,
-    blending:THREE.AdditiveBlending, depthWrite:false
-  }));
-  scene.add(drift);
-
-  /* ====================== postprocessing bloom (optional) ====================== */
-  if (EffectComposer && RenderPass && UnrealBloomPass) {
-    composer = new EffectComposer(renderer);
-    composer.addPass(new RenderPass(scene, camera));
-    bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.85, 0.6, 0.2);
-    composer.addPass(bloomPass);
-    composer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-    composer.setSize(window.innerWidth, window.innerHeight);
+    const g=new THREE.BufferGeometry().setFromPoints(pts);
+    const m=new THREE.LineBasicMaterial({ color:0x7cc8ff, transparent:true, opacity:0.16, blending:THREE.AdditiveBlending, depthWrite:false });
+    crystalGroup.add(new THREE.LineSegments(g,m));
   }
 
-  /* ====================== interaction: raycaster pick ====================== */
-  const raycaster = new THREE.Raycaster();
-  const pointer = new THREE.Vector2();
-  let hovered = null;
-  let focusMode = false;
-  let pointerInside = true;
-  const hoverLabel = document.getElementById('hover-label');
-  const hoverLabelText = hoverLabel.querySelector('span');
-  const hoverLabelIcon = hoverLabel.querySelector('i');
-
-  // reusable temp vectors (avoid per-frame allocation)
-  const _v = new THREE.Vector3();
-
-  function setPointerFromEvent(e){
-    const x = (e.touches ? e.touches[0].clientX : e.clientX);
-    const y = (e.touches ? e.touches[0].clientY : e.clientY);
-    pointer.x = (x / window.innerWidth) * 2 - 1;
-    pointer.y = -(y / window.innerHeight) * 2 + 1;
-    return { x, y };
-  }
-
-  renderer.domElement.addEventListener('pointermove', (e) => {
-    const p = setPointerFromEvent(e);
-    if (hovered && !focusMode) {
-      hoverLabel.style.left = p.x + 'px';
-      hoverLabel.style.top  = p.y + 'px';
-    }
+  /* ---------- raycast hover / click ---------- */
+  const ray = new THREE.Raycaster();
+  const mouse = new THREE.Vector2(-2,-2);
+  let hover = -1;
+  const labelEl = document.getElementById('label');
+  const hintEl = document.getElementById('hint');
+  addEventListener('pointermove', e=>{
+    mouse.x = (e.clientX/innerWidth)*2-1;
+    mouse.y = -(e.clientY/innerHeight)*2+1;
+    labelEl.style.left = e.clientX+'px';
+    labelEl.style.top = e.clientY+'px';
   });
-  renderer.domElement.addEventListener('pointerleave', () => { pointerInside = false; });
-  renderer.domElement.addEventListener('pointerenter', () => { pointerInside = true; });
-
-  function updateHover(){
-    if (focusMode){ if (hovered) clearHover(); return; }
-    raycaster.setFromCamera(pointer, camera);
-    const hits = raycaster.intersectObjects(pickables, false);
-    const obj = hits.length ? hits[0].object : null;
-    if (obj !== hovered){
-      if (hovered) hovered.userData.hovered = false;
-      hovered = obj;
-      if (hovered){
-        hovered.userData.hovered = true;
-        hoverLabelIcon.className = 'fa-solid ' + hovered.userData.icon;
-        hoverLabelText.textContent = hovered.userData.label;
-        hoverLabel.style.opacity = '1';
-        renderer.domElement.style.cursor = 'pointer';
-        window.SFX && SFX.play('hover');
-      } else {
-        hoverLabel.style.opacity = '0';
-        renderer.domElement.style.cursor = 'grab';
-      }
-    }
-  }
-  function clearHover(){
-    if (hovered) hovered.userData.hovered = false;
-    hovered = null; hoverLabel.style.opacity = '0';
-    renderer.domElement.style.cursor = 'grab';
-  }
-
-  /* ---- camera tween ---- */
-  const tween = { active:false, t:0, dur:1.0, fromPos:new THREE.Vector3(), toPos:new THREE.Vector3(),
-                  fromTarget:new THREE.Vector3(), toTarget:new THREE.Vector3() };
-  function easeInOut(t){ return t<0.5 ? 4*t*t*t : 1-Math.pow(-2*t+2,3)/2; }
-  function tweenCamera(toPos, toTarget, dur, whoosh){
-    tween.fromPos.copy(camera.position);
-    tween.toPos.copy(toPos);
-    tween.fromTarget.copy(controls.target);
-    tween.toTarget.copy(toTarget);
-    tween.t = 0; tween.dur = dur || 1.0; tween.active = true;
-    controls.autoRotate = false;
-    if (whoosh) window.SFX && SFX.play('whoosh');
-  }
-
-  function focusNode(mesh){
-    focusMode = true;
-    clearHover();
-    const np = mesh.userData.group.position;
-    // camera offset along the direction from core to node
-    _v.copy(np).normalize();
-    const dist = mesh.userData.key === 'stats' ? 9 : 8;
-    const camPos = np.clone().add(_v.multiplyScalar(dist)).add(new THREE.Vector3(0, 2.4, 0));
-    if (np.lengthSq() < 0.01){ camPos.set(0, np.y + 3, 9); }
-    tweenCamera(camPos, np.clone(), 1.0, true);
-    window.SFX && SFX.play('select');
-    openOverlay(mesh.userData.key);
-  }
-
-  function returnHome(){
-    focusMode = false;
-    closeOverlay();
-    tweenCamera(HOME.clone(), new THREE.Vector3(0,0,0), 0.9, true);
-    window.SFX && SFX.play('back');
-    setTimeout(() => { if (!focusMode && !reduceMotion) controls.autoRotate = true; }, 1100);
-  }
-
-  // click / tap to focus
-  let downXY = null;
-  renderer.domElement.addEventListener('pointerdown', (e) => { const p = setPointerFromEvent(e); downXY = p; });
-  renderer.domElement.addEventListener('pointerup', (e) => {
-    const p = setPointerFromEvent(e);
-    if (!downXY) return;
-    const moved = Math.hypot(p.x-downXY.x, p.y-downXY.y);
-    downXY = null;
-    if (moved > 6) return;            // it was a drag, not a click
-    raycaster.setFromCamera(pointer, camera);
-    const hits = raycaster.intersectObjects(pickables, false);
-    if (hits.length){ focusNode(hits[0].object); }
-    else if (focusMode){ returnHome(); }
+  let downAt=null;
+  addEventListener('pointerdown', e=>{ downAt=[e.clientX,e.clientY]; hintEl.classList.add('gone'); });
+  addEventListener('pointerup', e=>{
+    if(!downAt) return;
+    const moved = Math.hypot(e.clientX-downAt[0], e.clientY-downAt[1]);
+    downAt=null;
+    if(moved<6 && hover>=0) window.openSection(hover);
   });
 
-  /* ====================== overlay HTML panel ====================== */
-  const overlay = document.getElementById('overlay');
-  const card = document.getElementById('card');
-  function openOverlay(key){
-    card.innerHTML = window.buildCard(key);
-    overlay.classList.add('open');
-    const cl = document.getElementById('card-close');
-    if (cl) cl.addEventListener('click', returnHome);
-  }
-  function closeOverlay(){ overlay.classList.remove('open'); }
-  // click empty space (the dim background) returns
-  overlay.addEventListener('pointerdown', (e) => { if (e.target === overlay) returnHome(); });
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && (overlay.classList.contains('open') || focusMode)) returnHome();
+  /* ---------- resize / visibility ---------- */
+  addEventListener('resize', ()=>{
+    camera.aspect = innerWidth/innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(innerWidth, innerHeight);
   });
 
-  /* fade out the hint after a while */
-  setTimeout(() => { const h = document.getElementById('hint'); if (h) h.style.opacity = '0.35'; }, 9000);
-
-  /* ====================== resize ====================== */
-  function onResize(){
-    const w = window.innerWidth, h = window.innerHeight;
-    camera.aspect = w/h; camera.updateProjectionMatrix();
-    renderer.setSize(w, h);
-    if (composer){ composer.setSize(w, h); }
-    if (bloomPass){ bloomPass.setSize(w, h); }
-  }
-  window.addEventListener('resize', onResize);
-
-  /* ====================== render loop ====================== */
+  /* ---------- loop ---------- */
   const clock = new THREE.Clock();
-  RUNNING = true;
-  let rafId = 0;
-
-  function frame(){
-    rafId = requestAnimationFrame(frame);
-    const dt = Math.min(clock.getDelta(), 0.05);
-    const t = clock.elapsedTime;
-
-    // core pulse
-    const pulse = 1 + Math.sin(t*1.6)*0.04;
-    core.scale.setScalar(pulse);
-    coreMat.emissiveIntensity = 1.4 + Math.sin(t*2.0)*0.3;
-    coreHalo.scale.setScalar(10 + Math.sin(t*1.3)*0.6);
-    if (!reduceMotion){ coreGroup.rotation.y += dt*0.12; coreWire.rotation.x -= dt*0.06; }
-
-    // node animation
-    for (let i=0;i<pickables.length;i++){
-      const m = pickables[i], u = m.userData;
-      if (!reduceMotion){
-        m.rotation.x += u.spin.x * dt;
-        m.rotation.y += u.spin.y * dt;
-        m.rotation.z += u.spin.z * dt;
-        u.group.position.y = u.basePos.y + Math.sin(t*0.6 + u.floatPhase) * 0.4;
+  function tick(){
+    requestAnimationFrame(tick);
+    if(document.hidden) return;
+    const t = clock.getElapsedTime();
+    crystals.forEach((c,i)=>{
+      if(!REDUCED){
+        c.mesh.rotation.x += 0.004*c.spin*3;
+        c.mesh.rotation.y += 0.006*c.spin*3;
+        c.mesh.position.y = c.base.y + Math.sin(t*0.7+c.ph)*0.7;
       }
-      // hover/focus highlight
-      const focusedThis = focusMode && hovered === null && false; // focus handled via overlay
-      const targetScale = u.hovered ? 1.28 : 1.0;
-      const cur = m.scale.x;
-      m.scale.setScalar(cur + (targetScale - cur) * Math.min(1, dt*10));
-      const targetEm = u.hovered ? 1.6 : u.baseEmissive;
-      m.material.emissiveIntensity += (targetEm - m.material.emissiveIntensity) * Math.min(1, dt*10);
-      const targetHalo = u.hovered ? 0.95 : 0.5;
-      u.halo.material.opacity += (targetHalo - u.halo.material.opacity) * Math.min(1, dt*10);
-      // label visibility: show on hover, or when focused & overlay closed-ish
-      const labTargetOpacity = u.hovered ? 1 : 0;
-      const lm = u.labelSprite.material;
-      lm.opacity += (labTargetOpacity - lm.opacity) * Math.min(1, dt*8);
+      const target = (hover===i)?1.45:1.0;
+      c.mesh.scale.lerp(new THREE.Vector3(target,target,target), 0.12);
+      c.halo.material.opacity += (((hover===i)?0.85:0.5) - c.halo.material.opacity)*0.1;
+    });
+    /* hover pick */
+    ray.setFromCamera(mouse, camera);
+    const hits = ray.intersectObjects(crystalGroup.children.filter(o=>o.isMesh), false);
+    const h = hits.length ? hits[0].object.userData.i : -1;
+    if(h!==hover){
+      hover=h;
+      canvas.style.cursor = h>=0?'pointer':'grab';
+      if(h>=0){
+        labelEl.innerHTML='<i class="fa-solid '+S[h].icon+'"></i>'+S[h].label;
+        labelEl.style.opacity=1;
+        try{ window.SFX && SFX.play('hover'); }catch(e){}
+      } else labelEl.style.opacity=0;
     }
-
-    // drift particles
-    if (!reduceMotion){
-      const pos = driftGeo.attributes.position.array;
-      for (let i=0;i<driftCount;i++){
-        pos[i*3]   += driftVel[i*3];
-        pos[i*3+1] += driftVel[i*3+1];
-        pos[i*3+2] += driftVel[i*3+2];
-        // wrap
-        if (pos[i*3]   >  18) pos[i*3]   = -18; else if (pos[i*3]   < -18) pos[i*3]   =  18;
-        if (pos[i*3+1] >  12) pos[i*3+1] = -12; else if (pos[i*3+1] < -12) pos[i*3+1] =  12;
-        if (pos[i*3+2] >  18) pos[i*3+2] = -18; else if (pos[i*3+2] < -18) pos[i*3+2] =  18;
-      }
-      driftGeo.attributes.position.needsUpdate = true;
-      stars1.rotation.y += dt*0.005;
-      stars2.rotation.y -= dt*0.003;
-    }
-
-    // camera tween
-    if (tween.active){
-      tween.t += dt / tween.dur;
-      const k = Math.min(1, tween.t);
-      const e = easeInOut(k);
-      camera.position.lerpVectors(tween.fromPos, tween.toPos, e);
-      controls.target.lerpVectors(tween.fromTarget, tween.toTarget, e);
-      if (k >= 1){ tween.active = false; }
-    }
-
-    // hover detection only when not tweening/focused, pointer inside
-    if (!tween.active && !focusMode && pointerInside){ updateHover(); }
-
     controls.update();
-
-    if (composer) composer.render();
-    else renderer.render(scene, camera);
+    renderer.render(scene, camera);
   }
-  frame();
-
-  /* pause when tab hidden (saves GPU; resumes cleanly) */
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden){ if (rafId) cancelAnimationFrame(rafId); rafId = 0; }
-    else if (!rafId){ clock.getDelta(); frame(); }
-  });
-
-} catch (err) {
-  // WebGL missing or Three.js failed to import → graceful HTML fallback
-  let reason = 'WebGL unavailable';
-  if (err && /import|fetch|network|Failed/i.test(String(err.message))) reason = 'library could not load';
-  if (err && String(err.message) === 'no-webgl') reason = 'WebGL not supported';
-  window.showFallback(reason);
-  if (!RUNNING) window.__SPACE_OK__ = true; // we handled it; suppress the safety-net double fallback
+  tick();
+  window.__SPACE_OK__ = true;
+}catch(err){
+  window.showFallback();
 }
 </script>
 </body>
