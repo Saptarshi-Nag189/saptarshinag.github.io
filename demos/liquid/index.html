@@ -400,7 +400,7 @@ function step(dt){
   gl.useProgram(pPress.p);
   gl.uniform2f(pPress.u.texel,velocity.texX,velocity.texY);
   gl.uniform1i(pPress.u.uDiv,bindTex(1,divTex.t));
-  for(var i=0;i<20;i++){
+  for(var i=0;i<28;i++){
     gl.uniform1i(pPress.u.uP,bindTex(0,pressure.read.t));
     blit(pressure.write.f); pressure.swap();
   }
@@ -413,13 +413,14 @@ function step(dt){
   gl.useProgram(pAdvect.p);
   gl.uniform2f(pAdvect.u.texel,velocity.texX,velocity.texY);
   gl.uniform1f(pAdvect.u.dt,dt);
-  gl.uniform1f(pAdvect.u.diss,0.999);
+  /* framerate-independent decay: diss^(dt*60) so physics doesn't change with fps */
+  gl.uniform1f(pAdvect.u.diss,Math.pow(0.9985,dt*60));
   gl.uniform1i(pAdvect.u.uVel,bindTex(0,velocity.read.t));
   gl.uniform1i(pAdvect.u.uSrc,bindTex(0,velocity.read.t));
   blit(velocity.write.f); velocity.swap();
   gl.viewport(0,0,DYEW,DYEH);
   gl.uniform2f(pAdvect.u.texel,velocity.texX,velocity.texY);
-  gl.uniform1f(pAdvect.u.diss,0.992);
+  gl.uniform1f(pAdvect.u.diss,Math.pow(0.992,dt*60));
   gl.uniform1i(pAdvect.u.uVel,bindTex(0,velocity.read.t));
   gl.uniform1i(pAdvect.u.uSrc,bindTex(1,dye.read.t));
   blit(dye.write.f); dye.swap();
