@@ -4,7 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Overworld — Saptarshi Nag</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="stylesheet" href="../_shared/chrome.css">
+<script src="../_shared/chrome.js" data-accent="#ffd34d" data-tag="2d world"></script>
 <script src="../_shared/sfx.js"></script>
 <style>
   :root{
@@ -15,7 +20,7 @@
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{height:100%;overflow:hidden;background:#0a0f0c;color:#eef3ee;
-    font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    font-family:'Inter',system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
     -webkit-tap-highlight-color:transparent;user-select:none}
   #game{position:fixed;inset:0;display:block;touch-action:none}
 
@@ -39,7 +44,7 @@
     transition:opacity .4s}
   #hint b{color:var(--accent);font-weight:600}
   #hint kbd{background:rgba(255,255,255,.12);border-radius:4px;padding:1px 6px;
-    font-family:ui-monospace,monospace;font-size:11px;border:1px solid rgba(255,255,255,.18)}
+    font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;border:1px solid rgba(255,255,255,.18)}
 
   #legend{position:fixed;top:54px;right:14px;z-index:30;width:178px;
     background:rgba(8,14,10,.62);border:1px solid rgba(255,255,255,.14);
@@ -159,7 +164,7 @@
   #intro button:hover{transform:translateY(-2px)}
   #intro .ctrls{display:flex;gap:18px;color:#7e8d83;font-size:12px;margin-top:4px}
   #intro .ctrls kbd{background:rgba(255,255,255,.1);border-radius:4px;padding:2px 7px;
-    font-family:ui-monospace,monospace;border:1px solid rgba(255,255,255,.18);color:#cfd8d0}
+    font-family:'JetBrains Mono',ui-monospace,monospace;border:1px solid rgba(255,255,255,.18);color:#cfd8d0}
 </style>
 </head>
 <body>
