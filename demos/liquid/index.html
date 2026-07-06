@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Liquid — Saptarshi Nag</title>
+<meta name="description" content="A real-time GPU fluid portfolio for Saptarshi Nag, AI/ML Engineer.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="stylesheet" href="../_shared/chrome.css">
+<script src="../_shared/chrome.js" data-accent="#59c2ff" data-tag="liquid"></script>
+<script src="../_shared/sfx.js"></script>
+<style>
+  :root{
+    --blue:#59c2ff; --ink:#eaf3fb; --dim:#8fa5bd;
+    --line:rgba(89,194,255,.22);
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+    --sans:'Inter',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;overflow:hidden;background:#030711;color:var(--ink);
+    font-family:var(--sans);-webkit-font-smoothing:antialiased}
+  #fluid{position:fixed;inset:0;display:block;touch-action:none}
+
+  /* name floating over the fluid */
+  #title{position:fixed;left:50%;top:38%;transform:translate(-50%,-50%);z-index:5;
+    text-align:center;pointer-events:none;mix-blend-mode:screen}
+  #title .k{font-family:var(--mono);font-size:clamp(10px,1.4vw,13px);letter-spacing:.44em;
+    text-transform:uppercase;color:rgba(150,205,255,.75);margin-bottom:12px}
+  #title h1{font-size:clamp(40px,8vw,104px);font-weight:700;letter-spacing:-.03em;line-height:1;
+    color:#fff;text-shadow:0 0 60px rgba(89,194,255,.35)}
+  #title .r{margin-top:12px;font-family:var(--mono);font-size:clamp(11px,1.6vw,15px);
+    letter-spacing:.3em;text-transform:uppercase;color:rgba(190,225,255,.85)}
+  #hint{position:fixed;left:50%;top:calc(38% + clamp(70px,10vw,120px));transform:translateX(-50%);
+    z-index:5;font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--dim);
+    pointer-events:none;transition:opacity .8s}
+  #hint.gone{opacity:0}
+
+  /* section orbs */
+  #orbs{position:fixed;left:50%;bottom:64px;transform:translateX(-50%);z-index:6;
+    display:flex;gap:clamp(8px,1.6vw,18px);flex-wrap:wrap;justify-content:center;
+    max-width:94vw}
+  .orb{position:relative;width:clamp(46px,5.4vw,58px);height:clamp(46px,5.4vw,58px);border-radius:50%;
+    border:1px solid rgba(255,255,255,.22);cursor:pointer;
+    background:radial-gradient(circle at 34% 30%, rgba(255,255,255,.16), rgba(255,255,255,.03) 55%),rgba(6,14,26,.55);
+    backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+    color:#dcecff;font-size:clamp(15px,1.8vw,19px);
+    display:flex;align-items:center;justify-content:center;
+    transition:transform .22s cubic-bezier(.2,.8,.3,1.4), box-shadow .22s, border-color .22s}
+  .orb:hover{transform:translateY(-6px) scale(1.07)}
+  .orb:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+  .orb .lbl{position:absolute;top:-26px;left:50%;transform:translateX(-50%);
+    font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--dim);white-space:nowrap;opacity:0;transition:opacity .2s;pointer-events:none}
+  .orb:hover .lbl{opacity:1}
+
+  /* glass content panel */
+  #panelWrap{position:fixed;inset:0;z-index:20;display:none;align-items:center;justify-content:center;
+    background:rgba(2,5,12,.45);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+  #panelWrap.open{display:flex;animation:pf .3s ease}
+  @keyframes pf{from{opacity:0}to{opacity:1}}
+  #panel{position:relative;width:min(620px,92vw);max-height:80vh;overflow-y:auto;
+    background:linear-gradient(170deg,rgba(10,20,36,.88),rgba(5,11,22,.92));
+    border:1px solid var(--pc,var(--line));border-radius:18px;
+    box-shadow:0 30px 90px rgba(0,0,0,.6), 0 0 60px -18px var(--pc,rgba(89,194,255,.4));
+    padding:30px 32px 30px;animation:pr .38s cubic-bezier(.2,.85,.25,1)}
+  @keyframes pr{from{opacity:0;transform:translateY(26px) scale(.985)}to{opacity:1;transform:none}}
+  #panel::-webkit-scrollbar{width:8px}
+  #panel::-webkit-scrollbar-thumb{background:rgba(89,194,255,.3);border-radius:6px}
+  #pIcon{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;
+    font-size:19px;color:#04121f;background:var(--pc,var(--blue));margin-bottom:14px;
+    box-shadow:0 0 30px -6px var(--pc,var(--blue))}
+  #pKick{font-family:var(--mono);font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;
+    color:var(--pc,var(--blue));margin-bottom:6px}
+  #pTitle{font-size:clamp(20px,3vw,26px);font-weight:700;letter-spacing:-.01em;margin-bottom:16px}
+  #pBody{font-size:14.5px;line-height:1.62;color:#c8d9ea}
+  #pBody p{margin-bottom:13px}
+  #pBody .item{border-left:2px solid var(--line);padding:3px 0 3px 15px;margin-bottom:17px}
+  #pBody .item h3{font-size:15.5px;font-weight:600;color:#fff;margin-bottom:2px}
+  #pBody .item .meta{font-family:var(--mono);font-size:11px;color:var(--dim);margin-bottom:7px}
+  #pBody ul{list-style:none;margin:4px 0 8px}
+  #pBody ul li{position:relative;padding:5px 0 5px 19px;font-size:13.5px;line-height:1.55}
+  #pBody ul li::before{content:"\f043";font-family:"Font Awesome 6 Free";font-weight:900;
+    position:absolute;left:0;top:6px;color:var(--pc,var(--blue));font-size:10px;opacity:.85}
+  #pBody b{color:#fff;font-weight:600}
+  .tags{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 12px}
+  .tag{font-family:var(--mono);font-size:10.5px;color:#bfe2ff;background:rgba(89,194,255,.09);
+    border:1px solid var(--line);border-radius:6px;padding:3px 9px}
+  .mgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:11px;margin:8px 0 4px}
+  .mtile{background:rgba(89,194,255,.06);border:1px solid var(--line);border-radius:12px;padding:13px}
+  .mtile .v{font-family:var(--mono);font-size:19px;font-weight:700;color:var(--pc,var(--blue));line-height:1}
+  .mtile .l{font-size:11px;color:var(--dim);margin-top:5px;line-height:1.35}
+  .skillg{margin-bottom:12px}
+  .skillg h4{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--pc,var(--blue));margin-bottom:7px}
+  .links a{display:inline-flex;align-items:center;gap:9px;color:var(--blue);text-decoration:none;
+    font-size:14px;margin:5px 20px 5px 0;transition:.18s}
+  .links a:hover{text-shadow:0 0 12px rgba(89,194,255,.7)}
+  .links a i{width:18px;text-align:center}
+  #pClose{position:absolute;top:16px;right:16px;width:34px;height:34px;border-radius:10px;
+    border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.05);color:#fff;
+    cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;transition:.18s}
+  #pClose:hover{background:rgba(255,255,255,.14)}
+
+  /* fallback (no WebGL2) */
+  #fallback{position:fixed;inset:0;z-index:3;display:none;overflow-y:auto;padding:110px 20px 80px;
+    background:radial-gradient(ellipse 90% 70% at 50% 20%, #0a1a30 0%, #030711 65%)}
+  #fallback.show{display:block}
+  #fallback .fbw{max-width:720px;margin:0 auto}
+  #fallback .note{font-family:var(--mono);font-size:11px;color:var(--dim);margin-bottom:24px}
+
+  @media (prefers-reduced-motion: reduce){
+    #panelWrap,#panel{animation:none !important}
+    .orb{transition:none}
+  }
+  @media (max-width:640px){
+    #orbs{bottom:70px;gap:9px}
+    #panel{padding:24px 20px}
+  }
+</style>
+</head>
+<body>
+
+<canvas id="fluid"></canvas>
+
+<div id="title">
+  <div class="k">dissolved in real-time fluid</div>
+  <h1>Saptarshi Nag</h1>
+  <div class="r">AI / ML Engineer</div>
+</div>
+<div id="hint"><i class="fa-solid fa-hand-pointer"></i>&nbsp; move to stir · click an orb to burst a chapter open</div>
+
+<div id="orbs" aria-label="Sections"></div>
+
+<div id="panelWrap">
+  <div id="panel">
+    <button id="pClose" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+    <div id="pIcon"></div>
+    <div id="pKick"></div>
+    <h2 id="pTitle"></h2>
+    <div id="pBody"></div>
+  </div>
+</div>
+
+<div id="fallback"><div class="fbw">
+  <p class="note"><i class="fa-solid fa-circle-info"></i>&nbsp; WebGL2 is unavailable here — showing the still-water version. All content below.</p>
+  <div id="fbBody"></div>
+</div></div>
+
+<script>
+(function(){
+'use strict';
+var REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+var sfx = function(n){ try{ window.SFX && SFX.play(n); }catch(e){} };
+try{ window.SFX && SFX.init({ accent:'#59c2ff', ambient:true, ambientFreq:58 }); }catch(e){}
+
+/* ================= CONTENT ================= */
+var SECTIONS = [
+ { id:'about', icon:'fa-user', label:'About', color:[0.35,0.76,1.0], css:'#59c2ff',
+   kick:'the person in the water', title:'Saptarshi Nag — AI/ML Engineer',
+   body:'<p>AI/ML engineer at the intersection of <b>security and systems research</b>. M.Tech in Artificial Intelligence (DIAT, DRDO); research at NCRA-TIFR &amp; GMRT; now a Project Engineer at C-DAC building real-time IoT security — Zero Trust plus ML threat detection.</p>'+
+        '<p>Works across the full ML stack: feature engineering from raw data, model development and optimisation, and production deployment under tight performance constraints. Past work spans physics-informed neural networks, GPU-accelerated scientific computing, LLM fine-tuning, and RAG systems.</p>'+
+        '<div class="mgrid"><div class="mtile"><div class="v">96.97%</div><div class="l">IoT attack detection</div></div>'+
+        '<div class="mtile"><div class="v">99.8%</div><div class="l">pulsar F1-score</div></div>'+
+        '<div class="mtile"><div class="v">4.1×</div><div class="l">GPU speedup</div></div>'+
+        '<div class="mtile"><div class="v">50%</div><div class="l">latency cut</div></div>'+
+        '<div class="mtile"><div class="v">70M+</div><div class="l">samples</div></div></div>' },
+ { id:'exp', icon:'fa-briefcase', label:'Experience', color:[0.30,1.0,0.65], css:'#4dffa8',
+   kick:'three currents', title:'Experience',
+   body:'<div class="item"><h3>C-DAC — Project Engineer, AI Research &amp; IoT Security</h3><div class="meta">Jul 2025 – present · Chennai</div>'+
+        '<ul><li>Real-time <b>Zero Trust framework</b> for IoT (WiFi 802.11, BLE, Zigbee, LoRa) feeding a continuous <b>7-pillar device trust score</b>.</li>'+
+        '<li>Two-stage hybrid detection: 1-second <b>window model</b> (7 attack classes) + <b>flow model</b>; RF/XGBoost/SVM/MLP/Voting Ensemble over 6 preprocessing iterations with SMOTE + Optuna (TPE).</li>'+
+        '<li>Best: <b>96.97% accuracy</b> (flow/RF); <b>90.86% acc / 86.78% macro F1</b> (window/Ensemble).</li>'+
+        '<li><b>63 features</b> engineered from raw PCAPs (Scapy/PyShark); live PCAP pipeline (Watchdog, MD5 dedup, multi-threaded); SPIFFE/SPIRE, mTLS, OTP 2FA; two IoTaIS 2025 papers.</li></ul></div>'+
+        '<div class="item"><h3>NCRA-TIFR — Research Intern (M.Tech project)</h3><div class="meta">Aug 2024 – Apr 2025 · Pune</div>'+
+        '<ul><li><b>ResNet1D + Squeeze-and-Excitation attention</b> for weak pulsar detection at low SNR.</li>'+
+        '<li><b>99.8% F1</b> across <b>70M+ samples</b>; adaptive thresholding for non-stationary noise; ran end-to-end independently.</li></ul></div>'+
+        '<div class="item"><h3>GMRT — Winter Intern, HPC &amp; Signal Processing</h3><div class="meta">Dec 2023 – Jan 2024 · Pune</div>'+
+        '<ul><li>Profiled legacy CPU signal-filtering pipelines, refactored for <b>multicore</b>; cut latency <b>50%</b> for real-time telescope streams.</li></ul></div>' },
+ { id:'proj', icon:'fa-diagram-project', label:'Projects', color:[1.0,0.62,0.30], css:'#ffab54',
+   kick:'four vessels', title:'Projects',
+   body:'<div class="item"><h3>GPU-Accelerated F1 Tyre Degradation &amp; Race Strategy</h3>'+
+        '<div class="tags"><span class="tag">Python</span><span class="tag">PyTorch</span><span class="tag">CUDA</span><span class="tag">CuPy</span><span class="tag">XGBoost</span></div>'+
+        '<ul><li>Hybrid <b>LSTM-XGBoost</b> for tyre wear + pit-stop windows from 10 Hz telemetry.</li>'+
+        '<li><b>Physics-informed loss (PINNs)</b> separating thermal and mechanical degradation.</li>'+
+        '<li>Custom CUDA/CuPy kernels — <b>4.1× training speedup</b>.</li></ul></div>'+
+        '<div class="item"><h3>Omniscience Pro — Privacy-First Local RAG</h3>'+
+        '<div class="tags"><span class="tag">Python</span><span class="tag">LangChain</span><span class="tag">ChromaDB</span><span class="tag">Docker</span></div>'+
+        '<ul><li>Local multi-modal ingestion; <b>&lt;50 ms</b> vector search (HNSW); <b>&lt;500 ms</b> first-token latency; GPU-aware Docker, CI/CD, POSIX locking.</li></ul></div>'+
+        '<div class="item"><h3>ARO — Autonomous Research Operator</h3>'+
+        '<div class="tags"><span class="tag">Python</span><span class="tag">Flask</span><span class="tag">SQLAlchemy</span><span class="tag">NetworkX</span><span class="tag">React</span></div>'+
+        '<ul><li>Multi-agent LLM workflows as directed graphs; Flask SSE streaming; React UI; adversarial audit fixed <b>16 vulnerabilities</b>.</li></ul></div>'+
+        '<div class="item"><h3>Llama 3.2 Optimisation for Efficient Inference</h3>'+
+        '<div class="tags"><span class="tag">Python</span><span class="tag">Unsloth</span><span class="tag">Hugging Face</span><span class="tag">PyTorch</span></div>'+
+        '<ul><li>Fine-tuned Llama 3.2 (1B/3B) on <b>21.5k</b> interactions; <b>4-bit quantisation</b> with no meaningful quality drop.</li></ul></div>' },
+ { id:'skills', icon:'fa-microchip', label:'Skills', color:[0.72,0.55,1.0], css:'#b28cff',
+   kick:'what the current carries', title:'Skills',
+   body:'<div class="skillg"><h4>Languages</h4><div class="tags"><span class="tag">Python (advanced)</span><span class="tag">C++ (proficient)</span><span class="tag">C</span><span class="tag">Bash</span><span class="tag">SQL</span></div></div>'+
+        '<div class="skillg"><h4>ML &amp; Scientific Computing</h4><div class="tags"><span class="tag">PyTorch</span><span class="tag">XGBoost</span><span class="tag">Scikit-learn</span><span class="tag">PINNs</span><span class="tag">NumPy</span><span class="tag">SciPy</span></div></div>'+
+        '<div class="skillg"><h4>HPC &amp; Systems</h4><div class="tags"><span class="tag">CUDA</span><span class="tag">CuPy</span><span class="tag">Parallel Processing</span><span class="tag">Quantisation (4/8-bit)</span><span class="tag">Latency Optimisation</span><span class="tag">Linux</span></div></div>'+
+        '<div class="skillg"><h4>Data &amp; Engineering</h4><div class="tags"><span class="tag">Statistical Anomaly Detection</span><span class="tag">Time-Series</span><span class="tag">CI/CD</span><span class="tag">Docker</span><span class="tag">Git</span><span class="tag">Flask</span><span class="tag">ChromaDB</span></div></div>'+
+        '<div class="skillg"><h4>AI &amp; MLOps</h4><div class="tags"><span class="tag">RAG Systems</span><span class="tag">LLM Fine-Tuning</span><span class="tag">Multi-Agent Orchestration</span><span class="tag">SQLAlchemy</span></div></div>' },
+ { id:'pubs', icon:'fa-book', label:'Papers', color:[1.0,0.42,0.55], css:'#ff6b8d',
+   kick:'ink that set', title:'Publications',
+   body:'<div class="item"><h3>Protocol-Aware Continuous Monitoring and Anomaly Detection in IoT Networks</h3><div class="meta">IoTaIS 2025 · Bali, Indonesia</div></div>'+
+        '<div class="item"><h3>A Comprehensive Survey on Zero Trust Architecture in IoT Networks</h3><div class="meta">IoTaIS 2025 · Bali, Indonesia</div></div>' },
+ { id:'edu', icon:'fa-graduation-cap', label:'Education', color:[0.42,0.92,1.0], css:'#6be9ff',
+   kick:'the source', title:'Education',
+   body:'<div class="item"><h3>M.Tech, CSE (Artificial Intelligence)</h3><div class="meta">DIAT (DRDO), Pune · 2023–2025 · CGPA 8.64/10.0</div></div>'+
+        '<div class="item"><h3>B.Tech, Computer Science &amp; Engineering</h3><div class="meta">Academy of Technology, Kolkata · 2019–2023 · CGPA 9.44/10.0</div></div>'+
+        '<div class="item"><h3>GATE 2024</h3><div class="meta">Rank 1790 · Data Science &amp; AI · top 5%</div></div>' },
+ { id:'contact', icon:'fa-envelope', label:'Contact', color:[0.55,1.0,0.85], css:'#7dffcf',
+   kick:'send a ripple back', title:'Contact',
+   body:'<p>Open to research collaborations, engineering roles, and interesting problems.</p>'+
+        '<div class="links"><a href="mailto:saptarshinag18@gmail.com"><i class="fa-solid fa-envelope"></i>saptarshinag18@gmail.com</a>'+
+        '<a href="https://www.linkedin.com/in/saptarshi18" target="_blank" rel="noopener"><i class="fa-brands fa-linkedin"></i>/in/saptarshi18</a>'+
+        '<a href="https://github.com/Saptarshi-Nag189" target="_blank" rel="noopener"><i class="fa-brands fa-github"></i>Saptarshi-Nag189</a>'+
+        '<a href="../../saptarshi_resume_linkedin_2026.pdf" target="_blank" rel="noopener"><i class="fa-solid fa-file-arrow-down"></i>download CV</a></div>' }
+];
+
+/* ================= UI (orbs + panel + fallback) ================= */
+var orbsEl=document.getElementById('orbs');
+orbsEl.innerHTML=SECTIONS.map(function(s,i){
+  return '<button class="orb" data-i="'+i+'" style="--pc:'+s.css+'" aria-label="'+s.label+'">'+
+    '<span class="lbl">'+s.label+'</span><i class="fa-solid '+s.icon+'"></i></button>';
+}).join('');
+var wrapEl=document.getElementById('panelWrap'), panelEl=document.getElementById('panel');
+function openPanel(i){
+  var s=SECTIONS[i];
+  panelEl.style.setProperty('--pc',s.css);
+  document.getElementById('pIcon').innerHTML='<i class="fa-solid '+s.icon+'"></i>';
+  document.getElementById('pIcon').style.background=s.css;
+  document.getElementById('pKick').textContent=s.kick;
+  document.getElementById('pTitle').textContent=s.title;
+  document.getElementById('pBody').innerHTML=s.body;
+  panelEl.scrollTop=0;
+  wrapEl.classList.add('open');
+  sfx('splash');
+}
+function closePanel(){ if(!wrapEl.classList.contains('open'))return; wrapEl.classList.remove('open'); sfx('back'); }
+document.getElementById('pClose').addEventListener('click',closePanel);
+wrapEl.addEventListener('click',function(e){ if(e.target===wrapEl) closePanel(); });
+addEventListener('keydown',function(e){ if(e.key==='Escape') closePanel(); });
+
+function buildFallback(){
+  document.getElementById('fallback').classList.add('show');
+  document.getElementById('fbBody').innerHTML=SECTIONS.map(function(s){
+    return '<div style="margin-bottom:34px"><div style="font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:'+s.css+';margin-bottom:8px"><i class="fa-solid '+s.icon+'"></i> '+s.title+'</div>'+s.body+'</div>';
+  }).join('');
+  document.getElementById('title').style.display='none';
+  document.getElementById('hint').style.display='none';
+  orbsEl.style.display='none';
+}
+
+/* ================= WEBGL2 FLUID ================= */
+var canvas=document.getElementById('fluid');
+var gl=canvas.getContext('webgl2',{alpha:false,depth:false,stencil:false,antialias:false});
+var okFloat = gl && gl.getExtension('EXT_color_buffer_float');
+if(!gl || !okFloat){ buildFallback(); return; }
+
+var DPR=Math.min(devicePixelRatio||1,2);
+function sizeCanvas(){ canvas.width=innerWidth*DPR; canvas.height=innerHeight*DPR;
+  canvas.style.width=innerWidth+'px'; canvas.style.height=innerHeight+'px'; }
+sizeCanvas();
+
+/* --- shader helpers --- */
+function sh(type,src){ var s=gl.createShader(type); gl.shaderSource(s,src); gl.compileShader(s);
+  if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)+'\n'+src);
+  return s; }
+var VERT=sh(gl.VERTEX_SHADER,
+'#version 300 es\nprecision highp float;\n'+
+'in vec2 aP; out vec2 vUv; out vec2 vL; out vec2 vR; out vec2 vT; out vec2 vB; uniform vec2 texel;\n'+
+'void main(){ vUv=aP*0.5+0.5; vL=vUv-vec2(texel.x,0.); vR=vUv+vec2(texel.x,0.);'+
+' vT=vUv+vec2(0.,texel.y); vB=vUv-vec2(0.,texel.y); gl_Position=vec4(aP,0.,1.); }');
+function prog(fsrc){ var p=gl.createProgram();
+  gl.attachShader(p,VERT); gl.attachShader(p,sh(gl.FRAGMENT_SHADER,'#version 300 es\nprecision highp float;precision highp sampler2D;\n'+fsrc));
+  gl.linkProgram(p);
+  if(!gl.getProgramParameter(p,gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p));
+  var u={}, n=gl.getProgramParameter(p,gl.ACTIVE_UNIFORMS);
+  for(var i=0;i<n;i++){ var inf=gl.getActiveUniform(p,i); u[inf.name]=gl.getUniformLocation(p,inf.name); }
+  return {p:p,u:u};
+}
+var quad=gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER,quad);
+gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0,2,gl.FLOAT,false,0,0);
+function blit(target){ gl.bindFramebuffer(gl.FRAMEBUFFER,target); gl.drawArrays(gl.TRIANGLE_STRIP,0,4); }
+
+/* --- programs --- */
+var pSplat=prog(
+'in vec2 vUv; out vec4 o; uniform sampler2D uT; uniform vec3 color; uniform vec2 point; uniform float radius; uniform float aspect;\n'+
+'void main(){ vec2 d=vUv-point; d.x*=aspect; float g=exp(-dot(d,d)/radius);'+
+' vec3 base=texture(uT,vUv).xyz; o=vec4(base+g*color,1.); }');
+var pAdvect=prog(
+'in vec2 vUv; out vec4 o; uniform sampler2D uVel; uniform sampler2D uSrc; uniform vec2 texel; uniform float dt; uniform float diss;\n'+
+'void main(){ vec2 coord=vUv-dt*texture(uVel,vUv).xy*texel;'+
+' o=texture(uSrc,coord)*diss; }');
+var pDiv=prog(
+'in vec2 vUv,vL,vR,vT,vB; out vec4 o; uniform sampler2D uVel;\n'+
+'void main(){ float L=texture(uVel,vL).x,R=texture(uVel,vR).x,T=texture(uVel,vT).y,B=texture(uVel,vB).y;'+
+' o=vec4(0.5*(R-L+T-B),0.,0.,1.); }');
+var pCurl=prog(
+'in vec2 vUv,vL,vR,vT,vB; out vec4 o; uniform sampler2D uVel;\n'+
+'void main(){ float L=texture(uVel,vL).y,R=texture(uVel,vR).y,T=texture(uVel,vT).x,B=texture(uVel,vB).x;'+
+' o=vec4(R-L-(T-B),0.,0.,1.); }');
+var pVort=prog(
+'in vec2 vUv,vL,vR,vT,vB; out vec4 o; uniform sampler2D uVel; uniform sampler2D uCurl; uniform float curlK; uniform float dt;\n'+
+'void main(){ float L=texture(uCurl,vL).x,R=texture(uCurl,vR).x,T=texture(uCurl,vT).x,B=texture(uCurl,vB).x,C=texture(uCurl,vUv).x;'+
+' vec2 f=0.5*vec2(abs(T)-abs(B),abs(R)-abs(L)); f/=(length(f)+1e-4); f*=curlK*C; f.y*=-1.;'+
+' vec2 v=texture(uVel,vUv).xy + f*dt; o=vec4(clamp(v,-1000.,1000.),0.,1.); }');
+var pPress=prog(
+'in vec2 vUv,vL,vR,vT,vB; out vec4 o; uniform sampler2D uP; uniform sampler2D uDiv;\n'+
+'void main(){ float L=texture(uP,vL).x,R=texture(uP,vR).x,T=texture(uP,vT).x,B=texture(uP,vB).x;'+
+' float div=texture(uDiv,vUv).x; o=vec4((L+R+T+B-div)*0.25,0.,0.,1.); }');
+var pGrad=prog(
+'in vec2 vUv,vL,vR,vT,vB; out vec4 o; uniform sampler2D uP; uniform sampler2D uVel;\n'+
+'void main(){ float L=texture(uP,vL).x,R=texture(uP,vR).x,T=texture(uP,vT).x,B=texture(uP,vB).x;'+
+' vec2 v=texture(uVel,vUv).xy - vec2(R-L,T-B)*0.5; o=vec4(v,0.,1.); }');
+var pShow=prog(
+'in vec2 vUv; out vec4 o; uniform sampler2D uDye;\n'+
+'void main(){ vec3 c=texture(uDye,vUv).rgb;\n'+
+'  vec3 bg1=vec3(0.012,0.028,0.066), bg2=vec3(0.004,0.010,0.026);\n'+
+'  vec3 bg=mix(bg1,bg2,distance(vUv,vec2(0.5,0.42))*1.3);\n'+
+'  c=c/(1.0+c*0.8);\n'+                       /* soft tonemap */
+'  vec3 col=bg + c;\n'+
+'  float vg=smoothstep(1.15,0.35,distance(vUv,vec2(0.5,0.45)));\n'+
+'  o=vec4(col*mix(0.55,1.0,vg),1.); }');
+
+/* --- double-buffered targets --- */
+function makeFBO(w,h,internal,format,type,filter){
+  var t=gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D,t);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,filter);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,filter);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+  gl.texImage2D(gl.TEXTURE_2D,0,internal,w,h,0,format,type,null);
+  var f=gl.createFramebuffer(); gl.bindFramebuffer(gl.FRAMEBUFFER,f);
+  gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.TEXTURE_2D,t,0);
+  gl.clearColor(0,0,0,1); gl.clear(gl.COLOR_BUFFER_BIT);
+  return {t:t,f:f,w:w,h:h,texX:1/w,texY:1/h};
+}
+function dbl(w,h,internal,format,type,filter){
+  var a=makeFBO(w,h,internal,format,type,filter), b2=makeFBO(w,h,internal,format,type,filter);
+  return { get read(){return a;}, get write(){return b2;}, swap:function(){var t=a;a=b2;b2=t;},
+           texX:a.texX, texY:a.texY, w:w, h:h };
+}
+var SIMW=(innerWidth<820)?96:144, SIMH, DYEW=(innerWidth<820)?384:640, DYEH;
+(function(){ var ar=innerWidth/innerHeight;
+  SIMH=Math.round(SIMW/ar); DYEH=Math.round(DYEW/ar); })();
+var velocity=dbl(SIMW,SIMH,gl.RG16F,gl.RG,gl.HALF_FLOAT,gl.LINEAR);
+var dye=dbl(DYEW,DYEH,gl.RGBA16F,gl.RGBA,gl.HALF_FLOAT,gl.LINEAR);
+var divTex=makeFBO(SIMW,SIMH,gl.R16F,gl.RED,gl.HALF_FLOAT,gl.NEAREST);
+var curlTex=makeFBO(SIMW,SIMH,gl.R16F,gl.RED,gl.HALF_FLOAT,gl.NEAREST);
+var pressure=dbl(SIMW,SIMH,gl.R16F,gl.RED,gl.HALF_FLOAT,gl.NEAREST);
+
+function bindTex(unit,tex){ gl.activeTexture(gl.TEXTURE0+unit); gl.bindTexture(gl.TEXTURE_2D,tex); return unit; }
+
+/* --- splat --- */
+function splat(x,y,dx,dy,color,radius){
+  gl.viewport(0,0,SIMW,SIMH);
+  gl.useProgram(pSplat.p);
+  gl.uniform1i(pSplat.u.uT,bindTex(0,velocity.read.t));
+  gl.uniform1f(pSplat.u.aspect,innerWidth/innerHeight);
+  gl.uniform2f(pSplat.u.point,x,y);
+  gl.uniform3f(pSplat.u.color,dx,dy,0);
+  gl.uniform1f(pSplat.u.radius,(radius||0.0016));
+  blit(velocity.write.f); velocity.swap();
+  gl.viewport(0,0,DYEW,DYEH);
+  gl.uniform1i(pSplat.u.uT,bindTex(0,dye.read.t));
+  gl.uniform2f(pSplat.u.point,x,y);
+  gl.uniform3f(pSplat.u.color,color[0],color[1],color[2]);
+  gl.uniform1f(pSplat.u.radius,(radius||0.0016)*1.4);
+  blit(dye.write.f); dye.swap();
+}
+
+/* --- frame --- */
+var lastT=0, paused=false;
+function step(dt){
+  gl.disable(gl.BLEND);
+  gl.viewport(0,0,SIMW,SIMH);
+  /* curl + vorticity */
+  gl.useProgram(pCurl.p);
+  gl.uniform2f(pCurl.u.texel,velocity.texX,velocity.texY);
+  gl.uniform1i(pCurl.u.uVel,bindTex(0,velocity.read.t));
+  blit(curlTex.f);
+  gl.useProgram(pVort.p);
+  gl.uniform2f(pVort.u.texel,velocity.texX,velocity.texY);
+  gl.uniform1i(pVort.u.uVel,bindTex(0,velocity.read.t));
+  gl.uniform1i(pVort.u.uCurl,bindTex(1,curlTex.t));
+  gl.uniform1f(pVort.u.curlK,26);
+  gl.uniform1f(pVort.u.dt,dt);
+  blit(velocity.write.f); velocity.swap();
+  /* divergence + pressure */
+  gl.useProgram(pDiv.p);
+  gl.uniform2f(pDiv.u.texel,velocity.texX,velocity.texY);
+  gl.uniform1i(pDiv.u.uVel,bindTex(0,velocity.read.t));
+  blit(divTex.f);
+  gl.useProgram(pPress.p);
+  gl.uniform2f(pPress.u.texel,velocity.texX,velocity.texY);
+  gl.uniform1i(pPress.u.uDiv,bindTex(1,divTex.t));
+  for(var i=0;i<20;i++){
+    gl.uniform1i(pPress.u.uP,bindTex(0,pressure.read.t));
+    blit(pressure.write.f); pressure.swap();
+  }
+  gl.useProgram(pGrad.p);
+  gl.uniform2f(pGrad.u.texel,velocity.texX,velocity.texY);
+  gl.uniform1i(pGrad.u.uP,bindTex(0,pressure.read.t));
+  gl.uniform1i(pGrad.u.uVel,bindTex(1,velocity.read.t));
+  blit(velocity.write.f); velocity.swap();
+  /* advect */
+  gl.useProgram(pAdvect.p);
+  gl.uniform2f(pAdvect.u.texel,velocity.texX,velocity.texY);
+  gl.uniform1f(pAdvect.u.dt,dt);
+  gl.uniform1f(pAdvect.u.diss,0.999);
+  gl.uniform1i(pAdvect.u.uVel,bindTex(0,velocity.read.t));
+  gl.uniform1i(pAdvect.u.uSrc,bindTex(0,velocity.read.t));
+  blit(velocity.write.f); velocity.swap();
+  gl.viewport(0,0,DYEW,DYEH);
+  gl.uniform2f(pAdvect.u.texel,velocity.texX,velocity.texY);
+  gl.uniform1f(pAdvect.u.diss,0.992);
+  gl.uniform1i(pAdvect.u.uVel,bindTex(0,velocity.read.t));
+  gl.uniform1i(pAdvect.u.uSrc,bindTex(1,dye.read.t));
+  blit(dye.write.f); dye.swap();
+}
+function render(){
+  gl.viewport(0,0,canvas.width,canvas.height);
+  gl.useProgram(pShow.p);
+  gl.uniform2f(pShow.u.texel,1/canvas.width,1/canvas.height);
+  gl.uniform1i(pShow.u.uDye,bindTex(0,dye.read.t));
+  blit(null);
+}
+
+/* --- pointer stirring --- */
+var px=0.5,py=0.5,pdown=false,lastMove=0,hintEl=document.getElementById('hint');
+function pointerMove(e){
+  var nx=e.clientX/innerWidth, ny=1-e.clientY/innerHeight;
+  var dx=(nx-px)*SIMW*11, dy=(ny-py)*SIMH*11;
+  var sp=Math.abs(dx)+Math.abs(dy);
+  if(sp>0.4){
+    var hue=(performance.now()*0.00006)%1;
+    splat(nx,ny,dx,dy,hsv(hue,0.72,0.5),0.0024);
+    var now=performance.now();
+    if(sp>26 && now-lastMove>420){ lastMove=now; sfx('drip'); }
+    if(now>6000) hintEl.classList.add('gone');
+  }
+  px=nx; py=ny;
+}
+addEventListener('pointermove',pointerMove);
+addEventListener('pointerdown',function(e){
+  pdown=true;
+  var nx=e.clientX/innerWidth, ny=1-e.clientY/innerHeight;
+  splat(nx,ny,0,0,hsv(Math.random(),0.8,0.5),0.004);
+});
+addEventListener('pointerup',function(){ pdown=false; });
+function hsv(h,s,v){
+  var i=Math.floor(h*6),f=h*6-i,p=v*(1-s),q=v*(1-f*s),t=v*(1-(1-f)*s);
+  var r,g,b;
+  switch(i%6){case 0:r=v;g=t;b=p;break;case 1:r=q;g=v;b=p;break;case 2:r=p;g=v;b=t;break;
+    case 3:r=p;g=q;b=v;break;case 4:r=t;g=p;b=v;break;default:r=v;g=p;b=q;}
+  return [r,g,b];
+}
+
+/* --- orb bursts --- */
+[].forEach.call(orbsEl.children,function(orb){
+  orb.addEventListener('mouseenter',function(){
+    sfx('hover');
+    var r=orb.getBoundingClientRect();
+    var nx=(r.left+r.width/2)/innerWidth, ny=1-(r.top+r.height/2)/innerHeight;
+    var c=SECTIONS[+orb.dataset.i].color;
+    splat(nx,ny,0,3,[c[0]*0.25,c[1]*0.25,c[2]*0.25],0.002);
+  });
+  orb.addEventListener('click',function(){
+    var i=+orb.dataset.i, c=SECTIONS[i].color;
+    var r=orb.getBoundingClientRect();
+    var nx=(r.left+r.width/2)/innerWidth, ny=1-(r.top+r.height/2)/innerHeight;
+    for(var k=0;k<8;k++){
+      var a=(k/8)*Math.PI*2;
+      splat(nx,ny,Math.cos(a)*28,Math.sin(a)*28,[c[0]*0.55,c[1]*0.55,c[2]*0.55],0.0035);
+    }
+    openPanel(i);
+  });
+});
+
+/* --- idle life: wandering auto-splats --- */
+var wander={x:0.3,y:0.55,a:0.6};
+function idleSplat(t){
+  wander.a+=(Math.random()-0.5)*0.7;
+  wander.x=Math.min(0.92,Math.max(0.08,wander.x+Math.cos(wander.a)*0.015));
+  wander.y=Math.min(0.9,Math.max(0.25,wander.y+Math.sin(wander.a)*0.015));
+  var hue=(t*0.00002)%1;
+  splat(wander.x,wander.y,Math.cos(wander.a)*7,Math.sin(wander.a)*7,hsv(hue,0.65,0.17),0.0022);
+}
+
+/* --- initial art: seed splats spelling presence --- */
+function seed(){
+  for(var i=0;i<10;i++){
+    var x=0.2+Math.random()*0.6, y=0.3+Math.random()*0.45;
+    var c=SECTIONS[i%SECTIONS.length].color;
+    splat(x,y,(Math.random()-0.5)*60,(Math.random()-0.5)*60,[c[0]*0.4,c[1]*0.4,c[2]*0.4],0.005);
+  }
+}
+
+/* --- main loop --- */
+var raf=null;
+function loop(t){
+  raf=requestAnimationFrame(loop);
+  if(document.hidden) return;
+  var dt=Math.min(0.033,(t-lastT)/1000||0.016); lastT=t;
+  if(!REDUCED){
+    if(Math.random()<0.09) idleSplat(t);
+    step(dt);
+  }
+  render();
+}
+addEventListener('resize',function(){ sizeCanvas(); render(); });
+seed();
+if(REDUCED){
+  /* a few gentle steps to settle the seed art, then hold still */
+  for(var i=0;i<40;i++) step(0.016);
+  render();
+  hintEl.innerHTML='<i class="fa-solid fa-hand-pointer"></i>&nbsp; click an orb to open a chapter';
+  raf=requestAnimationFrame(function r(t){ raf=requestAnimationFrame(r); if(!document.hidden) render(); });
+} else {
+  raf=requestAnimationFrame(loop);
+}
+window.__liquid=function(){ return { webgl:true, simW:SIMW, dyeW:DYEW }; };
+})();
+</script>
+</body>
+</html>
