@@ -710,6 +710,7 @@ function domainTick(dt,ms){
     if(input.up){ input.up=false; resting=true; restT=0;
       fairySay(FAIRY.rest,5200);
       plateEl.classList.remove('show');
+      setPrompt(null);
       try{ SFX.stopAmbient&&SFX.stopAmbient(); SFX.stopBrook&&SFX.stopBrook(); SFX.stopWind&&SFX.stopWind(); }catch(e){}
     }
     renderer.render(IN.scene,camera); return;
