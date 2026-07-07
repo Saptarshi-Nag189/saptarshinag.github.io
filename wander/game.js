@@ -713,7 +713,7 @@ requestAnimationFrame(tick);
 /* ---------------- test hooks ---------------- */
 window.__wander=function(){ return {
   t:+state.t.toFixed(4), biome:state.biome, mode:state.mode, pov:state.pov,
-  started:state.started, water:state.biome==='river', flying:state.biome==='sky'
+  started:state.started, boat:boat.state, riding:boat.state==='carry', flying:state.biome==='sky'
 };};
 window.__teleport=function(t){ state.t=Math.max(0.005,Math.min(0.995,t)); };
 window.__press=function(k,v){ input[k]=v; };
