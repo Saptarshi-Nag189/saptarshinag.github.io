@@ -196,6 +196,29 @@
     }
     footer a { color: var(--dim); }
 
+    .featured {
+      display: block; position: relative; margin-bottom: 2.8rem;
+      border: 1px solid rgba(141, 227, 255, 0.35); border-radius: 18px;
+      padding: clamp(1.6rem, 4vw, 2.6rem);
+      background:
+        radial-gradient(90% 130% at 85% 20%, rgba(141, 227, 255, 0.14), transparent 60%),
+        linear-gradient(160deg, rgba(20, 40, 60, 0.5), rgba(4, 10, 18, 0.7));
+      text-decoration: none; color: inherit; overflow: hidden;
+      transition: transform 0.4s cubic-bezier(0.22, 0.61, 0.36, 1), box-shadow 0.4s ease;
+    }
+    .featured:hover { transform: translateY(-5px); box-shadow: 0 30px 80px -40px #8de3ff; }
+    .featured .f-kick { font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.34em;
+      text-transform: uppercase; color: #8de3ff; margin-bottom: 0.7rem; }
+    .featured h2 { font-size: clamp(1.7rem, 4vw, 2.7rem); font-weight: 800; letter-spacing: -0.02em;
+      margin-bottom: 0.6rem; color: #fff; }
+    .featured p { color: var(--dim); max-width: 62ch; font-size: 1rem; margin-bottom: 1.1rem; }
+    .featured p b { color: var(--fg); }
+    .featured .f-go { font-family: var(--font-mono); font-size: 0.85rem; font-weight: 700;
+      color: #8de3ff; letter-spacing: 0.08em; }
+    .featured .f-badge { position: absolute; top: 1.2rem; right: 1.3rem; font-family: var(--font-mono);
+      font-size: 0.62rem; font-weight: 700; letter-spacing: 0.16em; color: #04121c;
+      background: #8de3ff; border-radius: 6px; padding: 0.28rem 0.6rem; }
+
     .group { margin-bottom: 2.6rem; }
     .group__head {
       font-family: var(--font-mono);
@@ -238,6 +261,16 @@
         explore, each with its own sound. <strong>Pick one and dive in</strong> (sound on after your
         first click; mute anytime, bottom-left).</p>
     </header>
+
+    <a class="featured" href="../signal/index.html">
+      <span class="f-badge">FLAGSHIP · NEW</span>
+      <div class="f-kick"><i class="fa-solid fa-tower-broadcast"></i> the signal · a playable biography</div>
+      <h2>Don't read the r&eacute;sum&eacute;. Run it.</h2>
+      <p>Eight acts, one operator: <b>you</b>. Calibrate the carrier, compile the engineer,
+        parallelize a radio telescope, fold a real pulsar out of noise, contain a live intrusion,
+        out-call a physics model at the pit wall, query the oracle &mdash; and transmit.</p>
+      <span class="f-go">begin transmission <span class="arrow">&#9656;</span></span>
+    </a>
 
     <div id="groups"></div>
 
