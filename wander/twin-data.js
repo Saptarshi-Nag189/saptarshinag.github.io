@@ -7,7 +7,8 @@
    ========================================================================== */
 
 export const FAIRY = {
-  wake: "Oh! You're here. I'm Saptarshi's twin — I'll wander with you. Use ◀ ▶ to walk, ▲ to hop. The road knows the way.",
+  wake: "Oh! You're here. I'm Saptarshi's twin — I'll wander with you. ◀ ▶ walk · ▲ hop or enter · Esc steps out of any domain · T opens a chat with me. The road knows the way.",
+  rest: "Shhh… lie down. You walked a whole life today. I'll be right here on the table. Listen — rain.",
   idle: [
     "The path continues ▶ — no map needed, I promise.",
     "If you're curious about him, tap me anytime and just ask.",

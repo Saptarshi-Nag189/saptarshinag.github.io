@@ -18,7 +18,7 @@
   var ctx = null, master = null;
   var muted = (localStorage.getItem(KEY) === '1');
   var unlocked = false;
-  var ambient = null, projector = null, engine = null, chiptune = null, rain = null, clack = null, brook = null, wind = null;
+  var ambient = null, projector = null, engine = null, chiptune = null, rain = null, clack = null, brook = null, wind = null, crickets = null, hum = null;
   var accent = '#9aa0ff';
 
   function ensure() {
@@ -220,7 +220,7 @@
     muted = m;
     try { localStorage.setItem(KEY, m ? '1' : '0'); } catch (e) {}
     if (master && ctx) master.gain.setTargetAtTime(m ? 0 : 0.55, ctx.currentTime, 0.04);
-    if (m) { stopAmbient(); stopProjector(); stopEngine(); stopChiptune(); stopRain(); stopClack(); stopBrook(); stopWind(); }
+    if (m) { stopAmbient(); stopProjector(); stopEngine(); stopChiptune(); stopRain(); stopClack(); stopBrook(); stopWind(); stopCrickets(); stopHum(); }
     paint();
   }
   function toggleMute() { setMuted(!muted); if (!muted) play('click'); }
@@ -440,17 +440,19 @@
   }
 
   /* ---- wind: airy band-swept noise (sky biome) ---- */
-  function startWind() {
+  function startWind(opts) {
     ensure();
     if (!ctx || wind || muted) return;
+    opts = opts || {};
     var out = ctx.createGain(); out.gain.value = 0; out.connect(master);
-    out.gain.linearRampToValueAtTime(0.12, ctx.currentTime + 2);
+    out.gain.linearRampToValueAtTime(opts.gain != null ? opts.gain : 0.12, ctx.currentTime + 2);
     var nb = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 3), ctx.sampleRate);
     var nd = nb.getChannelData(0); for (var i = 0; i < nd.length; i++) nd[i] = Math.random() * 2 - 1;
     var src = ctx.createBufferSource(); src.buffer = nb; src.loop = true;
-    var bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 500; bp.Q.value = 0.7;
-    var lfo = ctx.createOscillator(); lfo.frequency.value = 0.11;
-    var lg = ctx.createGain(); lg.gain.value = 260; lfo.connect(lg); lg.connect(bp.frequency); lfo.start();
+    var bp = ctx.createBiquadFilter(); bp.type = 'bandpass';
+    bp.frequency.value = opts.freq || 500; bp.Q.value = 0.7;
+    var lfo = ctx.createOscillator(); lfo.frequency.value = opts.rate || 0.11;
+    var lg = ctx.createGain(); lg.gain.value = (opts.freq || 500) * 0.5; lfo.connect(lg); lg.connect(bp.frequency); lfo.start();
     src.connect(bp); bp.connect(out); src.start();
     wind = { out: out, src: src, lfo: lfo };
   }
@@ -459,6 +461,58 @@
     var w = wind; wind = null;
     w.out.gain.linearRampToValueAtTime(0.0001, ctx.currentTime + 1.4);
     setTimeout(function () { try { w.src.stop(); w.lfo.stop(); } catch (e) {} }, 1600);
+  }
+
+  /* ---- crickets: pulsing night chirps (meadow) ---- */
+  function startCrickets() {
+    ensure();
+    if (!ctx || crickets || muted) return;
+    var out = ctx.createGain(); out.gain.value = 0; out.connect(master);
+    out.gain.linearRampToValueAtTime(0.05, ctx.currentTime + 2);
+    var osc = ctx.createOscillator(); osc.type = 'sine'; osc.frequency.value = 4200;
+    var am = ctx.createGain(); am.gain.value = 0;
+    var lfo = ctx.createOscillator(); lfo.frequency.value = 24;      /* chirp buzz */
+    var lg = ctx.createGain(); lg.gain.value = 0.5; lfo.connect(lg); lg.connect(am.gain); lfo.start();
+    osc.connect(am); am.connect(out); osc.start();
+    function pulse() {                                               /* chirp bursts */
+      if (!crickets) return;
+      var g = crickets.am.gain;
+      g.cancelScheduledValues(ctx.currentTime);
+      g.setValueAtTime(0.5, ctx.currentTime);
+      g.setValueAtTime(0.0, ctx.currentTime + 0.35 + Math.random() * 0.3);
+      crickets.timer = setTimeout(pulse, 700 + Math.random() * 1400);
+    }
+    crickets = { out: out, osc: osc, lfo: lfo, am: am, timer: null };
+    crickets.timer = setTimeout(pulse, 400);
+  }
+  function stopCrickets() {
+    if (!crickets || !ctx) return;
+    var c = crickets; crickets = null; clearTimeout(c.timer);
+    c.out.gain.linearRampToValueAtTime(0.0001, ctx.currentTime + 1);
+    setTimeout(function () { try { c.osc.stop(); c.lfo.stop(); } catch (e) {} }, 1200);
+  }
+
+  /* ---- hum: dark detuned synth drone (futuristic city) ---- */
+  function startHum() {
+    ensure();
+    if (!ctx || hum || muted) return;
+    var out = ctx.createGain(); out.gain.value = 0; out.connect(master);
+    out.gain.linearRampToValueAtTime(0.07, ctx.currentTime + 2.5);
+    var lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 240; lp.connect(out);
+    var oscs = [55, 55.6, 110.4].map(function (f) {
+      var o = ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.value = f;
+      var og = ctx.createGain(); og.gain.value = 0.4;
+      o.connect(og); og.connect(lp); o.start(); return o;
+    });
+    var lfo = ctx.createOscillator(); lfo.frequency.value = 0.07;
+    var lg = ctx.createGain(); lg.gain.value = 90; lfo.connect(lg); lg.connect(lp.frequency); lfo.start();
+    hum = { out: out, oscs: oscs, lfo: lfo };
+  }
+  function stopHum() {
+    if (!hum || !ctx) return;
+    var h = hum; hum = null;
+    h.out.gain.linearRampToValueAtTime(0.0001, ctx.currentTime + 1.2);
+    setTimeout(function () { try { h.oscs.forEach(function (o) { o.stop(); }); h.lfo.stop(); } catch (e) {} }, 1400);
   }
 
   window.SFX = {
@@ -470,6 +524,8 @@
     startRain: startRain, stopRain: stopRain,
     startBrook: startBrook, stopBrook: stopBrook,
     startWind: startWind, stopWind: stopWind,
+    startCrickets: startCrickets, stopCrickets: stopCrickets,
+    startHum: startHum, stopHum: stopHum,
     startClack: startClack, stopClack: stopClack,
     toggleMute: toggleMute, setMuted: setMuted,
     get muted() { return muted; },

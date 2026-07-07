@@ -36,14 +36,14 @@ export const BIOMES = [
     sky:0xbfeef2, fog:0xc9f0f2, ground:0x9adfc9, far:170 },
   { id:'desert', t0:0.40, t1:0.535, name:'Oasis of Craft',     subtitle:'skills',
     sky:0xffe2b8, fog:0xffe6c2, ground:0xf2cf9a, far:190 },
-  { id:'snow',   t0:0.535,t1:0.665, name:'The Quiet Archive',  subtitle:'publications',
+  { id:'snow',   t0:0.535,t1:0.625, name:'The Quiet Archive',  subtitle:'publications',
     sky:0xe6e9ff, fog:0xeceeff, ground:0xf4f4ff, far:150 },
-  { id:'sky',    t0:0.665,t1:0.82,  name:"The Dreamer's Sky",  subtitle:'about him · fly',
+  { id:'sky',    t0:0.625,t1:0.845, name:"The Dreamer's Sky",  subtitle:'about him · fly',
     sky:0xffc9d9, fog:0xffd4e2, ground:0xffffff, far:260 },
-  { id:'city',   t0:0.82, t1:0.935, name:'The Atelier',        subtitle:'projects & c-dac',
-    sky:0xd8ccff, fog:0xe2d8ff, ground:0xf0ecff, far:180 },
-  { id:'meadow', t0:0.935,t1:1.00,  name:"Journey's End",      subtitle:'contact',
-    sky:0x9fb8e8, fog:0xb0c4ee, ground:0x9fd8a8, far:160 }
+  { id:'city',   t0:0.845,t1:0.945, name:'The Atelier',        subtitle:'projects & c-dac',
+    sky:0x141126, fog:0x1c1733, ground:0x181430, far:180 },
+  { id:'meadow', t0:0.945,t1:1.00,  name:"Journey's End",      subtitle:'contact',
+    sky:0x3d4e78, fog:0x46578a, ground:0x4f7a5e, far:150 }
 ];
 
 const PTS = [
@@ -53,8 +53,9 @@ const PTS = [
   [258,3,-10],[282,6,-2],[306,5,10],[328,7,0],        /* desert climbs dunes    */
   [350,10,-10],[372,13,-2],[394,12,8],                /* snow high路            */
   [416,18,0],[436,30,-10],[456,44,4],[476,56,-6],[496,62,4], /* ascend to sky   */
-  [518,40,-6],[538,22,4],[558,12,-6],[578,9,2],       /* glide down to city     */
-  [600,4,-6],[622,3,4],[642,3,0]                      /* meadow                 */
+  [520,66,-10],[544,58,8],[566,64,-4],[588,54,6],[608,60,-8], /* long sky drift  */
+  [630,42,-4],[650,24,6],[668,12,-6],[686,9,2],       /* glide down to city     */
+  [706,4,-6],[726,3,4],[746,3,0]                      /* meadow (night)         */
 ];
 const curve = new THREE.CatmullRomCurve3(PTS.map(p=>new THREE.Vector3(p[0],p[1],p[2])), false, 'catmullrom', 0.5);
 const CURVE_LEN = curve.getLength();
@@ -141,17 +142,33 @@ let waterMesh=null;
 
 /* ---------------- props ---------------- */
 const rand=(a,b)=>a+Math.random()*(b-a);
+/* dense path sampling so no prop can sit on ANY bend of the road */
+const PATH_SAMPLES=(function(){ const arr=[]; const v=new THREE.Vector3();
+  for(let i=0;i<=700;i++){ curve.getPointAt(i/700,v); arr.push(v.x,v.z); } return arr; })();
+function clearOfPath(x,z,min){
+  const m2=min*min;
+  for(let i=0;i<PATH_SAMPLES.length;i+=2){
+    const dx=x-PATH_SAMPLES[i], dz=z-PATH_SAMPLES[i+1];
+    if(dx*dx+dz*dz<m2) return false;
+  }
+  return true;
+}
 function scatter(t0,t1,count,builder){
   const p=new THREE.Vector3(), tan=new THREE.Vector3(), nrm=new THREE.Vector3(), up=new THREE.Vector3(0,1,0);
   for(let i=0;i<count;i++){
-    const t=rand(t0,t1);
-    curve.getPointAt(t,p); curve.getTangentAt(t,tan);
-    nrm.crossVectors(tan,up).normalize();
-    const side=Math.random()<0.5?-1:1, d=rand(9,26)*side;
-    const o=builder(i);
-    o.position.set(p.x+nrm.x*d, p.y-0.5, p.z+nrm.z*d);
-    o.rotation.y=Math.random()*Math.PI*2;
-    scene.add(o);
+    let placed=false;
+    for(let tries=0;tries<6 && !placed;tries++){
+      const t=rand(t0,t1);
+      curve.getPointAt(t,p); curve.getTangentAt(t,tan);
+      nrm.crossVectors(tan,up).normalize();
+      const side=Math.random()<0.5?-1:1, d=rand(12,28)*side;
+      const x=p.x+nrm.x*d, z=p.z+nrm.z*d;
+      if(!clearOfPath(x,z,9)) continue;
+      const o=builder(i);
+      o.position.set(x, p.y-0.5, z);
+      o.rotation.y=Math.random()*Math.PI*2;
+      scene.add(o); placed=true;
+    }
   }
 }
 function tree(c1,c2){
@@ -199,7 +216,7 @@ scatter(snowT.t0,snowT.t1,70,()=>{
 /* sky islands + clouds */
 (function skyProps(){
   const p=new THREE.Vector3();
-  for(let i=0;i<26;i++){
+  for(let i=0;i<62;i++){
     const t=rand(skyT.t0,skyT.t1);
     curve.getPointAt(t,p);
     const cl=new THREE.Mesh(new THREE.SphereGeometry(rand(2.5,7),8,6),
@@ -220,16 +237,59 @@ scatter(snowT.t0,snowT.t1,70,()=>{
     scene.add(isle);
   }
 })();
+/* sky life: bird flocks + the manta (Sky:CotL homage) */
+const skyLife={flocks:[],manta:null};
+(function skyCreatures(){
+  const center=curve.getPointAt((skyT.t0+skyT.t1)/2);
+  for(let f=0;f<3;f++){
+    const flock={birds:[],cx:center.x+rand(-90,90),cy:center.y+rand(-8,14),cz:center.z+rand(-40,40),
+      r:rand(14,26),spd:rand(0.25,0.45)*(Math.random()<0.5?1:-1),ph:Math.random()*7};
+    for(let i=0;i<7;i++){
+      const bird=new THREE.Group();
+      const wm=new THREE.MeshLambertMaterial({color:0xffffff,side:THREE.DoubleSide});
+      const w1=new THREE.Mesh(new THREE.ConeGeometry(0.34,0.9,3),wm); w1.rotation.z=Math.PI/2; w1.position.x=-0.4;
+      const w2=w1.clone(); w2.rotation.z=-Math.PI/2; w2.position.x=0.4;
+      bird.add(w1); bird.add(w2);
+      bird.userData={off:i*0.8,w1,w2};
+      scene.add(bird); flock.birds.push(bird);
+    }
+    skyLife.flocks.push(flock);
+  }
+  /* the manta */
+  const manta=new THREE.Group();
+  const bodyM=new THREE.MeshLambertMaterial({color:0xffe4ef,flatShading:true,transparent:true,opacity:0.96});
+  const body=new THREE.Mesh(new THREE.SphereGeometry(2.4,10,8),bodyM);
+  body.scale.set(1.1,0.42,1.7); manta.add(body);
+  const wingM=new THREE.MeshLambertMaterial({color:0xffd0e4,side:THREE.DoubleSide,transparent:true,opacity:0.9});
+  const mwL=new THREE.Mesh(new THREE.ConeGeometry(2.4,6.5,3),wingM);
+  mwL.rotation.z=Math.PI/2; mwL.position.x=-4; mwL.scale.set(1,1,0.22); manta.add(mwL);
+  const mwR=mwL.clone(); mwR.rotation.z=-Math.PI/2; mwR.position.x=4; manta.add(mwR);
+  const tail=new THREE.Mesh(new THREE.ConeGeometry(0.5,3.4,5),bodyM);
+  tail.rotation.x=Math.PI/2; tail.position.z=-4; manta.add(tail);
+  const mglow=new THREE.PointLight(0xffc9ec,8,26); manta.add(mglow);
+  manta.userData={mwL,mwR,seen:false};
+  scene.add(manta);
+  skyLife.manta=manta;
+  skyLife.center=center;
+})();
+
 /* city towers */
-scatter(cityT.t0,cityT.t1,44,()=>{
-  const h=rand(4,16);
+scatter(cityT.t0,cityT.t1,50,()=>{  /* dark city: near-black towers, loud neon */
+  const h=rand(4,18);
   const tower=new THREE.Mesh(new THREE.BoxGeometry(rand(1.6,3.4),h,rand(1.6,3.4)),
-    new THREE.MeshLambertMaterial({color:[0xffffff,0xf4eaff,0xe8f4ff][Math.floor(Math.random()*3)]}));
+    new THREE.MeshLambertMaterial({color:[0x1c1830,0x241d3d,0x191526][Math.floor(Math.random()*3)]}));
   tower.position.y=h/2-0.5;
-  const glow=new THREE.Mesh(new THREE.BoxGeometry(0.4,h*0.7,0.12),
-    new THREE.MeshBasicMaterial({color:[0xff9ecb,0x8fd8ff,0xffd98a][Math.floor(Math.random()*3)]}));
+  const neon=[0xff2d78,0x36e0ff,0xb14dff,0x2dff9e][Math.floor(Math.random()*4)];
+  const glow=new THREE.Mesh(new THREE.BoxGeometry(0.4,h*0.72,0.12),
+    new THREE.MeshBasicMaterial({color:neon}));
   glow.position.set(0,h*0.1,tower.geometry.parameters.depth/2+0.07);
   tower.add(glow);
+  const glow2=new THREE.Mesh(new THREE.BoxGeometry(tower.geometry.parameters.width+0.1,0.16,0.12),
+    new THREE.MeshBasicMaterial({color:neon}));
+  glow2.position.set(0,h*0.42,tower.geometry.parameters.depth/2+0.07);
+  tower.add(glow2);
+  const cap=new THREE.Mesh(new THREE.SphereGeometry(0.16,6,5),new THREE.MeshBasicMaterial({color:neon}));
+  cap.position.y=h/2+0.2; tower.add(cap);
   return tower;
 });
 scatter(meadowT.t0,meadowT.t1,60,()=>{
@@ -275,20 +335,47 @@ export const wanderer=(function(){
   const wL=new THREE.Mesh(new THREE.ConeGeometry(0.5,1.6,3),wingM);
   wL.rotation.z=Math.PI/2; wL.position.set(-0.75,1.25,0); wL.scale.set(1,1,0.24); wL.visible=false;
   const wR=wL.clone(); wR.rotation.z=-Math.PI/2; wR.position.x=0.75; g.add(wL); g.add(wR);
-  /* boat (hidden until river) */
-  const boat=new THREE.Group();
+  scene.add(g);
+  return {g,cape,head,hood,wL,wR,glow};
+})();
+
+/* ---------------- the boat: a real thing in the world ---------------- */
+const RIVER=BIOMES.find(b=>b.id==='river');
+const BOARD_T=RIVER.t0+0.012, ALIGHT_T=RIVER.t1-0.012;
+const boat=(function(){
+  const b=new THREE.Group();
   const hull=new THREE.Mesh(new THREE.CylinderGeometry(0.9,0.55,0.6,8,1),
     new THREE.MeshLambertMaterial({color:0xc78a5f,flatShading:true}));
-  hull.scale.set(1.6,1,0.9); hull.position.y=0.28; boat.add(hull);
+  hull.scale.set(1.6,1,0.9); hull.position.y=0.28; b.add(hull);
   const rim=new THREE.Mesh(new THREE.TorusGeometry(0.95,0.09,6,10),
     new THREE.MeshLambertMaterial({color:0xa86f47}));
-  rim.rotation.x=Math.PI/2; rim.position.y=0.58; rim.scale.set(1.6,0.9,1); boat.add(rim);
+  rim.rotation.x=Math.PI/2; rim.position.y=0.58; rim.scale.set(1.6,0.9,1); b.add(rim);
   const lamp=new THREE.Mesh(new THREE.SphereGeometry(0.14,8,6),new THREE.MeshBasicMaterial({color:0xffd98a}));
-  lamp.position.set(1.35,0.9,0); boat.add(lamp);
-  boat.visible=false;
-  g.add(boat);
-  scene.add(g);
-  return {g,cape,head,hood,wL,wR,boat,glow};
+  lamp.position.set(1.35,0.9,0); b.add(lamp);
+  const ll=new THREE.PointLight(0xffd98a,3,6); ll.position.copy(lamp.position); b.add(ll);
+  scene.add(b);
+  /* jetties at both moorings */
+  function jetty(t){
+    const p=curve.getPointAt(t), tan=curve.getTangentAt(t);
+    const j=new THREE.Group();
+    for(let k=0;k<5;k++){
+      const plank=new THREE.Mesh(new THREE.BoxGeometry(0.9,0.12,2.6),
+        new THREE.MeshLambertMaterial({color:0xa8815e}));
+      plank.position.set((k-2)*0.95,0.05,0); j.add(plank);
+    }
+    for(const px of [-2.1,2.1]) for(const pz of [-1.1,1.1]){
+      const post=new THREE.Mesh(new THREE.CylinderGeometry(0.09,0.11,1.2,6),
+        new THREE.MeshLambertMaterial({color:0x8a6a4a}));
+      post.position.set(px,-0.4,pz); j.add(post);
+    }
+    j.position.set(p.x,0.02,p.z);
+    j.rotation.y=Math.atan2(tan.x,tan.z);
+    scene.add(j);
+  }
+  jetty(BOARD_T); jetty(ALIGHT_T);
+  const m0=curve.getPointAt(BOARD_T);
+  b.position.set(m0.x,-0.12,m0.z);
+  return {g:b, state:'moor0'};
 })();
 
 /* ---------------- fairy ---------------- */
@@ -403,10 +490,15 @@ function biomeSound(id){
   if(id===sndBiome) return; sndBiome=id;
   try{
     if(!window.SFX) return;
-    SFX.stopBrook && SFX.stopBrook(); SFX.stopWind && SFX.stopWind(); SFX.stopAmbient && SFX.stopAmbient();
-    if(id==='river') SFX.startBrook(1);
-    else if(id==='sky') SFX.startWind();
-    else SFX.startAmbient(id==='city'?72:id==='snow'?48:58);
+    ['stopBrook','stopWind','stopAmbient','stopCrickets','stopHum'].forEach(f=>SFX[f]&&SFX[f]());
+    if(id==='glade')       SFX.startAmbient(58);                       /* soft dawn pad     */
+    else if(id==='forest') SFX.startWind({freq:760,gain:0.05,rate:0.3});/* leaves in breeze; birds chirp in tick */
+    else if(id==='river')  SFX.startBrook(1);                          /* running water     */
+    else if(id==='desert') SFX.startWind({freq:280,gain:0.14,rate:0.07});/* dry, wide wind   */
+    else if(id==='snow')   SFX.startWind({freq:1050,gain:0.05,rate:0.16});/* thin hush       */
+    else if(id==='sky')    SFX.startWind({freq:500,gain:0.12,rate:0.11}); /* open-air rush   */
+    else if(id==='city')   SFX.startHum && SFX.startHum();             /* dark synth hum    */
+    else if(id==='meadow') SFX.startCrickets && SFX.startCrickets();   /* night crickets    */
   }catch(e){}
 }
 let chirpTimer=0;
@@ -448,11 +540,13 @@ function tick(ms){
   if(state.mode!=='overworld'){ domains.tick(dt,ms); return; }
 
   /* --- move --- */
-  const SPEED=0.030;   /* t per second at full walk */
+  const SPEED=0.0075;  /* t per second at full walk — 25% of v1, per user */
+  const bSpeed = b0 => b0.id==='sky' ? 0.8 : 1;   /* flying drifts even slower */
   let target=0;
+  const bNow=biomeAt(state.t);
   if(state.started){
-    if(input.right) target= SPEED;
-    if(input.left)  target=-SPEED;
+    if(input.right) target= SPEED*bSpeed(bNow);
+    if(input.left)  target=-SPEED*bSpeed(bNow);
   }
   state.vel += (target-state.vel)*Math.min(1,dt*6);
   state.t = Math.max(0.005, Math.min(0.995, state.t + state.vel*dt));
@@ -460,8 +554,19 @@ function tick(ms){
   if(moving){ idleMs=0; } else idleMs+=dt*1000;
 
   const b=biomeAt(state.t);
-  const onWater = b.id==='river';
+  const riding = state.t>BOARD_T && state.t<ALIGHT_T;
+  const onWater = riding;
   const flying  = b.id==='sky';
+  /* boarding / alighting transitions */
+  if(riding && boat.state!=='carry'){
+    boat.state='carry'; state.jumpV=2.6; sfx('creak'); sfx('splash');
+    fairySay('Steady… step aboard. The river does the walking now.',3800);
+  } else if(!riding && boat.state==='carry'){
+    boat.state = state.t>=ALIGHT_T ? 'moor1' : 'moor0';
+    state.jumpV=2.6; sfx('splash'); sfx('step');
+    const mp=curve.getPointAt(boat.state==='moor1'?ALIGHT_T:BOARD_T);
+    boat.g.position.set(mp.x,-0.12,mp.z);
+  }
 
   /* jump (small hop; disabled while flying/boating) */
   if(input.up && state.jumpY<=0.001 && !flying && !onWater && !domains.nearDoor()){
@@ -472,7 +577,7 @@ function tick(ms){
 
   /* --- place character --- */
   curve.getPointAt(state.t,_p); curve.getTangentAt(state.t,_tan);
-  const baseY=onWater? -0.05 : 0;
+  const baseY=onWater? 0.42 : 0;   /* standing on the boat deck */
   wanderer.g.position.set(_p.x, _p.y+baseY+state.jumpY+(flying?Math.sin(ms*0.002)*0.6:0), _p.z);
   const face=Math.atan2(_tan.x,_tan.z)+(state.vel<-0.001?Math.PI:0);
   wanderer.g.rotation.y += (face-wanderer.g.rotation.y)*Math.min(1,dt*7);
@@ -482,13 +587,17 @@ function tick(ms){
   wanderer.cape.scale.x=1+Math.sin(walkPhase*0.7)*0.05;
   wanderer.g.position.y+=moving&&!onWater&&!flying?Math.abs(Math.sin(walkPhase))*0.12:0;
   /* modes */
-  wanderer.boat.visible=onWater;
   wanderer.wL.visible=wanderer.wR.visible=flying;
-  if(onWater){
-    wanderer.boat.rotation.z=Math.sin(ms*0.0016)*0.05;
-    wanderer.boat.rotation.x=Math.sin(ms*0.0011)*0.04;
+  if(boat.state==='carry'){
+    boat.g.position.set(_p.x,-0.12+Math.sin(ms*0.0016)*0.04,_p.z);
+    boat.g.rotation.y += ((Math.atan2(_tan.x,_tan.z))-boat.g.rotation.y)*Math.min(1,dt*5);
+    boat.g.rotation.z=Math.sin(ms*0.0016)*0.05;
+    boat.g.rotation.x=Math.sin(ms*0.0011)*0.04;
     if(moving && Math.random()<0.03) sfx('drip');
     if(Math.random()<0.004) sfx('creak');
+  } else {
+    boat.g.rotation.z=Math.sin(ms*0.0013)*0.03;   /* gentle bob at the jetty */
+    boat.g.position.y=-0.12+Math.sin(ms*0.0014)*0.03;
   }
   if(flying){
     const flap=Math.sin(ms*0.008)*0.5;
@@ -550,6 +659,32 @@ function tick(ms){
       pos.array[i*3+2]=base[i*3+2]+Math.sin(ms*0.0016+base[i*3]*0.25+base[i*3+1]*0.2)*0.16;
     }
     pos.needsUpdate=true;
+  }
+  /* sky life animation */
+  if(skyLife.manta){
+    const c=skyLife.center, mt=ms*0.00008;
+    const mx=c.x+Math.cos(mt*2*Math.PI)*95, mz=c.z+Math.sin(mt*2*Math.PI)*55;
+    const my=c.y+Math.sin(ms*0.0006)*10+4;
+    skyLife.manta.position.set(mx,my,mz);
+    skyLife.manta.rotation.y=-mt*2*Math.PI+Math.PI/2;
+    skyLife.manta.rotation.z=Math.sin(ms*0.0011)*0.18;
+    const mf=Math.sin(ms*0.0028)*0.5;
+    skyLife.manta.userData.mwL.rotation.y=mf; skyLife.manta.userData.mwR.rotation.y=-mf;
+    if(flying && !skyLife.manta.userData.seen &&
+       skyLife.manta.position.distanceTo(wanderer.g.position)<70){
+      skyLife.manta.userData.seen=true;
+      fairySay('Oh — look up. She only shows herself to gentle travellers. ✧',5200);
+      sfx('whale');
+    }
+    for(const fl of skyLife.flocks){
+      for(const bird of fl.birds){
+        const a=ms*0.001*fl.spd+bird.userData.off+fl.ph;
+        bird.position.set(fl.cx+Math.cos(a)*fl.r, fl.cy+Math.sin(a*1.7)*2.4, fl.cz+Math.sin(a)*fl.r);
+        bird.rotation.y=-a+(fl.spd>0?Math.PI/2:-Math.PI/2);
+        const bf=Math.sin(ms*0.012+bird.userData.off)*0.7;
+        bird.userData.w1.rotation.y=bf; bird.userData.w2.rotation.y=-bf;
+      }
+    }
   }
   /* fireflies twinkle */
   flies.pts.material.opacity=0.55+0.4*Math.sin(ms*0.002);
