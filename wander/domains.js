@@ -97,11 +97,12 @@ const interiors={};
 Object.keys(DOMAINS).forEach(id=>{
   const st=IN_STYLE[id], D=DOMAINS[id];
   const sc=new THREE.Scene();
-  const moody=new THREE.Color(st.fog).multiplyScalar(id==='meadow'?0.30:0.78);
+  const moody=id==='meadow' ? new THREE.Color(0x241a12)
+                             : new THREE.Color(st.fog).multiplyScalar(0.78);
   sc.background=moody.clone();
-  sc.fog=new THREE.Fog(moody, 10, id==='meadow'?30:38);
-  sc.add(new THREE.HemisphereLight(0xffffff, st.floor, id==='meadow'?0.35:0.8));
-  const dl=new THREE.DirectionalLight(id==='meadow'?0xffc9a0:0xfff4e0, id==='meadow'?0.3:0.8);
+  sc.fog=new THREE.Fog(moody, id==='meadow'?14:10, id==='meadow'?46:38);
+  sc.add(new THREE.HemisphereLight(id==='meadow'?0xffdCb0:0xffffff, id==='meadow'?0x40301f:st.floor, id==='meadow'?0.55:0.8));
+  const dl=new THREE.DirectionalLight(id==='meadow'?0xffc9a0:0xfff4e0, id==='meadow'?0.35:0.8);
   dl.position.set(6,12,4); sc.add(dl);
 
   if(id==='meadow'){
@@ -140,6 +141,7 @@ Object.keys(DOMAINS).forEach(id=>{
     pil.position.set(0,0.98,-1.6); bed.add(pil);
     const tbl=new THREE.Mesh(new THREE.BoxGeometry(0.8,0.9,0.8),wood); tbl.position.set(1.9,0.45,-1.6); bed.add(tbl);
     bed.position.set(3.2,0,17); sc.add(bed);
+    const bedGlow=new THREE.PointLight(0xffc080,12,12); bedGlow.position.set(2.2,2.4,15.2); sc.add(bedGlow);
     sc.userData.bed={x:3.2,z:17,fairyPerch:new THREE.Vector3(5.1,1.25,15.4)};
   } else {
     /* ---------- sanctum shell (Genshin-domain feel): enclosed, moody, glowing ---------- */
@@ -572,7 +574,11 @@ async function ask(){
     if(k>=a.length){ clearInterval(iv); m.textContent=a; } },18);
 }
 chatGo.addEventListener('click',ask);
-chatQ.addEventListener('keydown',e=>{ if(e.key==='Enter') ask(); e.stopPropagation(); });
+chatQ.addEventListener('keydown',e=>{
+  if(e.key==='Enter'){ ask(); }
+  else if(e.key==='Escape'){ toggleChat(false); chatQ.blur(); }
+  e.stopPropagation();
+});
 addEventListener('keydown',e=>{ if((e.key==='t'||e.key==='T')&&document.activeElement!==chatQ) toggleChat(); });
 addEventListener('keydown',e=>{
   if(e.key!=='Escape') return;
@@ -674,6 +680,10 @@ function domainTick(dt,ms){
       wanderer.g.position.y+1.85+(moving?Math.sin(ms*0.02)*0.05:0), u+0.3*dir);
     state.camPos.lerp(camT,Math.min(1,dt*8)); camera.position.copy(state.camPos);
     _look.set(wanderer.g.position.x,1.6,u+4*dir);
+  } else if(activeDomain==='meadow'){
+    const camT=new THREE.Vector3(-2.4, 3.2, u-5.4);
+    state.camPos.lerp(camT,Math.min(1,dt*2.4)); camera.position.copy(state.camPos);
+    _look.set(wanderer.g.position.x*0.5, 1.3, u+2.2);
   } else {
     const camT=new THREE.Vector3(wanderer.g.position.x-4.6, 4.4, u-7.5);
     state.camPos.lerp(camT,Math.min(1,dt*2.4)); camera.position.copy(state.camPos);
@@ -718,6 +728,8 @@ function domainTick(dt,ms){
 
 const restartBtn=document.getElementById('restartBtn');
 if(restartBtn) restartBtn.addEventListener('click',()=>location.reload());
+
+window.__domainU=function(v){ if(activeDomain!=null) u=v; };
 
 return {
   overworldTick,
