@@ -18,7 +18,7 @@
   var ctx = null, master = null;
   var muted = (localStorage.getItem(KEY) === '1');
   var unlocked = false;
-  var ambient = null, projector = null, engine = null, chiptune = null, rain = null, clack = null;
+  var ambient = null, projector = null, engine = null, chiptune = null, rain = null, clack = null, brook = null, wind = null;
   var accent = '#9aa0ff';
 
   function ensure() {
@@ -118,6 +118,10 @@
     horn:    function () { [220, 277].forEach(function (f) { tone({ freq: f, type: 'triangle', dur: 1.4, gain: 0.06, attack: 0.25 }); }); },
     whale:   function () { tone({ freq: 180, type: 'sine', dur: 2.2, gain: 0.08, attack: 0.5, slideTo: 420 }); },
     page:    function () { noise({ dur: 0.22, gain: 0.08, filter: 'bandpass', freq: 2600, q: 0.5 }); },
+    chirp:   function () { var f = 2200 + Math.random() * 1400; tone({ freq: f, type: 'sine', dur: 0.09, gain: 0.05, slideTo: f * 1.3 }); tone({ freq: f * 1.1, type: 'sine', dur: 0.07, gain: 0.04, delay: 0.11, slideTo: f * 0.9 }); },
+    creak:   function () { tone({ freq: 130 + Math.random() * 60, type: 'sawtooth', dur: 0.3, gain: 0.04, slideTo: 90 }); },
+    bloom:   function () { [392, 494, 587, 784].forEach(function (f, i) { tone({ freq: f, type: 'sine', dur: 0.55, gain: 0.06, delay: i * 0.08, attack: 0.04 }); }); },
+    trill:   function () { [1319, 1568, 1976].forEach(function (f, i) { tone({ freq: f, type: 'sine', dur: 0.12, gain: 0.055, delay: i * 0.07 }); }); },
     chime:   function () { [1047, 1319, 1568].forEach(function (f, i) { tone({ freq: f, type: 'sine', dur: 0.9, gain: 0.05, delay: i * 0.12, attack: 0.02 }); }); }
   };
 
@@ -216,7 +220,7 @@
     muted = m;
     try { localStorage.setItem(KEY, m ? '1' : '0'); } catch (e) {}
     if (master && ctx) master.gain.setTargetAtTime(m ? 0 : 0.55, ctx.currentTime, 0.04);
-    if (m) { stopAmbient(); stopProjector(); stopEngine(); stopChiptune(); }
+    if (m) { stopAmbient(); stopProjector(); stopEngine(); stopChiptune(); stopRain(); stopClack(); stopBrook(); stopWind(); }
     paint();
   }
   function toggleMute() { setMuted(!muted); if (!muted) play('click'); }
@@ -407,6 +411,56 @@
     c.out.gain.linearRampToValueAtTime(0.0001, ctx.currentTime + 0.8);
   }
 
+  /* ---- brook: gentle running water (river biome) ---- */
+  function startBrook(intensity) {
+    ensure();
+    if (!ctx || brook || muted) return;
+    var out = ctx.createGain(); out.gain.value = 0; out.connect(master);
+    out.gain.linearRampToValueAtTime(0.16 * (intensity || 1), ctx.currentTime + 1.6);
+    var nb = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 2.7), ctx.sampleRate);
+    var nd = nb.getChannelData(0); for (var i = 0; i < nd.length; i++) nd[i] = Math.random() * 2 - 1;
+    var src = ctx.createBufferSource(); src.buffer = nb; src.loop = true;
+    var bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 900; bp.Q.value = 0.4;
+    var lfo = ctx.createOscillator(); lfo.frequency.value = 0.23;
+    var lg = ctx.createGain(); lg.gain.value = 300; lfo.connect(lg); lg.connect(bp.frequency); lfo.start();
+    src.connect(bp); bp.connect(out); src.start();
+    function burble() {
+      if (!brook) return;
+      if (!muted && !document.hidden) lib.drip();
+      brook.timer = setTimeout(burble, 700 + Math.random() * 1800);
+    }
+    brook = { out: out, src: src, lfo: lfo, timer: null };
+    brook.timer = setTimeout(burble, 900);
+  }
+  function stopBrook() {
+    if (!brook || !ctx) return;
+    var b = brook; brook = null; clearTimeout(b.timer);
+    b.out.gain.linearRampToValueAtTime(0.0001, ctx.currentTime + 1.1);
+    setTimeout(function () { try { b.src.stop(); b.lfo.stop(); } catch (e) {} }, 1300);
+  }
+
+  /* ---- wind: airy band-swept noise (sky biome) ---- */
+  function startWind() {
+    ensure();
+    if (!ctx || wind || muted) return;
+    var out = ctx.createGain(); out.gain.value = 0; out.connect(master);
+    out.gain.linearRampToValueAtTime(0.12, ctx.currentTime + 2);
+    var nb = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 3), ctx.sampleRate);
+    var nd = nb.getChannelData(0); for (var i = 0; i < nd.length; i++) nd[i] = Math.random() * 2 - 1;
+    var src = ctx.createBufferSource(); src.buffer = nb; src.loop = true;
+    var bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 500; bp.Q.value = 0.7;
+    var lfo = ctx.createOscillator(); lfo.frequency.value = 0.11;
+    var lg = ctx.createGain(); lg.gain.value = 260; lfo.connect(lg); lg.connect(bp.frequency); lfo.start();
+    src.connect(bp); bp.connect(out); src.start();
+    wind = { out: out, src: src, lfo: lfo };
+  }
+  function stopWind() {
+    if (!wind || !ctx) return;
+    var w = wind; wind = null;
+    w.out.gain.linearRampToValueAtTime(0.0001, ctx.currentTime + 1.4);
+    setTimeout(function () { try { w.src.stop(); w.lfo.stop(); } catch (e) {} }, 1600);
+  }
+
   window.SFX = {
     init: init, play: play,
     startAmbient: startAmbient, stopAmbient: stopAmbient,
@@ -414,6 +468,8 @@
     startEngine: startEngine, setThrottle: setThrottle, revTo: revTo, stopEngine: stopEngine,
     startChiptune: startChiptune, stopChiptune: stopChiptune,
     startRain: startRain, stopRain: stopRain,
+    startBrook: startBrook, stopBrook: stopBrook,
+    startWind: startWind, stopWind: stopWind,
     startClack: startClack, stopClack: stopClack,
     toggleMute: toggleMute, setMuted: setMuted,
     get muted() { return muted; },
