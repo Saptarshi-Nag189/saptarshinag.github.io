@@ -112,6 +112,9 @@ function makeApi(section){
 function go(i){
   if(i>=ACTS.length) return;
   try{ window.SFX && SFX.play('whoosh'); }catch(e){}
+  /* signal sweep wipe between acts */
+  var sw=document.getElementById('sweep');
+  if(sw && !REDUCED){ sw.classList.remove('go'); void sw.offsetWidth; sw.classList.add('go'); }
   /* retire old */
   frameFns=[];
   actDone=false; nextBtn=null;

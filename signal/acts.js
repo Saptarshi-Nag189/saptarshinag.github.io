@@ -65,7 +65,9 @@ function act0(stage, api){
   api.onFrame(function(){
     t+=0.05;
     var x=C.x,w=C.w,h=C.h,mid=h/2;
-    x.clearRect(0,0,w,h);
+    /* phosphor persistence: fade instead of clear for CRT afterglow */
+    x.fillStyle='rgba(2,8,14,0.32)';
+    x.fillRect(0,0,w,h);
     x.strokeStyle='rgba(141,227,255,0.06)';
     for(var gy=0;gy<h;gy+=24){x.beginPath();x.moveTo(0,gy);x.lineTo(w,gy);x.stroke();}
     x.beginPath();
@@ -378,7 +380,7 @@ function act3(stage, api){
   var C=setupCanvas(cv,300);
   /* synthetic observation: PHASE-BINNED. True period P0. */
   var P0=0.7168;
-  var NP=240;                 /* pulses observed */
+  var NP=120;                 /* pulses observed */
   var BIN=96;                 /* phase bins */
   /* pre-generate pulse arrival jitter/noise as per-sample stream approximated:
      we fold analytically: for trial period P, phase offset per pulse k is
@@ -393,15 +395,16 @@ function act3(stage, api){
       for(var b3=0;b3<BIN;b3++){
         var ph=b3/BIN;
         var d=ph-shift; d-=Math.round(d);   /* wrap */
-        var pulse=Math.exp(-(d*d)/(2*0.018*0.018))*1.0;
-        prof[b3]+=pulse*0.16 + noiseSeed[k2][b3]*1.0;
+        prof[b3]+=Math.exp(-(d*d)/(2*0.03*0.03))*0.30 + noiseSeed[k2][b3];
       }
     }
-    /* normalize + SNR = peak/std */
-    var mean=0; for(var b4=0;b4<BIN;b4++) mean+=prof[b4]/BIN;
-    var vr=0, mx=-1e9;
-    for(var b5=0;b5<BIN;b5++){ var v=prof[b5]-mean; vr+=v*v/BIN; if(v>mx)mx=v; }
-    return { prof:prof, mean:mean, snr: mx/Math.sqrt(vr+1e-9) };
+    /* off-pulse SNR — the real pulsar-astronomy metric: noise estimated away from the peak */
+    var mxi=0; for(var bb=1;bb<BIN;bb++) if(prof[bb]>prof[mxi]) mxi=bb;
+    var off=[], mean=0;
+    for(var b4=0;b4<BIN;b4++){ var dd=Math.abs(b4-mxi); dd=Math.min(dd,BIN-dd); if(dd>10) off.push(prof[b4]); }
+    for(var oi=0;oi<off.length;oi++) mean+=off[oi]/off.length;
+    var vr=0; for(var oj=0;oj<off.length;oj++){ var v=off[oj]-mean; vr+=v*v/off.length; }
+    return { prof:prof, mean:mean, snr:(prof[mxi]-mean)/Math.sqrt(vr+1e-9) };
   }
 
   var P=0.5, res=fold(P), t=0, locked=false;
@@ -411,8 +414,8 @@ function act3(stage, api){
   function setP(v){
     P=v; res=fold(P);
     pEl.textContent=P.toFixed(4)+' s';
-    snrEl.textContent='FOLDED SNR '+res.snr.toFixed(1)+(res.snr>3.4?'  ▲':'');
-    if(!locked && res.snr>5.2){
+    snrEl.textContent='FOLDED SNR '+res.snr.toFixed(1)+(res.snr>4?'  ▲ warmer':'');
+    if(!locked && res.snr>8.0){
       locked=true;
       api.sfx('lock'); api.sfx('success');
       snrEl.textContent='PULSAR DETECTED · SNR '+res.snr.toFixed(1);
@@ -458,7 +461,7 @@ function act3(stage, api){
       var shift=((kk*P0)%P)/P;
       for(var c=0;c<cols;c++){
         var ph=c/cols, d=ph-shift; d-=Math.round(d);
-        var sig=Math.exp(-(d*d)/(2*0.018*0.018))*0.9;
+        var sig=Math.exp(-(d*d)/(2*0.03*0.03))*0.9;
         var n=Math.abs(noiseSeed[kk][c])*0.55;
         var v=Math.min(1,n+sig*(0.35+0.65));
         var a=0.06+v*0.5;
@@ -476,7 +479,7 @@ function act3(stage, api){
     var mean=res.mean;
     for(var b6=0;b6<BIN;b6++){
       var vx=20+(b6/(BIN-1))*(w-40);
-      var vv=(res.prof[b6]-mean)/ (NP*0.16);       /* scale */
+      var vv=(res.prof[b6]-mean)/ (NP*0.30);       /* scale */
       var vy=py0+ph2*0.82 - vv*ph2*2.4;
       b6===0?x.moveTo(vx,vy):x.lineTo(vx,vy);
     }
@@ -484,6 +487,16 @@ function act3(stage, api){
     x.lineWidth=2; x.shadowColor=locked?'rgba(255,210,127,.9)':'rgba(141,227,255,.6)';
     x.shadowBlur=locked?16:6; x.stroke(); x.shadowBlur=0;
     if(locked){
+      /* starburst rings pulsing at the pulsar's own period */
+      var beat=(t*0.02*50 % (P0*3))/(P0*3);
+      var mxb=0; for(var mb=1;mb<BIN;mb++) if(res.prof[mb]>res.prof[mxb]) mxb=mb;
+      var sx2=20+(mxb/(BIN-1))*(w-40);
+      for(var ring=0;ring<3;ring++){
+        var rr=((t*40+ring*30)%90);
+        x.strokeStyle='rgba(255,210,127,'+Math.max(0,0.6-rr/90*0.6)+')';
+        x.lineWidth=1.5;
+        x.beginPath(); x.arc(sx2, py0+ph2*0.35, rr, 0, 7); x.stroke();
+      }
       x.fillStyle='rgba(255,210,127,'+(0.5+0.5*Math.sin(t*8))+')';
       x.font='700 11px "JetBrains Mono",monospace'; x.textAlign='center';
       x.fillText('♥ the star\'s heartbeat — every '+P0+' s', w/2, py0+14);
@@ -531,7 +544,7 @@ function act4(stage, api){
   function tryQuarantine(i){
     if(phase!=='attack'||contained) return;
     if(i===victim){
-      contained=true; phase='contained';
+      contained=true; phase='contained'; rig.classList.remove('alarm');
       api.sfx('lock'); api.sfx('success');
       stEl.textContent='THREAT CONTAINED · cam-01 ISOLATED';
       qbtn.disabled=true; qbtn.textContent='contained ✓';
@@ -562,7 +575,8 @@ function act4(stage, api){
     var x=C.x,w=C.w,h=C.h;
     x.clearRect(0,0,w,h);
     var hub={x:w/2,y:150};
-    if(phase==='calm'&&t>attackAt){ phase='attack'; stEl.textContent='⚠ ANOMALY — deauth storm on cam-01'; api.sfx('error'); qbtn.disabled=false; }
+    if(phase==='calm'&&t>attackAt){ phase='attack'; stEl.textContent='⚠ ANOMALY — deauth storm on cam-01'; api.sfx('error'); qbtn.disabled=false; rig.classList.add('alarm'); }
+    if(phase==='attack'&&!contained&&t%52===0){ api.sfx('beep'); }
     if(phase==='attack'&&!contained){ trust[victim]=Math.max(8,trust[victim]-0.35); }
     if(phase==='contained'){ trust[victim]=Math.min(100,trust[victim]+0.8); }
     /* edges + packets */

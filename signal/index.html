@@ -131,6 +131,20 @@
     padding:11px 18px;transition:.2s}
   .tx-links a:hover{background:rgba(141,227,255,.1);box-shadow:0 0 18px -4px var(--sig)}
 
+  /* act-transition signal sweep */
+  #sweep{position:fixed;top:0;bottom:0;left:-18%;width:16%;z-index:30;pointer-events:none;
+    background:linear-gradient(90deg,transparent,rgba(141,227,255,.16) 45%,rgba(141,227,255,.5) 50%,rgba(141,227,255,.16) 55%,transparent);
+    filter:blur(2px);opacity:0}
+  #sweep.go{animation:sweep .75s cubic-bezier(.3,0,.2,1)}
+  @keyframes sweep{0%{left:-18%;opacity:1}100%{left:104%;opacity:1}}
+
+  /* act 4 alarm vignette */
+  .rig.alarm{animation:alarmglow 1.1s ease-in-out infinite}
+  @keyframes alarmglow{
+    0%,100%{box-shadow:0 30px 90px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.06)}
+    50%{box-shadow:0 30px 90px rgba(0,0,0,.6), 0 0 55px -8px rgba(255,92,106,.65), inset 0 1px 0 rgba(255,255,255,.06)}
+  }
+
   @media (max-width:640px){
     #rail{left:8px} .act{padding:58px 10px 80px}
     .rig{padding:12px}
@@ -155,6 +169,7 @@
 
 <div id="rail" aria-hidden="true"></div>
 <div id="stage"></div>
+<div id="sweep" aria-hidden="true"></div>
 <div id="logToast"></div>
 
 <script src="acts.js"></script>
