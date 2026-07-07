@@ -391,7 +391,7 @@ function act3(stage, api){
   function fold(P){
     var prof=new Float32Array(BIN);
     for(var k2=0;k2<NP;k2++){
-      var shift=((k2*P0)%P)/P;             /* where the true pulse lands in trial phase */
+      var shift=(((k2*P0)%P)/P+0.5)%1;     /* pulse phase (referenced to centre for display) */
       for(var b3=0;b3<BIN;b3++){
         var ph=b3/BIN;
         var d=ph-shift; d-=Math.round(d);   /* wrap */
@@ -458,7 +458,7 @@ function act3(stage, api){
     var cw=(w-40)/cols, ch=(half-34)/rows;
     for(var r=0;r<rows;r++){
       var kk=Math.floor(r*NP/rows);
-      var shift=((kk*P0)%P)/P;
+      var shift=(((kk*P0)%P)/P+0.5)%1;
       for(var c=0;c<cols;c++){
         var ph=c/cols, d=ph-shift; d-=Math.round(d);
         var sig=Math.exp(-(d*d)/(2*0.03*0.03))*0.9;
