@@ -170,6 +170,28 @@
   #chatIn button{border:none;border-radius:50%;width:38px;height:38px;cursor:pointer;color:#fff;
     background:linear-gradient(135deg,#ff9ecb,#c78ad6);font-size:13px}
 
+  /* night fade for the goodnight ending */
+  #night{position:fixed;inset:0;z-index:38;pointer-events:none;background:#05060f;opacity:0;
+    transition:opacity 6s ease}
+  #night.on{opacity:0.93}
+  /* end card */
+  #endcard{position:fixed;left:50%;top:50%;transform:translate(-50%,-46%) scale(.97);z-index:39;
+    width:min(430px,90vw);text-align:center;background:rgba(16,14,28,.92);border:1px solid rgba(255,217,138,.25);
+    border-radius:24px;padding:34px 30px;opacity:0;pointer-events:none;
+    transition:opacity 1.6s ease,transform 1.6s ease;box-shadow:0 30px 90px rgba(0,0,0,.6)}
+  #endcard.show{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1)}
+  #endcard .ek{font-family:var(--mono);font-size:10px;letter-spacing:.3em;text-transform:uppercase;
+    color:#c9a86f;margin-bottom:12px}
+  #endcard h2{font-size:22px;font-weight:700;color:#f4e6d0;margin-bottom:10px}
+  #endcard p{font-size:13px;line-height:1.7;color:#a99cc2;margin-bottom:18px}
+  #endcard .elinks{display:flex;justify-content:center;gap:16px;flex-wrap:wrap;margin-bottom:20px}
+  #endcard .elinks a{color:#ffd98a;text-decoration:none;font-size:12.5px;font-weight:600}
+  #endcard .elinks a:hover{text-decoration:underline}
+  #endcard #restartBtn{font-family:var(--sans);font-weight:700;font-size:14px;color:#241d38;
+    background:linear-gradient(135deg,#ffd98a,#ff9ecb);border:none;border-radius:999px;
+    padding:12px 28px;cursor:pointer;box-shadow:0 10px 30px rgba(255,180,150,.3);transition:transform .15s}
+  #endcard #restartBtn:hover{transform:translateY(-2px) scale(1.03)}
+
   /* smooth white bloom for domain transitions */
   #bloom{position:fixed;inset:0;z-index:40;pointer-events:none;background:#fff;opacity:0;
     transition:opacity .75s cubic-bezier(.4,0,.2,1)}
@@ -190,6 +212,8 @@
   <div class="orb"></div>
   <p id="veilMsg">the fairy is waking…</p>
   <button class="start" id="startBtn"><i class="fa-solid fa-seedling"></i>&nbsp; begin the wander</button>
+  <p style="margin-top:18px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:#a394bd">
+    ◀ ▶ walk &nbsp;·&nbsp; ▲ hop / enter &nbsp;·&nbsp; Esc leave a domain &nbsp;·&nbsp; T talk to the fairy</p>
 </div>
 
 <div id="chip">the <b>wander</b> · saptarshi nag</div>
@@ -222,6 +246,20 @@
   <button class="pbtn" id="padL" aria-label="Walk back"><i class="fa-solid fa-chevron-left"></i></button>
   <button class="pbtn up" id="padU" aria-label="Jump / enter"><i class="fa-solid fa-chevron-up"></i></button>
   <button class="pbtn" id="padR" aria-label="Walk on"><i class="fa-solid fa-chevron-right"></i></button>
+</div>
+
+<div id="night"></div>
+<div id="endcard">
+  <div class="ek">the wander is over — for today</div>
+  <h2>He'll leave a light on for you.</h2>
+  <p>You walked his story, sailed his research, flew his dreams and ran his machines.<br>The real one is one message away.</p>
+  <div class="elinks">
+    <a href="mailto:saptarshinag18@gmail.com"><i class="fa-solid fa-envelope"></i> email</a>
+    <a href="https://www.linkedin.com/in/saptarshi18" target="_blank" rel="noopener"><i class="fa-brands fa-linkedin"></i> linkedin</a>
+    <a href="https://github.com/Saptarshi-Nag189" target="_blank" rel="noopener"><i class="fa-brands fa-github"></i> github</a>
+    <a href="../saptarshi_resume_linkedin_2026.pdf" target="_blank" rel="noopener"><i class="fa-solid fa-file-arrow-down"></i> cv</a>
+  </div>
+  <button id="restartBtn"><i class="fa-solid fa-rotate-left"></i>&nbsp; wander again</button>
 </div>
 
 <div id="bloom"></div>
