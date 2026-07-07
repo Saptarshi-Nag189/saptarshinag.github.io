@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>THE WANDER — Saptarshi Nag</title>
+<meta name="description" content="A dreamlike exploration of Saptarshi Nag's story — walk, sail and fly through it, with his digital twin as your companion.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<script src="../demos/_shared/sfx.js"></script>
+<style>
+  :root{
+    --ink:#3c3552; --soft:#7a7194; --peach:#ffb997; --rose:#ff9ecb; --sky:#8fd8ff;
+    --gold:#ffd98a; --mint:#9defc9;
+    --sans:'Quicksand',system-ui,sans-serif;
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;overflow:hidden;background:#ffeef7;
+    font-family:var(--sans);-webkit-font-smoothing:antialiased;color:var(--ink)}
+  #view{position:fixed;inset:0;display:block;touch-action:none}
+
+  /* soft vignette + dream grain */
+  #dream{position:fixed;inset:0;z-index:3;pointer-events:none;
+    background:radial-gradient(ellipse 80% 74% at 50% 46%, transparent 55%, rgba(120,80,160,.14) 100%)}
+
+  /* loading veil */
+  #veil{position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;background:linear-gradient(180deg,#ffe9f4,#e8f4ff);transition:opacity 1s}
+  #veil.gone{opacity:0;pointer-events:none}
+  #veil .orb{width:52px;height:52px;border-radius:50%;
+    background:radial-gradient(circle at 35% 30%,#fff,#ffd98a 55%,#ff9ecb);
+    box-shadow:0 0 50px rgba(255,180,150,.8);animation:breathe 1.6s ease-in-out infinite}
+  @keyframes breathe{50%{transform:scale(1.15)}}
+  #veil p{margin-top:20px;font-size:15px;color:var(--soft);letter-spacing:.06em}
+  #veil .start{margin-top:26px;font-family:var(--sans);font-weight:700;font-size:15px;
+    color:#5c4a75;background:#fff;border:none;border-radius:999px;padding:14px 34px;cursor:pointer;
+    box-shadow:0 10px 30px rgba(150,100,180,.25);transition:transform .15s;display:none}
+  #veil .start:hover{transform:translateY(-2px) scale(1.03)}
+
+  /* title chip */
+  #chip{position:fixed;top:14px;left:16px;z-index:20;font-family:var(--mono);font-size:11px;
+    letter-spacing:.22em;text-transform:uppercase;color:#8a7fa8;
+    background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.8);border-radius:999px;
+    padding:8px 16px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+  #chip b{color:#6b5b8e}
+  #exitLink{position:fixed;top:14px;right:16px;z-index:20;font-family:var(--mono);font-size:10.5px;
+    letter-spacing:.14em;text-transform:uppercase;color:#8a7fa8;text-decoration:none;
+    background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.8);border-radius:999px;
+    padding:8px 14px;backdrop-filter:blur(8px);transition:.2s}
+  #exitLink:hover{color:#5c4a75;transform:translateY(-1px)}
+  #povBtn{position:fixed;top:56px;right:16px;z-index:20;font-family:var(--mono);font-size:10.5px;
+    letter-spacing:.1em;color:#8a7fa8;background:rgba(255,255,255,.55);
+    border:1px solid rgba(255,255,255,.8);border-radius:999px;padding:8px 14px;cursor:pointer;
+    backdrop-filter:blur(8px);transition:.2s}
+  #povBtn:hover{color:#5c4a75}
+
+  /* biome toast */
+  #toast{position:fixed;top:12%;left:50%;transform:translateX(-50%);z-index:15;text-align:center;
+    pointer-events:none;opacity:0;transition:opacity 1.2s}
+  #toast.show{opacity:1}
+  #toast .t1{font-size:clamp(22px,3.6vw,36px);font-weight:700;color:#fff;
+    text-shadow:0 2px 26px rgba(120,80,160,.55);letter-spacing:.04em}
+  #toast .t2{margin-top:4px;font-family:var(--mono);font-size:11px;letter-spacing:.3em;
+    text-transform:uppercase;color:rgba(255,255,255,.92);text-shadow:0 1px 12px rgba(120,80,160,.6)}
+
+  /* interaction prompt */
+  #prompt{position:fixed;left:50%;bottom:26%;transform:translateX(-50%) translateY(8px);z-index:15;
+    font-weight:600;font-size:14px;color:#5c4a75;background:rgba(255,255,255,.85);
+    border-radius:999px;padding:10px 22px;box-shadow:0 8px 28px rgba(150,100,180,.3);
+    opacity:0;transition:.35s;pointer-events:none}
+  #prompt.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  #prompt b{color:#e75f9c}
+
+  /* fairy bubble */
+  #bubble{position:fixed;z-index:16;max-width:min(320px,72vw);pointer-events:none;
+    background:rgba(255,255,255,.92);border-radius:16px 16px 16px 4px;
+    padding:11px 15px;font-size:13.5px;line-height:1.5;color:#4a4064;
+    box-shadow:0 10px 34px rgba(150,100,180,.3);opacity:0;transform:translateY(8px) scale(.96);
+    transition:opacity .4s,transform .4s}
+  #bubble.show{opacity:1;transform:none}
+  #bubble .who{font-family:var(--mono);font-size:9px;letter-spacing:.22em;text-transform:uppercase;
+    color:#c78ad6;margin-bottom:3px}
+
+  /* on-screen controls */
+  #pad{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:20;
+    display:flex;gap:14px;align-items:center}
+  .pbtn{width:60px;height:60px;border-radius:50%;border:1px solid rgba(255,255,255,.9);
+    background:rgba(255,255,255,.55);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+    color:#6b5b8e;font-size:20px;cursor:pointer;user-select:none;-webkit-user-select:none;
+    box-shadow:0 8px 24px rgba(150,100,180,.22);transition:transform .12s,background .12s;
+    display:flex;align-items:center;justify-content:center;touch-action:none}
+  .pbtn:active,.pbtn.on{transform:scale(.92);background:rgba(255,255,255,.85)}
+  .pbtn.up{width:52px;height:52px;font-size:17px}
+
+  /* domain content plate */
+  #plate{position:fixed;z-index:18;width:min(430px,88vw);max-height:56vh;overflow-y:auto;
+    background:rgba(255,255,255,.94);border-radius:20px;padding:22px 24px;
+    box-shadow:0 18px 60px rgba(120,80,160,.35);opacity:0;transform:translateY(14px) scale(.97);
+    transition:opacity .45s,transform .45s;pointer-events:none}
+  #plate.show{opacity:1;transform:none;pointer-events:auto}
+  #plate::-webkit-scrollbar{width:7px}
+  #plate::-webkit-scrollbar-thumb{background:rgba(200,140,214,.4);border-radius:5px}
+  #plate .pk{font-family:var(--mono);font-size:9.5px;letter-spacing:.24em;text-transform:uppercase;
+    color:#c78ad6;margin-bottom:5px}
+  #plate h3{font-size:19px;font-weight:700;color:#3c3552;margin-bottom:9px}
+  #plate .pb{font-size:13.5px;line-height:1.6;color:#5a5175}
+  #plate .pb p{margin-bottom:10px}
+  #plate .pb ul{list-style:none;margin:4px 0 8px}
+  #plate .pb ul li{position:relative;padding:4px 0 4px 20px}
+  #plate .pb ul li::before{content:"✿";position:absolute;left:0;top:4px;color:#ff9ecb;font-size:11px}
+  #plate .pb b{color:#3c3552}
+  #plate .tags{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 10px}
+  #plate .tag{font-family:var(--mono);font-size:10px;color:#7a5f9e;background:rgba(199,138,214,.12);
+    border:1px solid rgba(199,138,214,.3);border-radius:6px;padding:3px 8px}
+  #plate .mgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:9px;margin:8px 0 4px}
+  #plate .mtile{background:rgba(143,216,255,.14);border:1px solid rgba(143,216,255,.4);border-radius:12px;padding:10px}
+  #plate .mtile .v{font-family:var(--mono);font-size:17px;font-weight:700;color:#3d7fa8}
+  #plate .mtile .l{font-size:10px;color:#7a8ca0;margin-top:3px;line-height:1.3}
+  #plate .links a{display:inline-flex;align-items:center;gap:8px;color:#e75f9c;text-decoration:none;
+    font-weight:600;font-size:13.5px;margin:4px 16px 4px 0}
+  #plate .links a:hover{text-decoration:underline}
+
+  /* demo console overlay (Atelier) */
+  #console{position:fixed;inset:auto 0 0 0;z-index:25;max-height:74vh;
+    background:rgba(255,255,255,.97);border-radius:26px 26px 0 0;
+    box-shadow:0 -20px 70px rgba(120,80,160,.4);transform:translateY(105%);
+    transition:transform .6s cubic-bezier(.2,.85,.25,1);padding:22px min(4vw,30px) 26px;overflow-y:auto}
+  #console.up{transform:none}
+  #console .chead{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+  #console .ct{font-weight:700;font-size:17px;color:#3c3552}
+  #console .ct .ck{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.22em;
+    text-transform:uppercase;color:#c78ad6;margin-bottom:2px}
+  #console .cx{width:34px;height:34px;border-radius:10px;border:1px solid rgba(120,80,160,.25);
+    background:rgba(120,80,160,.06);color:#6b5b8e;cursor:pointer;font-size:13px}
+  #console canvas{display:block;width:100%;border-radius:14px;background:#241f38}
+  #console .crow{display:flex;gap:12px;align-items:center;justify-content:center;margin-top:12px;flex-wrap:wrap}
+  #console .cbtn{font-family:var(--sans);font-weight:700;font-size:13px;color:#fff;
+    background:linear-gradient(135deg,#ff9ecb,#c78ad6);border:none;border-radius:999px;
+    padding:11px 22px;cursor:pointer;box-shadow:0 8px 22px rgba(199,138,214,.4);transition:transform .15s}
+  #console .cbtn:hover{transform:translateY(-2px)}
+  #console .cbtn:disabled{opacity:.4;transform:none;cursor:default}
+  #console .cslider{-webkit-appearance:none;width:min(380px,64vw);height:8px;border-radius:6px;
+    background:linear-gradient(90deg,rgba(199,138,214,.25),rgba(255,158,203,.5));cursor:ew-resize}
+  #console .cslider::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;
+    background:radial-gradient(circle at 35% 30%,#fff,#ff9ecb 65%);box-shadow:0 0 14px rgba(255,158,203,.8);cursor:ew-resize}
+  #console .cread{font-family:var(--mono);font-size:11.5px;color:#7a7194;min-width:110px;text-align:center}
+  #console .cread b{color:#e75f9c;font-size:14px}
+  #console .cstamp{font-family:var(--mono);font-size:10px;color:#8a6d3b;background:rgba(255,217,138,.25);
+    border:1px dashed rgba(200,160,80,.5);border-radius:8px;padding:5px 10px;margin:3px}
+
+  /* twin chat drawer */
+  #chat{position:fixed;right:14px;bottom:92px;z-index:24;width:min(340px,88vw);
+    background:rgba(255,255,255,.97);border-radius:20px;box-shadow:0 16px 56px rgba(120,80,160,.4);
+    transform:translateY(12px);opacity:0;pointer-events:none;transition:.4s;overflow:hidden}
+  #chat.open{transform:none;opacity:1;pointer-events:auto}
+  #chat .chd{display:flex;align-items:center;gap:9px;padding:13px 16px;background:linear-gradient(135deg,#ffe9f4,#e8f0ff)}
+  #chat .chd .dot{width:10px;height:10px;border-radius:50%;background:#9defc9;box-shadow:0 0 8px #9defc9}
+  #chat .chd b{font-size:13.5px;color:#4a4064}
+  #chat .chd span{font-family:var(--mono);font-size:9px;color:#8a7fa8;letter-spacing:.12em}
+  #chatLog{max-height:230px;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+  #chatLog .m{max-width:86%;font-size:12.5px;line-height:1.5;padding:8px 12px;border-radius:14px}
+  #chatLog .m.you{align-self:flex-end;background:#e8f0ff;color:#3d5075;border-radius:14px 14px 4px 14px}
+  #chatLog .m.twin{align-self:flex-start;background:#ffeef7;color:#4a4064;border-radius:14px 14px 14px 4px}
+  #chatIn{display:flex;gap:8px;padding:10px 12px;border-top:1px solid rgba(120,80,160,.1)}
+  #chatIn input{flex:1;font-family:var(--sans);font-size:13px;color:#3c3552;border:1px solid rgba(120,80,160,.2);
+    border-radius:999px;padding:9px 14px;outline:none;background:#fff}
+  #chatIn button{border:none;border-radius:50%;width:38px;height:38px;cursor:pointer;color:#fff;
+    background:linear-gradient(135deg,#ff9ecb,#c78ad6);font-size:13px}
+
+  /* smooth white bloom for domain transitions */
+  #bloom{position:fixed;inset:0;z-index:40;pointer-events:none;background:#fff;opacity:0;
+    transition:opacity .75s cubic-bezier(.4,0,.2,1)}
+  #bloom.on{opacity:1}
+
+  @media (max-width:640px){ .pbtn{width:54px;height:54px} #chat{right:8px} }
+  @media (prefers-reduced-motion: reduce){
+    #bloom{transition:opacity .25s} #plate,#bubble,#prompt{transition:opacity .2s}
+  }
+</style>
+</head>
+<body>
+
+<canvas id="view"></canvas>
+<div id="dream"></div>
+
+<div id="veil">
+  <div class="orb"></div>
+  <p id="veilMsg">the fairy is waking…</p>
+  <button class="start" id="startBtn"><i class="fa-solid fa-seedling"></i>&nbsp; begin the wander</button>
+</div>
+
+<div id="chip">the <b>wander</b> · saptarshi nag</div>
+<a id="exitLink" href="../demos/index.html"><i class="fa-solid fa-door-open"></i> leave</a>
+<button id="povBtn"><i class="fa-solid fa-video"></i> 3rd person</button>
+
+<div id="toast"><div class="t1" id="toastT"></div><div class="t2" id="toastS"></div></div>
+<div id="prompt"></div>
+<div id="bubble"><div class="who">saptarshi ai</div><span id="bubbleTx"></span></div>
+<div id="plate"></div>
+
+<div id="console">
+  <div class="chead">
+    <div class="ct"><span class="ck" id="conKick"></span><span id="conTitle"></span></div>
+    <button class="cx" id="conClose"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+  <div id="conBody"></div>
+</div>
+
+<div id="chat">
+  <div class="chd"><span class="dot"></span><div><b>Saptarshi AI</b><br><span>digital twin · local brain</span></div></div>
+  <div id="chatLog"></div>
+  <div id="chatIn">
+    <input id="chatQ" type="text" placeholder="ask me anything about him…" maxlength="140">
+    <button id="chatGo"><i class="fa-solid fa-paper-plane"></i></button>
+  </div>
+</div>
+
+<div id="pad">
+  <button class="pbtn" id="padL" aria-label="Walk back"><i class="fa-solid fa-chevron-left"></i></button>
+  <button class="pbtn up" id="padU" aria-label="Jump / enter"><i class="fa-solid fa-chevron-up"></i></button>
+  <button class="pbtn" id="padR" aria-label="Walk on"><i class="fa-solid fa-chevron-right"></i></button>
+</div>
+
+<div id="bloom"></div>
+
+<script type="module" src="game.js"></script>
+</body>
+</html>

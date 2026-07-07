@@ -1,0 +1,585 @@
+/* ==========================================================================
+   THE WANDER — game.js  (engine + overworld)
+   One spline through seven biomes. A cloaked wanderer walks, sails, flies.
+   Everything lerps — nothing cuts. Domains live in domains.js.
+   ========================================================================== */
+import * as THREE from './lib/three.module.js';
+import { FAIRY } from './twin-data.js';
+import { initDomains } from './domains.js';
+
+const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const sfx = n => { try{ window.SFX && SFX.play(n); }catch(e){} };
+try{ window.SFX && SFX.init({ accent:'#ff9ecb', ambient:false }); }catch(e){}
+
+/* ---------------- renderer / scene ---------------- */
+const canvas = document.getElementById('view');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias:true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+const scene = new THREE.Scene();
+scene.fog = new THREE.Fog(0xffd9ec, 40, 170);
+const camera = new THREE.PerspectiveCamera(58, innerWidth/innerHeight, 0.1, 600);
+
+const hemi = new THREE.HemisphereLight(0xfff2fa, 0xd7b8ff, 1.15); scene.add(hemi);
+const sun = new THREE.DirectionalLight(0xfff0d8, 1.6); sun.position.set(40, 70, 20); scene.add(sun);
+
+/* ---------------- the path ---------------- */
+/* biome ranges over t 0..1 */
+export const BIOMES = [
+  { id:'glade',  t0:0.00, t1:0.075, name:'Dawn Glade',        subtitle:'where it begins',
+    sky:0xffd9ec, fog:0xffd9ec, ground:0xa8e6b8, far:170 },
+  { id:'forest', t0:0.075,t1:0.235, name:'Grove of Foundations', subtitle:'education',
+    sky:0xcfeecf, fog:0xd8f2d8, ground:0x8fd89a, far:150 },
+  { id:'river',  t0:0.235,t1:0.40,  name:'The Listening River', subtitle:'research years · GMRT & NCRA',
+    sky:0xbfeef2, fog:0xc9f0f2, ground:0x9adfc9, far:170 },
+  { id:'desert', t0:0.40, t1:0.535, name:'Oasis of Craft',     subtitle:'skills',
+    sky:0xffe2b8, fog:0xffe6c2, ground:0xf2cf9a, far:190 },
+  { id:'snow',   t0:0.535,t1:0.665, name:'The Quiet Archive',  subtitle:'publications',
+    sky:0xe6e9ff, fog:0xeceeff, ground:0xf4f4ff, far:150 },
+  { id:'sky',    t0:0.665,t1:0.82,  name:"The Dreamer's Sky",  subtitle:'about him · fly',
+    sky:0xffc9d9, fog:0xffd4e2, ground:0xffffff, far:260 },
+  { id:'city',   t0:0.82, t1:0.935, name:'The Atelier',        subtitle:'projects & c-dac',
+    sky:0xd8ccff, fog:0xe2d8ff, ground:0xf0ecff, far:180 },
+  { id:'meadow', t0:0.935,t1:1.00,  name:"Journey's End",      subtitle:'contact',
+    sky:0x9fb8e8, fog:0xb0c4ee, ground:0x9fd8a8, far:160 }
+];
+
+const PTS = [
+  [0,2,0],[24,2,-8],[46,2,6],[70,2.5,-10],           /* glade → forest winding */
+  [96,3,4],[120,2,14],[142,1,2],
+  [164,0.4,-12],[188,0.4,-4],[212,0.4,10],[234,0.4,2],/* river at water level  */
+  [258,3,-10],[282,6,-2],[306,5,10],[328,7,0],        /* desert climbs dunes    */
+  [350,10,-10],[372,13,-2],[394,12,8],                /* snow high路            */
+  [416,18,0],[436,30,-10],[456,44,4],[476,56,-6],[496,62,4], /* ascend to sky   */
+  [518,40,-6],[538,22,4],[558,12,-6],[578,9,2],       /* glide down to city     */
+  [600,4,-6],[622,3,4],[642,3,0]                      /* meadow                 */
+];
+const curve = new THREE.CatmullRomCurve3(PTS.map(p=>new THREE.Vector3(p[0],p[1],p[2])), false, 'catmullrom', 0.5);
+const CURVE_LEN = curve.getLength();
+
+export function biomeAt(t){
+  for(const b of BIOMES) if(t>=b.t0 && t<=b.t1) return b;
+  return BIOMES[BIOMES.length-1];
+}
+/* smooth palette sample: blend biome colours near boundaries (no jitter) */
+const _cA=new THREE.Color(), _cB=new THREE.Color();
+function blendAttr(t, attr){
+  const b = biomeAt(t);
+  const i = BIOMES.indexOf(b);
+  const BLEND = 0.028;
+  _cA.set(b[attr]);
+  if(i<BIOMES.length-1 && b.t1-t < BLEND){
+    _cB.set(BIOMES[i+1][attr]);
+    _cA.lerp(_cB, 1-(b.t1-t)/BLEND*0.5-0.5+0.5); /* 0→0.5 into boundary */
+    _cA.lerp(_cB, 0); /* noop guard */
+    const k=(1-(b.t1-t)/BLEND)*0.5; _cA.set(b[attr]).lerp(_cB,k);
+  } else if(i>0 && t-b.t0 < BLEND){
+    _cB.set(BIOMES[i-1][attr]);
+    const k=(1-(t-b.t0)/BLEND)*0.5; _cA.set(b[attr]).lerp(_cB,k);
+  }
+  return _cA;
+}
+
+/* ---------------- terrain ribbon ---------------- */
+(function buildRibbon(){
+  const SEG=560, W=30;
+  const pos=[], col=[], idx=[];
+  const p=new THREE.Vector3(), tan=new THREE.Vector3(), nrm=new THREE.Vector3(), up=new THREE.Vector3(0,1,0);
+  for(let i=0;i<=SEG;i++){
+    const t=i/SEG;
+    curve.getPointAt(t,p); curve.getTangentAt(t,tan);
+    nrm.crossVectors(tan,up).normalize();
+    const b=biomeAt(t);
+    const inSky = b.id==='sky';
+    const c = blendAttr(t,'ground').clone();
+    const drop = inSky ? -400 : -0.55;           /* sky biome: ribbon far below (invisible) */
+    for(const s of [-1,1]){
+      pos.push(p.x+nrm.x*W/2*s, p.y+drop - (inSky?0:0.0), p.z+nrm.z*W/2*s);
+      col.push(c.r,c.g,c.b);
+    }
+    if(i<SEG){ const a=i*2; idx.push(a,a+1,a+2, a+1,a+3,a+2); }
+  }
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos,3));
+  g.setAttribute('color', new THREE.Float32BufferAttribute(col,3));
+  g.setIndex(idx); g.computeVertexNormals();
+  const m=new THREE.MeshLambertMaterial({ vertexColors:true });
+  scene.add(new THREE.Mesh(g,m));
+})();
+
+/* wide soft under-plane per land biome for horizon fill */
+(function underPlanes(){
+  BIOMES.forEach(b=>{
+    if(b.id==='sky') return;
+    const mid=(b.t0+b.t1)/2, p=curve.getPointAt(mid);
+    const len=(b.t1-b.t0)*CURVE_LEN+80;
+    const g=new THREE.CircleGeometry(len*0.62, 26);
+    const m=new THREE.MeshLambertMaterial({ color:new THREE.Color(b.ground).multiplyScalar(0.93) });
+    const mesh=new THREE.Mesh(g,m);
+    mesh.rotation.x=-Math.PI/2; mesh.position.set(p.x,(b.id==='river'?-0.9:-0.8)+p.y*0, p.z);
+    mesh.position.y = b.id==='river' ? -0.9 : -0.8;
+    scene.add(mesh);
+  });
+})();
+
+/* ---------------- water (river) ---------------- */
+let waterMesh=null;
+(function water(){
+  const b=BIOMES.find(x=>x.id==='river');
+  const p0=curve.getPointAt(b.t0), p1=curve.getPointAt(b.t1);
+  const cx=(p0.x+p1.x)/2, cz=(p0.z+p1.z)/2;
+  const g=new THREE.PlaneGeometry(Math.abs(p1.x-p0.x)+120, 130, 60, 24);
+  const m=new THREE.MeshLambertMaterial({ color:0x6fd8e8, transparent:true, opacity:0.82 });
+  waterMesh=new THREE.Mesh(g,m);
+  waterMesh.rotation.x=-Math.PI/2;
+  waterMesh.position.set(cx,-0.35,cz);
+  scene.add(waterMesh);
+  waterMesh.userData.base=g.attributes.position.array.slice();
+})();
+
+/* ---------------- props ---------------- */
+const rand=(a,b)=>a+Math.random()*(b-a);
+function scatter(t0,t1,count,builder){
+  const p=new THREE.Vector3(), tan=new THREE.Vector3(), nrm=new THREE.Vector3(), up=new THREE.Vector3(0,1,0);
+  for(let i=0;i<count;i++){
+    const t=rand(t0,t1);
+    curve.getPointAt(t,p); curve.getTangentAt(t,tan);
+    nrm.crossVectors(tan,up).normalize();
+    const side=Math.random()<0.5?-1:1, d=rand(9,26)*side;
+    const o=builder(i);
+    o.position.set(p.x+nrm.x*d, p.y-0.5, p.z+nrm.z*d);
+    o.rotation.y=Math.random()*Math.PI*2;
+    scene.add(o);
+  }
+}
+function tree(c1,c2){
+  const g=new THREE.Group();
+  const tr=new THREE.Mesh(new THREE.CylinderGeometry(0.22,0.34,rand(1.6,2.6),6), new THREE.MeshLambertMaterial({color:0xb08a6a}));
+  tr.position.y=1; g.add(tr);
+  const crown=new THREE.Mesh(new THREE.IcosahedronGeometry(rand(1.1,2.1),0),
+    new THREE.MeshLambertMaterial({color:Math.random()<0.34?c2:c1, flatShading:true}));
+  crown.position.y=tr.geometry.parameters.height+0.9; g.add(crown);
+  const s=rand(0.8,1.5); g.scale.setScalar(s);
+  return g;
+}
+const gladeT=BIOMES[0], forestT=BIOMES[1], riverT=BIOMES[2], desertT=BIOMES[3],
+      snowT=BIOMES[4], skyT=BIOMES[5], cityT=BIOMES[6], meadowT=BIOMES[7];
+scatter(gladeT.t0,gladeT.t1,26,()=>tree(0x8fd89a,0xffb0cf));
+scatter(forestT.t0,forestT.t1,110,()=>tree(0x6fca7f,0xff9ecb));
+scatter(riverT.t0,riverT.t1,34,()=>{ /* reeds + stones */
+  if(Math.random()<0.5){
+    const r=new THREE.Mesh(new THREE.ConeGeometry(0.09,rand(1,1.9),5), new THREE.MeshLambertMaterial({color:0x7fcf9f}));
+    r.position.y=0.6; const g=new THREE.Group(); g.add(r); return g;
+  }
+  return new THREE.Mesh(new THREE.IcosahedronGeometry(rand(0.4,1),0), new THREE.MeshLambertMaterial({color:0xcfd8dc,flatShading:true}));
+});
+scatter(desertT.t0,desertT.t1,60,()=>{
+  if(Math.random()<0.55){ /* cactus */
+    const g=new THREE.Group();
+    const m=new THREE.MeshLambertMaterial({color:0x7fbf7f});
+    const b1=new THREE.Mesh(new THREE.CapsuleGeometry(0.3,rand(1,2),4,8),m); b1.position.y=1; g.add(b1);
+    const arm=new THREE.Mesh(new THREE.CapsuleGeometry(0.18,0.7,4,8),m);
+    arm.position.set(0.45,1.3,0); arm.rotation.z=-0.7; g.add(arm);
+    return g;
+  }
+  const dune=new THREE.Mesh(new THREE.SphereGeometry(rand(2,5),8,6), new THREE.MeshLambertMaterial({color:0xf2d4a0}));
+  dune.scale.y=0.28; return dune;
+});
+scatter(snowT.t0,snowT.t1,70,()=>{
+  const g=new THREE.Group();
+  const m=new THREE.MeshLambertMaterial({color:Math.random()<0.4?0xdfe8f4:0xa8d8c8,flatShading:true});
+  const c=new THREE.Mesh(new THREE.ConeGeometry(rand(0.7,1.4),rand(2,3.6),7),m);
+  c.position.y=1.4; g.add(c);
+  const cap=new THREE.Mesh(new THREE.ConeGeometry(0.5,0.8,7),new THREE.MeshLambertMaterial({color:0xffffff}));
+  cap.position.y=2.8; g.add(cap);
+  return g;
+});
+/* sky islands + clouds */
+(function skyProps(){
+  const p=new THREE.Vector3();
+  for(let i=0;i<26;i++){
+    const t=rand(skyT.t0,skyT.t1);
+    curve.getPointAt(t,p);
+    const cl=new THREE.Mesh(new THREE.SphereGeometry(rand(2.5,7),8,6),
+      new THREE.MeshLambertMaterial({color:0xffffff,transparent:true,opacity:0.85}));
+    cl.scale.y=0.42;
+    cl.position.set(p.x+rand(-40,40), p.y+rand(-16,10), p.z+rand(-40,40));
+    scene.add(cl);
+  }
+  for(let i=0;i<6;i++){
+    const t=rand(skyT.t0+0.02,skyT.t1-0.02);
+    curve.getPointAt(t,p);
+    const isle=new THREE.Group();
+    const top=new THREE.Mesh(new THREE.CylinderGeometry(rand(3,5),1.2,2.4,7),
+      new THREE.MeshLambertMaterial({color:0x9fd8a8,flatShading:true}));
+    isle.add(top);
+    const t2=tree(0x8fd89a,0xffb0cf); t2.position.y=1.2; isle.add(t2);
+    isle.position.set(p.x+rand(-26,26), p.y+rand(-10,8), p.z+rand(-26,26));
+    scene.add(isle);
+  }
+})();
+/* city towers */
+scatter(cityT.t0,cityT.t1,44,()=>{
+  const h=rand(4,16);
+  const tower=new THREE.Mesh(new THREE.BoxGeometry(rand(1.6,3.4),h,rand(1.6,3.4)),
+    new THREE.MeshLambertMaterial({color:[0xffffff,0xf4eaff,0xe8f4ff][Math.floor(Math.random()*3)]}));
+  tower.position.y=h/2-0.5;
+  const glow=new THREE.Mesh(new THREE.BoxGeometry(0.4,h*0.7,0.12),
+    new THREE.MeshBasicMaterial({color:[0xff9ecb,0x8fd8ff,0xffd98a][Math.floor(Math.random()*3)]}));
+  glow.position.set(0,h*0.1,tower.geometry.parameters.depth/2+0.07);
+  tower.add(glow);
+  return tower;
+});
+scatter(meadowT.t0,meadowT.t1,60,()=>{
+  const f=new THREE.Mesh(new THREE.SphereGeometry(0.16,6,5),
+    new THREE.MeshBasicMaterial({color:[0xff9ecb,0xffd98a,0x9defc9,0x8fd8ff][Math.floor(Math.random()*4)]}));
+  const g=new THREE.Group();
+  const st=new THREE.Mesh(new THREE.CylinderGeometry(0.03,0.03,0.5),new THREE.MeshLambertMaterial({color:0x7fcf8f}));
+  st.position.y=0.25; f.position.y=0.55; g.add(st); g.add(f);
+  return g;
+});
+/* fireflies (meadow + glade sparkle) */
+const flies=(function(){
+  const N=140, pos=new Float32Array(N*3), ph=new Float32Array(N);
+  const p=new THREE.Vector3();
+  for(let i=0;i<N;i++){
+    const t=Math.random()<0.5?rand(meadowT.t0,meadowT.t1):rand(0,0.06);
+    curve.getPointAt(t,p);
+    pos[i*3]=p.x+rand(-20,20); pos[i*3+1]=p.y+rand(0.5,4); pos[i*3+2]=p.z+rand(-20,20);
+    ph[i]=Math.random()*7;
+  }
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
+  const m=new THREE.PointsMaterial({color:0xffe9a8,size:0.34,transparent:true,opacity:0.9,sizeAttenuation:true});
+  const pts=new THREE.Points(g,m); scene.add(pts);
+  return {pts,ph};
+})();
+
+/* ---------------- character ---------------- */
+export const wanderer=(function(){
+  const g=new THREE.Group();
+  const cape=new THREE.Mesh(new THREE.ConeGeometry(0.62,1.5,9,1,true),
+    new THREE.MeshLambertMaterial({color:0xff9ecb,side:THREE.DoubleSide,flatShading:true}));
+  cape.position.y=0.85; g.add(cape);
+  const head=new THREE.Mesh(new THREE.SphereGeometry(0.34,12,10),
+    new THREE.MeshLambertMaterial({color:0xfff2e2}));
+  head.position.y=1.78; g.add(head);
+  const hood=new THREE.Mesh(new THREE.SphereGeometry(0.4,10,8,0,Math.PI*2,0,Math.PI*0.62),
+    new THREE.MeshLambertMaterial({color:0xe75f9c,flatShading:true}));
+  hood.position.y=1.86; g.add(hood);
+  const glow=new THREE.PointLight(0xffd98a,6,7); glow.position.y=1.2; g.add(glow);
+  /* wings (hidden until sky) */
+  const wingM=new THREE.MeshLambertMaterial({color:0xffd0e4,transparent:true,opacity:0.85,side:THREE.DoubleSide});
+  const wL=new THREE.Mesh(new THREE.ConeGeometry(0.5,1.6,3),wingM);
+  wL.rotation.z=Math.PI/2; wL.position.set(-0.75,1.25,0); wL.scale.set(1,1,0.24); wL.visible=false;
+  const wR=wL.clone(); wR.rotation.z=-Math.PI/2; wR.position.x=0.75; g.add(wL); g.add(wR);
+  /* boat (hidden until river) */
+  const boat=new THREE.Group();
+  const hull=new THREE.Mesh(new THREE.CylinderGeometry(0.9,0.55,0.6,8,1),
+    new THREE.MeshLambertMaterial({color:0xc78a5f,flatShading:true}));
+  hull.scale.set(1.6,1,0.9); hull.position.y=0.28; boat.add(hull);
+  const rim=new THREE.Mesh(new THREE.TorusGeometry(0.95,0.09,6,10),
+    new THREE.MeshLambertMaterial({color:0xa86f47}));
+  rim.rotation.x=Math.PI/2; rim.position.y=0.58; rim.scale.set(1.6,0.9,1); boat.add(rim);
+  const lamp=new THREE.Mesh(new THREE.SphereGeometry(0.14,8,6),new THREE.MeshBasicMaterial({color:0xffd98a}));
+  lamp.position.set(1.35,0.9,0); boat.add(lamp);
+  boat.visible=false;
+  g.add(boat);
+  scene.add(g);
+  return {g,cape,head,hood,wL,wR,boat,glow};
+})();
+
+/* ---------------- fairy ---------------- */
+const fairy=(function(){
+  const g=new THREE.Group();
+  const c=document.createElement('canvas'); c.width=c.height=64;
+  const x=c.getContext('2d');
+  const gr=x.createRadialGradient(32,32,2,32,32,32);
+  gr.addColorStop(0,'rgba(255,255,255,1)'); gr.addColorStop(0.4,'rgba(255,220,250,.8)'); gr.addColorStop(1,'rgba(255,220,250,0)');
+  x.fillStyle=gr; x.fillRect(0,0,64,64);
+  const tex=new THREE.CanvasTexture(c);
+  const body=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,color:0xffd0f0,transparent:true,depthWrite:false}));
+  body.scale.setScalar(1.5); g.add(body);
+  const wingMat=new THREE.SpriteMaterial({map:tex,color:0xbfe8ff,transparent:true,opacity:0.9,depthWrite:false});
+  const w1=new THREE.Sprite(wingMat); w1.scale.set(0.9,0.5,1); w1.position.set(-0.5,0.15,0); g.add(w1);
+  const w2=new THREE.Sprite(wingMat.clone()); w2.scale.set(0.9,0.5,1); w2.position.set(0.5,0.15,0); g.add(w2);
+  const light=new THREE.PointLight(0xffc9ec,4,6); g.add(light);
+  scene.add(g);
+  return {g,w1,w2};
+})();
+
+/* ---------------- state ---------------- */
+const state={
+  t:0.012, vel:0, jumpV:0, jumpY:0,
+  pov:'third', biome:null, mode:'overworld',
+  camPos:new THREE.Vector3(), camLook:new THREE.Vector3(), started:false
+};
+const input={left:false,right:false,up:false};
+
+/* keyboard */
+addEventListener('keydown',e=>{
+  if(e.key==='ArrowLeft'||e.key==='a') input.left=true;
+  if(e.key==='ArrowRight'||e.key==='d') input.right=true;
+  if(e.key==='ArrowUp'||e.key===' '||e.key==='w'){ input.up=true; e.preventDefault(); }
+});
+addEventListener('keyup',e=>{
+  if(e.key==='ArrowLeft'||e.key==='a') input.left=false;
+  if(e.key==='ArrowRight'||e.key==='d') input.right=false;
+  if(e.key==='ArrowUp'||e.key===' '||e.key==='w') input.up=false;
+});
+/* on-screen pad */
+function bindPad(id,key){
+  const b=document.getElementById(id);
+  const on=e=>{ e.preventDefault(); input[key]=true; b.classList.add('on'); };
+  const off=()=>{ input[key]=false; b.classList.remove('on'); };
+  b.addEventListener('pointerdown',on);
+  addEventListener('pointerup',off);
+  b.addEventListener('pointerleave',off);
+}
+bindPad('padL','left'); bindPad('padR','right'); bindPad('padU','up');
+
+/* POV toggle */
+const povBtn=document.getElementById('povBtn');
+povBtn.addEventListener('click',()=>{
+  state.pov = state.pov==='third' ? 'first' : 'third';
+  povBtn.innerHTML='<i class="fa-solid fa-video"></i> '+(state.pov==='third'?'3rd person':'1st person');
+  sfx('select');
+});
+
+/* ---------------- camera profiles (keyed, smoothly interpolated) ---------------- */
+const CAMKEYS=[
+  { t:0.03,  az: 0.55, dist:11, h:4.2, ahead:0.012 },   /* glade: over-shoulder */
+  { t:0.15,  az: 1.45, dist:14, h:2.6, ahead:0.006 },   /* forest: side-on (Limbo, sunlit) */
+  { t:0.31,  az: 0.25, dist:12, h:2.4, ahead:0.014 },   /* river: low chase behind boat */
+  { t:0.47,  az:-0.85, dist:26, h:15,  ahead:0.02  },   /* desert: high crane */
+  { t:0.60,  az: 1.2,  dist:15, h:4,   ahead:0.01  },   /* snow: side drift */
+  { t:0.74,  az: 0.0,  dist:17, h:3.2, ahead:0.02  },   /* sky: behind, open */
+  { t:0.79,  az:-2.2,  dist:19, h:6,   ahead:0.016 },   /* sky late: slow orbit feel */
+  { t:0.88,  az:-0.9,  dist:12, h:5,   ahead:0.012 },   /* city: 3/4 view */
+  { t:0.97,  az: 0.5,  dist:10, h:3,   ahead:0.008 }    /* meadow: close & warm */
+];
+function camProfile(t){
+  if(t<=CAMKEYS[0].t) return CAMKEYS[0];
+  for(let i=0;i<CAMKEYS.length-1;i++){
+    const a=CAMKEYS[i], b=CAMKEYS[i+1];
+    if(t>=a.t && t<=b.t){
+      const k=(t-a.t)/(b.t-a.t), s=k*k*(3-2*k);
+      return { az:a.az+(b.az-a.az)*s, dist:a.dist+(b.dist-a.dist)*s,
+               h:a.h+(b.h-a.h)*s, ahead:a.ahead+(b.ahead-a.ahead)*s };
+    }
+  }
+  return CAMKEYS[CAMKEYS.length-1];
+}
+
+/* ---------------- HUD helpers ---------------- */
+const toast=document.getElementById('toast');
+function showToast(a,b){
+  document.getElementById('toastT').textContent=a;
+  document.getElementById('toastS').textContent=b;
+  toast.classList.add('show');
+  clearTimeout(showToast._t);
+  showToast._t=setTimeout(()=>toast.classList.remove('show'), 3600);
+}
+const bubble=document.getElementById('bubble'), bubbleTx=document.getElementById('bubbleTx');
+let bubbleTimer=null;
+export function fairySay(msg,ms){
+  bubbleTx.textContent=msg;
+  bubble.classList.add('show');
+  sfx('trill');
+  clearTimeout(bubbleTimer);
+  bubbleTimer=setTimeout(()=>bubble.classList.remove('show'), ms||5200);
+}
+const promptEl=document.getElementById('prompt');
+export function setPrompt(html){
+  if(html){ promptEl.innerHTML=html; promptEl.classList.add('show'); }
+  else promptEl.classList.remove('show');
+}
+
+/* ---------------- ambient sound per biome ---------------- */
+let sndBiome=null;
+function biomeSound(id){
+  if(id===sndBiome) return; sndBiome=id;
+  try{
+    if(!window.SFX) return;
+    SFX.stopBrook && SFX.stopBrook(); SFX.stopWind && SFX.stopWind(); SFX.stopAmbient && SFX.stopAmbient();
+    if(id==='river') SFX.startBrook(1);
+    else if(id==='sky') SFX.startWind();
+    else SFX.startAmbient(id==='city'?72:id==='snow'?48:58);
+  }catch(e){}
+}
+let chirpTimer=0;
+
+/* ---------------- domains (doors, interiors) ---------------- */
+const domains = initDomains({
+  THREE, scene, curve, wanderer, fairy, camera, renderer, state, input,
+  fairySay, setPrompt, sfx, REDUCED, biomeAt, showToast
+});
+
+/* ---------------- resize ---------------- */
+addEventListener('resize',()=>{
+  camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth,innerHeight);
+});
+
+/* ---------------- start veil ---------------- */
+const veil=document.getElementById('veil'), startBtn=document.getElementById('startBtn');
+document.getElementById('veilMsg').textContent='a small world grew while you blinked';
+startBtn.style.display='block';
+startBtn.addEventListener('click',()=>{
+  veil.classList.add('gone');
+  state.started=true;
+  biomeSound('glade');
+  setTimeout(()=>fairySay(FAIRY.wake, 7000), 700);
+  sfx('bloom');
+});
+
+/* ---------------- main loop ---------------- */
+const _p=new THREE.Vector3(), _tan=new THREE.Vector3(), _n=new THREE.Vector3(), _up=new THREE.Vector3(0,1,0);
+const _camTarget=new THREE.Vector3(), _look=new THREE.Vector3(), _fair=new THREE.Vector3();
+let lastBiome=null, lastMs=0, idleMs=0, walkPhase=0;
+
+function tick(ms){
+  requestAnimationFrame(tick);
+  if(document.hidden) return;
+  const dt=Math.min(0.05,(ms-lastMs)/1000||0.016); lastMs=ms;
+
+  if(state.mode!=='overworld'){ domains.tick(dt,ms); return; }
+
+  /* --- move --- */
+  const SPEED=0.030;   /* t per second at full walk */
+  let target=0;
+  if(state.started){
+    if(input.right) target= SPEED;
+    if(input.left)  target=-SPEED;
+  }
+  state.vel += (target-state.vel)*Math.min(1,dt*6);
+  state.t = Math.max(0.005, Math.min(0.995, state.t + state.vel*dt));
+  const moving=Math.abs(state.vel)>0.004;
+  if(moving){ idleMs=0; } else idleMs+=dt*1000;
+
+  const b=biomeAt(state.t);
+  const onWater = b.id==='river';
+  const flying  = b.id==='sky';
+
+  /* jump (small hop; disabled while flying/boating) */
+  if(input.up && state.jumpY<=0.001 && !flying && !onWater && !domains.nearDoor()){
+    state.jumpV=5.2; sfx('jump'); input.up=false;
+  }
+  state.jumpV-=16*dt; state.jumpY=Math.max(0,state.jumpY+state.jumpV*dt);
+  if(state.jumpY===0) state.jumpV=0;
+
+  /* --- place character --- */
+  curve.getPointAt(state.t,_p); curve.getTangentAt(state.t,_tan);
+  const baseY=onWater? -0.05 : 0;
+  wanderer.g.position.set(_p.x, _p.y+baseY+state.jumpY+(flying?Math.sin(ms*0.002)*0.6:0), _p.z);
+  const face=Math.atan2(_tan.x,_tan.z)+(state.vel<-0.001?Math.PI:0);
+  wanderer.g.rotation.y += (face-wanderer.g.rotation.y)*Math.min(1,dt*7);
+  /* walk bob + cape sway */
+  walkPhase+=dt*(moving?9:2);
+  wanderer.cape.rotation.z=Math.sin(walkPhase)*0.08*(moving?1:0.4);
+  wanderer.cape.scale.x=1+Math.sin(walkPhase*0.7)*0.05;
+  wanderer.g.position.y+=moving&&!onWater&&!flying?Math.abs(Math.sin(walkPhase))*0.12:0;
+  /* modes */
+  wanderer.boat.visible=onWater;
+  wanderer.wL.visible=wanderer.wR.visible=flying;
+  if(onWater){
+    wanderer.boat.rotation.z=Math.sin(ms*0.0016)*0.05;
+    wanderer.boat.rotation.x=Math.sin(ms*0.0011)*0.04;
+    if(moving && Math.random()<0.03) sfx('drip');
+    if(Math.random()<0.004) sfx('creak');
+  }
+  if(flying){
+    const flap=Math.sin(ms*0.008)*0.5;
+    wanderer.wL.rotation.y=flap; wanderer.wR.rotation.y=-flap;
+    wanderer.g.rotation.z=(state.vel>0?-1:1)*Math.min(0.3,Math.abs(state.vel)*8);
+  } else wanderer.g.rotation.z*=0.9;
+  /* footsteps */
+  if(moving && !onWater && !flying && Math.floor(walkPhase/Math.PI)!==Math.floor((walkPhase-dt*9)/Math.PI)) sfx('step');
+  if(b.id==='forest'){ chirpTimer-=dt; if(chirpTimer<=0){ chirpTimer=2+Math.random()*4; sfx('chirp'); } }
+
+  /* --- fairy follows with spring lag --- */
+  _n.crossVectors(_tan,_up).normalize();
+  _fair.set(wanderer.g.position.x-_n.x*1.6-_tan.x*0.8,
+            wanderer.g.position.y+2.5+Math.sin(ms*0.003)*0.25,
+            wanderer.g.position.z-_n.z*1.6-_tan.z*0.8);
+  fairy.g.position.lerp(_fair, Math.min(1,dt*3.2));
+  const flap2=0.6+Math.abs(Math.sin(ms*0.012))*0.5;
+  fairy.w1.scale.set(0.9*flap2,0.5,1); fairy.w2.scale.set(0.9*flap2,0.5,1);
+  /* bubble follows fairy */
+  if(bubble.classList.contains('show')){
+    _look.copy(fairy.g.position); _look.project(camera);
+    bubble.style.left=((_look.x*0.5+0.5)*innerWidth+14)+'px';
+    bubble.style.top=((-_look.y*0.5+0.5)*innerHeight-30)+'px';
+  }
+
+  /* --- camera (all-lerped: never jitters) --- */
+  const prof=camProfile(state.t);
+  if(state.pov==='third'){
+    const azWorld=Math.atan2(_tan.x,_tan.z)+prof.az;
+    _camTarget.set(
+      wanderer.g.position.x - Math.sin(azWorld)*prof.dist,
+      wanderer.g.position.y + prof.h,
+      wanderer.g.position.z - Math.cos(azWorld)*prof.dist);
+  } else {
+    _camTarget.set(
+      wanderer.g.position.x+_tan.x*0.3,
+      wanderer.g.position.y+1.85+(moving?Math.sin(walkPhase*2)*0.05:0),
+      wanderer.g.position.z+_tan.z*0.3);
+  }
+  state.camPos.lerp(_camTarget, Math.min(1,dt*(REDUCED?12:2.6)));
+  camera.position.copy(state.camPos);
+  const lookT=Math.min(0.995,state.t+prof.ahead);
+  curve.getPointAt(state.pov==='third'?lookT:Math.min(0.995,state.t+0.02),_look);
+  _look.y+= state.pov==='third'?1.2:1.7;
+  state.camLook.lerp(_look, Math.min(1,dt*3.4));
+  camera.lookAt(state.camLook);
+
+  /* --- environment blend (smooth, per-frame lerp) --- */
+  scene.fog.color.lerp(blendAttr(state.t,'fog'), Math.min(1,dt*2));
+  const skyC=blendAttr(state.t,'sky');
+  if(!scene.background) scene.background=new THREE.Color(skyC);
+  scene.background.lerp(skyC, Math.min(1,dt*2));
+  scene.fog.far += ((b.far)-scene.fog.far)*Math.min(1,dt*1.5);
+
+  /* --- water ripple --- */
+  if(waterMesh){
+    const pos=waterMesh.geometry.attributes.position, base=waterMesh.userData.base;
+    for(let i=0;i<pos.count;i++){
+      pos.array[i*3+2]=base[i*3+2]+Math.sin(ms*0.0016+base[i*3]*0.25+base[i*3+1]*0.2)*0.16;
+    }
+    pos.needsUpdate=true;
+  }
+  /* fireflies twinkle */
+  flies.pts.material.opacity=0.55+0.4*Math.sin(ms*0.002);
+
+  /* --- biome events --- */
+  if(b!==lastBiome && state.started){
+    lastBiome=b;
+    showToast(b.name, b.subtitle);
+    biomeSound(b.id);
+    if(FAIRY.biomes[b.id]) fairySay(FAIRY.biomes[b.id], 6000);
+  }
+  state.biome=b.id;
+  /* idle nudge */
+  if(idleMs>16000 && state.started){
+    idleMs=0;
+    fairySay(FAIRY.idle[Math.floor(Math.random()*FAIRY.idle.length)],4500);
+  }
+
+  /* doors */
+  domains.overworldTick(dt,ms);
+
+  renderer.render(scene,camera);
+}
+requestAnimationFrame(tick);
+
+/* ---------------- test hooks ---------------- */
+window.__wander=function(){ return {
+  t:+state.t.toFixed(4), biome:state.biome, mode:state.mode, pov:state.pov,
+  started:state.started, water:state.biome==='river', flying:state.biome==='sky'
+};};
+window.__teleport=function(t){ state.t=Math.max(0.005,Math.min(0.995,t)); };
+window.__press=function(k,v){ input[k]=v; };
+window.__start=function(){ if(!state.started){ startBtn.click(); } };
