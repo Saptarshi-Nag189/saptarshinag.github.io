@@ -4,6 +4,7 @@
    Six runnable machines. The twin chat (TwinBrain socket for future Llama).
    ========================================================================== */
 import { DOMAINS, FAIRY, CORPUS, CORPUS_FALLBACK } from './twin-data.js';
+import { buildDungeons } from './dungeons.js';
 
 export function initDomains(ctx){
 const { THREE, scene, curve, wanderer, fairy, camera, renderer, state, input,
@@ -44,171 +45,9 @@ Object.keys(DOOR_BIOME).forEach(id=>{
   doors.push({id,t,g,veil,halo,side,dist});
 });
 
-/* ---------------- interiors (all prebuilt now → no hitch on entry) ---------------- */
-const IN_STYLE={
-  forest:{floor:0x9fe0aa,fog:0xe2f6e2,prop:'crystaltree'},
-  river:{floor:0x9adfd4,fog:0xd8f2f0,prop:'lily'},
-  desert:{floor:0xf4d8a8,fog:0xffeacd,prop:'palm'},
-  snow:{floor:0xf4f6ff,fog:0xf0f2ff,prop:'icepillar'},
-  sky:{floor:0xffe2ec,fog:0xffe8f0,prop:'cloudpuff'},
-  city:{floor:0xf0ecff,fog:0xe8e2ff,prop:'pylon'},
-  meadow:{floor:0xa8dfb0,fog:0xd8eedd,prop:'lantern'}
-};
-function inProp(kind,THREE){
-  const g=new THREE.Group();
-  if(kind==='crystaltree'){
-    const c=new THREE.Mesh(new THREE.OctahedronGeometry(0.9,0),new THREE.MeshLambertMaterial({color:0x9defc9,flatShading:true,transparent:true,opacity:0.9}));
-    c.position.y=2.1; g.add(c);
-    const s=new THREE.Mesh(new THREE.CylinderGeometry(0.14,0.2,2),new THREE.MeshLambertMaterial({color:0xb08a6a})); s.position.y=1; g.add(s);
-  } else if(kind==='lily'){
-    const pad=new THREE.Mesh(new THREE.CircleGeometry(0.7,10),new THREE.MeshLambertMaterial({color:0x6fca8f}));
-    pad.rotation.x=-Math.PI/2; pad.position.y=0.02; g.add(pad);
-    const fl=new THREE.Mesh(new THREE.SphereGeometry(0.2,6,5),new THREE.MeshBasicMaterial({color:0xffb0cf})); fl.position.y=0.2; g.add(fl);
-  } else if(kind==='palm'){
-    const tr=new THREE.Mesh(new THREE.CylinderGeometry(0.14,0.22,2.6,6),new THREE.MeshLambertMaterial({color:0xc79a6f}));
-    tr.position.y=1.3; tr.rotation.z=0.12; g.add(tr);
-    for(let i=0;i<5;i++){
-      const leaf=new THREE.Mesh(new THREE.ConeGeometry(0.16,1.6,4),new THREE.MeshLambertMaterial({color:0x7fcf8f}));
-      leaf.position.y=2.7; leaf.rotation.z=Math.PI/2.4; leaf.rotation.y=i/5*Math.PI*2; g.add(leaf);
-    }
-  } else if(kind==='icepillar'){
-    const c=new THREE.Mesh(new THREE.ConeGeometry(0.5,rand(2,3.4),6),new THREE.MeshLambertMaterial({color:0xdfe9ff,flatShading:true,transparent:true,opacity:0.92}));
-    c.position.y=1.4; g.add(c);
-  } else if(kind==='cloudpuff'){
-    const c=new THREE.Mesh(new THREE.SphereGeometry(rand(0.7,1.4),8,6),new THREE.MeshLambertMaterial({color:0xffffff,transparent:true,opacity:0.9}));
-    c.scale.y=0.5; c.position.y=rand(0.6,3); g.add(c);
-  } else if(kind==='pylon'){
-    const b=new THREE.Mesh(new THREE.BoxGeometry(0.5,rand(2,3.6),0.5),new THREE.MeshLambertMaterial({color:0xffffff}));
-    b.position.y=1.4; g.add(b);
-    const glow=new THREE.Mesh(new THREE.BoxGeometry(0.56,0.2,0.56),new THREE.MeshBasicMaterial({color:[0xff9ecb,0x8fd8ff,0xffd98a][Math.floor(Math.random()*3)]}));
-    glow.position.y=2.6; g.add(glow);
-  } else { /* lantern */
-    const post=new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.08,1.8),new THREE.MeshLambertMaterial({color:0x8a6f57}));
-    post.position.y=0.9; g.add(post);
-    const lamp=new THREE.Mesh(new THREE.SphereGeometry(0.2,8,6),new THREE.MeshBasicMaterial({color:0xffe9a8}));
-    lamp.position.y=1.9; g.add(lamp);
-    const pl=new THREE.PointLight(0xffe9a8,3,5); pl.position.y=1.9; g.add(pl);
-  }
-  return g;
-}
-function rand(a,b){ return a+Math.random()*(b-a); }
-
-const interiors={};
-Object.keys(DOMAINS).forEach(id=>{
-  const st=IN_STYLE[id], D=DOMAINS[id];
-  const sc=new THREE.Scene();
-  const moody=id==='meadow' ? new THREE.Color(0x241a12)
-                             : new THREE.Color(st.fog).multiplyScalar(0.78);
-  sc.background=moody.clone();
-  sc.fog=new THREE.Fog(moody, id==='meadow'?14:10, id==='meadow'?46:38);
-  sc.add(new THREE.HemisphereLight(id==='meadow'?0xffdCb0:0xffffff, id==='meadow'?0x40301f:st.floor, id==='meadow'?0.55:0.8));
-  const dl=new THREE.DirectionalLight(id==='meadow'?0xffc9a0:0xfff4e0, id==='meadow'?0.35:0.8);
-  dl.position.set(6,12,4); sc.add(dl);
-
-  if(id==='meadow'){
-    /* ---------- the night cabin: warm wood, a desk, a bed ---------- */
-    const wood=new THREE.MeshLambertMaterial({color:0x8a5f3d});
-    const woodD=new THREE.MeshLambertMaterial({color:0x6f4a2e});
-    const fl=new THREE.Mesh(new THREE.BoxGeometry(13,0.4,36),wood); fl.position.set(0,-0.2,11); sc.add(fl);
-    for(let k=-5;k<=5;k+=2){ const line=new THREE.Mesh(new THREE.BoxGeometry(0.06,0.42,36),woodD);
-      line.position.set(k,-0.17,11); sc.add(line); }
-    const mkWall=(w,h,d,x,y,z)=>{ const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),woodD); m.position.set(x,y,z); sc.add(m); };
-    mkWall(13,7,0.5,0,3.5,-7); mkWall(13,7,0.5,0,3.5,29);
-    mkWall(0.5,7,36.5,-6.5,3.5,11); mkWall(0.5,7,36.5,6.5,3.5,11);
-    const ceil=new THREE.Mesh(new THREE.BoxGeometry(13,0.5,36.5),woodD); ceil.position.set(0,7.2,11); sc.add(ceil);
-    /* window with the night outside */
-    const win=new THREE.Mesh(new THREE.PlaneGeometry(3.4,2.4),new THREE.MeshBasicMaterial({color:0x16233f}));
-    win.position.set(-6.2,3.4,9); win.rotation.y=Math.PI/2; sc.add(win);
-    /* warm lamps + hearth glow */
-    [[-4,0],[4,13]].forEach(pp=>{ const lp=inProp('lantern',THREE); lp.position.set(pp[0],0,pp[1]); sc.add(lp); });
-    const hearth=new THREE.PointLight(0xffb070,16,18); hearth.position.set(4,1.8,4); sc.add(hearth);
-    /* desk with the letters (contact station anchors nearby) */
-    const desk=new THREE.Group();
-    const top=new THREE.Mesh(new THREE.BoxGeometry(2.6,0.16,1.3),wood); top.position.y=1.05; desk.add(top);
-    [[-1.1,-0.5],[1.1,-0.5],[-1.1,0.5],[1.1,0.5]].forEach(l=>{
-      const leg=new THREE.Mesh(new THREE.BoxGeometry(0.14,1.05,0.14),woodD); leg.position.set(l[0],0.5,l[1]); desk.add(leg); });
-    const letter=new THREE.Mesh(new THREE.BoxGeometry(0.5,0.02,0.34),new THREE.MeshLambertMaterial({color:0xfff4e0}));
-    letter.position.set(0.3,1.15,0); letter.rotation.y=0.4; desk.add(letter);
-    desk.position.set(-3.2,0,6); desk.rotation.y=0.5; sc.add(desk);
-    /* the bed + bedside table for the fairy */
-    const bed=new THREE.Group();
-    const bf=new THREE.Mesh(new THREE.BoxGeometry(2.6,0.5,4.6),woodD); bf.position.y=0.35; bed.add(bf);
-    const mat=new THREE.Mesh(new THREE.BoxGeometry(2.3,0.4,4.2),new THREE.MeshLambertMaterial({color:0xf4e6d8}));
-    mat.position.y=0.75; bed.add(mat);
-    const quilt=new THREE.Mesh(new THREE.BoxGeometry(2.32,0.18,2.6),new THREE.MeshLambertMaterial({color:0xc96f8a}));
-    quilt.position.set(0,0.92,0.7); bed.add(quilt);
-    const pil=new THREE.Mesh(new THREE.BoxGeometry(1.5,0.26,0.8),new THREE.MeshLambertMaterial({color:0xfff8ee}));
-    pil.position.set(0,0.98,-1.6); bed.add(pil);
-    const tbl=new THREE.Mesh(new THREE.BoxGeometry(0.8,0.9,0.8),wood); tbl.position.set(1.9,0.45,-1.6); bed.add(tbl);
-    bed.position.set(3.2,0,17); sc.add(bed);
-    const bedGlow=new THREE.PointLight(0xffc080,12,12); bedGlow.position.set(2.2,2.4,15.2); sc.add(bedGlow);
-    sc.userData.bed={x:3.2,z:17,fairyPerch:new THREE.Vector3(5.1,1.25,15.4)};
-  } else {
-    /* ---------- sanctum shell (Genshin-domain feel): enclosed, moody, glowing ---------- */
-    const floor=new THREE.Mesh(new THREE.CircleGeometry(30,36),
-      new THREE.MeshLambertMaterial({color:new THREE.Color(st.floor).multiplyScalar(0.8)}));
-    floor.rotation.x=-Math.PI/2; sc.add(floor);
-    const wallC=new THREE.Color(DOOR_COLORS[id]).multiplyScalar(0.34);
-    const wall=new THREE.Mesh(new THREE.CylinderGeometry(30,30,16,36,1,true),
-      new THREE.MeshLambertMaterial({color:wallC,side:THREE.BackSide}));
-    wall.position.y=7.9; sc.add(wall);
-    const band=new THREE.Mesh(new THREE.CylinderGeometry(29.7,29.7,0.6,36,1,true),
-      new THREE.MeshBasicMaterial({color:DOOR_COLORS[id],side:THREE.BackSide,transparent:true,opacity:0.6}));
-    band.position.y=4.2; sc.add(band);
-    const ceilD=new THREE.Mesh(new THREE.CircleGeometry(30,36),
-      new THREE.MeshLambertMaterial({color:wallC.clone().multiplyScalar(0.7)}));
-    ceilD.rotation.x=Math.PI/2; ceilD.position.y=15.8; sc.add(ceilD);
-    for(let i=0;i<8;i++){
-      const a=i/8*Math.PI*2;
-      const pil=new THREE.Mesh(new THREE.CylinderGeometry(0.55,0.7,12,8),
-        new THREE.MeshLambertMaterial({color:0xf4ead8,flatShading:true}));
-      pil.position.set(Math.cos(a)*26,6,Math.sin(a)*26); sc.add(pil);
-      const cap=new THREE.Mesh(new THREE.SphereGeometry(0.5,8,6),
-        new THREE.MeshBasicMaterial({color:DOOR_COLORS[id]}));
-      cap.position.set(Math.cos(a)*26,12.3,Math.sin(a)*26); sc.add(cap);
-    }
-    [4.6,9.5].forEach((rr,ri)=>{
-      const ring=new THREE.Mesh(new THREE.RingGeometry(rr,rr+0.28,48),
-        new THREE.MeshBasicMaterial({color:DOOR_COLORS[id],transparent:true,opacity:ri?0.26:0.5,side:THREE.DoubleSide}));
-      ring.rotation.x=-Math.PI/2; ring.position.y=0.04; sc.add(ring);
-    });
-    /* one light shaft per pedestal, directly overhead (aligned with each jewel) */
-    D.stations.forEach((_,i)=>{
-      const px=i%2===0?-2.6:2.6, pz=6+i*7;
-      const shaft=new THREE.Mesh(new THREE.ConeGeometry(2.2,14.4,10,1,true),
-        new THREE.MeshBasicMaterial({color:0xfff6e0,transparent:true,opacity:0.10,
-          blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));
-      shaft.position.set(px,8.2,pz); sc.add(shaft);
-      const spot=new THREE.PointLight(0xfff2d8,4,9); spot.position.set(px,6.5,pz); sc.add(spot);
-    });
-    for(let i=0;i<14;i++){
-      const a=Math.random()*Math.PI*2, r=rand(11,23);
-      const x=Math.cos(a)*r, z=Math.sin(a)*r;
-      if(Math.abs(x)<4.4 && z>-5 && z<40) continue;
-      const pr=inProp(st.prop,THREE);
-      pr.position.set(x,0,z); pr.rotation.y=Math.random()*7;
-      sc.add(pr);
-    }
-  }
-  /* stations along +z line */
-  const stations=D.stations.map((s,i)=>{
-    const z=6+i*7;
-    const ped=new THREE.Group();
-    const base=new THREE.Mesh(new THREE.CylinderGeometry(1.1,1.35,0.5,9),
-      new THREE.MeshLambertMaterial({color:0xffffff,flatShading:true}));
-    base.position.y=0.25; ped.add(base);
-    const gem=new THREE.Mesh(new THREE.OctahedronGeometry(0.55,0),
-      new THREE.MeshLambertMaterial({color:DOOR_COLORS[id],flatShading:true,emissive:DOOR_COLORS[id],emissiveIntensity:0.35}));
-    gem.position.y=1.4; ped.add(gem);
-    const pl=new THREE.PointLight(DOOR_COLORS[id],3,6); pl.position.y=1.6; ped.add(pl);
-    ped.position.set(i%2===0?-2.6:2.6, 0, z);
-    sc.add(ped);
-    return {data:s, z, gem, done:false};
-  });
-  /* exit arch at z=-3 */
-  const exitG=inProp('lantern',THREE); exitG.position.set(0,0,-4); sc.add(exitG);
-  interiors[id]={scene:sc, stations, len: 6+D.stations.length*7+3};
-});
+/* ---------------- interiors: seven distinct worlds (dungeons.js) ---------------- */
+const interiors=buildDungeons(THREE, DOMAINS, DOOR_COLORS);
+Object.values(interiors).forEach(IN=>IN.stations.forEach(st=>{ st.gem.userData.by=st.gem.position.y; }));
 
 /* ---------------- enter / exit with soft bloom ---------------- */
 let activeDomain=null, u=0, uvel=0, activeStation=-1, transitioning=false;
@@ -671,12 +510,22 @@ function domainTick(dt,ms){
   uvel+=(tgt-uvel)*Math.min(1,dt*6);
   u=Math.max(-3.4,Math.min(IN.len, u+uvel*dt));
   const moving=Math.abs(uvel)>0.3;
-  wanderer.g.position.set(Math.sin(u*0.35)*1.4, moving?Math.abs(Math.sin(ms*0.012))*0.12:0, u);
-  wanderer.g.rotation.y += ((uvel>=0?Math.atan2(Math.cos(u*0.35)*0.5,1):Math.PI+Math.atan2(-Math.cos(u*0.35)*0.5,1))-wanderer.g.rotation.y)*Math.min(1,dt*6);
+  const bob=moving?Math.abs(Math.sin(ms*0.012))*0.12:0;
+  let faceY;
+  if(IN.path){
+    const pp=IN.path(u,ms);
+    wanderer.g.position.set(pp.x, pp.y+bob, pp.z);
+    faceY=pp.ry+(uvel<-0.3?Math.PI:0);
+  } else {
+    wanderer.g.position.set(Math.sin(u*0.35)*1.4, bob, u);
+    faceY=uvel>=0?Math.atan2(Math.cos(u*0.35)*0.5,1):Math.PI+Math.atan2(-Math.cos(u*0.35)*0.5,1);
+  }
+  wanderer.g.rotation.y += (faceY-wanderer.g.rotation.y)*Math.min(1,dt*6);
   wanderer.cape.rotation.z=Math.sin(ms*0.01)*0.07;
   if(moving && Math.floor(ms/280)!==Math.floor((ms-dt*1000)/280)) sfx('step');
   /* fairy */
-  fairy.g.position.lerp(new THREE.Vector3(wanderer.g.position.x+1.4, 2.5+Math.sin(ms*0.003)*0.25, u-1.2), Math.min(1,dt*3));
+  fairy.g.position.lerp(new THREE.Vector3(wanderer.g.position.x+1.4,
+    wanderer.g.position.y+2.5+Math.sin(ms*0.003)*0.25, wanderer.g.position.z-1.2), Math.min(1,dt*3));
   const flap=0.6+Math.abs(Math.sin(ms*0.012))*0.5;
   fairy.w1.scale.set(0.9*flap,0.5,1); fairy.w2.scale.set(0.9*flap,0.5,1);
   /* camera: gentle 3/4 follow — or first person */
@@ -700,7 +549,7 @@ function domainTick(dt,ms){
   let ns=-1,best=14;
   IN.stations.forEach((s,i)=>{
     s.gem.rotation.y=ms*0.001+i;
-    s.gem.position.y=1.4+Math.sin(ms*0.002+i)*0.12;
+    s.gem.position.y=(s.gem.userData.by||1.4)+Math.sin(ms*0.002+i)*0.12;
     const d=Math.abs(u-s.z);
     if(d<best){ best=d; if(d<4.4) ns=i; }
   });
