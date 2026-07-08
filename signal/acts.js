@@ -549,7 +549,7 @@ function act4(stage, api){
       stEl.textContent='THREAT CONTAINED · cam-01 ISOLATED';
       qbtn.disabled=true; qbtn.textContent='contained ✓';
       api.stamp(stamps,'fa-shield-halved','deauth-flood contained · window model p=0.97',0);
-      api.stamp(stamps,'fa-crosshairs','97.93% accuracy · <1 ms inference per window (XGBoost/MLP)',280);
+      api.stamp(stamps,'fa-crosshairs','C-DAC IoT detection: 97.93% acc · <1 ms/window (XGBoost/MLP)',280);
       api.stamp(stamps,'fa-network-wired','63 features from raw PCAPs · Scapy/PyShark · SMOTE+Optuna',560);
       api.stamp(stamps,'fa-key','SHAP explainability · SQL pipelines · live dashboards',840);
       api.stamp(stamps,'fa-book','cited: 2 papers @ IoTaIS 2025, Bali (monitoring + Zero-Trust survey)',1120);

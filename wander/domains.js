@@ -32,8 +32,7 @@ Object.keys(DOOR_BIOME).forEach(id=>{
   const lintel=new THREE.Mesh(new THREE.BoxGeometry(4.6,0.5,0.7),pm); lintel.position.y=4.6;
   const veilM=new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:0.35,side:THREE.DoubleSide});
   const veil=new THREE.Mesh(new THREE.PlaneGeometry(3,4.2),veilM); veil.position.y=2.2;
-  const halo=new THREE.PointLight(col,5,10); halo.position.y=2.6;
-  g.add(p1,p2,lintel,veil,halo);
+  g.add(p1,p2,lintel,veil);
   const side = (id==='river'||id==='sky') ? 0 : (Math.random()<0.5?-1:1);
   const dist = side===0 ? 0 : 7.5;
   g.position.set(_p.x+_n.x*dist*side, _p.y-0.4, _p.z+_n.z*dist*side);
@@ -42,8 +41,12 @@ Object.keys(DOOR_BIOME).forEach(id=>{
     g.lookAt(_p.x+_t.x,_p.y-0.4,_p.z+_t.z);
   } else g.lookAt(curve.getPointAt(t).x,g.position.y,curve.getPointAt(t).z);
   scene.add(g);
-  doors.push({id,t,g,veil,halo,side,dist});
+  doors.push({id,t,g,veil,col,side,dist});
 });
+
+/* one shared halo light roams to whichever door is nearest — visually identical
+   (a door's glow is only ever perceptible up close), far cheaper per fragment  */
+const doorHalo=new THREE.PointLight(0xffffff,5,12); doorHalo.visible=false; scene.add(doorHalo);
 
 /* ---------------- interiors: seven distinct worlds (dungeons.js) ---------------- */
 const interiors=buildDungeons(THREE, DOMAINS, DOOR_COLORS);
@@ -80,7 +83,7 @@ function enterDomain(id){
     const dot=document.querySelector('#journey span[data-d="'+id+'"]');
     if(dot && !dot.classList.contains('lit')){ dot.classList.add('lit'); sfx('coin'); }
     const dr=doors.find(d=>d.id===id);
-    if(dr){ dr.veil.material.color.set(0xffd98a); dr.halo.color.set(0xffd98a); }
+    if(dr){ dr.veil.material.color.set(0xffd98a); dr.col=0xffd98a; }
     if(!escHinted){ escHinted=true; fairySay(FAIRY.doorEnter+' (Esc steps back outside, anytime.)', 4600); }
     else fairySay(FAIRY.doorEnter, 3200);
     setPrompt(null);
@@ -339,7 +342,7 @@ const MACHINES={
     const DEV=['cam','lock','therm','plug','sense'];
     let t=0,phase='calm',victim=0,contained=false; const trust=DEV.map(()=>100);
     qb.addEventListener('click',()=>{ if(phase!=='attack'||contained)return; contained=true; phase='ok'; sfx('lock');
-      machineDone(); stampRow(host,['97.93% accuracy · <1 ms per window','XGBoost + MLP on the edge','SHAP explainability · 2× IoTaIS\'25']); });
+      machineDone(); stampRow(host,['C-DAC IoT detection: 97.93% · <1 ms/window','XGBoost + MLP on the edge','SHAP explainability · 2× IoTaIS\'25']); });
     loop(()=>{ t++;
       if(phase==='calm'&&t>140){ phase='attack'; qb.disabled=false; sfx('error'); }
       if(phase==='attack'&&!contained){ trust[victim]=Math.max(10,trust[victim]-0.4); if(t%60===0) sfx('beep'); }
@@ -461,17 +464,24 @@ let near=null;
 function overworldTick(dt,ms){
   near=null;
   const cp=wanderer.g.position;
-  if(announce){
-    announce.t+=dt;
-    announce.door.halo.intensity=14+Math.sin(ms*0.02)*6;
-    if(announce.t>=announce.dur) announce=null;
-  }
+  if(announce){ announce.t+=dt; if(announce.t>=announce.dur) announce=null; }
+  /* roam the shared halo to the nearest door */
+  let nd=null, ndd=1;
+  for(const d of doors){ const dt2=Math.abs(state.t-d.t); if(dt2<ndd){ ndd=dt2; nd=d; } }
+  if(nd && ndd<0.08){
+    doorHalo.visible=true;
+    doorHalo.position.set(nd.g.position.x, nd.g.position.y+2.6, nd.g.position.z);
+    doorHalo.color.set(nd.col);
+    const cpx=cp.x-nd.g.position.x, cpz=cp.z-nd.g.position.z;
+    const closeUp=(cpx*cpx+cpz*cpz)<70;
+    const tgt=(announce&&announce.door===nd)?14+Math.sin(ms*0.02)*6:(closeUp?12:5);
+    doorHalo.intensity += (tgt-doorHalo.intensity)*Math.min(1,dt*4);
+  } else doorHalo.visible=false;
   for(const d of doors){
     const dx=cp.x-d.g.position.x, dz=cp.z-d.g.position.z, dy=cp.y-d.g.position.y;
     const dd=dx*dx+dz*dz+dy*dy;
     const isNear=dd<70;
     d.veil.material.opacity += ((isNear?0.75:0.35)-d.veil.material.opacity)*Math.min(1,dt*4);
-    d.halo.intensity += ((isNear?12:5)-d.halo.intensity)*Math.min(1,dt*4);
     d.veil.rotation.z=Math.sin(ms*0.001+d.t*40)*0.06;
     /* first sight: announce the chapter */
     if(!d.announced && dd<1150 && Math.abs(state.t-d.t)<0.04){
@@ -491,7 +501,7 @@ function overworldTick(dt,ms){
 function nearDoor(){ return !!near; }
 
 /* ---------------- per-frame: inside a domain ---------------- */
-const _look=new THREE.Vector3();
+const _look=new THREE.Vector3(), _camT=new THREE.Vector3(), _fairT=new THREE.Vector3();
 function domainTick(dt,ms){
   if(transitioning){ renderer.render(interiors[activeDomain].scene,camera); return; }
   const IN=interiors[activeDomain];
@@ -563,12 +573,12 @@ function domainTick(dt,ms){
     state.camPos.lerp(camT,Math.min(1,dt*8)); camera.position.copy(state.camPos);
     _look.set(wanderer.g.position.x,1.6,u+4*dir);
   } else if(activeDomain==='meadow'){
-    const camT=new THREE.Vector3(-2.4, 3.2, u-5.4);
-    state.camPos.lerp(camT,Math.min(1,dt*2.4)); camera.position.copy(state.camPos);
+    _camT.set(-2.4, 3.2, u-5.4);
+    state.camPos.lerp(_camT,Math.min(1,dt*2.4)); camera.position.copy(state.camPos);
     _look.set(wanderer.g.position.x*0.5, 1.3, u+2.2);
   } else {
-    const camT=new THREE.Vector3(wanderer.g.position.x-4.6, 4.4, u-7.5);
-    state.camPos.lerp(camT,Math.min(1,dt*2.4)); camera.position.copy(state.camPos);
+    _camT.set(wanderer.g.position.x-4.6, 4.4, u-7.5);
+    state.camPos.lerp(_camT,Math.min(1,dt*2.4)); camera.position.copy(state.camPos);
     _look.set(wanderer.g.position.x,1.5,u+2.5);
   }
   state.camLook.lerp(_look,Math.min(1,dt*3)); camera.lookAt(state.camLook);

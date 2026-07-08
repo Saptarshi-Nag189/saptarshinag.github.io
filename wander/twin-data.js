@@ -47,7 +47,7 @@ export const CORPUS = [
   { p: ["skill","stack","tools","language"], a: "Python (advanced) and C++ (proficient) at the core; PyTorch, XGBoost, scikit-learn, PINNs; CUDA and CuPy for speed; Docker, Flask, ChromaDB, Git for shipping; RAG, LLM fine-tuning and multi-agent orchestration for the AI work. The desert oasis shows them as constellations." },
   { p: ["paper","publication","iotais"], a: "Two papers at IoTaIS 2025 in Bali: 'Protocol-Aware Continuous Monitoring and Anomaly Detection in IoT Networks' and 'A Comprehensive Survey on Zero Trust Architecture in IoT Networks'. They rest in the snow archive." },
   { p: ["contact","email","hire","reach","linkedin","github","cv","resume"], a: "Reach him at saptarshinag18@gmail.com, /in/saptarshi18 on LinkedIn, or Saptarshi-Nag189 on GitHub. His CV waits at journey's end — or right here: I'd say he's open to interesting problems." },
-  { p: ["metric","number","stat","achievement"], a: "The numbers he's proudest of: 97.93% IoT attack detection at under 1 ms per window, 99.8% pulsar F1 over 70M+ samples, 4.1× GPU speedup, a 50% latency cut at GMRT, and retrieval under 50 ms." },
+  { p: ["metric","number","stat","achievement"], a: "The numbers he's proudest of — each from a real build: 97.93% attack detection at under 1 ms per window (C-DAC's IoT Zero-Trust framework), 99.8% F1 over 70M+ samples (the NCRA-TIFR pulsar ResNet1D), 4.1× training speedup (custom CUDA kernels in his F1 tyre project), a 50% latency cut (the GMRT telescope pipeline refactor), and sub-50 ms retrieval (Omniscience Pro, his local RAG)." },
   { p: ["hello","hi ","hey","namaste"], a: "Hello, wanderer ✧ Lovely night for a walk through a life, isn't it? Ask me anything, or just keep going ▶" },
   { p: ["thank","thanks"], a: "Always. He'd say it too — softly, and then go back to training something." }
 ];
@@ -103,7 +103,7 @@ export const DOMAINS = {
       { k:"the person", t:"Saptarshi Nag — AI/ML Engineer",
         b:"<p>An engineer at the meeting point of <b>security and systems research</b> — happiest where raw data becomes a working model that must survive production.</p><p>From Kolkata, through Pune's telescopes and defence labs, to Chennai's live networks — the thread is the same: teach machines to notice what matters.</p>" },
       { k:"carried lights", t:"The numbers he keeps",
-        b:"<div class='mgrid'><div class='mtile'><div class='v'>97.93%</div><div class='l'>IoT attack detection</div></div><div class='mtile'><div class='v'>&lt;1 ms</div><div class='l'>inference per window</div></div><div class='mtile'><div class='v'>99.8%</div><div class='l'>pulsar F1</div></div><div class='mtile'><div class='v'>4.1×</div><div class='l'>GPU speedup</div></div><div class='mtile'><div class='v'>50%</div><div class='l'>latency cut</div></div><div class='mtile'><div class='v'>70M+</div><div class='l'>samples</div></div></div>" }
+        b:"<div class='mgrid'><div class='mtile'><div class='v'>97.93%</div><div class='l'>attack detection · C-DAC IoT framework</div></div><div class='mtile'><div class='v'>&lt;1 ms</div><div class='l'>inference/window · C-DAC edge models</div></div><div class='mtile'><div class='v'>99.8%</div><div class='l'>pulsar F1 · NCRA ResNet1D</div></div><div class='mtile'><div class='v'>4.1×</div><div class='l'>speedup · F1 tyre CUDA kernels</div></div><div class='mtile'><div class='v'>50%</div><div class='l'>latency cut · GMRT pipeline</div></div><div class='mtile'><div class='v'>70M+</div><div class='l'>samples · NCRA pulsar search</div></div></div>" }
     ]
   },
   city: {

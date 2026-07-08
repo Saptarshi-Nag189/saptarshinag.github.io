@@ -164,6 +164,11 @@ let waterMesh=null;
 
 /* ---------------- props ---------------- */
 const rand=(a,b)=>a+Math.random()*(b-a);
+/* per-biome prop groups: anything beyond the fog window is culled wholesale */
+const biomeGroups={};
+BIOMES.forEach(b=>{ const g=new THREE.Group(); g.userData={t0:b.t0,t1:b.t1}; biomeGroups[b.id]=g; scene.add(g); });
+function groupFor(t){ return biomeGroups[biomeAt(t).id]; }
+function freeze(o){ o.traverse(n=>{ n.updateMatrix(); n.matrixAutoUpdate=false; }); }
 /* dense path sampling so no prop can sit on ANY bend of the road */
 const PATH_SAMPLES=(function(){ const arr=[]; const v=new THREE.Vector3();
   for(let i=0;i<=700;i++){ curve.getPointAt(i/700,v); arr.push(v.x,v.z); } return arr; })();
@@ -251,7 +256,7 @@ scatter(snowT.t0,snowT.t1,70,()=>{
       new THREE.MeshLambertMaterial({color:0xffffff,transparent:true,opacity:0.85}));
     cl.scale.y=0.42;
     cl.position.set(p.x+rand(-40,40), p.y+rand(-16,10), p.z+rand(-40,40));
-    scene.add(cl);
+    biomeGroups.sky.add(cl); freeze(cl);
   }
   for(let i=0;i<6;i++){
     const t=rand(skyT.t0+0.02,skyT.t1-0.02);
@@ -262,7 +267,7 @@ scatter(snowT.t0,snowT.t1,70,()=>{
     isle.add(top);
     const t2=tree(0x8fd89a,0xffb0cf); t2.position.y=1.2; isle.add(t2);
     isle.position.set(p.x+rand(-26,26), p.y+rand(-10,8), p.z+rand(-26,26));
-    scene.add(isle);
+    biomeGroups.sky.add(isle); freeze(isle);
   }
 })();
 /* sky life: bird flocks + the manta (Sky:CotL homage) */
@@ -803,16 +808,22 @@ function tick(ms){
   scene.background.lerp(skyC, Math.min(1,dt*2));
   scene.fog.far += ((b.far)-scene.fog.far)*Math.min(1,dt*1.5);
 
-  /* --- water ripple --- */
-  if(waterMesh){
+  /* --- biome culling: whole prop groups beyond the fog window skip the GPU --- */
+  for(const id in biomeGroups){
+    const gd=biomeGroups[id].userData;
+    biomeGroups[id].visible = state.t > gd.t0-0.12 && state.t < gd.t1+0.12;
+  }
+
+  /* --- water ripple (only animated when the river can be seen) --- */
+  if(waterMesh && Math.abs(state.t-0.317)<0.17){
     const pos=waterMesh.geometry.attributes.position, base=waterMesh.userData.base;
     for(let i=0;i<pos.count;i++){
       pos.array[i*3+2]=base[i*3+2]+Math.sin(ms*0.0016+base[i*3]*0.25+base[i*3+1]*0.2)*0.16;
     }
     pos.needsUpdate=true;
   }
-  /* sky life animation */
-  if(skyLife.manta){
+  /* sky life animation (only when the sky biome is near) */
+  if(skyLife.manta && Math.abs(state.t-0.735)<0.24){
     const c=skyLife.center, mt=ms*0.00008;
     const mx=c.x+Math.cos(mt*2*Math.PI)*95, mz=c.z+Math.sin(mt*2*Math.PI)*55;
     const my=c.y+Math.sin(ms*0.0006)*10+4;
