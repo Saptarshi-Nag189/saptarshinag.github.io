@@ -448,11 +448,24 @@ document.getElementById('bubble').addEventListener('click',()=>toggleChat(true))
 const chatFab=document.getElementById('chatFab');
 if(chatFab) chatFab.addEventListener('click',()=>toggleChat());
 
+/* ---------------- arrival moments: chapters announce themselves ---------------- */
+let announce=null;   /* {door, t, dur} while an arrival moment plays */
+function getAnnounce(){
+  if(!announce) return null;
+  const k=announce.t/announce.dur;
+  return { p:announce.door.g.position, w:Math.sin(Math.PI*Math.min(1,k))*0.85 };
+}
+
 /* ---------------- per-frame: overworld doors ---------------- */
 let near=null;
 function overworldTick(dt,ms){
   near=null;
   const cp=wanderer.g.position;
+  if(announce){
+    announce.t+=dt;
+    announce.door.halo.intensity=14+Math.sin(ms*0.02)*6;
+    if(announce.t>=announce.dur) announce=null;
+  }
   for(const d of doors){
     const dx=cp.x-d.g.position.x, dz=cp.z-d.g.position.z, dy=cp.y-d.g.position.y;
     const dd=dx*dx+dz*dz+dy*dy;
@@ -460,6 +473,14 @@ function overworldTick(dt,ms){
     d.veil.material.opacity += ((isNear?0.75:0.35)-d.veil.material.opacity)*Math.min(1,dt*4);
     d.halo.intensity += ((isNear?12:5)-d.halo.intensity)*Math.min(1,dt*4);
     d.veil.rotation.z=Math.sin(ms*0.001+d.t*40)*0.06;
+    /* first sight: announce the chapter */
+    if(!d.announced && dd<1150 && Math.abs(state.t-d.t)<0.04){
+      d.announced=true;
+      if(!REDUCED) announce={door:d, t:0, dur:2.6};
+      sfx('chime');
+      const DD=DOMAINS[d.id];
+      fairySay('Look — '+DD.door+'. '+DD.name+' waits inside. ✧', 5200);
+    }
     if(isNear) near=d;
   }
   if(near && !transitioning){
@@ -594,7 +615,7 @@ if(restartBtn) restartBtn.addEventListener('click',()=>location.reload());
 window.__domainU=function(v){ if(activeDomain!=null) u=v; };
 
 return {
-  overworldTick,
+  overworldTick, getAnnounce,
   tick: domainTick,
   nearDoor,
   __enter: enterDomain, __exit: exitDomain,
