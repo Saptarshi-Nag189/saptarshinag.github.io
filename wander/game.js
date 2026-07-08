@@ -187,8 +187,9 @@ function scatter(t0,t1,count,builder){
       const x=p.x+nrm.x*d, z=p.z+nrm.z*d;
       if(!clearOfPath(x,z,9)) continue;
       const o=builder(i);
-      /* props stand on the ground plane, not floating at path height */
-      o.position.set(x, o.userData.gy!=null?o.userData.gy:-0.55, z);
+      /* near the road: stand on the plateau ledge; farther out: on the ground plane */
+      const base = Math.abs(d)<15.5 ? p.y-0.55 : -0.55;
+      o.position.set(x, base + (o.userData.dy||0), z);
       o.rotation.y=Math.random()*Math.PI*2;
       scene.add(o); placed=true;
     }
@@ -225,7 +226,7 @@ scatter(desertT.t0,desertT.t1,60,()=>{
     return g;
   }
   const dune=new THREE.Mesh(new THREE.SphereGeometry(rand(2,5),8,6), new THREE.MeshLambertMaterial({color:0xf2d4a0}));
-  dune.scale.y=0.28; dune.userData.gy=-0.8; return dune;
+  dune.scale.y=0.28; dune.userData.dy=-0.3; return dune;
 });
 scatter(snowT.t0,snowT.t1,70,()=>{
   const g=new THREE.Group();
@@ -305,7 +306,7 @@ scatter(cityT.t0,cityT.t1,50,()=>{  /* dark city: near-black towers, loud neon *
   const h=rand(4,18);
   const tower=new THREE.Mesh(new THREE.BoxGeometry(rand(1.6,3.4),h,rand(1.6,3.4)),
     new THREE.MeshLambertMaterial({color:[0x1c1830,0x241d3d,0x191526][Math.floor(Math.random()*3)]}));
-  tower.userData.gy=h/2-0.55;
+  tower.userData.dy=h/2;
   const neon=[0xff2d78,0x36e0ff,0xb14dff,0x2dff9e][Math.floor(Math.random()*4)];
   const glow=new THREE.Mesh(new THREE.BoxGeometry(0.4,h*0.72,0.12),
     new THREE.MeshBasicMaterial({color:neon}));
