@@ -6,6 +6,7 @@
 import * as THREE from './lib/three.module.js';
 import { FAIRY } from './twin-data.js';
 import { initDomains } from './domains.js';
+import { createAmbience } from './ambience.js';
 
 const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const sfx = n => { try{ window.SFX && SFX.play(n); }catch(e){} };
@@ -92,15 +93,15 @@ function blendAttr(t, attr){
     const t=i/SEG;
     curve.getPointAt(t,p); curve.getTangentAt(t,tan);
     nrm.crossVectors(tan,up).normalize();
-    const b=biomeAt(t);
-    const inSky = b.id==='sky';
     const c = blendAttr(t,'ground').clone();
-    const drop = inSky ? -400 : -0.55;           /* sky biome: ribbon far below (invisible) */
     for(const s of [-1,1]){
-      pos.push(p.x+nrm.x*W/2*s, p.y+drop - (inSky?0:0.0), p.z+nrm.z*W/2*s);
+      pos.push(p.x+nrm.x*W/2*s, p.y-0.55, p.z+nrm.z*W/2*s);
       col.push(c.r,c.g,c.b);
     }
-    if(i<SEG){ const a=i*2; idx.push(a,a+1,a+2, a+1,a+3,a+2); }
+    /* the sky biome gets NO road faces — a clean gap, not a stretched sheet */
+    if(i<SEG && biomeAt(i/SEG).id!=='sky' && biomeAt((i+1)/SEG).id!=='sky'){
+      const a=i*2; idx.push(a,a+1,a+2, a+1,a+3,a+2);
+    }
   }
   const g=new THREE.BufferGeometry();
   g.setAttribute('position', new THREE.Float32BufferAttribute(pos,3));
@@ -108,6 +109,27 @@ function blendAttr(t, attr){
   g.setIndex(idx); g.computeVertexNormals();
   const m=new THREE.MeshLambertMaterial({ vertexColors:true });
   scene.add(new THREE.Mesh(g,m));
+  /* cliff skirts: drop both edges to the ground so elevated stretches read as a plateau */
+  const sp=[], scol=[], sidx=[];
+  for(let i=0;i<=SEG;i++){
+    const bi=i*6;
+    for(const off of [0,3]){                 /* left edge vtx, right edge vtx */
+      const x=pos[bi+off], y=pos[bi+off+1], z=pos[bi+off+2];
+      const cr=col[bi+off]*0.72, cg=col[bi+off+1]*0.72, cb=col[bi+off+2]*0.72;
+      sp.push(x,y,z, x,-1.1,z);
+      scol.push(cr,cg,cb, cr*0.8,cg*0.8,cb*0.8);
+    }
+    if(i<SEG && biomeAt(i/SEG).id!=='sky' && biomeAt((i+1)/SEG).id!=='sky'){
+      const a=i*4;
+      sidx.push(a,a+1,a+4, a+1,a+5,a+4);      /* left wall  */
+      sidx.push(a+2,a+6,a+3, a+3,a+6,a+7);    /* right wall */
+    }
+  }
+  const sg=new THREE.BufferGeometry();
+  sg.setAttribute('position', new THREE.Float32BufferAttribute(sp,3));
+  sg.setAttribute('color', new THREE.Float32BufferAttribute(scol,3));
+  sg.setIndex(sidx); sg.computeVertexNormals();
+  scene.add(new THREE.Mesh(sg,new THREE.MeshLambertMaterial({vertexColors:true,side:THREE.DoubleSide})));
 })();
 
 /* wide soft under-plane per land biome for horizon fill */
@@ -131,7 +153,7 @@ let waterMesh=null;
   const b=BIOMES.find(x=>x.id==='river');
   const p0=curve.getPointAt(b.t0), p1=curve.getPointAt(b.t1);
   const cx=(p0.x+p1.x)/2, cz=(p0.z+p1.z)/2;
-  const g=new THREE.PlaneGeometry(Math.abs(p1.x-p0.x)+120, 130, 60, 24);
+  const g=new THREE.PlaneGeometry(Math.abs(p1.x-p0.x)+10, 78, 60, 24);
   const m=new THREE.MeshLambertMaterial({ color:0x6fd8e8, transparent:true, opacity:0.82 });
   waterMesh=new THREE.Mesh(g,m);
   waterMesh.rotation.x=-Math.PI/2;
@@ -165,7 +187,8 @@ function scatter(t0,t1,count,builder){
       const x=p.x+nrm.x*d, z=p.z+nrm.z*d;
       if(!clearOfPath(x,z,9)) continue;
       const o=builder(i);
-      o.position.set(x, p.y-0.5, z);
+      /* props stand on the ground plane, not floating at path height */
+      o.position.set(x, o.userData.gy!=null?o.userData.gy:-0.55, z);
       o.rotation.y=Math.random()*Math.PI*2;
       scene.add(o); placed=true;
     }
@@ -202,15 +225,19 @@ scatter(desertT.t0,desertT.t1,60,()=>{
     return g;
   }
   const dune=new THREE.Mesh(new THREE.SphereGeometry(rand(2,5),8,6), new THREE.MeshLambertMaterial({color:0xf2d4a0}));
-  dune.scale.y=0.28; return dune;
+  dune.scale.y=0.28; dune.userData.gy=-0.8; return dune;
 });
 scatter(snowT.t0,snowT.t1,70,()=>{
   const g=new THREE.Group();
+  /* snowy mound so no tree ever floats */
+  const drift=new THREE.Mesh(new THREE.SphereGeometry(rand(1.8,3),9,7),
+    new THREE.MeshLambertMaterial({color:0xf7f9ff}));
+  drift.scale.y=0.45; drift.position.y=0.1; g.add(drift);
   const m=new THREE.MeshLambertMaterial({color:Math.random()<0.4?0xdfe8f4:0xa8d8c8,flatShading:true});
   const c=new THREE.Mesh(new THREE.ConeGeometry(rand(0.7,1.4),rand(2,3.6),7),m);
-  c.position.y=1.4; g.add(c);
+  c.position.y=1.9; g.add(c);
   const cap=new THREE.Mesh(new THREE.ConeGeometry(0.5,0.8,7),new THREE.MeshLambertMaterial({color:0xffffff}));
-  cap.position.y=2.8; g.add(cap);
+  cap.position.y=3.3; g.add(cap);
   return g;
 });
 /* sky islands + clouds */
@@ -278,7 +305,7 @@ scatter(cityT.t0,cityT.t1,50,()=>{  /* dark city: near-black towers, loud neon *
   const h=rand(4,18);
   const tower=new THREE.Mesh(new THREE.BoxGeometry(rand(1.6,3.4),h,rand(1.6,3.4)),
     new THREE.MeshLambertMaterial({color:[0x1c1830,0x241d3d,0x191526][Math.floor(Math.random()*3)]}));
-  tower.position.y=h/2-0.5;
+  tower.userData.gy=h/2-0.55;
   const neon=[0xff2d78,0x36e0ff,0xb14dff,0x2dff9e][Math.floor(Math.random()*4)];
   const glow=new THREE.Mesh(new THREE.BoxGeometry(0.4,h*0.72,0.12),
     new THREE.MeshBasicMaterial({color:neon}));
@@ -400,9 +427,15 @@ const fairy=(function(){
 /* ---------------- state ---------------- */
 const state={
   t:0.012, vel:0, jumpV:0, jumpY:0,
-  pov:'third', biome:null, mode:'overworld',
+  pov:'third', biome:null, mode:'overworld', run:false,
   camPos:new THREE.Vector3(), camLook:new THREE.Vector3(), started:false
 };
+function setRun(v){
+  state.run=v;
+  const b=document.getElementById('runBtn');
+  if(b) b.innerHTML='<i class="fa-solid fa-person-'+(v?'running':'walking')+'"></i> '+(v?'run':'walk');
+}
+addEventListener('keydown',e=>{ if(e.key==='Shift' && !e.repeat){ setRun(!state.run); sfx('tick'); } });
 const input={left:false,right:false,up:false};
 
 /* keyboard */
@@ -429,6 +462,8 @@ bindPad('padL','left'); bindPad('padR','right'); bindPad('padU','up');
 
 /* POV toggle */
 const povBtn=document.getElementById('povBtn');
+const runBtn=document.getElementById('runBtn');
+if(runBtn) runBtn.addEventListener('click',()=>{ setRun(!state.run); sfx('select'); });
 povBtn.addEventListener('click',()=>{
   state.pov = state.pov==='third' ? 'first' : 'third';
   povBtn.innerHTML='<i class="fa-solid fa-video"></i> '+(state.pov==='third'?'3rd person':'1st person');
@@ -486,11 +521,13 @@ export function setPrompt(html){
 
 /* ---------------- ambient sound per biome ---------------- */
 let sndBiome=null;
-function biomeSound(id){
-  if(id===sndBiome) return; sndBiome=id;
+function stopSynthLoops(){
+  try{ if(window.SFX) ['stopBrook','stopWind','stopAmbient','stopCrickets','stopHum'].forEach(f=>SFX[f]&&SFX[f]()); }catch(e){}
+}
+function synthBiome(id){
   try{
     if(!window.SFX) return;
-    ['stopBrook','stopWind','stopAmbient','stopCrickets','stopHum'].forEach(f=>SFX[f]&&SFX[f]());
+    stopSynthLoops();
     if(id==='glade')       SFX.startAmbient(58);                       /* soft dawn pad     */
     else if(id==='forest') SFX.startWind({freq:760,gain:0.05,rate:0.3});/* leaves in breeze; birds chirp in tick */
     else if(id==='river')  SFX.startBrook(1);                          /* running water     */
@@ -499,7 +536,14 @@ function biomeSound(id){
     else if(id==='sky')    SFX.startWind({freq:500,gain:0.12,rate:0.11}); /* open-air rush   */
     else if(id==='city')   SFX.startHum && SFX.startHum();             /* dark synth hum    */
     else if(id==='meadow') SFX.startCrickets && SFX.startCrickets();   /* night crickets    */
+    else if(id==='rain')   SFX.startRain && SFX.startRain();            /* cabin goodnight   */
   }catch(e){}
+}
+const AMB=createAmbience(synthBiome, stopSynthLoops);
+window.WANDER_AMB=AMB;
+function biomeSound(id){
+  if(id===sndBiome) return; sndBiome=id;
+  AMB.play(id);
 }
 let chirpTimer=0;
 
@@ -540,7 +584,7 @@ function tick(ms){
   if(state.mode!=='overworld'){ domains.tick(dt,ms); return; }
 
   /* --- move --- */
-  const SPEED=0.0075;  /* t per second at full walk — 25% of v1, per user */
+  const SPEED = state.run ? 0.030 : 0.0075;   /* walk = 25% of v1 · run = original */
   const bSpeed = b0 => b0.id==='sky' ? 0.8 : 1;   /* flying drifts even slower */
   let target=0;
   const bNow=biomeAt(state.t);
@@ -638,6 +682,7 @@ function tick(ms){
       wanderer.g.position.z+_tan.z*0.3);
   }
   state.camPos.lerp(_camTarget, Math.min(1,dt*(REDUCED?12:2.6)));
+  if(!flying){ const minY=Math.max(_p.y+1.0, 0.2); if(state.camPos.y<minY) state.camPos.y=minY; }
   camera.position.copy(state.camPos);
   const lookT=Math.min(0.995,state.t+prof.ahead);
   curve.getPointAt(state.pov==='third'?lookT:Math.min(0.995,state.t+0.02),_look);

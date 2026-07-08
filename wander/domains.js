@@ -172,12 +172,15 @@ Object.keys(DOMAINS).forEach(id=>{
         new THREE.MeshBasicMaterial({color:DOOR_COLORS[id],transparent:true,opacity:ri?0.26:0.5,side:THREE.DoubleSide}));
       ring.rotation.x=-Math.PI/2; ring.position.y=0.04; sc.add(ring);
     });
-    for(let i=0;i<3;i++){
-      const shaft=new THREE.Mesh(new THREE.ConeGeometry(2.6,14,10,1,true),
-        new THREE.MeshBasicMaterial({color:0xfff6e0,transparent:true,opacity:0.08,
+    /* one light shaft per pedestal, directly overhead (aligned with each jewel) */
+    D.stations.forEach((_,i)=>{
+      const px=i%2===0?-2.6:2.6, pz=6+i*7;
+      const shaft=new THREE.Mesh(new THREE.ConeGeometry(2.2,14.4,10,1,true),
+        new THREE.MeshBasicMaterial({color:0xfff6e0,transparent:true,opacity:0.10,
           blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));
-      shaft.position.set(rand(-8,8),8,6+i*8); sc.add(shaft);
-    }
+      shaft.position.set(px,8.2,pz); sc.add(shaft);
+      const spot=new THREE.PointLight(0xfff2d8,4,9); spot.position.set(px,6.5,pz); sc.add(spot);
+    });
     for(let i=0;i<14;i++){
       const a=Math.random()*Math.PI*2, r=rand(11,23);
       const x=Math.cos(a)*r, z=Math.sin(a)*r;
@@ -649,7 +652,10 @@ function domainTick(dt,ms){
     if(restT>1.2 && !domainTick._night){
       domainTick._night=true;
       document.getElementById('night').classList.add('on');
-      try{ SFX.startRain && SFX.startRain(); }catch(e){}
+      try{
+        if(window.WANDER_AMB) window.WANDER_AMB.play('rain');
+        else SFX.startRain && SFX.startRain();
+      }catch(e){}
     }
     if(restT>6 && !domainTick._card){
       domainTick._card=true;
@@ -661,7 +667,7 @@ function domainTick(dt,ms){
   }
   /* move along z */
   let tgt=0;
-  if(input.right) tgt=1.6; if(input.left) tgt=-1.6;   /* slowed per user */
+  if(input.right) tgt=5.2; if(input.left) tgt=-5.2;   /* original domain speed, per user */
   uvel+=(tgt-uvel)*Math.min(1,dt*6);
   u=Math.max(-3.4,Math.min(IN.len, u+uvel*dt));
   const moving=Math.abs(uvel)>0.3;
