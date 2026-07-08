@@ -630,6 +630,13 @@ function tick(ms){
   walkPhase+=dt*(moving?9:2);
   wanderer.cape.rotation.z=Math.sin(walkPhase)*0.08*(moving?1:0.4);
   wanderer.cape.scale.x=1+Math.sin(walkPhase*0.7)*0.05;
+  if(!moving){                       /* idle life: breathe + glance around */
+    const br=1+Math.sin(ms*0.0016)*0.02;
+    wanderer.cape.scale.y=br; wanderer.cape.scale.z=2-br;
+    wanderer.head.rotation.y=Math.sin(ms*0.0006)*0.55;
+    wanderer.hood.rotation.y=wanderer.head.rotation.y;
+  } else { wanderer.cape.scale.y=1; wanderer.cape.scale.z=1;
+    wanderer.head.rotation.y*=0.9; wanderer.hood.rotation.y*=0.9; }
   wanderer.g.position.y+=moving&&!onWater&&!flying?Math.abs(Math.sin(walkPhase))*0.12:0;
   /* modes */
   wanderer.wL.visible=wanderer.wR.visible=flying;

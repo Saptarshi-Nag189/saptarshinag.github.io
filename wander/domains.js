@@ -77,6 +77,10 @@ function enterDomain(id){
     camera.position.set(0,4.6,-9);
     state.camLook.set(0,1.4,4);
     showToast(D.name, D.sub);
+    const dot=document.querySelector('#journey span[data-d="'+id+'"]');
+    if(dot && !dot.classList.contains('lit')){ dot.classList.add('lit'); sfx('coin'); }
+    const dr=doors.find(d=>d.id===id);
+    if(dr){ dr.veil.material.color.set(0xffd98a); dr.halo.color.set(0xffd98a); }
     if(!escHinted){ escHinted=true; fairySay(FAIRY.doorEnter+' (Esc steps back outside, anytime.)', 4600); }
     else fairySay(FAIRY.doorEnter, 3200);
     setPrompt(null);
@@ -335,7 +339,7 @@ const MACHINES={
     const DEV=['cam','lock','therm','plug','sense'];
     let t=0,phase='calm',victim=0,contained=false; const trust=DEV.map(()=>100);
     qb.addEventListener('click',()=>{ if(phase!=='attack'||contained)return; contained=true; phase='ok'; sfx('lock');
-      machineDone(); stampRow(host,['96.97% detection (flow/RF)','63 features from raw PCAPs','SPIFFE/SPIRE · mTLS · 2× IoTaIS\'25']); });
+      machineDone(); stampRow(host,['97.93% accuracy · <1 ms per window','XGBoost + MLP on the edge','SHAP explainability · 2× IoTaIS\'25']); });
     loop(()=>{ t++;
       if(phase==='calm'&&t>140){ phase='attack'; qb.disabled=false; sfx('error'); }
       if(phase==='attack'&&!contained){ trust[victim]=Math.max(10,trust[victim]-0.4); if(t%60===0) sfx('beep'); }
@@ -441,6 +445,8 @@ function canvas_click(){
 }
 document.getElementById('bubble').style.pointerEvents='auto';
 document.getElementById('bubble').addEventListener('click',()=>toggleChat(true));
+const chatFab=document.getElementById('chatFab');
+if(chatFab) chatFab.addEventListener('click',()=>toggleChat());
 
 /* ---------------- per-frame: overworld doors ---------------- */
 let near=null;
