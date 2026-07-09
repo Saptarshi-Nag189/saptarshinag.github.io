@@ -170,6 +170,24 @@
   #chatIn button{border:none;border-radius:50%;width:38px;height:38px;cursor:pointer;color:#fff;
     background:linear-gradient(135deg,#ff9ecb,#c78ad6);font-size:13px}
 
+  /* journey tracker */
+  #journey{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:20;display:flex;gap:9px;
+    background:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.8);border-radius:999px;
+    padding:8px 14px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+  #journey span{width:9px;height:9px;border-radius:50%;background:rgba(120,100,150,.25);
+    transition:background .6s, box-shadow .6s}
+  #journey span.lit{background:#ffd98a;box-shadow:0 0 8px rgba(255,217,138,.9)}
+  /* chat fab (touch devices have no T key) */
+  #chatFab{position:fixed;right:16px;bottom:24px;z-index:22;width:52px;height:52px;border-radius:50%;
+    border:1px solid rgba(255,255,255,.9);color:#fff;font-size:19px;cursor:pointer;
+    background:linear-gradient(135deg,#ff9ecb,#c78ad6);box-shadow:0 10px 28px rgba(199,138,214,.45);
+    transition:transform .15s}
+  #chatFab:hover{transform:translateY(-2px) scale(1.05)}
+  @media (max-width:640px){
+    #journey{top:auto;bottom:92px}
+    #plate{left:50% !important;right:auto !important;top:auto !important;bottom:96px !important;
+      transform:translateX(-50%) !important;max-height:38vh;width:min(430px,94vw)}
+  }
   /* night fade for the goodnight ending */
   #night{position:fixed;inset:0;z-index:38;pointer-events:none;background:#05060f;opacity:0;
     transition:opacity 6s ease}
@@ -217,6 +235,11 @@
 </div>
 
 <div id="chip">the <b>wander</b> · saptarshi nag</div>
+<div id="journey" aria-label="Chapters visited">
+  <span data-d="forest"></span><span data-d="river"></span><span data-d="desert"></span>
+  <span data-d="snow"></span><span data-d="sky"></span><span data-d="city"></span><span data-d="meadow"></span>
+</div>
+<button id="chatFab" aria-label="Talk to the fairy"><i class="fa-solid fa-comment-dots"></i></button>
 <a id="exitLink" href="../demos/index.html"><i class="fa-solid fa-door-open"></i> leave</a>
 <button id="povBtn"><i class="fa-solid fa-video"></i> 3rd person</button>
 <button id="runBtn" style="position:fixed;top:98px;right:16px;z-index:20;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;color:#8a7fa8;background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.8);border-radius:999px;padding:8px 14px;cursor:pointer;backdrop-filter:blur(8px);transition:.2s"><i class="fa-solid fa-person-walking"></i> walk</button>

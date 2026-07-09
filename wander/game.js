@@ -164,6 +164,11 @@ let waterMesh=null;
 
 /* ---------------- props ---------------- */
 const rand=(a,b)=>a+Math.random()*(b-a);
+/* per-biome prop groups: anything beyond the fog window is culled wholesale */
+const biomeGroups={};
+BIOMES.forEach(b=>{ const g=new THREE.Group(); g.userData={t0:b.t0,t1:b.t1}; biomeGroups[b.id]=g; scene.add(g); });
+function groupFor(t){ return biomeGroups[biomeAt(t).id]; }
+function freeze(o){ o.traverse(n=>{ n.updateMatrix(); n.matrixAutoUpdate=false; }); }
 /* dense path sampling so no prop can sit on ANY bend of the road */
 const PATH_SAMPLES=(function(){ const arr=[]; const v=new THREE.Vector3();
   for(let i=0;i<=700;i++){ curve.getPointAt(i/700,v); arr.push(v.x,v.z); } return arr; })();
@@ -251,7 +256,7 @@ scatter(snowT.t0,snowT.t1,70,()=>{
       new THREE.MeshLambertMaterial({color:0xffffff,transparent:true,opacity:0.85}));
     cl.scale.y=0.42;
     cl.position.set(p.x+rand(-40,40), p.y+rand(-16,10), p.z+rand(-40,40));
-    scene.add(cl);
+    biomeGroups.sky.add(cl); freeze(cl);
   }
   for(let i=0;i<6;i++){
     const t=rand(skyT.t0+0.02,skyT.t1-0.02);
@@ -262,7 +267,7 @@ scatter(snowT.t0,snowT.t1,70,()=>{
     isle.add(top);
     const t2=tree(0x8fd89a,0xffb0cf); t2.position.y=1.2; isle.add(t2);
     isle.position.set(p.x+rand(-26,26), p.y+rand(-10,8), p.z+rand(-26,26));
-    scene.add(isle);
+    biomeGroups.sky.add(isle); freeze(isle);
   }
 })();
 /* sky life: bird flocks + the manta (Sky:CotL homage) */
@@ -344,6 +349,102 @@ const flies=(function(){
   const pts=new THREE.Points(g,m); scene.add(pts);
   return {pts,ph};
 })();
+
+/* ---------------- path-side juice: the world reacts to you ---------------- */
+const juice=[];
+(function buildJuice(){
+  const p=new THREE.Vector3(), tan=new THREE.Vector3(), nrm=new THREE.Vector3(), up=new THREE.Vector3(0,1,0);
+  function place(t,side,d){
+    curve.getPointAt(t,p); curve.getTangentAt(t,tan);
+    nrm.crossVectors(tan,up).normalize();
+    return {x:p.x+nrm.x*d*side, y:p.y, z:p.z+nrm.z*d*side};
+  }
+  /* ground birds (glade, forest, river banks): flutter away as you pass */
+  for(let i=0;i<26;i++){
+    const t=[rand(0.01,0.07),rand(0.08,0.23),rand(0.24,0.39)][i%3];
+    const pos=place(t, Math.random()<0.5?-1:1, rand(3.4,7));
+    const bird=new THREE.Group();
+    const bm=new THREE.MeshLambertMaterial({color:[0xffffff,0xffd9ec,0x8fd8ff][i%3],side:THREE.DoubleSide});
+    const w1=new THREE.Mesh(new THREE.ConeGeometry(0.22,0.55,3),bm); w1.rotation.z=Math.PI/2; w1.position.x=-0.24;
+    const w2=w1.clone(); w2.rotation.z=-Math.PI/2; w2.position.x=0.24;
+    bird.add(w1,w2);
+    bird.position.set(pos.x,0.25,pos.z);
+    bird.userData={w1,w2};
+    scene.add(bird);
+    juice.push({t,kind:'bird',obj:bird,home:{...pos},state:'idle',a:0,dir:Math.random()*7});
+  }
+  /* chime flowers (glade, desert, meadow): ring softly as you brush past */
+  for(let i=0;i<24;i++){
+    const t=[rand(0.01,0.07),rand(0.41,0.53),rand(0.946,0.99)][i%3];
+    const pos=place(t, Math.random()<0.5?-1:1, rand(2.6,4.6));
+    const fg=new THREE.Group();
+    const stem=new THREE.Mesh(new THREE.CylinderGeometry(0.035,0.05,0.7),new THREE.MeshLambertMaterial({color:0x7fcf8f}));
+    stem.position.y=0.35; fg.add(stem);
+    const bell=new THREE.Mesh(new THREE.SphereGeometry(0.2,7,6),
+      new THREE.MeshBasicMaterial({color:[0xffd98a,0xff9ecb,0x9defc9,0x8fd8ff][i%4]}));
+    bell.position.y=0.78; fg.add(bell);
+    fg.position.set(pos.x,-0.05,pos.z);
+    fg.userData={bell};
+    scene.add(fg);
+    juice.push({t,kind:'flower',obj:fg,state:'idle',a:0});
+  }
+  /* snow poffs: bushes shrug off their snow as you pass */
+  for(let i=0;i<12;i++){
+    const t=rand(0.54,0.62);
+    const pos=place(t, Math.random()<0.5?-1:1, rand(3,5.5));
+    const bush=new THREE.Group();
+    const body=new THREE.Mesh(new THREE.IcosahedronGeometry(0.55,0),new THREE.MeshLambertMaterial({color:0x9fc9b8,flatShading:true}));
+    body.position.y=0.4; bush.add(body);
+    const cap=new THREE.Mesh(new THREE.SphereGeometry(0.42,8,6),new THREE.MeshLambertMaterial({color:0xffffff}));
+    cap.scale.y=0.5; cap.position.y=0.85; bush.add(cap);
+    bush.position.set(pos.x,-0.05,pos.z);
+    bush.userData={cap};
+    scene.add(bush);
+    juice.push({t,kind:'poff',obj:bush,state:'idle',a:0});
+  }
+})();
+let juiceCount=0;
+function juiceTick(dt,ms){
+  const cp=wanderer.g.position;
+  for(const j of juice){
+    if(j.state==='idle'){
+      if(Math.abs(j.t-state.t)>0.02) continue;
+      const dx=cp.x-j.obj.position.x, dz=cp.z-j.obj.position.z;
+      if(dx*dx+dz*dz<(j.kind==='bird'?30:9)){
+        j.state='go'; j.a=0; juiceCount++;
+        if(j.kind==='bird') sfx('chirp');
+        else if(j.kind==='flower') sfx('chime');
+        else sfx('step');
+      }
+    } else if(j.state==='go'){
+      j.a+=dt;
+      if(j.kind==='bird'){
+        j.obj.position.y=0.25+j.a*j.a*6;
+        j.obj.position.x+=Math.cos(j.dir)*dt*7;
+        j.obj.position.z+=Math.sin(j.dir)*dt*7;
+        const f=Math.sin(ms*0.03)*0.9;
+        j.obj.userData.w1.rotation.y=f; j.obj.userData.w2.rotation.y=-f;
+        if(j.a>2.2){ j.obj.visible=false; j.state='gone'; j.a=0; }
+      } else if(j.kind==='flower'){
+        const k=Math.min(1,j.a/0.5);
+        j.obj.userData.bell.scale.setScalar(1+Math.sin(k*Math.PI)*0.7);
+        j.obj.rotation.z=Math.sin(j.a*14)*0.14*(1-k);
+        if(j.a>0.9){ j.state='rest'; j.a=0; }
+      } else {
+        j.obj.userData.cap.scale.y=Math.max(0.02,0.5-j.a*0.8);
+        j.obj.userData.cap.position.y=0.85-j.a*0.5;
+        if(j.a>0.7){ j.obj.userData.cap.visible=false; j.state='rest'; j.a=0; }
+      }
+    } else if(j.state==='gone' || j.state==='rest'){
+      j.a+=dt;
+      if(j.a>24){ /* the world quietly resets behind you */
+        j.state='idle'; j.a=0;
+        if(j.kind==='bird'){ j.obj.visible=true; j.obj.position.set(j.home.x,0.25,j.home.z); }
+        if(j.kind==='poff'){ j.obj.userData.cap.visible=true; j.obj.userData.cap.scale.y=0.5; j.obj.userData.cap.position.y=0.85; }
+      }
+    }
+  }
+}
 
 /* ---------------- character ---------------- */
 export const wanderer=(function(){
@@ -630,6 +731,13 @@ function tick(ms){
   walkPhase+=dt*(moving?9:2);
   wanderer.cape.rotation.z=Math.sin(walkPhase)*0.08*(moving?1:0.4);
   wanderer.cape.scale.x=1+Math.sin(walkPhase*0.7)*0.05;
+  if(!moving){                       /* idle life: breathe + glance around */
+    const br=1+Math.sin(ms*0.0016)*0.02;
+    wanderer.cape.scale.y=br; wanderer.cape.scale.z=2-br;
+    wanderer.head.rotation.y=Math.sin(ms*0.0006)*0.55;
+    wanderer.hood.rotation.y=wanderer.head.rotation.y;
+  } else { wanderer.cape.scale.y=1; wanderer.cape.scale.z=1;
+    wanderer.head.rotation.y*=0.9; wanderer.hood.rotation.y*=0.9; }
   wanderer.g.position.y+=moving&&!onWater&&!flying?Math.abs(Math.sin(walkPhase))*0.12:0;
   /* modes */
   wanderer.wL.visible=wanderer.wR.visible=flying;
@@ -688,6 +796,8 @@ function tick(ms){
   const lookT=Math.min(0.995,state.t+prof.ahead);
   curve.getPointAt(state.pov==='third'?lookT:Math.min(0.995,state.t+0.02),_look);
   _look.y+= state.pov==='third'?1.2:1.7;
+  const ann=domains.getAnnounce ? domains.getAnnounce() : null;
+  if(ann){ _look.lerp(ann.p, ann.w); }                 /* the chapter announces itself */
   state.camLook.lerp(_look, Math.min(1,dt*3.4));
   camera.lookAt(state.camLook);
 
@@ -698,16 +808,22 @@ function tick(ms){
   scene.background.lerp(skyC, Math.min(1,dt*2));
   scene.fog.far += ((b.far)-scene.fog.far)*Math.min(1,dt*1.5);
 
-  /* --- water ripple --- */
-  if(waterMesh){
+  /* --- biome culling: whole prop groups beyond the fog window skip the GPU --- */
+  for(const id in biomeGroups){
+    const gd=biomeGroups[id].userData;
+    biomeGroups[id].visible = state.t > gd.t0-0.12 && state.t < gd.t1+0.12;
+  }
+
+  /* --- water ripple (only animated when the river can be seen) --- */
+  if(waterMesh && Math.abs(state.t-0.317)<0.17){
     const pos=waterMesh.geometry.attributes.position, base=waterMesh.userData.base;
     for(let i=0;i<pos.count;i++){
       pos.array[i*3+2]=base[i*3+2]+Math.sin(ms*0.0016+base[i*3]*0.25+base[i*3+1]*0.2)*0.16;
     }
     pos.needsUpdate=true;
   }
-  /* sky life animation */
-  if(skyLife.manta){
+  /* sky life animation (only when the sky biome is near) */
+  if(skyLife.manta && Math.abs(state.t-0.735)<0.24){
     const c=skyLife.center, mt=ms*0.00008;
     const mx=c.x+Math.cos(mt*2*Math.PI)*95, mz=c.z+Math.sin(mt*2*Math.PI)*55;
     const my=c.y+Math.sin(ms*0.0006)*10+4;
@@ -749,8 +865,9 @@ function tick(ms){
     fairySay(FAIRY.idle[Math.floor(Math.random()*FAIRY.idle.length)],4500);
   }
 
-  /* doors */
+  /* doors + path-side life */
   domains.overworldTick(dt,ms);
+  juiceTick(dt,ms);
 
   renderer.render(scene,camera);
 }
@@ -763,4 +880,5 @@ window.__wander=function(){ return {
 };};
 window.__teleport=function(t){ state.t=Math.max(0.005,Math.min(0.995,t)); };
 window.__press=function(k,v){ input[k]=v; };
+window.__juice=function(){ return juiceCount; };
 window.__start=function(){ if(!state.started){ startBtn.click(); } };

@@ -106,24 +106,24 @@
     <section class="metrics" aria-label="Key results">
       <div class="container metrics__grid">
         <div class="metric reveal" style="--i:0">
-          <span class="metric__value mono">96.97<span class="metric__unit">%</span></span>
-          <span class="metric__label mono">IoT attack detection accuracy</span>
+          <span class="metric__value mono">97.93<span class="metric__unit">%</span></span>
+          <span class="metric__label mono">IoT attack detection — C-DAC Zero-Trust framework</span>
         </div>
         <div class="metric reveal" style="--i:1">
           <span class="metric__value mono">99.8<span class="metric__unit">%</span></span>
-          <span class="metric__label mono">pulsar detection F1-score</span>
+          <span class="metric__label mono">pulsar detection F1 — NCRA-TIFR ResNet1D</span>
         </div>
         <div class="metric reveal" style="--i:2">
           <span class="metric__value mono">4.1<span class="metric__unit">×</span></span>
-          <span class="metric__label mono">GPU training speedup</span>
+          <span class="metric__label mono">GPU training speedup — F1 tyre-strategy CUDA kernels</span>
         </div>
         <div class="metric reveal" style="--i:3">
           <span class="metric__value mono">50<span class="metric__unit">%</span></span>
-          <span class="metric__label mono">signal pipeline latency cut</span>
+          <span class="metric__label mono">pipeline latency cut — GMRT telescope refactor</span>
         </div>
         <div class="metric reveal" style="--i:4">
           <span class="metric__value mono">70M<span class="metric__unit">+</span></span>
-          <span class="metric__label mono">samples processed</span>
+          <span class="metric__label mono">samples processed — NCRA pulsar search</span>
         </div>
       </div>
     </section>
@@ -190,8 +190,11 @@
               <li>Two-stage hybrid detection pipeline: window model (1-second sliding windows, 7 attack classes) + flow
                 model for longer-duration patterns. Compared RF, XGBoost, SVM, MLP, and Voting Ensemble across 6
                 preprocessing iterations with SMOTE and Optuna (TPE) hyperparameter search.</li>
-              <li>Best results: <strong>96.97% accuracy</strong> (flow/RF); <strong>90.86% accuracy / 86.78% macro
-                  F1</strong> (window/Voting Ensemble).</li>
+              <li>Detection pipeline runs at <strong>&lt;1 ms inference latency per window</strong> (optimised XGBoost
+                and MLP architectures) — deployable on edge devices; best accuracy <strong>97.93%</strong> on
+                high-throughput network data.</li>
+              <li>Integrated <strong>SHAP-based explainability</strong> to debug model behaviour and keep automated
+                decisions transparent; SQL pipelines for continuous logging plus live monitoring dashboards.</li>
               <li>Engineered 63 statistical and behavioural features from raw PCAPs using Scapy and PyShark (MAC entropy,
                 frame rate statistics, sequence gap analysis, EAPOL key MIC ratios, beacon timestamp variance).</li>
               <li>Live PCAP drop-folder pipeline via Watchdog: MD5 deduplication, multi-threaded extraction, batch

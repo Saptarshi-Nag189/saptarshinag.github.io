@@ -549,9 +549,9 @@ function act4(stage, api){
       stEl.textContent='THREAT CONTAINED · cam-01 ISOLATED';
       qbtn.disabled=true; qbtn.textContent='contained ✓';
       api.stamp(stamps,'fa-shield-halved','deauth-flood contained · window model p=0.97',0);
-      api.stamp(stamps,'fa-crosshairs','flow/RF 96.97% acc · window ensemble 90.86% / 86.78% F1',280);
+      api.stamp(stamps,'fa-crosshairs','C-DAC IoT detection: 97.93% acc · <1 ms/window (XGBoost/MLP)',280);
       api.stamp(stamps,'fa-network-wired','63 features from raw PCAPs · Scapy/PyShark · SMOTE+Optuna',560);
-      api.stamp(stamps,'fa-key','SPIFFE/SPIRE identity · mTLS · OTP 2FA',840);
+      api.stamp(stamps,'fa-key','SHAP explainability · SQL pipelines · live dashboards',840);
       api.stamp(stamps,'fa-book','cited: 2 papers @ IoTaIS 2025, Bali (monitoring + Zero-Trust survey)',1120);
       api.done('intrusion contained — the detector flagged, you executed');
     } else {
@@ -907,7 +907,7 @@ function act7(stage, api){
     '<span class="c">▸</span> you <b>compiled the engineer</b> — B.Tech <span class="y">9.44</span> · GATE <span class="y">top 5%</span> · M.Tech AI @ DIAT (DRDO) <span class="y">8.64</span>',
     '<span class="c">▸</span> you <b>parallelized a radio telescope</b> — GMRT latency <span class="y">−50%</span>, real-time unblocked',
     '<span class="c">▸</span> you <b>folded a pulsar out of noise</b> — his model: <span class="y">99.8% F1</span> across <span class="y">70M+ samples</span> (NCRA-TIFR)',
-    '<span class="c">▸</span> you <b>contained a live intrusion</b> — Zero-Trust @ C-DAC · <span class="y">96.97%</span> detection · 63 PCAP features · 2× IoTaIS\'25',
+    '<span class="c">▸</span> you <b>contained a live intrusion</b> — Zero-Trust @ C-DAC · <span class="y">97.93%</span> · <span class="y">&lt;1 ms</span>/window · 2× IoTaIS\'25',
     '<span class="c">▸</span> you <b>called a pit stop against a PINN</b> — thermal/mechanical split · <span class="y">4.1×</span> CUDA speedup',
     '<span class="c">▸</span> you <b>queried the oracle</b> — local RAG <span class="y">&lt;50 ms</span> · agent graphs · 4-bit Llama',
     '<span class="c">▸</span> conclusion: <b>one operator behind all of it — Saptarshi Nag, AI/ML Engineer.</b>'

@@ -419,7 +419,7 @@
         +'framework with ML-based threat detection across multiple wireless protocols. Past projects span physics-informed neural networks, '
         +'GPU-accelerated scientific computing, LLM fine-tuning, and RAG systems.</p>'
         +'<div class="cards">'
-        +card('96.97%','IoT Detection','Attack-detection accuracy on protocol-aware IoT traffic monitoring.','live model','fa-shield-halved')
+        +card('97.93%','IoT Detection','Attack-detection accuracy on protocol-aware IoT traffic monitoring.','live model','fa-shield-halved')
         +card('99.8%','Pulsar F1','F1-score for weak pulsar detection at low signal-to-noise ratio.','signal pipeline','fa-satellite-dish')
         +card('4.1×','GPU Speedup','Training acceleration via CUDA / CuPy and physics-informed loss.','hpc','fa-microchip')
         +card('50%','Latency Cut','Signal-pipeline latency reduction unblocking real-time processing.','optimisation','fa-gauge-high')
@@ -435,7 +435,7 @@
           'Building real-time IoT security systems combining Zero Trust architecture with ML-based threat detection across multiple wireless protocols.',
           ['Built a real-time Zero Trust security framework for IoT networks covering WiFi (802.11), BLE, Zigbee, and LoRa; ML-based attack detection feeds a continuous 7-pillar device trust score engine.',
            'Two-stage hybrid detection pipeline: window model (1-second sliding windows, 7 attack classes) + flow model for longer-duration patterns. Compared RF, XGBoost, SVM, MLP, and Voting Ensemble across 6 preprocessing iterations with SMOTE and Optuna (TPE) hyperparameter search.',
-           'Best results: 96.97% accuracy (flow/RF); 90.86% accuracy / 86.78% macro F1 (window/Voting Ensemble).',
+           'Best results: 97.93% accuracy (flow/RF); 90.86% accuracy / 86.78% macro F1 (window/Voting Ensemble).',
            'Engineered 63 statistical and behavioural features from raw PCAPs using Scapy and PyShark (MAC entropy, frame rate statistics, sequence gap analysis, EAPOL key MIC ratios, beacon timestamp variance).',
            'Live PCAP drop-folder pipeline via Watchdog: MD5 deduplication, multi-threaded extraction, batch inference, per-resource thread-safe locking.',
            'Integrated SPIFFE/SPIRE workload identity, mTLS, OTP-based 2FA. Co-authored two papers published at IoTaIS 2025.'])
@@ -613,7 +613,7 @@
   /* ---------------- TELEMETRY METRICS ---------------- */
   var tel = document.getElementById('telemetry');
   var METRICS = [
-    {name:'IoT DETECTION ACC', target:96.97, unit:'%', dec:2, type:'bar', max:100},
+    {name:'IoT DETECTION ACC', target:97.93, unit:'%', dec:2, type:'bar', max:100},
     {name:'PULSAR F1-SCORE',   target:99.8,  unit:'%', dec:1, type:'bar', max:100},
     {name:'PIPELINE LATENCY',  target:50,    unit:'% cut', dec:0, type:'bar', max:100}
   ];
