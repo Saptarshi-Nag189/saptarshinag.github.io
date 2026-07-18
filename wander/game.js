@@ -116,7 +116,7 @@ function blendAttr(t, attr){
     for(const off of [0,3]){                 /* left edge vtx, right edge vtx */
       const x=pos[bi+off], y=pos[bi+off+1], z=pos[bi+off+2];
       const cr=col[bi+off]*0.72, cg=col[bi+off+1]*0.72, cb=col[bi+off+2]*0.72;
-      sp.push(x,y,z, x,-1.1,z);
+      sp.push(x,y,z, x,-1.9,z);
       scol.push(cr,cg,cb, cr*0.8,cg*0.8,cb*0.8);
     }
     if(i<SEG && biomeAt(i/SEG).id!=='sky' && biomeAt((i+1)/SEG).id!=='sky'){
@@ -132,19 +132,32 @@ function blendAttr(t, attr){
   scene.add(new THREE.Mesh(sg,new THREE.MeshLambertMaterial({vertexColors:true,side:THREE.DoubleSide})));
 })();
 
-/* wide soft under-plane per land biome for horizon fill */
-(function underPlanes(){
-  BIOMES.forEach(b=>{
-    if(b.id==='sky') return;
-    const mid=(b.t0+b.t1)/2, p=curve.getPointAt(mid);
-    const len=(b.t1-b.t0)*CURVE_LEN+80;
-    const g=new THREE.CircleGeometry(len*0.62, 26);
-    const m=new THREE.MeshLambertMaterial({ color:new THREE.Color(b.ground).multiplyScalar(0.93) });
-    const mesh=new THREE.Mesh(g,m);
-    mesh.rotation.x=-Math.PI/2; mesh.position.set(p.x,(b.id==='river'?-0.9:-0.8)+p.y*0, p.z);
-    mesh.position.y = b.id==='river' ? -0.9 : -0.8;
-    scene.add(mesh);
-  });
+/* wide ground ribbon for horizon fill — follows the path, blends colours at
+   boundaries exactly like the road, so biomes can never bleed into each other */
+(function groundRibbon(){
+  const SEG=200, W=380;
+  const pos=[], col=[], idx=[];
+  const p=new THREE.Vector3(), tan=new THREE.Vector3(), nrm=new THREE.Vector3(), up=new THREE.Vector3(0,1,0);
+  for(let i=0;i<=SEG;i++){
+    const t=i/SEG;
+    curve.getPointAt(t,p); curve.getTangentAt(t,tan);
+    nrm.crossVectors(tan,up).normalize();
+    const c=blendAttr(t,'ground').clone().multiplyScalar(0.93);
+    for(const s of [-1,1]){
+      pos.push(p.x+nrm.x*W/2*s, -0.85 - t*0.6, p.z+nrm.z*W/2*s);
+      col.push(c.r,c.g,c.b);
+    }
+    if(i<SEG && biomeAt(i/SEG).id!=='sky' && biomeAt((i+1)/SEG).id!=='sky'){
+      const a=i*2; idx.push(a,a+1,a+2, a+1,a+3,a+2);
+    }
+  }
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos,3));
+  g.setAttribute('color', new THREE.Float32BufferAttribute(col,3));
+  g.setIndex(idx); g.computeVertexNormals();
+  const mesh=new THREE.Mesh(g,new THREE.MeshLambertMaterial({vertexColors:true}));
+  mesh.updateMatrix(); mesh.matrixAutoUpdate=false;
+  scene.add(mesh);
 })();
 
 /* ---------------- water (river) ---------------- */
@@ -581,6 +594,7 @@ const CAMKEYS=[
   { t:0.60,  az: 1.2,  dist:15, h:4,   ahead:0.01  },   /* snow: side drift */
   { t:0.74,  az: 0.0,  dist:17, h:3.2, ahead:0.02  },   /* sky: behind, open */
   { t:0.79,  az:-2.2,  dist:19, h:6,   ahead:0.016 },   /* sky late: slow orbit feel */
+  { t:0.835, az:-0.3,  dist:15, h:8,   ahead:0.012 },   /* the dive: settle high behind */
   { t:0.88,  az:-0.9,  dist:12, h:5,   ahead:0.012 },   /* city: 3/4 view */
   { t:0.97,  az: 0.5,  dist:10, h:3,   ahead:0.008 }    /* meadow: close & warm */
 ];
@@ -791,7 +805,9 @@ function tick(ms){
       wanderer.g.position.z+_tan.z*0.3);
   }
   state.camPos.lerp(_camTarget, Math.min(1,dt*(REDUCED?12:2.6)));
-  if(!flying){ const minY=Math.max(_p.y+1.0, 0.2); if(state.camPos.y<minY) state.camPos.y=minY; }
+  /* the camera may never sink below the world surface — flying or not */
+  const minY = flying ? 0.6 : Math.max(_p.y+1.0, 0.2);
+  if(state.camPos.y<minY) state.camPos.y=minY;
   camera.position.copy(state.camPos);
   const lookT=Math.min(0.995,state.t+prof.ahead);
   curve.getPointAt(state.pov==='third'?lookT:Math.min(0.995,state.t+0.02),_look);
@@ -799,6 +815,7 @@ function tick(ms){
   const ann=domains.getAnnounce ? domains.getAnnounce() : null;
   if(ann){ _look.lerp(ann.p, ann.w); }                 /* the chapter announces itself */
   state.camLook.lerp(_look, Math.min(1,dt*3.4));
+  if(state.camLook.y<-0.4) state.camLook.y=-0.4;
   camera.lookAt(state.camLook);
 
   /* --- environment blend (smooth, per-frame lerp) --- */
