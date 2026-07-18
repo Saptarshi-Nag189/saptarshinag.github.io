@@ -63,6 +63,7 @@ const CURVE_LEN = curve.getLength();
 
 const RIVER_B=BIOMES.find(b=>b.id==='river');
 const BOARD_T=RIVER_B.t0+0.012, ALIGHT_T=RIVER_B.t1-0.012;   /* the sailed stretch */
+const CITY_B=BIOMES.find(b=>b.id==='city');
 
 export function biomeAt(t){
   for(const b of BIOMES) if(t>=b.t0 && t<=b.t1) return b;
@@ -97,6 +98,11 @@ function blendAttr(t, attr){
     curve.getPointAt(t,p); curve.getTangentAt(t,tan);
     nrm.crossVectors(tan,up).normalize();
     const c = blendAttr(t,'ground').clone();
+    /* the city's avenue reads as a road, not a black slope */
+    if(t>CITY_B.t0-0.02 && t<CITY_B.t1+0.015){
+      const cw=Math.min(1, Math.min((t-(CITY_B.t0-0.02))/0.025, ((CITY_B.t1+0.015)-t)/0.025));
+      c.lerp(new THREE.Color(0x342b5e), Math.max(0,cw));
+    }
     for(const s of [-1,1]){
       pos.push(p.x+nrm.x*W/2*s, p.y-0.55, p.z+nrm.z*W/2*s);
       col.push(c.r,c.g,c.b);
@@ -137,6 +143,28 @@ function blendAttr(t, attr){
   sg.setAttribute('color', new THREE.Float32BufferAttribute(scol,3));
   sg.setIndex(sidx); sg.computeVertexNormals();
   scene.add(new THREE.Mesh(sg,new THREE.MeshLambertMaterial({vertexColors:true,side:THREE.DoubleSide})));
+  /* neon edge lines along the city avenue */
+  for(const side of [-1,1]){
+    const lp=[], li=[];
+    let n=0;
+    for(let i=0;i<=SEG;i++){
+      const t=i/SEG;
+      if(t<CITY_B.t0-0.004 || t>CITY_B.t1) continue;
+      curve.getPointAt(t,p); curve.getTangentAt(t,tan);
+      nrm.crossVectors(tan,up).normalize();
+      const e=W/2-0.5;
+      lp.push(p.x+nrm.x*e*side-nrm.x*0.15, p.y-0.42, p.z+nrm.z*e*side-nrm.z*0.15);
+      lp.push(p.x+nrm.x*e*side+nrm.x*0.15, p.y-0.42, p.z+nrm.z*e*side+nrm.z*0.15);
+      if(n>0){ const a=(n-1)*2; li.push(a,a+1,a+2, a+1,a+3,a+2); }
+      n++;
+    }
+    const lg=new THREE.BufferGeometry();
+    lg.setAttribute('position', new THREE.Float32BufferAttribute(lp,3));
+    lg.setIndex(li);
+    const line=new THREE.Mesh(lg,new THREE.MeshBasicMaterial({color:side<0?0xff2d78:0x36e0ff,transparent:true,opacity:0.85}));
+    line.updateMatrix(); line.matrixAutoUpdate=false;
+    scene.add(line);
+  }
 })();
 
 /* wide ground ribbon for horizon fill — follows the path, blends colours at
