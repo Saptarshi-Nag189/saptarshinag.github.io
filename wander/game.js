@@ -182,9 +182,7 @@ function blendAttr(t, attr){
       pos.push(p.x+nrm.x*W/2*s, -0.85 - t*0.6, p.z+nrm.z*W/2*s);
       col.push(c.r,c.g,c.b);
     }
-    if(i<SEG && biomeAt(i/SEG).id!=='sky' && biomeAt((i+1)/SEG).id!=='sky'){
-      const a=i*2; idx.push(a,a+1,a+2, a+1,a+3,a+2);
-    }
+    if(i<SEG){ const a=i*2; idx.push(a,a+1,a+2, a+1,a+3,a+2); }
   }
   const g=new THREE.BufferGeometry();
   g.setAttribute('position', new THREE.Float32BufferAttribute(pos,3));
@@ -237,7 +235,8 @@ function clearOfPath(x,z,min){
   }
   return true;
 }
-function scatter(t0,t1,count,builder){
+function scatter(t0,t1,count,builder,dmin,dmax){
+  dmin=dmin||13.5; dmax=dmax||28;
   const p=new THREE.Vector3(), tan=new THREE.Vector3(), nrm=new THREE.Vector3(), up=new THREE.Vector3(0,1,0);
   for(let i=0;i<count;i++){
     let placed=false;
@@ -245,7 +244,7 @@ function scatter(t0,t1,count,builder){
       const t=rand(t0,t1);
       curve.getPointAt(t,p); curve.getTangentAt(t,tan);
       nrm.crossVectors(tan,up).normalize();
-      const side=Math.random()<0.5?-1:1, d=rand(13.5,28)*side;
+      const side=Math.random()<0.5?-1:1, d=rand(dmin,dmax)*side;
       const x=p.x+nrm.x*d, z=p.z+nrm.z*d;
       if(!clearOfPath(x,z,9)) continue;
       const o=builder(i);
@@ -389,7 +388,7 @@ const skyLife={flocks:[],manta:null};
 })();
 
 /* city towers */
-scatter(cityT.t0,cityT.t1,72,()=>{  /* dark city: near-black towers, loud neon */
+scatter(cityT.t0+0.007,cityT.t1,72,()=>{  /* dark city: towers hug the lit avenue */
   const h=rand(4,18);
   const tower=new THREE.Mesh(new THREE.BoxGeometry(rand(1.6,3.4),h,rand(1.6,3.4)),
     new THREE.MeshLambertMaterial({color:[0x1c1830,0x241d3d,0x191526][Math.floor(Math.random()*3)]}));
@@ -529,6 +528,65 @@ function juiceTick(dt,ms){
   }
 }
 
+/* ---------------- memory sparks: seven hidden lights, one per chapter ------- */
+const SPARK_TS=[0.13,0.29,0.44,0.57,0.72,0.86,0.955];
+const sparks=[];
+(function buildSparks(){
+  const p=new THREE.Vector3(), tan=new THREE.Vector3(), nrm=new THREE.Vector3(), up=new THREE.Vector3(0,1,0);
+  SPARK_TS.forEach((t,i)=>{
+    curve.getPointAt(t,p); curve.getTangentAt(t,tan);
+    nrm.crossVectors(tan,up).normalize();
+    const side=i%2?1:-1;
+    const g=new THREE.Group();
+    const core=new THREE.Mesh(GP.sphere, MB(0xffe9a8));
+    core.scale.setScalar(0.28); g.add(core);
+    const halo=new THREE.Mesh(GP.sphere, new THREE.MeshBasicMaterial({color:0xffd98a,transparent:true,opacity:0.25}));
+    halo.scale.setScalar(0.7); g.add(halo);
+    g.position.set(p.x+nrm.x*2.8*side, p.y+1.1, p.z+nrm.z*2.8*side);
+    groupFor(t).add(g);
+    sparks.push({t,g,core,halo,got:false});
+  });
+})();
+let sparkCount=0;
+function sparkTick(dt,ms){
+  const cp=wanderer.g.position;
+  for(const sp of sparks){
+    if(sp.got){ if(sp.g.visible){ sp.g.position.y+=dt*6; sp.g.scale.multiplyScalar(1-dt*1.6);
+      if(sp.g.scale.x<0.05) sp.g.visible=false; } continue; }
+    if(Math.abs(sp.t-state.t)>0.02) continue;
+    sp.g.position.y=curve.getPointAt(sp.t,_p).y+1.1+Math.sin(ms*0.003+sp.t*50)*0.3;
+    sp.halo.scale.setScalar(0.7+Math.sin(ms*0.004)*0.15);
+    const dx=cp.x-sp.g.position.x, dz=cp.z-sp.g.position.z;
+    if(dx*dx+dz*dz<20){
+      sp.got=true; sparkCount++;
+      sfx('coin'); sfx('trill');
+      const n=document.getElementById('sparkN'); if(n) n.textContent=sparkCount;
+      if(sparkCount===1) fairySay('Oh — a memory spark! Seven of them hide along the road. Collect them all and something lovely happens at the end. ✧',6200);
+      if(sparkCount===7) fairySay('All seven memories! The night sky will remember this. ✧',5200);
+      drawConstellation();
+    }
+  }
+}
+/* the end-card constellation: collected sparks become stars, joined in order */
+const CONST_PTS=[[14,46],[42,18],[74,38],[100,10],[128,34],[158,16],[186,44]];
+function drawConstellation(){
+  const svg=document.getElementById('constellation');
+  if(!svg) return;
+  let h='';
+  for(let i=1;i<sparkCount;i++){
+    const a=CONST_PTS[i-1], b=CONST_PTS[i];
+    h+='<line x1="'+a[0]+'" y1="'+a[1]+'" x2="'+b[0]+'" y2="'+b[1]+'" stroke="rgba(255,217,138,.5)" stroke-width="1"/>';
+  }
+  CONST_PTS.forEach((pt,i)=>{
+    const on=i<sparkCount;
+    h+='<circle cx="'+pt[0]+'" cy="'+pt[1]+'" r="'+(on?3:1.6)+'" fill="'+(on?'#ffd98a':'rgba(255,255,255,.25)')+'"/>';
+  });
+  svg.innerHTML=h;
+  const cn=document.getElementById('constN');
+  if(cn) cn.textContent=sparkCount===7?'ALL SEVEN MEMORIES GATHERED ✦':'memories gathered · '+sparkCount+' / 7';
+}
+drawConstellation();
+
 /* ---------------- character ---------------- */
 export const wanderer=(function(){
   const g=new THREE.Group();
@@ -610,9 +668,24 @@ const fairy=(function(){
 /* ---------------- state ---------------- */
 const state={
   t:0.012, vel:0, jumpV:0, jumpY:0,
-  pov:'third', biome:null, mode:'overworld', run:false,
+  pov:'third', biome:null, mode:'overworld', run:false, photo:false,
   camPos:new THREE.Vector3(), camLook:new THREE.Vector3(), started:false
 };
+let photoAng=0;
+function setPhoto(v){
+  state.photo=v;
+  document.body.classList.toggle('photo',v);
+  const b=document.getElementById('photoBtn');
+  if(b) b.innerHTML='<i class="fa-solid fa-camera"></i> '+(v?'exit':'photo');
+  sfx(v?'chime':'back');
+}
+addEventListener('keydown',e=>{
+  if((e.key==='p'||e.key==='P') && document.activeElement?.id!=='chatQ'){ setPhoto(!state.photo); }
+  if(e.key==='Escape' && state.photo){ setPhoto(false); e.stopPropagation(); }
+},true);
+const photoBtn=document.getElementById('photoBtn');
+if(photoBtn) photoBtn.addEventListener('click',()=>setPhoto(!state.photo));
+
 function setRun(v){
   state.run=v;
   const b=document.getElementById('runBtn');
@@ -773,7 +846,7 @@ function tick(ms){
   const bSpeed = b0 => b0.id==='sky' ? 0.8 : 1;   /* flying drifts even slower */
   let target=0;
   const bNow=biomeAt(state.t);
-  if(state.started){
+  if(state.started && !state.photo){
     if(input.right) target= SPEED*bSpeed(bNow);
     if(input.left)  target=-SPEED*bSpeed(bNow);
   }
@@ -859,8 +932,18 @@ function tick(ms){
     bubble.style.top=((-_look.y*0.5+0.5)*innerHeight-30)+'px';
   }
 
-  /* --- camera (all-lerped: never jitters) --- */
+  /* --- camera: photo mode orbits; otherwise the keyed rig --- */
   const prof=camProfile(state.t);
+  if(state.photo){
+    photoAng+=dt*(REDUCED?0:0.14);
+    const cx=wanderer.g.position.x+Math.cos(photoAng)*13;
+    const cz=wanderer.g.position.z+Math.sin(photoAng)*13;
+    const cy=Math.max(wanderer.g.position.y+3.6, 0.8);
+    state.camPos.lerp(_camTarget.set(cx,cy,cz), Math.min(1,dt*2.2));
+    camera.position.copy(state.camPos);
+    state.camLook.lerp(_look.set(wanderer.g.position.x, wanderer.g.position.y+1.2, wanderer.g.position.z), Math.min(1,dt*3));
+    camera.lookAt(state.camLook);
+  } else {
   if(state.pov==='third'){
     const azWorld=Math.atan2(_tan.x,_tan.z)+prof.az;
     _camTarget.set(
@@ -886,6 +969,7 @@ function tick(ms){
   state.camLook.lerp(_look, Math.min(1,dt*3.4));
   if(state.camLook.y<-0.4) state.camLook.y=-0.4;
   camera.lookAt(state.camLook);
+  }
 
   /* --- environment blend (smooth, per-frame lerp) --- */
   scene.fog.color.lerp(blendAttr(state.t,'fog'), Math.min(1,dt*2));
@@ -955,6 +1039,7 @@ function tick(ms){
   /* doors + path-side life */
   domains.overworldTick(dt,ms);
   juiceTick(dt,ms);
+  sparkTick(dt,ms);
 
   renderer.render(scene,camera);
 }
@@ -968,5 +1053,6 @@ window.__wander=function(){ return {
 window.__teleport=function(t){ state.t=Math.max(0.005,Math.min(0.995,t)); };
 window.__press=function(k,v){ input[k]=v; };
 window.__juice=function(){ return juiceCount; };
+window.__sparks=function(){ return sparkCount; };
 window.__mem=function(){ return { geometries:renderer.info.memory.geometries, textures:renderer.info.memory.textures, programs:renderer.info.programs.length }; };
 window.__start=function(){ if(!state.started){ startBtn.click(); } };
