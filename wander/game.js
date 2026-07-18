@@ -116,7 +116,7 @@ function blendAttr(t, attr){
     for(const off of [0,3]){                 /* left edge vtx, right edge vtx */
       const x=pos[bi+off], y=pos[bi+off+1], z=pos[bi+off+2];
       const cr=col[bi+off]*0.72, cg=col[bi+off+1]*0.72, cb=col[bi+off+2]*0.72;
-      sp.push(x,y,z, x,-1.1,z);
+      sp.push(x,y,z, x,-1.9,z);
       scol.push(cr,cg,cb, cr*0.8,cg*0.8,cb*0.8);
     }
     if(i<SEG && biomeAt(i/SEG).id!=='sky' && biomeAt((i+1)/SEG).id!=='sky'){
@@ -132,19 +132,32 @@ function blendAttr(t, attr){
   scene.add(new THREE.Mesh(sg,new THREE.MeshLambertMaterial({vertexColors:true,side:THREE.DoubleSide})));
 })();
 
-/* wide soft under-plane per land biome for horizon fill */
-(function underPlanes(){
-  BIOMES.forEach(b=>{
-    if(b.id==='sky') return;
-    const mid=(b.t0+b.t1)/2, p=curve.getPointAt(mid);
-    const len=(b.t1-b.t0)*CURVE_LEN+80;
-    const g=new THREE.CircleGeometry(len*0.62, 26);
-    const m=new THREE.MeshLambertMaterial({ color:new THREE.Color(b.ground).multiplyScalar(0.93) });
-    const mesh=new THREE.Mesh(g,m);
-    mesh.rotation.x=-Math.PI/2; mesh.position.set(p.x,(b.id==='river'?-0.9:-0.8)+p.y*0, p.z);
-    mesh.position.y = b.id==='river' ? -0.9 : -0.8;
-    scene.add(mesh);
-  });
+/* wide ground ribbon for horizon fill — follows the path, blends colours at
+   boundaries exactly like the road, so biomes can never bleed into each other */
+(function groundRibbon(){
+  const SEG=200, W=380;
+  const pos=[], col=[], idx=[];
+  const p=new THREE.Vector3(), tan=new THREE.Vector3(), nrm=new THREE.Vector3(), up=new THREE.Vector3(0,1,0);
+  for(let i=0;i<=SEG;i++){
+    const t=i/SEG;
+    curve.getPointAt(t,p); curve.getTangentAt(t,tan);
+    nrm.crossVectors(tan,up).normalize();
+    const c=blendAttr(t,'ground').clone().multiplyScalar(0.93);
+    for(const s of [-1,1]){
+      pos.push(p.x+nrm.x*W/2*s, -0.85 - t*0.6, p.z+nrm.z*W/2*s);
+      col.push(c.r,c.g,c.b);
+    }
+    if(i<SEG && biomeAt(i/SEG).id!=='sky' && biomeAt((i+1)/SEG).id!=='sky'){
+      const a=i*2; idx.push(a,a+1,a+2, a+1,a+3,a+2);
+    }
+  }
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos,3));
+  g.setAttribute('color', new THREE.Float32BufferAttribute(col,3));
+  g.setIndex(idx); g.computeVertexNormals();
+  const mesh=new THREE.Mesh(g,new THREE.MeshLambertMaterial({vertexColors:true}));
+  mesh.updateMatrix(); mesh.matrixAutoUpdate=false;
+  scene.add(mesh);
 })();
 
 /* ---------------- water (river) ---------------- */
@@ -188,7 +201,7 @@ function scatter(t0,t1,count,builder){
       const t=rand(t0,t1);
       curve.getPointAt(t,p); curve.getTangentAt(t,tan);
       nrm.crossVectors(tan,up).normalize();
-      const side=Math.random()<0.5?-1:1, d=rand(12,28)*side;
+      const side=Math.random()<0.5?-1:1, d=rand(13.5,28)*side;
       const x=p.x+nrm.x*d, z=p.z+nrm.z*d;
       if(!clearOfPath(x,z,9)) continue;
       const o=builder(i);
@@ -200,14 +213,39 @@ function scatter(t0,t1,count,builder){
     }
   }
 }
+/* geometry+material pools: one GPU buffer per prop KIND, variety via per-prop
+   transforms and a few size variants — visually equivalent, ~10x fewer buffers */
+const GP={
+  trunk:new THREE.CylinderGeometry(0.26,0.34,2.1,6),
+  crowns:[new THREE.IcosahedronGeometry(1.15,0),new THREE.IcosahedronGeometry(1.55,0),new THREE.IcosahedronGeometry(2.0,0)],
+  cone:new THREE.ConeGeometry(1,1,7),
+  coneSharp:new THREE.ConeGeometry(1,1,5),
+  sphere:new THREE.SphereGeometry(1,8,6),
+  ico:new THREE.IcosahedronGeometry(1,0),
+  capsule:new THREE.CapsuleGeometry(0.3,1.5,4,8),
+  capsuleArm:new THREE.CapsuleGeometry(0.18,0.7,4,8),
+  box:new THREE.BoxGeometry(1,1,1),
+  cyl:new THREE.CylinderGeometry(1,1,1,6)
+};
+const _matCache={};
+function ML(color,opts){
+  const key=color+'|'+JSON.stringify(opts||{});
+  if(!_matCache[key]) _matCache[key]=new THREE.MeshLambertMaterial(Object.assign({color},opts||{}));
+  return _matCache[key];
+}
+function MB(color){
+  const key='B'+color;
+  if(!_matCache[key]) _matCache[key]=new THREE.MeshBasicMaterial({color});
+  return _matCache[key];
+}
 function tree(c1,c2){
   const g=new THREE.Group();
-  const tr=new THREE.Mesh(new THREE.CylinderGeometry(0.22,0.34,rand(1.6,2.6),6), new THREE.MeshLambertMaterial({color:0xb08a6a}));
-  tr.position.y=1; g.add(tr);
-  const crown=new THREE.Mesh(new THREE.IcosahedronGeometry(rand(1.1,2.1),0),
-    new THREE.MeshLambertMaterial({color:Math.random()<0.34?c2:c1, flatShading:true}));
-  crown.position.y=tr.geometry.parameters.height+0.9; g.add(crown);
-  const s=rand(0.8,1.5); g.scale.setScalar(s);
+  const tr=new THREE.Mesh(GP.trunk, ML(0xb08a6a));
+  tr.position.y=1.05; g.add(tr);
+  const crown=new THREE.Mesh(GP.crowns[Math.floor(Math.random()*3)],
+    ML(Math.random()<0.34?c2:c1,{flatShading:true}));
+  crown.position.y=3.0; g.add(crown);
+  g.scale.setScalar(rand(0.75,1.45));
   return g;
 }
 const gladeT=BIOMES[0], forestT=BIOMES[1], riverT=BIOMES[2], desertT=BIOMES[3],
@@ -216,10 +254,12 @@ scatter(gladeT.t0,gladeT.t1,26,()=>tree(0x8fd89a,0xffb0cf));
 scatter(forestT.t0,forestT.t1,110,()=>tree(0x6fca7f,0xff9ecb));
 scatter(riverT.t0,riverT.t1,34,()=>{ /* reeds + stones */
   if(Math.random()<0.5){
-    const r=new THREE.Mesh(new THREE.ConeGeometry(0.09,rand(1,1.9),5), new THREE.MeshLambertMaterial({color:0x7fcf9f}));
-    r.position.y=0.6; const g=new THREE.Group(); g.add(r); return g;
+    const r=new THREE.Mesh(GP.coneSharp, ML(0x7fcf9f));
+    const h=rand(1,1.9); r.scale.set(0.09,h,0.09); r.position.y=h/2;
+    const g=new THREE.Group(); g.add(r); return g;
   }
-  return new THREE.Mesh(new THREE.IcosahedronGeometry(rand(0.4,1),0), new THREE.MeshLambertMaterial({color:0xcfd8dc,flatShading:true}));
+  const st=new THREE.Mesh(GP.ico, ML(0xcfd8dc,{flatShading:true}));
+  st.scale.setScalar(rand(0.4,1)); return st;
 });
 scatter(desertT.t0,desertT.t1,60,()=>{
   if(Math.random()<0.55){ /* cactus */
@@ -236,14 +276,13 @@ scatter(desertT.t0,desertT.t1,60,()=>{
 scatter(snowT.t0,snowT.t1,70,()=>{
   const g=new THREE.Group();
   /* snowy mound so no tree ever floats */
-  const drift=new THREE.Mesh(new THREE.SphereGeometry(rand(1.8,3),9,7),
-    new THREE.MeshLambertMaterial({color:0xf7f9ff}));
-  drift.scale.y=0.45; drift.position.y=0.1; g.add(drift);
-  const m=new THREE.MeshLambertMaterial({color:Math.random()<0.4?0xdfe8f4:0xa8d8c8,flatShading:true});
-  const c=new THREE.Mesh(new THREE.ConeGeometry(rand(0.7,1.4),rand(2,3.6),7),m);
-  c.position.y=1.9; g.add(c);
-  const cap=new THREE.Mesh(new THREE.ConeGeometry(0.5,0.8,7),new THREE.MeshLambertMaterial({color:0xffffff}));
-  cap.position.y=3.3; g.add(cap);
+  const drift=new THREE.Mesh(GP.sphere, ML(0xf7f9ff));
+  const dr=rand(1.8,3); drift.scale.set(dr,dr*0.45,dr); drift.position.y=0.1; g.add(drift);
+  const c=new THREE.Mesh(GP.cone, ML(Math.random()<0.4?0xdfe8f4:0xa8d8c8,{flatShading:true}));
+  const cw=rand(0.7,1.4), chh=rand(2,3.6);
+  c.scale.set(cw,chh,cw); c.position.y=0.1+chh/2+0.3; g.add(c);
+  const cap=new THREE.Mesh(GP.cone, ML(0xffffff));
+  cap.scale.set(0.5,0.8,0.5); cap.position.y=0.1+chh+0.3; g.add(cap);
   return g;
 });
 /* sky islands + clouds */
@@ -252,9 +291,8 @@ scatter(snowT.t0,snowT.t1,70,()=>{
   for(let i=0;i<62;i++){
     const t=rand(skyT.t0,skyT.t1);
     curve.getPointAt(t,p);
-    const cl=new THREE.Mesh(new THREE.SphereGeometry(rand(2.5,7),8,6),
-      new THREE.MeshLambertMaterial({color:0xffffff,transparent:true,opacity:0.85}));
-    cl.scale.y=0.42;
+    const cl=new THREE.Mesh(GP.sphere, ML(0xffffff,{transparent:true,opacity:0.85}));
+    const cr=rand(2.5,7); cl.scale.set(cr,cr*0.42,cr);
     cl.position.set(p.x+rand(-40,40), p.y+rand(-16,10), p.z+rand(-40,40));
     biomeGroups.sky.add(cl); freeze(cl);
   }
@@ -263,7 +301,7 @@ scatter(snowT.t0,snowT.t1,70,()=>{
     curve.getPointAt(t,p);
     const isle=new THREE.Group();
     const top=new THREE.Mesh(new THREE.CylinderGeometry(rand(3,5),1.2,2.4,7),
-      new THREE.MeshLambertMaterial({color:0x9fd8a8,flatShading:true}));
+      ML(0x9fd8a8,{flatShading:true}));
     isle.add(top);
     const t2=tree(0x8fd89a,0xffb0cf); t2.position.y=1.2; isle.add(t2);
     isle.position.set(p.x+rand(-26,26), p.y+rand(-10,8), p.z+rand(-26,26));
@@ -326,11 +364,12 @@ scatter(cityT.t0,cityT.t1,50,()=>{  /* dark city: near-black towers, loud neon *
   return tower;
 });
 scatter(meadowT.t0,meadowT.t1,60,()=>{
-  const f=new THREE.Mesh(new THREE.SphereGeometry(0.16,6,5),
-    new THREE.MeshBasicMaterial({color:[0xff9ecb,0xffd98a,0x9defc9,0x8fd8ff][Math.floor(Math.random()*4)]}));
+  const f=new THREE.Mesh(GP.sphere, MB([0xff9ecb,0xffd98a,0x9defc9,0x8fd8ff][Math.floor(Math.random()*4)]));
+  f.scale.setScalar(0.16);
   const g=new THREE.Group();
-  const st=new THREE.Mesh(new THREE.CylinderGeometry(0.03,0.03,0.5),new THREE.MeshLambertMaterial({color:0x7fcf8f}));
-  st.position.y=0.25; f.position.y=0.55; g.add(st); g.add(f);
+  const st=new THREE.Mesh(GP.cyl, ML(0x7fcf8f));
+  st.scale.set(0.03,0.5,0.03); st.position.y=0.25; f.position.y=0.55;
+  g.add(st); g.add(f);
   return g;
 });
 /* fireflies (meadow + glade sparkle) */
@@ -364,8 +403,8 @@ const juice=[];
     const t=[rand(0.01,0.07),rand(0.08,0.23),rand(0.24,0.39)][i%3];
     const pos=place(t, Math.random()<0.5?-1:1, rand(3.4,7));
     const bird=new THREE.Group();
-    const bm=new THREE.MeshLambertMaterial({color:[0xffffff,0xffd9ec,0x8fd8ff][i%3],side:THREE.DoubleSide});
-    const w1=new THREE.Mesh(new THREE.ConeGeometry(0.22,0.55,3),bm); w1.rotation.z=Math.PI/2; w1.position.x=-0.24;
+    const bm=ML([0xffffff,0xffd9ec,0x8fd8ff][i%3],{side:THREE.DoubleSide});
+    const w1=new THREE.Mesh(GP.coneSharp,bm); w1.scale.set(0.22,0.55,0.22); w1.rotation.z=Math.PI/2; w1.position.x=-0.24;
     const w2=w1.clone(); w2.rotation.z=-Math.PI/2; w2.position.x=0.24;
     bird.add(w1,w2);
     bird.position.set(pos.x,0.25,pos.z);
@@ -378,10 +417,10 @@ const juice=[];
     const t=[rand(0.01,0.07),rand(0.41,0.53),rand(0.946,0.99)][i%3];
     const pos=place(t, Math.random()<0.5?-1:1, rand(2.6,4.6));
     const fg=new THREE.Group();
-    const stem=new THREE.Mesh(new THREE.CylinderGeometry(0.035,0.05,0.7),new THREE.MeshLambertMaterial({color:0x7fcf8f}));
-    stem.position.y=0.35; fg.add(stem);
-    const bell=new THREE.Mesh(new THREE.SphereGeometry(0.2,7,6),
-      new THREE.MeshBasicMaterial({color:[0xffd98a,0xff9ecb,0x9defc9,0x8fd8ff][i%4]}));
+    const stem=new THREE.Mesh(GP.cyl, ML(0x7fcf8f));
+    stem.scale.set(0.045,0.7,0.045); stem.position.y=0.35; fg.add(stem);
+    const bell=new THREE.Mesh(GP.sphere, MB([0xffd98a,0xff9ecb,0x9defc9,0x8fd8ff][i%4]));
+    bell.scale.setScalar(0.2);
     bell.position.y=0.78; fg.add(bell);
     fg.position.set(pos.x,-0.05,pos.z);
     fg.userData={bell};
@@ -393,10 +432,10 @@ const juice=[];
     const t=rand(0.54,0.62);
     const pos=place(t, Math.random()<0.5?-1:1, rand(3,5.5));
     const bush=new THREE.Group();
-    const body=new THREE.Mesh(new THREE.IcosahedronGeometry(0.55,0),new THREE.MeshLambertMaterial({color:0x9fc9b8,flatShading:true}));
-    body.position.y=0.4; bush.add(body);
-    const cap=new THREE.Mesh(new THREE.SphereGeometry(0.42,8,6),new THREE.MeshLambertMaterial({color:0xffffff}));
-    cap.scale.y=0.5; cap.position.y=0.85; bush.add(cap);
+    const body=new THREE.Mesh(GP.ico, ML(0x9fc9b8,{flatShading:true}));
+    body.scale.setScalar(0.55); body.position.y=0.4; bush.add(body);
+    const cap=new THREE.Mesh(GP.sphere, ML(0xffffff));
+    cap.scale.set(0.42,0.21,0.42); cap.position.y=0.85; bush.add(cap);
     bush.position.set(pos.x,-0.05,pos.z);
     bush.userData={cap};
     scene.add(bush);
@@ -427,11 +466,11 @@ function juiceTick(dt,ms){
         if(j.a>2.2){ j.obj.visible=false; j.state='gone'; j.a=0; }
       } else if(j.kind==='flower'){
         const k=Math.min(1,j.a/0.5);
-        j.obj.userData.bell.scale.setScalar(1+Math.sin(k*Math.PI)*0.7);
+        j.obj.userData.bell.scale.setScalar(0.2*(1+Math.sin(k*Math.PI)*0.7));
         j.obj.rotation.z=Math.sin(j.a*14)*0.14*(1-k);
         if(j.a>0.9){ j.state='rest'; j.a=0; }
       } else {
-        j.obj.userData.cap.scale.y=Math.max(0.02,0.5-j.a*0.8);
+        j.obj.userData.cap.scale.y=Math.max(0.01,0.21-j.a*0.34);
         j.obj.userData.cap.position.y=0.85-j.a*0.5;
         if(j.a>0.7){ j.obj.userData.cap.visible=false; j.state='rest'; j.a=0; }
       }
@@ -440,7 +479,7 @@ function juiceTick(dt,ms){
       if(j.a>24){ /* the world quietly resets behind you */
         j.state='idle'; j.a=0;
         if(j.kind==='bird'){ j.obj.visible=true; j.obj.position.set(j.home.x,0.25,j.home.z); }
-        if(j.kind==='poff'){ j.obj.userData.cap.visible=true; j.obj.userData.cap.scale.y=0.5; j.obj.userData.cap.position.y=0.85; }
+        if(j.kind==='poff'){ j.obj.userData.cap.visible=true; j.obj.userData.cap.scale.y=0.21; j.obj.userData.cap.position.y=0.85; }
       }
     }
   }
@@ -575,12 +614,13 @@ povBtn.addEventListener('click',()=>{
 /* ---------------- camera profiles (keyed, smoothly interpolated) ---------------- */
 const CAMKEYS=[
   { t:0.03,  az: 0.55, dist:11, h:4.2, ahead:0.012 },   /* glade: over-shoulder */
-  { t:0.15,  az: 1.45, dist:14, h:2.6, ahead:0.006 },   /* forest: side-on (Limbo, sunlit) */
+  { t:0.15,  az: 1.45, dist:11.5, h:3.4, ahead:0.006 }, /* forest: side-on (Limbo, sunlit) */
   { t:0.31,  az: 0.25, dist:12, h:2.4, ahead:0.014 },   /* river: low chase behind boat */
   { t:0.47,  az:-0.85, dist:26, h:15,  ahead:0.02  },   /* desert: high crane */
   { t:0.60,  az: 1.2,  dist:15, h:4,   ahead:0.01  },   /* snow: side drift */
   { t:0.74,  az: 0.0,  dist:17, h:3.2, ahead:0.02  },   /* sky: behind, open */
   { t:0.79,  az:-2.2,  dist:19, h:6,   ahead:0.016 },   /* sky late: slow orbit feel */
+  { t:0.835, az:-0.3,  dist:15, h:8,   ahead:0.012 },   /* the dive: settle high behind */
   { t:0.88,  az:-0.9,  dist:12, h:5,   ahead:0.012 },   /* city: 3/4 view */
   { t:0.97,  az: 0.5,  dist:10, h:3,   ahead:0.008 }    /* meadow: close & warm */
 ];
@@ -791,7 +831,9 @@ function tick(ms){
       wanderer.g.position.z+_tan.z*0.3);
   }
   state.camPos.lerp(_camTarget, Math.min(1,dt*(REDUCED?12:2.6)));
-  if(!flying){ const minY=Math.max(_p.y+1.0, 0.2); if(state.camPos.y<minY) state.camPos.y=minY; }
+  /* the camera may never sink below the world surface — flying or not */
+  const minY = flying ? 0.6 : Math.max(_p.y+1.0, 0.2);
+  if(state.camPos.y<minY) state.camPos.y=minY;
   camera.position.copy(state.camPos);
   const lookT=Math.min(0.995,state.t+prof.ahead);
   curve.getPointAt(state.pov==='third'?lookT:Math.min(0.995,state.t+0.02),_look);
@@ -799,6 +841,7 @@ function tick(ms){
   const ann=domains.getAnnounce ? domains.getAnnounce() : null;
   if(ann){ _look.lerp(ann.p, ann.w); }                 /* the chapter announces itself */
   state.camLook.lerp(_look, Math.min(1,dt*3.4));
+  if(state.camLook.y<-0.4) state.camLook.y=-0.4;
   camera.lookAt(state.camLook);
 
   /* --- environment blend (smooth, per-frame lerp) --- */
@@ -881,4 +924,5 @@ window.__wander=function(){ return {
 window.__teleport=function(t){ state.t=Math.max(0.005,Math.min(0.995,t)); };
 window.__press=function(k,v){ input[k]=v; };
 window.__juice=function(){ return juiceCount; };
+window.__mem=function(){ return { geometries:renderer.info.memory.geometries, textures:renderer.info.memory.textures, programs:renderer.info.programs.length }; };
 window.__start=function(){ if(!state.started){ startBtn.click(); } };
