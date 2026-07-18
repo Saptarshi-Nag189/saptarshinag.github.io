@@ -55,8 +55,8 @@ const PTS = [
   [350,10,-10],[372,13,-2],[394,12,8],                /* snow high路            */
   [416,18,0],[436,30,-10],[456,44,4],[476,56,-6],[496,62,4], /* ascend to sky   */
   [520,66,-10],[544,58,8],[566,64,-4],[588,54,6],[608,60,-8], /* long sky drift  */
-  [630,42,-4],[650,24,6],[668,12,-6],[686,9,2],       /* glide down to city     */
-  [706,4,-6],[726,3,4],[746,3,0]                      /* meadow (night)         */
+  [630,38,-4],[648,18,6],[664,7,-5],[680,4,2],        /* glide lands BEFORE the city */
+  [700,3.5,-5],[720,3,3],[746,3,0]                    /* flat city → meadow (night)  */
 ];
 const curve = new THREE.CatmullRomCurve3(PTS.map(p=>new THREE.Vector3(p[0],p[1],p[2])), false, 'catmullrom', 0.5);
 const CURVE_LEN = curve.getLength();
@@ -277,7 +277,7 @@ scatter(riverT.t0,riverT.t1,34,()=>{ /* reeds + stones */
   const st=new THREE.Mesh(GP.ico, ML(0xcfd8dc,{flatShading:true}));
   st.scale.setScalar(rand(0.4,1)); return st;
 });
-scatter(desertT.t0,desertT.t1,60,()=>{
+scatter(desertT.t0,desertT.t1,85,()=>{
   if(Math.random()<0.55){ /* cactus */
     const g=new THREE.Group();
     const m=new THREE.MeshLambertMaterial({color:0x7fbf7f});
@@ -289,7 +289,7 @@ scatter(desertT.t0,desertT.t1,60,()=>{
   const dune=new THREE.Mesh(new THREE.SphereGeometry(rand(2,5),8,6), new THREE.MeshLambertMaterial({color:0xf2d4a0}));
   dune.scale.y=0.28; dune.userData.dy=-0.3; return dune;
 });
-scatter(snowT.t0,snowT.t1,70,()=>{
+scatter(snowT.t0,snowT.t1,95,()=>{
   const g=new THREE.Group();
   /* snowy mound so no tree ever floats */
   const drift=new THREE.Mesh(GP.sphere, ML(0xf7f9ff));
@@ -361,7 +361,7 @@ const skyLife={flocks:[],manta:null};
 })();
 
 /* city towers */
-scatter(cityT.t0,cityT.t1,50,()=>{  /* dark city: near-black towers, loud neon */
+scatter(cityT.t0,cityT.t1,72,()=>{  /* dark city: near-black towers, loud neon */
   const h=rand(4,18);
   const tower=new THREE.Mesh(new THREE.BoxGeometry(rand(1.6,3.4),h,rand(1.6,3.4)),
     new THREE.MeshLambertMaterial({color:[0x1c1830,0x241d3d,0x191526][Math.floor(Math.random()*3)]}));
@@ -634,8 +634,9 @@ const CAMKEYS=[
   { t:0.60,  az: 1.2,  dist:15, h:4,   ahead:0.01  },   /* snow: side drift */
   { t:0.74,  az: 0.0,  dist:17, h:3.2, ahead:0.02  },   /* sky: behind, open */
   { t:0.79,  az:-2.2,  dist:19, h:6,   ahead:0.016 },   /* sky late: slow orbit feel */
-  { t:0.835, az:-0.3,  dist:15, h:8,   ahead:0.012 },   /* the dive: settle high behind */
-  { t:0.88,  az:-0.9,  dist:12, h:5,   ahead:0.012 },   /* city: 3/4 view */
+  { t:0.828, az:-0.25, dist:15, h:8,   ahead:0.012 },   /* the dive: settle high behind */
+  { t:0.86,  az:-0.5,  dist:12, h:5.5, ahead:0.012 },   /* touchdown: gentle behind     */
+  { t:0.90,  az:-0.9,  dist:12, h:5,   ahead:0.012 },   /* city: 3/4 view */
   { t:0.97,  az: 0.5,  dist:10, h:3,   ahead:0.008 }    /* meadow: close & warm */
 ];
 function camProfile(t){
