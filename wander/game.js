@@ -61,6 +61,9 @@ const PTS = [
 const curve = new THREE.CatmullRomCurve3(PTS.map(p=>new THREE.Vector3(p[0],p[1],p[2])), false, 'catmullrom', 0.5);
 const CURVE_LEN = curve.getLength();
 
+const RIVER_B=BIOMES.find(b=>b.id==='river');
+const BOARD_T=RIVER_B.t0+0.012, ALIGHT_T=RIVER_B.t1-0.012;   /* the sailed stretch */
+
 export function biomeAt(t){
   for(const b of BIOMES) if(t>=b.t0 && t<=b.t1) return b;
   return BIOMES[BIOMES.length-1];
@@ -98,8 +101,10 @@ function blendAttr(t, attr){
       pos.push(p.x+nrm.x*W/2*s, p.y-0.55, p.z+nrm.z*W/2*s);
       col.push(c.r,c.g,c.b);
     }
-    /* the sky biome gets NO road faces — a clean gap, not a stretched sheet */
-    if(i<SEG && biomeAt(i/SEG).id!=='sky' && biomeAt((i+1)/SEG).id!=='sky'){
+    /* no road faces in the sky (you fly) or on the sailed river stretch (you boat) */
+    const mid=(i+0.5)/SEG;
+    const sail = mid>BOARD_T+0.004 && mid<ALIGHT_T-0.004;
+    if(i<SEG && !sail && biomeAt(i/SEG).id!=='sky' && biomeAt((i+1)/SEG).id!=='sky'){
       const a=i*2; idx.push(a,a+1,a+2, a+1,a+3,a+2);
     }
   }
@@ -119,7 +124,9 @@ function blendAttr(t, attr){
       sp.push(x,y,z, x,-1.9,z);
       scol.push(cr,cg,cb, cr*0.8,cg*0.8,cb*0.8);
     }
-    if(i<SEG && biomeAt(i/SEG).id!=='sky' && biomeAt((i+1)/SEG).id!=='sky'){
+    const smid=(i+0.5)/SEG;
+    const ssail = smid>BOARD_T+0.004 && smid<ALIGHT_T-0.004;
+    if(i<SEG && !ssail && biomeAt(i/SEG).id!=='sky' && biomeAt((i+1)/SEG).id!=='sky'){
       const a=i*4;
       sidx.push(a,a+1,a+4, a+1,a+5,a+4);      /* left wall  */
       sidx.push(a+2,a+6,a+3, a+3,a+6,a+7);    /* right wall */
@@ -160,19 +167,28 @@ function blendAttr(t, attr){
   scene.add(mesh);
 })();
 
-/* ---------------- water (river) ---------------- */
+/* ---------------- water: a ribbon along the river's own curve ----------------
+   level (y=-0.35) everywhere, tapered ends — it can never climb into a shore */
 let waterMesh=null;
 (function water(){
-  const b=BIOMES.find(x=>x.id==='river');
-  const p0=curve.getPointAt(b.t0), p1=curve.getPointAt(b.t1);
-  const cx=(p0.x+p1.x)/2, cz=(p0.z+p1.z)/2;
-  const g=new THREE.PlaneGeometry(Math.abs(p1.x-p0.x)+10, 78, 60, 24);
-  const m=new THREE.MeshLambertMaterial({ color:0x6fd8e8, transparent:true, opacity:0.82 });
-  waterMesh=new THREE.Mesh(g,m);
-  waterMesh.rotation.x=-Math.PI/2;
-  waterMesh.position.set(cx,-0.35,cz);
+  const SEG=90, W=64;
+  const t0=RIVER_B.t0-0.002, t1=RIVER_B.t1+0.002;
+  const pos=[], idx=[];
+  const p=new THREE.Vector3(), tan=new THREE.Vector3(), nrm=new THREE.Vector3(), up=new THREE.Vector3(0,1,0);
+  for(let i=0;i<=SEG;i++){
+    const k=i/SEG, t=t0+(t1-t0)*k;
+    curve.getPointAt(t,p); curve.getTangentAt(t,tan);
+    nrm.crossVectors(tan,up).normalize();
+    const taper=Math.min(1, Math.min(k,1-k)*10);       /* soft narrowing ends */
+    const w=W/2*(0.2+0.8*taper);
+    for(const sd of [-1,1]) pos.push(p.x+nrm.x*w*sd, -0.35, p.z+nrm.z*w*sd);
+    if(i<SEG){ const a=i*2; idx.push(a,a+1,a+2, a+1,a+3,a+2); }
+  }
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos,3));
+  g.setIndex(idx); g.computeVertexNormals();
+  waterMesh=new THREE.Mesh(g,new THREE.MeshLambertMaterial({color:0x6fd8e8,transparent:true,opacity:0.82}));
   scene.add(waterMesh);
-  waterMesh.userData.base=g.attributes.position.array.slice();
 })();
 
 /* ---------------- props ---------------- */
@@ -197,7 +213,7 @@ function scatter(t0,t1,count,builder){
   const p=new THREE.Vector3(), tan=new THREE.Vector3(), nrm=new THREE.Vector3(), up=new THREE.Vector3(0,1,0);
   for(let i=0;i<count;i++){
     let placed=false;
-    for(let tries=0;tries<6 && !placed;tries++){
+    for(let tries=0;tries<14 && !placed;tries++){
       const t=rand(t0,t1);
       curve.getPointAt(t,p); curve.getTangentAt(t,tan);
       nrm.crossVectors(tan,up).normalize();
@@ -217,7 +233,7 @@ function scatter(t0,t1,count,builder){
    transforms and a few size variants — visually equivalent, ~10x fewer buffers */
 const GP={
   trunk:new THREE.CylinderGeometry(0.26,0.34,2.1,6),
-  crowns:[new THREE.IcosahedronGeometry(1.15,0),new THREE.IcosahedronGeometry(1.55,0),new THREE.IcosahedronGeometry(2.0,0)],
+  crowns:[new THREE.IcosahedronGeometry(1.25,0),new THREE.IcosahedronGeometry(1.7,0),new THREE.IcosahedronGeometry(2.15,0)],
   cone:new THREE.ConeGeometry(1,1,7),
   coneSharp:new THREE.ConeGeometry(1,1,5),
   sphere:new THREE.SphereGeometry(1,8,6),
@@ -245,13 +261,13 @@ function tree(c1,c2){
   const crown=new THREE.Mesh(GP.crowns[Math.floor(Math.random()*3)],
     ML(Math.random()<0.34?c2:c1,{flatShading:true}));
   crown.position.y=3.0; g.add(crown);
-  g.scale.setScalar(rand(0.75,1.45));
+  g.scale.setScalar(rand(0.85,1.55));
   return g;
 }
 const gladeT=BIOMES[0], forestT=BIOMES[1], riverT=BIOMES[2], desertT=BIOMES[3],
       snowT=BIOMES[4], skyT=BIOMES[5], cityT=BIOMES[6], meadowT=BIOMES[7];
-scatter(gladeT.t0,gladeT.t1,26,()=>tree(0x8fd89a,0xffb0cf));
-scatter(forestT.t0,forestT.t1,110,()=>tree(0x6fca7f,0xff9ecb));
+scatter(gladeT.t0,gladeT.t1,40,()=>tree(0x8fd89a,0xffb0cf));
+scatter(forestT.t0,forestT.t1,155,()=>tree(0x6fca7f,0xff9ecb));
 scatter(riverT.t0,riverT.t1,34,()=>{ /* reeds + stones */
   if(Math.random()<0.5){
     const r=new THREE.Mesh(GP.coneSharp, ML(0x7fcf9f));
@@ -508,8 +524,6 @@ export const wanderer=(function(){
 })();
 
 /* ---------------- the boat: a real thing in the world ---------------- */
-const RIVER=BIOMES.find(b=>b.id==='river');
-const BOARD_T=RIVER.t0+0.012, ALIGHT_T=RIVER.t1-0.012;
 const boat=(function(){
   const b=new THREE.Group();
   const hull=new THREE.Mesh(new THREE.CylinderGeometry(0.9,0.55,0.6,8,1),
@@ -859,9 +873,10 @@ function tick(ms){
 
   /* --- water ripple (only animated when the river can be seen) --- */
   if(waterMesh && Math.abs(state.t-0.317)<0.17){
-    const pos=waterMesh.geometry.attributes.position, base=waterMesh.userData.base;
+    const pos=waterMesh.geometry.attributes.position;
     for(let i=0;i<pos.count;i++){
-      pos.array[i*3+2]=base[i*3+2]+Math.sin(ms*0.0016+base[i*3]*0.25+base[i*3+1]*0.2)*0.16;
+      const wx=pos.array[i*3], wz=pos.array[i*3+2];
+      pos.array[i*3+1]=-0.35+Math.sin(ms*0.0016+wx*0.22+wz*0.18)*0.11;
     }
     pos.needsUpdate=true;
   }
