@@ -55,8 +55,8 @@ const PTS = [
   [350,10,-10],[372,13,-2],[394,12,8],                /* snow high路            */
   [416,18,0],[436,30,-10],[456,44,4],[476,56,-6],[496,62,4], /* ascend to sky   */
   [520,66,-10],[544,58,8],[566,64,-4],[588,54,6],[608,60,-8], /* long sky drift  */
-  [630,38,-4],[648,18,6],[664,7,-5],[680,4,2],        /* glide lands BEFORE the city */
-  [700,3.5,-5],[720,3,3],[746,3,0]                    /* flat city → meadow (night)  */
+  [630,38,-4],[648,18,6],[664,6,-5],[680,2,2],        /* glide lands BEFORE the city */
+  [700,1.2,-5],[720,1.1,3],[746,1.2,0]                /* low flat city → meadow      */
 ];
 const curve = new THREE.CatmullRomCurve3(PTS.map(p=>new THREE.Vector3(p[0],p[1],p[2])), false, 'catmullrom', 0.5);
 const CURVE_LEN = curve.getLength();
