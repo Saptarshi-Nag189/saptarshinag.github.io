@@ -59,9 +59,19 @@ CDNs don't load in the build sandbox, so this had to be vendored to be testable 
   falls back to synth automatically. `wander/audio/README.md` lists the needed filenames + free
   CC0 sources (Pixabay etc.). **User has not yet dropped in real recordings — still pending.**
   This is the last open gap between the visual and audio quality of the experience.
-- **`index.html`** — shell: veil/start screen (controls taught up front), HUD (journey dots, POV
-  toggle, run/walk toggle, floating chat button for touch devices), mobile bottom-sheet plate,
-  night/end-card overlays for the goodnight ending.
+- **`index.html`** — shell: veil/start screen (controls taught up front), HUD (journey dots,
+  memory-spark counter, POV toggle, run/walk toggle, photo-mode button, floating chat button),
+  mobile bottom-sheet plate, night/end-card overlays (the end card carries the spark
+  constellation) for the goodnight ending.
+- **Photo mode** (P key / camera button): HUD melts, slow orbit around the wanderer, name
+  watermark — built for shareable screenshots. **Memory sparks**: seven hidden collectibles,
+  one per chapter, drawn as a constellation on the end card.
+- **`brain/llm-brain.js` + `lib/transformers.min.js` (vendored, 548 KB)** — the twin's optional
+  "full brain": SmolLM2-360M-Instruct (q4, ~300 MB) loaded in the visitor's browser on the
+  chat's "✨ full brain" button (WebGPU→WASM fallback). RAG-grounded: the corpus matcher
+  retrieves facts, the model only phrases them. LocalBrain remains default + fallback for every
+  failure. The happy path is untestable in the sandbox (CDN-blocked weights) — only the user
+  can judge generation quality live. Model swap = one MODEL_ID constant.
 
 ## Résumé facts (source of truth: user's LaTeX CV)
 
@@ -126,5 +136,5 @@ requirement, don't regress to bare numbers.
 
 - `wander/audio/*.ogg` real recordings — user hasn't dropped these in yet (synth fallback is
   active). This is the one remaining gap between the visual and audio polish of the experience.
-- Possible future direction (not committed): swap `window.TwinBrain`'s `LocalBrain` for a
-  WebLLM-backed brain running an in-browser Llama — the interface is already there for it.
+- The in-browser LLM twin is BUILT (see brain/llm-brain.js above); pending: the user's live
+  quality check of SmolLM2-360M, and possibly swapping in a self-fine-tuned model later.
