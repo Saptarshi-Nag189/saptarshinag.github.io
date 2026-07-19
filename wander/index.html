@@ -188,6 +188,35 @@
     #plate{left:50% !important;right:auto !important;top:auto !important;bottom:96px !important;
       transform:translateX(-50%) !important;max-height:38vh;width:min(430px,94vw)}
   }
+  /* full-brain loader */
+  #brainBtn{margin-left:auto;font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;color:#7a5f9e;
+    background:rgba(199,138,214,.14);border:1px solid rgba(199,138,214,.4);border-radius:999px;
+    padding:6px 10px;cursor:pointer;transition:.2s;white-space:nowrap}
+  #brainBtn:hover{background:rgba(199,138,214,.28)}
+  #brainBtn.on{color:#2e7d4f;border-color:rgba(80,180,120,.5);background:rgba(157,239,201,.2);cursor:default}
+  #brainBar{display:none;position:relative;height:22px;background:rgba(199,138,214,.1);overflow:hidden}
+  #brainBar.show{display:block}
+  #brainFill{position:absolute;inset:0;width:0%;background:linear-gradient(90deg,rgba(255,158,203,.4),rgba(199,138,214,.5));transition:width .3s}
+  #brainMsg{position:relative;display:block;text-align:center;font-family:var(--mono);font-size:9px;
+    line-height:22px;color:#7a5f9e;letter-spacing:.05em}
+
+  /* memory sparks */
+  #sparks{position:fixed;top:16px;left:calc(50% + 110px);z-index:20;font-family:var(--mono);
+    font-size:11px;color:#c9a86f;background:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.8);
+    border-radius:999px;padding:8px 13px;backdrop-filter:blur(8px)}
+  #sparks b{color:#b8862f}
+  #constellation{margin:6px auto 14px;display:block}
+
+  /* photo mode: the world alone, softly orbiting */
+  #mark{position:fixed;right:22px;bottom:20px;z-index:21;font-family:var(--mono);font-size:11px;
+    letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.85);
+    text-shadow:0 1px 10px rgba(90,60,120,.6);opacity:0;pointer-events:none;transition:opacity .5s}
+  body.photo #mark{opacity:1}
+  body.photo #chip, body.photo #journey, body.photo #pad, body.photo #povBtn, body.photo #runBtn,
+  body.photo #exitLink, body.photo #chatFab, body.photo #prompt, body.photo #bubble,
+  body.photo #plate, body.photo #toast, body.photo #sparks{opacity:0 !important; pointer-events:none !important}
+  body.photo #photoBtn{color:#e75f9c;border-color:#e75f9c}
+
   /* night fade for the goodnight ending */
   #night{position:fixed;inset:0;z-index:38;pointer-events:none;background:#05060f;opacity:0;
     transition:opacity 6s ease}
@@ -235,6 +264,7 @@
 </div>
 
 <div id="chip">the <b>wander</b> · saptarshi nag</div>
+<div id="sparks"><i class="fa-solid fa-star"></i> <b id="sparkN">0</b>/7</div>
 <div id="journey" aria-label="Chapters visited">
   <span data-d="forest"></span><span data-d="river"></span><span data-d="desert"></span>
   <span data-d="snow"></span><span data-d="sky"></span><span data-d="city"></span><span data-d="meadow"></span>
@@ -242,6 +272,8 @@
 <button id="chatFab" aria-label="Talk to the fairy"><i class="fa-solid fa-comment-dots"></i></button>
 <a id="exitLink" href="../demos/index.html"><i class="fa-solid fa-door-open"></i> leave</a>
 <button id="povBtn"><i class="fa-solid fa-video"></i> 3rd person</button>
+<button id="photoBtn" style="position:fixed;top:140px;right:16px;z-index:20;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;color:#8a7fa8;background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.8);border-radius:999px;padding:8px 14px;cursor:pointer;backdrop-filter:blur(8px);transition:.2s"><i class="fa-solid fa-camera"></i> photo</button>
+<div id="mark">the wander · saptarshi nag</div>
 <button id="runBtn" style="position:fixed;top:98px;right:16px;z-index:20;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;color:#8a7fa8;background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.8);border-radius:999px;padding:8px 14px;cursor:pointer;backdrop-filter:blur(8px);transition:.2s"><i class="fa-solid fa-person-walking"></i> walk</button>
 
 <div id="toast"><div class="t1" id="toastT"></div><div class="t2" id="toastS"></div></div>
@@ -258,7 +290,9 @@
 </div>
 
 <div id="chat">
-  <div class="chd"><span class="dot"></span><div><b>Saptarshi AI</b><br><span>digital twin · local brain</span></div></div>
+  <div class="chd"><span class="dot"></span><div><b>Saptarshi AI</b><br><span id="brainKind">digital twin · local brain</span></div>
+    <button id="brainBtn" title="Load a real 360M-parameter language model in your browser (~300 MB, one-time)">✨ full brain</button></div>
+  <div id="brainBar"><div id="brainFill"></div><span id="brainMsg"></span></div>
   <div id="chatLog"></div>
   <div id="chatIn">
     <input id="chatQ" type="text" placeholder="ask me anything about him…" maxlength="140">
@@ -277,6 +311,8 @@
   <div class="ek">the wander is over — for today</div>
   <h2>He'll leave a light on for you.</h2>
   <p>You walked his story, sailed his research, flew his dreams and ran his machines.<br>The real one is one message away.</p>
+  <svg id="constellation" width="200" height="64" viewBox="0 0 200 64" aria-label="Memories gathered"></svg>
+  <div id="constN" style="font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:#c9a86f;margin:-6px 0 14px"></div>
   <div class="elinks">
     <a href="mailto:saptarshinag18@gmail.com"><i class="fa-solid fa-envelope"></i> email</a>
     <a href="https://www.linkedin.com/in/saptarshi18" target="_blank" rel="noopener"><i class="fa-brands fa-linkedin"></i> linkedin</a>

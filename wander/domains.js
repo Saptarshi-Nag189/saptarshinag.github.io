@@ -399,6 +399,45 @@ const LocalBrain={
    See twin-data.js to update the local corpus. */
 window.TwinBrain = window.TwinBrain || LocalBrain;
 
+/* ---- optional full brain: a small LLM in the visitor's browser ---- */
+const brainBtn=document.getElementById('brainBtn'),
+      brainBar=document.getElementById('brainBar'),
+      brainFill=document.getElementById('brainFill'),
+      brainMsg=document.getElementById('brainMsg'),
+      brainKind=document.getElementById('brainKind');
+let llmLoading=false;
+async function loadFullBrain(){
+  if(llmLoading || (window.TwinBrain && window.TwinBrain.kind==='smollm2-360m' && window.TwinBrain.ready)) return;
+  llmLoading=true;
+  brainBar.classList.add('show');
+  try{
+    const mod=await import('../brain/llm-brain.js');
+    const llm=mod.createLLMBrain({
+      corpus:CORPUS, fallback:LocalBrain,
+      onProgress:(pct)=>{ brainFill.style.width=pct+'%'; brainMsg.textContent='downloading the full brain · '+pct+'%'; },
+      onStatus:(st)=>{ brainMsg.textContent=st; }
+    });
+    const ok=await llm.load();
+    if(ok){
+      window.TwinBrain=llm;
+      brainBtn.classList.add('on'); brainBtn.textContent='✦ full brain active';
+      brainKind.textContent='digital twin · SmolLM2-360M in your browser';
+      brainBar.classList.remove('show');
+      try{ localStorage.setItem('wander-llm','1'); }catch(e){}
+      addMsg('twin','My full brain is awake — a real 360M-parameter model running right here in your browser, grounded in his story. Ask away. ✧');
+    }else{
+      brainBar.classList.remove('show');
+      addMsg('twin',"I couldn't wake the full brain here (it needs a network + WebGPU or WASM). No matter — my local mind knows everything important.");
+    }
+  }catch(e){
+    brainBar.classList.remove('show');
+    addMsg('twin',"The full brain didn't load this time — my local mind continues, and it never gets his numbers wrong.");
+  }
+  llmLoading=false;
+}
+if(brainBtn) brainBtn.addEventListener('click',()=>{ toggleChat(true); loadFullBrain(); });
+try{ if(localStorage.getItem('wander-llm')==='1') setTimeout(loadFullBrain, 4000); }catch(e){}
+
 const chatEl=document.getElementById('chat'), chatLog=document.getElementById('chatLog'),
       chatQ=document.getElementById('chatQ'), chatGo=document.getElementById('chatGo');
 let chatOpen=false, greeted=false;
