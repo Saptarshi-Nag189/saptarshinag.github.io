@@ -63,6 +63,27 @@
     color:#f3eeff;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.25);
     border-radius:999px;padding:9px 15px;cursor:pointer}
 
+  /* The Ledger's typography — plain, readable, unhurried */
+  #ledger .lhead h1{font-size:clamp(28px,5vw,46px);font-weight:600;letter-spacing:-.01em}
+  #ledger .role{margin-top:4px;font-family:var(--mono);font-size:11px;letter-spacing:.26em;
+    text-transform:uppercase;color:#ffd9a8}
+  #ledger .blurb{margin-top:16px;max-width:60ch;font-size:15.5px;line-height:1.66;color:#d9d2ea}
+  #ledger .links{margin-top:18px;display:flex;flex-wrap:wrap;gap:10px}
+  #ledger .links a{font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;color:#f3eeff;
+    text-decoration:none;border:1px solid rgba(255,255,255,.22);border-radius:999px;padding:7px 13px}
+  #ledger .links a:hover{border-color:#ffd98a;color:#ffd98a}
+  #ledger .lsec{margin-top:46px}
+  #ledger .lsec h2{font-family:var(--mono);font-size:10.5px;letter-spacing:.32em;text-transform:uppercase;
+    color:#9f95bd;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,.12)}
+  #ledger .item{margin-top:26px}
+  #ledger .item h3{font-size:17px;font-weight:600}
+  #ledger .item .meta{margin-top:3px;font-family:var(--mono);font-size:11.5px;color:#9f95bd;line-height:1.6}
+  #ledger ul{margin-top:10px;padding-left:18px}
+  #ledger li{margin-top:7px;font-size:14.5px;line-height:1.62;color:#ddd6ee}
+  #ledger b{color:#ffd98a;font-weight:600}
+  #ledger .lfoot{margin-top:56px;padding-top:18px;border-top:1px solid rgba(255,255,255,.12);
+    font-size:13px;color:#9f95bd}
+
   @media (prefers-reduced-motion: reduce){
     #veil .orb{animation:none}
     #placeCard,#veil{transition-duration:.2s}
@@ -91,6 +112,13 @@
   <div id="veilTitle">the long light</div>
   <p id="veilMsg">a world is growing…</p>
 </div>
+
+<!-- The Ledger renders first and on its own: it must survive a failed or
+     absent WebGL context, because it is the fallback for exactly that case. -->
+<script type="module">
+  import { renderLedger } from './ledger.js';
+  renderLedger(document.getElementById('ledgerBody'));
+</script>
 
 <script src="lib/babylon.js"></script>
 <script type="module" src="main.js"></script>

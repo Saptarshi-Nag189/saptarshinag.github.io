@@ -4,6 +4,7 @@
    ========================================================================== */
 import { createHeightField, buildTerrain, buildWater, WORLD, SEA_LEVEL } from './terrain.js';
 import { createSkyState, setSkyTime, createSky, SKY_KEYS } from './sky.js';
+import { buildFlora } from './flora.js';
 import * as SH from './shaders.js';
 import { clamp, lerp } from './noise.js';
 
@@ -42,7 +43,16 @@ const skyObj = createSky(B, scene, sky, SH);
 const terrain = buildTerrain(B, scene, field, SH, { halfExtent: WORLD.halfExtent, segments: 300 });
 const water = buildWater(B, scene, field, SH, {});
 
-const worldMats = [skyObj.mat, terrain.mat, water.mat];
+/* what grows on it — counts are tunable so quality tiers can scale them */
+const QS = new URLSearchParams(location.search);
+const num = (k, d) => (QS.has(k) ? Math.max(0, parseInt(QS.get(k), 10) || 0) : d);
+const flora = buildFlora(B, scene, field, SH, {
+  grass: { count: num('grass', 55000) },
+  trees: { count: num('trees', 4200) },
+  rocks: { count: num('rocks', 1400) },
+});
+
+const worldMats = [skyObj.mat, terrain.mat, water.mat].concat(flora.mats);
 
 /* ---------- post-processing: the dreamy half of the look ---------- */
 const pipeline = new B.DefaultRenderingPipeline('longlight', true, scene, [camera]);
@@ -115,15 +125,29 @@ window.__LL = {
   look(px, py, pz, tx, ty, tz) {
     camera.position.set(px, py, pz);
     camera.setTarget(new B.Vector3(tx, ty, tz));
+    flora.grass.follow(px, pz);
   },
   /** stand the camera on the ground at (x,z), looking toward (lx,lz) */
   stand(x, z, lx, lz, eye) {
     const h = field.heightAt(x, z);
     camera.position.set(x, h + (eye == null ? 1.7 : eye), z);
+    flora.grass.follow(x, z);
     const lh = field.heightAt(lx, lz);
     camera.setTarget(new B.Vector3(lx, lh + 2, lz));
   },
+  /** stand at (x,z) and look along the sun's bearing — the light is the subject */
+  faceSun(x, z, eye) {
+    const h = field.heightAt(x, z);
+    camera.position.set(x, h + (eye == null ? 1.75 : eye), z);
+    const d = sky.sunDir;
+    const lx = x + d.x * 120, lz = z + d.z * 120;
+    camera.setTarget(new B.Vector3(lx, field.heightAt(lx, lz) + 30, lz));
+    flora.grass.follow(x, z);
+    return { sun: [d.x.toFixed(2), d.y.toFixed(2), d.z.toFixed(2)] };
+  },
   heightAt: (x, z) => field.heightAt(x, z),
+  /** move the dense grass disc to a point (the traveller will drive this) */
+  grassAt(x, z) { return flora.grass.refocus(x, z); },
   skyKeys: () => SKY_KEYS.map(k => ({ id: k.id, at: k.at, label: k.label })),
   stats() {
     return {
@@ -137,6 +161,7 @@ window.__LL = {
       time: sky.t,
       label: sky.label,
       reduced: REDUCED,
+      flora: flora.counts,
     };
   },
   /** tests: isolate parts of the pipeline */
