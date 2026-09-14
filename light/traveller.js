@@ -206,6 +206,14 @@ function createCloak(BABYLON, scene, mat, opts) {
       B.x -= dx * k; B.y -= dy * k; B.z -= dz * k;
     }
 
+    flush();
+  }
+
+  /** Push the simulation into the mesh. Separate from update() because reset()
+      must do it too: a teleport that only moves the simulation points leaves
+      the vertex buffer holding the PREVIOUS position's cape, which shows up as
+      a cloak floating unattached beside the traveller. */
+  function flush() {
     for (let i = 0; i < N; i++) {
       const A = chains[0][i].p, B = chains[1][i].p;
       const o = i * 6;
@@ -244,9 +252,10 @@ function createCloak(BABYLON, scene, mat, opts) {
         chains[s][i].o.copyFrom(chains[s][i].p);
       }
     }
+    flush();
   }
 
-  return { mesh, update, reset };
+  return { mesh, update, reset, flush };
 }
 
 /* ==========================================================================
