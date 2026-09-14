@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>spike</title>
+<style>html,body{margin:0;height:100%;overflow:hidden;background:#000}#c{width:100vw;height:100vh;display:block}</style>
+</head><body>
+<canvas id="c"></canvas>
+<script src="lib/babylon.js"></script>
+<script>
+/* Phase-0 spike: does a full game-engine stack render under SwiftShader software WebGL?
+   Each at-risk feature is tried independently so partial failure is reported, not fatal. */
+const R = { boot:null, webgl2:null, sky:null, pbr:null, dynTex:null, shadows:null,
+            instances:null, particles:null, pipeline:null, bloom:null, dof:null,
+            grain:null, vignette:null, tonemap:null, fxaa:null, frames:0, errors:[] };
+function tryStep(name, fn){ try { fn(); R[name] = true; } catch(e){ R[name] = false; R.errors.push(name+': '+(e&&e.message||e)); } }
+
+let engine, scene, camera;
+
+tryStep('boot', () => {
+  engine = new BABYLON.Engine(document.getElementById('c'), true,
+    { preserveDrawingBuffer:true, stencil:true, disableWebGL2Support:false });
+  scene = new BABYLON.Scene(engine);
+  R.webgl2 = engine.webGLVersion === 2;
+  scene.clearColor = new BABYLON.Color4(0.02,0.03,0.06,1);
+  camera = new BABYLON.FreeCamera('cam', new BABYLON.Vector3(0, 3.2, -11), scene);
+  camera.setTarget(new BABYLON.Vector3(0, 1.6, 0));
+  camera.fov = 0.95;
+});
+
+/* sun + ambient: a dawn key light */
+let sun;
+tryStep('pbr', () => {
+  sun = new BABYLON.DirectionalLight('sun', new BABYLON.Vector3(-0.45,-0.35,0.82), scene);
+  sun.intensity = 3.2;
+  sun.diffuse = new BABYLON.Color3(1.0, 0.72, 0.45);
+  const hemi = new BABYLON.HemisphericLight('hemi', new BABYLON.Vector3(0,1,0), scene);
+  hemi.intensity = 0.55;
+  hemi.diffuse = new BABYLON.Color3(0.55,0.62,0.85);
+  hemi.groundColor = new BABYLON.Color3(0.22,0.18,0.24);
+
+  const ground = BABYLON.MeshBuilder.CreateGround('g', {width:120, height:120, subdivisions:64}, scene);
+  const gm = new BABYLON.PBRMaterial('gm', scene);
+  gm.albedoColor = new BABYLON.Color3(0.30,0.34,0.26);
+  gm.metallic = 0; gm.roughness = 0.92;
+  ground.material = gm; ground.receiveShadows = true;
+
+  const hero = BABYLON.MeshBuilder.CreateSphere('hero', {diameter:2.4, segments:32}, scene);
+  hero.position.y = 1.4;
+  const hm = new BABYLON.PBRMaterial('hm', scene);
+  hm.albedoColor = new BABYLON.Color3(0.85,0.35,0.55);
+  hm.metallic = 0.1; hm.roughness = 0.45;
+  hero.material = hm;
+
+  /* emissive orb — the bloom test subject */
+  const orb = BABYLON.MeshBuilder.CreateSphere('orb', {diameter:0.7, segments:16}, scene);
+  orb.position.set(2.6, 2.1, -1.2);
+  const om = new BABYLON.PBRMaterial('om', scene);
+  om.emissiveColor = new BABYLON.Color3(1.0, 0.85, 0.45);
+  om.albedoColor = new BABYLON.Color3(0,0,0);
+  orb.material = om;
+  window.__orb = orb;
+});
+
+/* custom GLSL sky — proves shader compilation works */
+tryStep('sky', () => {
+  BABYLON.Effect.ShadersStore['skyVertexShader'] = `
+    precision highp float; attribute vec3 position; uniform mat4 worldViewProjection;
+    varying vec3 vPos; void main(){ vPos = position; gl_Position = worldViewProjection*vec4(position,1.0); }`;
+  BABYLON.Effect.ShadersStore['skyFragmentShader'] = `
+    precision highp float; varying vec3 vPos;
+    uniform vec3 top; uniform vec3 horiz; uniform vec3 sunDir; uniform vec3 sunCol;
+    void main(){
+      vec3 d = normalize(vPos);
+      float h = clamp(d.y*0.5+0.5, 0.0, 1.0);
+      vec3 col = mix(horiz, top, pow(h, 0.65));
+      float s = pow(max(dot(d, normalize(sunDir)), 0.0), 220.0);
+      float glow = pow(max(dot(d, normalize(sunDir)), 0.0), 6.0)*0.35;
+      col += sunCol*(s*6.0 + glow);
+      gl_FragColor = vec4(col, 1.0);
+    }`;
+  const skyMat = new BABYLON.ShaderMaterial('skyMat', scene,
+    { vertex:'sky', fragment:'sky' },
+    { attributes:['position'], uniforms:['worldViewProjection','top','horiz','sunDir','sunCol'] });
+  skyMat.setColor3('top', new BABYLON.Color3(0.18,0.30,0.62));
+  skyMat.setColor3('horiz', new BABYLON.Color3(1.0,0.62,0.42));
+  skyMat.setVector3('sunDir', new BABYLON.Vector3(0.45,0.35,-0.82));
+  skyMat.setColor3('sunCol', new BABYLON.Color3(1.0,0.78,0.5));
+  skyMat.backFaceCulling = false; skyMat.disableDepthWrite = true;
+  const skyBox = BABYLON.MeshBuilder.CreateSphere('sky', {diameter:900, segments:24}, scene);
+  skyBox.material = skyMat; skyBox.infiniteDistance = true;
+});
+
+/* procedural texture generated in code — the whole art pipeline depends on this */
+tryStep('dynTex', () => {
+  const dt = new BABYLON.DynamicTexture('dt', {width:512, height:512}, scene, true);
+  const ctx = dt.getContext();
+  const img = ctx.createImageData(512,512);
+  for (let y=0;y<512;y++) for (let x=0;x<512;x++){
+    const i=(y*512+x)*4;
+    const n = (Math.sin(x*0.06)*Math.cos(y*0.05)+Math.sin((x+y)*0.021))*0.25+0.5;
+    img.data[i]=90+n*70; img.data[i+1]=110+n*80; img.data[i+2]=70+n*50; img.data[i+3]=255;
+  }
+  ctx.putImageData(img,0,0); dt.update();
+  const m = scene.getMaterialByName('gm');
+  if (m) m.albedoTexture = dt;
+});
+
+tryStep('shadows', () => {
+  const sg = new BABYLON.ShadowGenerator(1024, sun);
+  sg.useBlurExponentialShadowMap = true; sg.blurKernel = 32;
+  sg.addShadowCaster(scene.getMeshByName('hero'));
+  sg.addShadowCaster(scene.getMeshByName('orb'));
+});
+
+/* thin instances — how thousands of grass blades/trees will be drawn */
+tryStep('instances', () => {
+  const blade = BABYLON.MeshBuilder.CreateBox('blade', {width:0.12, height:0.9, depth:0.12}, scene);
+  const bm = new BABYLON.PBRMaterial('bm', scene);
+  bm.albedoColor = new BABYLON.Color3(0.34,0.45,0.24); bm.roughness=1; bm.metallic=0;
+  blade.material = bm;
+  const N = 4000, mats = new Float32Array(N*16);
+  for (let i=0;i<N;i++){
+    const a = i*2.399, r = 3 + Math.sqrt(i)*0.55;
+    const m = BABYLON.Matrix.Translation(Math.cos(a)*r, 0.45, Math.sin(a)*r);
+    m.copyToArray(mats, i*16);
+  }
+  blade.thinInstanceSetBuffer('matrix', mats, 16);
+  window.__blades = N;
+});
+
+tryStep('particles', () => {
+  const ps = new BABYLON.ParticleSystem('pollen', 600, scene);
+  ps.particleTexture = null;
+  ps.emitter = new BABYLON.Vector3(0,2,0);
+  ps.minEmitBox = new BABYLON.Vector3(-14,0,-14);
+  ps.maxEmitBox = new BABYLON.Vector3(14,6,14);
+  ps.color1 = new BABYLON.Color4(1,0.9,0.6,0.9);
+  ps.color2 = new BABYLON.Color4(1,0.75,0.5,0.7);
+  ps.minSize=0.05; ps.maxSize=0.14;
+  ps.minLifeTime=4; ps.maxLifeTime=9; ps.emitRate=120;
+  ps.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD;
+  ps.direction1 = new BABYLON.Vector3(-0.2,0.1,-0.2);
+  ps.direction2 = new BABYLON.Vector3(0.2,0.35,0.2);
+  ps.minEmitPower=0.05; ps.maxEmitPower=0.2; ps.gravity=new BABYLON.Vector3(0,-0.02,0);
+  ps.start();
+  R.gpuParticlesSupported = BABYLON.GPUParticleSystem.IsSupported;
+});
+
+/* THE critical one: the full post-processing pipeline */
+let pipeline;
+tryStep('pipeline', () => {
+  pipeline = new BABYLON.DefaultRenderingPipeline('dp', true, scene, [camera]);
+});
+if (pipeline) {
+  tryStep('bloom', () => { pipeline.bloomEnabled = true; pipeline.bloomThreshold = 0.62;
+                           pipeline.bloomWeight = 0.85; pipeline.bloomKernel = 64; pipeline.bloomScale = 0.6; });
+  tryStep('dof', () => { pipeline.depthOfFieldEnabled = true;
+                         pipeline.depthOfFieldBlurLevel = BABYLON.DepthOfFieldEffectBlurLevel.Low;
+                         pipeline.depthOfField.focusDistance = 11000;
+                         pipeline.depthOfField.fStop = 2.2; pipeline.depthOfField.focalLength = 42; });
+  tryStep('grain', () => { pipeline.grainEnabled = true; pipeline.grain.intensity = 7; pipeline.grain.animated = true; });
+  tryStep('tonemap', () => { pipeline.imageProcessing.toneMappingEnabled = true;
+                             pipeline.imageProcessing.toneMappingType = BABYLON.ImageProcessingConfiguration.TONEMAPPING_ACES;
+                             pipeline.imageProcessing.exposure = 1.15;
+                             pipeline.imageProcessing.contrast = 1.25; });
+  tryStep('vignette', () => { pipeline.imageProcessing.vignetteEnabled = true;
+                              pipeline.imageProcessing.vignetteWeight = 3.2;
+                              pipeline.imageProcessing.vignetteColor = new BABYLON.Color4(0.05,0.02,0.08,0); });
+  tryStep('fxaa', () => { pipeline.fxaaEnabled = true; });
+}
+
+/* atmospheric fog */
+try {
+  scene.fogMode = BABYLON.Scene.FOGMODE_EXP2;
+  scene.fogDensity = 0.012;
+  scene.fogColor = new BABYLON.Color3(0.85,0.62,0.52);
+} catch(e){ R.errors.push('fog: '+e.message); }
+
+window.addEventListener('error', e => R.errors.push('window: '+e.message));
+
+engine.runRenderLoop(() => {
+  R.frames++;
+  const t = R.frames * 0.016;
+  if (window.__orb) window.__orb.position.y = 2.1 + Math.sin(t*1.6)*0.3;
+  scene.render();
+});
+
+window.__spike = () => {
+  const s = Object.assign({}, R);
+  try {
+    s.drawCalls = scene.getEngine().drawCalls;
+    s.activeMeshes = scene.getActiveMeshes().length;
+    s.totalVertices = scene.getTotalVertices();
+    s.glVersion = engine.webGLVersion;
+    s.glRenderer = engine._gl.getParameter(engine._gl.RENDERER);
+  } catch(e){ s.statsErr = e.message; }
+  return s;
+};
+</script>
+</body></html>
