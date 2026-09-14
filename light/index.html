@@ -33,6 +33,16 @@
   #veil p{font-size:14px;letter-spacing:.06em;color:#e8cfc4;opacity:.85}
   #veilTitle{font-size:12px;letter-spacing:.42em;text-transform:uppercase;color:#ffcfa8;opacity:.9}
 
+  /* controls, taught before they are needed and faded once they are known */
+  #keys{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:18;
+    display:flex;gap:7px;flex-wrap:wrap;justify-content:center;max-width:92vw;
+    pointer-events:none;transition:opacity 1.2s ease}
+  #keys.gone{opacity:0}
+  #keys span{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+    color:rgba(255,245,235,.82);background:rgba(18,12,30,.42);border:1px solid rgba(255,255,255,.18);
+    border-radius:999px;padding:6px 11px;backdrop-filter:blur(8px);white-space:nowrap}
+  #keys b{color:#ffd9a8;font-weight:600}
+
   /* corner chip */
   #chip{position:fixed;top:16px;left:18px;z-index:20;font-family:var(--mono);font-size:10.5px;
     letter-spacing:.24em;text-transform:uppercase;color:rgba(255,245,235,.72);
@@ -97,6 +107,14 @@
 
 <div id="chip">the <b>long light</b> · saptarshi nag</div>
 <button id="ledgerBtn" aria-controls="ledger" aria-expanded="false">read it plainly</button>
+
+<div id="keys">
+  <span><b>click</b> to look around</span>
+  <span><b>W A S D</b> walk</span>
+  <span><b>shift</b> run</span>
+  <span><b>V</b> first person</span>
+  <span><b>L</b> read it plainly</span>
+</div>
 
 <div id="placeCard"><div class="t1" id="placeName"></div><div class="t2" id="placeSub"></div></div>
 

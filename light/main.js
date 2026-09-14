@@ -5,6 +5,8 @@
 import { createHeightField, buildTerrain, buildWater, WORLD, SEA_LEVEL } from './terrain.js';
 import { createSkyState, setSkyTime, createSky, SKY_KEYS } from './sky.js';
 import { buildFlora } from './flora.js';
+import { createTraveller } from './traveller.js';
+import { createCameraRig, createController } from './camera.js';
 import * as SH from './shaders.js';
 import { clamp, lerp } from './noise.js';
 
@@ -30,11 +32,11 @@ scene.ambientColor = new B.Color3(0, 0, 0);
 const sky = createSkyState(B);
 setSkyTime(sky, 0);                       // dawn
 
-/* ---------- camera (temporary rig — the real one lands with the traveller) */
+/* ---------- camera ---------- */
 const camera = new B.FreeCamera('cam', new B.Vector3(0, 6, -205), scene);
 camera.minZ = 0.4;
 camera.maxZ = 4000;
-camera.fov = 0.95;
+camera.fov = 0.96;
 camera.setTarget(new B.Vector3(0, 8, -120));
 
 /* ---------- world ---------- */
@@ -52,7 +54,15 @@ const flora = buildFlora(B, scene, field, SH, {
   rocks: { count: num('rocks', 1400) },
 });
 
-const worldMats = [skyObj.mat, terrain.mat, water.mat].concat(flora.mats);
+/* ---------- the traveller, the rig, the hands ---------- */
+const traveller = createTraveller(B, scene, SH, {});
+const control = createController(field, { x: WORLD.startX, z: WORLD.startZ, heading: 0 });
+const rig = createCameraRig(B, scene, camera, field, {});
+traveller.reset(control.me, control.me.heading);
+rig.snap(control.yaw, control.pitch, control.me);
+flora.grass.refocus(control.me.x, control.me.z);
+
+const worldMats = [skyObj.mat, terrain.mat, water.mat, traveller.mat].concat(flora.mats);
 
 /* ---------- post-processing: the dreamy half of the look ---------- */
 const pipeline = new B.DefaultRenderingPipeline('longlight', true, scene, [camera]);
@@ -81,6 +91,7 @@ pipeline.depthOfFieldEnabled = false;   // enabled per-tier; costly under softwa
 
 /* ---------- loop ---------- */
 let t0 = performance.now();
+let frozen = false;
 let frames = 0;
 
 /* diagnostics — lets a headless test isolate fog, post and geometry so a
@@ -108,8 +119,34 @@ function liftVeil() {
   setTimeout(() => veil.remove(), 1400);
 }
 
+let firstPerson = false;
+let hintsGone = false;
+let walked = 0;
+let last = performance.now();
+
 engine.runRenderLoop(() => {
   frames++;
+  const now = performance.now();
+  const dt = Math.min((now - last) / 1000, 0.05);
+  last = now;
+  const t = (now - t0) / 1000;
+
+  if (!frozen) {
+    const me = control.update(dt);
+    traveller.update(dt, me, me.heading, me.speed, me.running, t);
+    rig.update(dt, control.yaw, control.pitch, me, me.fwd, me.speed, me.running, firstPerson);
+    traveller.body.setEnabled(!firstPerson);
+    traveller.cloak.setEnabled(!firstPerson);
+    // the dense grass disc follows, refilling only when we leave the patch
+    flora.grass.follow(me.x, me.z);
+
+    // once you have walked a little way, the hints have done their job
+    if (!hintsGone) {
+      walked += me.speed * dt;
+      if (walked > 22) { hintsGone = true; const k = document.getElementById('keys'); if (k) k.classList.add('gone'); }
+    }
+  }
+
   applyTimeOfDay();
   scene.render();
   if (frames === 3) liftVeil();
@@ -117,18 +154,54 @@ engine.runRenderLoop(() => {
 
 addEventListener('resize', () => engine.resize());
 
+/* ---------- input ---------- */
+let pointerLocked = false;
+addEventListener('keydown', (e) => {
+  if (e.code === 'KeyP') { /* photo mode lands in a later phase */ }
+  if (e.code === 'KeyV') { firstPerson = !firstPerson; }
+  if (['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code)) e.preventDefault();
+  control.key(e.code, true);
+});
+addEventListener('keyup', (e) => control.key(e.code, false));
+addEventListener('blur', () => { for (const k of ['KeyW','KeyA','KeyS','KeyD','ShiftLeft','ShiftRight']) control.key(k, false); });
+
+canvas.addEventListener('click', () => { if (!pointerLocked) canvas.requestPointerLock(); });
+document.addEventListener('pointerlockchange', () => { pointerLocked = document.pointerLockElement === canvas; });
+addEventListener('mousemove', (e) => {
+  if (!pointerLocked) return;
+  control.orbit(e.movementX * 0.0022, -e.movementY * 0.0016);
+});
+
+/* touch: drag anywhere to look, and the left third acts as a walk pad */
+let touchId = null, lastTX = 0, lastTY = 0;
+canvas.addEventListener('touchstart', (e) => {
+  const t = e.changedTouches[0];
+  touchId = t.identifier; lastTX = t.clientX; lastTY = t.clientY;
+  if (t.clientX < innerWidth * 0.33) control.key('KeyW', true);
+}, { passive: true });
+canvas.addEventListener('touchmove', (e) => {
+  for (const t of e.changedTouches) {
+    if (t.identifier !== touchId) continue;
+    control.orbit((t.clientX - lastTX) * 0.005, -(t.clientY - lastTY) * 0.004);
+    lastTX = t.clientX; lastTY = t.clientY;
+  }
+}, { passive: true });
+canvas.addEventListener('touchend', () => { touchId = null; control.key('KeyW', false); }, { passive: true });
+
 /* ---------- test + authoring hooks ---------- */
 window.__LL = {
   /** move the day: 0 = dawn on the shore … 1 = night */
   setTime(t) { setSkyTime(sky, t); return sky.label; },
   /** place the camera for a shot */
   look(px, py, pz, tx, ty, tz) {
+    frozen = true;
     camera.position.set(px, py, pz);
     camera.setTarget(new B.Vector3(tx, ty, tz));
     flora.grass.follow(px, pz);
   },
   /** stand the camera on the ground at (x,z), looking toward (lx,lz) */
   stand(x, z, lx, lz, eye) {
+    frozen = true;
     const h = field.heightAt(x, z);
     camera.position.set(x, h + (eye == null ? 1.7 : eye), z);
     flora.grass.follow(x, z);
@@ -137,6 +210,7 @@ window.__LL = {
   },
   /** stand at (x,z) and look along the sun's bearing — the light is the subject */
   faceSun(x, z, eye) {
+    frozen = true;
     const h = field.heightAt(x, z);
     camera.position.set(x, h + (eye == null ? 1.75 : eye), z);
     const d = sky.sunDir;
@@ -179,5 +253,15 @@ window.__LL = {
   /** tests: skip the fade and clear the overlay immediately */
   clearVeil() { if (veil) veil.remove(); return true; },
   veilGone: () => !document.getElementById('veil'),
+  /** hand control back to the traveller after a scripted shot */
+  unfreeze() { frozen = false; rig.snap(control.yaw, control.pitch, control.me); return true; },
+  /** put the traveller somewhere and let the rig follow */
+  goto(x, z, heading) { frozen = false; control.place(x, z, heading);
+    traveller.reset(control.me, control.me.heading);
+    rig.snap(control.yaw, control.pitch, control.me);
+    flora.grass.refocus(x, z); return { x: control.me.x, y: control.me.y, z: control.me.z }; },
+  /** where the traveller is and what it is doing */
+  who() { const m = control.me; return { x:+m.x.toFixed(2), y:+m.y.toFixed(2), z:+m.z.toFixed(2),
+    heading:+m.heading.toFixed(2), speed:+m.speed.toFixed(2), running:+m.running.toFixed(2) }; },
   ready: true,
 };

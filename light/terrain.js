@@ -22,6 +22,8 @@ export const WORLD = {
   shoreZ: -300,         // mean shoreline; noise-warped into bays and headlands
   groveZ: 40,           // heart of the forest
   spireZ: 620,          // far beyond the slice — silhouette only
+  startX: 20,           // where the traveller first stands
+  startZ: -262,
 };
 
 /**
