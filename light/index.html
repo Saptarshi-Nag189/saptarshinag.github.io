@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>THE LONG LIGHT — Saptarshi Nag</title>
+<meta name="description" content="One world, many lands, one day's light — an explorable world built around the work of Saptarshi Nag, AI/ML engineer.">
+<style>
+  :root{
+    --ink:#2b2740; --soft:#7a7194; --gold:#ffd98a; --rose:#ff9ecb;
+    --sans:'Quicksand',ui-rounded,system-ui,sans-serif;
+    --mono:ui-monospace,'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;overflow:hidden;background:#06070d;color:#f3eeff;
+    font-family:var(--sans);-webkit-font-smoothing:antialiased}
+  #view{position:fixed;inset:0;display:block;width:100%;height:100%;touch-action:none;outline:none}
+
+  /* a faint grade over the whole frame — the last 3% of the look */
+  #grade{position:fixed;inset:0;z-index:3;pointer-events:none;
+    background:radial-gradient(ellipse 86% 78% at 50% 44%, transparent 52%, rgba(20,10,40,.34) 100%)}
+
+  /* loading veil */
+  #veil{position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:18px;
+    background:linear-gradient(175deg,#1a1430 0%,#3a2240 45%,#8c4a3c 100%);
+    transition:opacity 1.1s ease}
+  #veil.gone{opacity:0;pointer-events:none}
+  #veil .orb{width:54px;height:54px;border-radius:50%;
+    background:radial-gradient(circle at 36% 32%,#fff,#ffd08a 52%,#e0653f 100%);
+    box-shadow:0 0 60px rgba(255,160,110,.75);animation:breathe 2.6s ease-in-out infinite}
+  @keyframes breathe{50%{transform:scale(1.13)}}
+  #veil p{font-size:14px;letter-spacing:.06em;color:#e8cfc4;opacity:.85}
+  #veilTitle{font-size:12px;letter-spacing:.42em;text-transform:uppercase;color:#ffcfa8;opacity:.9}
+
+  /* corner chip */
+  #chip{position:fixed;top:16px;left:18px;z-index:20;font-family:var(--mono);font-size:10.5px;
+    letter-spacing:.24em;text-transform:uppercase;color:rgba(255,245,235,.72);
+    text-shadow:0 1px 14px rgba(0,0,0,.6);pointer-events:none}
+  #chip b{color:#ffd9a8;font-weight:600}
+
+  /* the land you are in */
+  #placeCard{position:fixed;top:14%;left:50%;transform:translateX(-50%);z-index:15;
+    text-align:center;pointer-events:none;opacity:0;transition:opacity 1.4s ease}
+  #placeCard.show{opacity:1}
+  #placeCard .t1{font-size:clamp(24px,4vw,40px);font-weight:600;letter-spacing:.02em;
+    text-shadow:0 2px 30px rgba(0,0,0,.55)}
+  #placeCard .t2{margin-top:6px;font-family:var(--mono);font-size:10.5px;letter-spacing:.34em;
+    text-transform:uppercase;opacity:.82;text-shadow:0 1px 14px rgba(0,0,0,.6)}
+
+  /* The Ledger — real DOM: SEO surface, no-WebGL fallback, screen-reader path */
+  #ledgerBtn{position:fixed;top:16px;right:18px;z-index:22;font-family:var(--mono);font-size:10.5px;
+    letter-spacing:.14em;text-transform:uppercase;color:#f3eeff;cursor:pointer;
+    background:rgba(20,14,34,.42);border:1px solid rgba(255,255,255,.22);border-radius:999px;
+    padding:9px 15px;backdrop-filter:blur(10px);transition:.2s}
+  #ledgerBtn:hover{background:rgba(20,14,34,.66);border-color:rgba(255,217,138,.55);color:#ffd98a}
+  #ledger{position:fixed;inset:0;z-index:50;overflow-y:auto;padding:6vh 5vw 10vh;
+    background:rgba(10,8,20,.93);backdrop-filter:blur(18px);
+    opacity:0;pointer-events:none;transition:opacity .45s ease}
+  #ledger.open{opacity:1;pointer-events:auto}
+  #ledger .wrap{max-width:760px;margin:0 auto}
+  #ledgerClose{position:fixed;top:16px;right:18px;z-index:52;font-family:var(--mono);font-size:11px;
+    color:#f3eeff;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.25);
+    border-radius:999px;padding:9px 15px;cursor:pointer}
+
+  @media (prefers-reduced-motion: reduce){
+    #veil .orb{animation:none}
+    #placeCard,#veil{transition-duration:.2s}
+  }
+</style>
+</head>
+<body>
+
+<canvas id="view" tabindex="0"></canvas>
+<div id="grade"></div>
+
+<div id="chip">the <b>long light</b> · saptarshi nag</div>
+<button id="ledgerBtn" aria-controls="ledger" aria-expanded="false">read it plainly</button>
+
+<div id="placeCard"><div class="t1" id="placeName"></div><div class="t2" id="placeSub"></div></div>
+
+<!-- The Ledger: every fact, as real text. Present in the DOM from the first byte,
+     so it works with WebGL disabled, for screen readers, and for search engines. -->
+<main id="ledger" aria-hidden="true">
+  <button id="ledgerClose">close</button>
+  <div class="wrap" id="ledgerBody"></div>
+</main>
+
+<div id="veil">
+  <div class="orb"></div>
+  <div id="veilTitle">the long light</div>
+  <p id="veilMsg">a world is growing…</p>
+</div>
+
+<script src="lib/babylon.js"></script>
+<script type="module" src="main.js"></script>
+<script>
+  /* Ledger open/close — plain DOM, works even if the 3D scene never boots */
+  (function(){
+    const btn = document.getElementById('ledgerBtn');
+    const panel = document.getElementById('ledger');
+    const close = document.getElementById('ledgerClose');
+    function set(open){
+      panel.classList.toggle('open', open);
+      panel.setAttribute('aria-hidden', String(!open));
+      btn.setAttribute('aria-expanded', String(open));
+    }
+    btn.addEventListener('click', () => set(true));
+    close.addEventListener('click', () => set(false));
+    addEventListener('keydown', e => {
+      if (e.key === 'Escape') set(false);
+      if ((e.key === 'l' || e.key === 'L') && document.activeElement.tagName !== 'INPUT') {
+        set(!panel.classList.contains('open'));
+      }
+    });
+  })();
+</script>
+</body>
+</html>
