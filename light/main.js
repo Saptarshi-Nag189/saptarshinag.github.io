@@ -2,9 +2,12 @@
    main.js — THE LONG LIGHT
    Boots the engine, grows the world, and runs the loop.
    ========================================================================== */
-import { createHeightField, buildTerrain, buildWater, WORLD, SEA_LEVEL } from './terrain.js';
+import { createHeightField, buildTerrain, buildWater, buildLake, WORLD, SEA_LEVEL } from './terrain.js';
 import { createSkyState, setSkyTime, createSky, SKY_KEYS } from './sky.js';
 import { buildFlora } from './flora.js';
+import { createChunkManager } from './chunks.js';
+import { buildLandmarks } from './landmarks.js';
+import { buildFauna } from './fauna.js';
 import { createTraveller } from './traveller.js';
 import { createCameraRig, createController } from './camera.js';
 import * as SH from './shaders.js';
@@ -40,19 +43,48 @@ camera.fov = 0.96;
 camera.setTarget(new B.Vector3(0, 8, -120));
 
 /* ---------- world ---------- */
-const field = createHeightField(WORLD.seed);
-const skyObj = createSky(B, scene, sky, SH);
-const terrain = buildTerrain(B, scene, field, SH, { halfExtent: WORLD.halfExtent, segments: 300 });
-const water = buildWater(B, scene, field, SH, {});
-
-/* what grows on it — counts are tunable so quality tiers can scale them */
 const QS = new URLSearchParams(location.search);
 const num = (k, d) => (QS.has(k) ? Math.max(0, parseInt(QS.get(k), 10) || 0) : d);
-const flora = buildFlora(B, scene, field, SH, {
-  grass: { count: num('grass', 55000) },
-  trees: { count: num('trees', 4200) },
-  rocks: { count: num('rocks', 1400) },
-});
+const STREAM = QS.get('stream') !== '0';
+
+/* boot timings — the only way to know which stage is actually the slow one */
+const BOOT = {};
+const stage = (k, fn) => { const t = performance.now(); const r = fn(); BOOT[k] = Math.round(performance.now() - t); return r; };
+
+const field = stage('field', () => createHeightField(WORLD.seed));
+const skyObj = stage('sky', () => createSky(B, scene, sky, SH));
+const water = stage('sea', () => buildWater(B, scene, field, SH, {}));
+const lake = stage('lake', () => buildLake(B, scene, field, SH));
+
+/* The ground and everything growing on it.
+   Streaming builds only what is near enough to see and frees the rest; the
+   legacy whole-island build stays behind ?stream=0 so the two can be compared
+   directly when something looks wrong. */
+let chunks = null, terrain = null, flora = null;
+if (STREAM) {
+  chunks = stage('chunkInit', () => createChunkManager(B, scene, field, SH, {
+    tile: 64,
+    nearRings: num('near', 2),
+    midRings: num('mid', 5),
+    grassPerTile: num('grasstile', 2600),
+  }));
+} else {
+  terrain = buildTerrain(B, scene, field, SH, { halfExtent: WORLD.halfExtent, segments: 300 });
+  flora = buildFlora(B, scene, field, SH, {
+    grass: { count: num('grass', 55000) },
+  });
+}
+
+/* ---------- what was built, and what lives here ---------- */
+const landmarks = stage('landmarks', () => buildLandmarks(B, scene, field, SH, {
+  lanterns: num('lanterns', 46),
+  driftwood: num('driftwood', 150),
+  shards: num('shards', 260),
+}));
+const fauna = stage('fauna', () => buildFauna(B, scene, field, SH, {
+  deer: { count: num('deer', 26) },
+  birds: { count: num('birds', 54) },
+}));
 
 /* ---------- the traveller, the rig, the hands ---------- */
 const traveller = createTraveller(B, scene, SH, {});
@@ -60,9 +92,18 @@ const control = createController(field, { x: WORLD.startX, z: WORLD.startZ, head
 const rig = createCameraRig(B, scene, camera, field, {});
 traveller.reset(control.me, control.me.heading);
 rig.snap(control.yaw, control.pitch, control.me);
-flora.grass.refocus(control.me.x, control.me.z);
+// Only the near ring is built before the veil lifts. The rest streams in over
+// the next few seconds under the frame budget, which is the entire point.
+stage('prime', () => {
+  if (chunks) chunks.prime(control.me.x, control.me.z, chunks.rings.near);
+  else flora.grass.refocus(control.me.x, control.me.z);
+});
 
-const worldMats = [skyObj.mat, terrain.mat, water.mat, traveller.mat].concat(flora.mats);
+const worldMats = [skyObj.mat, water.mat, traveller.mat]
+  .concat(lake ? [lake.mat] : [])
+  .concat(chunks ? chunks.mats : [terrain.mat].concat(flora.mats))
+  .concat(landmarks.mats)
+  .concat(fauna.mats);
 
 /* ---------- post-processing: the dreamy half of the look ---------- */
 const pipeline = new B.DefaultRenderingPipeline('longlight', true, scene, [camera]);
@@ -108,6 +149,49 @@ function applyTimeOfDay() {
   }
   // the bloom follows the sun: strong at dawn and golden hour, restrained at noon
   pipeline.bloomWeight = lerp(0.28, 0.58, clamp(sky.sunGlow / 0.5, 0, 1));
+  // lanterns burn brightest when the sky is darkest
+  landmarks.update(sky);
+}
+
+/* ---------- naming the land you are standing in ----------
+   The card only appears once a biome has held for a moment. Without that
+   hysteresis, walking a border flickers the title on and off, which reads as a
+   bug rather than as arrival. */
+const PLACES = {
+  beach:  ['The Long Strand', 'where the island begins'],
+  desert: ['The Dune Sea', 'dry, and older than the rest'],
+  meadow: ['The Open Meadow', 'the easy middle of the world'],
+  forest: ['The Deep Wood', 'close, and full of quiet'],
+  marsh:  ['The Still Water', 'reeds, and something moored'],
+  rock:   ['The Bare Shoulder', 'above where things grow'],
+  snow:   ['The Frozen Crown', 'the cold top of the light'],
+};
+const placeEl = document.getElementById('placeCard');
+const placeName = document.getElementById('placeName');
+const placeSub = document.getElementById('placeSub');
+let placeShown = null, placeCandidate = null, placeHeld = 0, placeTimer = 0;
+
+function announcePlace(x, z, dt) {
+  placeTimer -= dt;
+  if (placeTimer > 0) return;
+  placeTimer = 0.35;                       // sampling four times a second is plenty
+
+  const h = field.heightAt(x, z);
+  const w = field.climate.climateAt(x, z, h, field.inlandOf(x, z), field.moistureAt(x, z));
+  const here = field.climate.dominant(w);
+
+  if (here !== placeCandidate) { placeCandidate = here; placeHeld = 0; return; }
+  placeHeld += 0.35;
+  if (placeHeld < 2.0 || here === placeShown) return;
+
+  placeShown = here;
+  const p = PLACES[here];
+  if (!p || !placeEl) return;
+  placeName.textContent = p[0];
+  placeSub.textContent = p[1];
+  placeEl.classList.add('show');
+  clearTimeout(announcePlace._t);
+  announcePlace._t = setTimeout(() => placeEl.classList.remove('show'), 4200);
 }
 
 /* lift the veil once the world has actually drawn a frame or two — not on
@@ -137,8 +221,15 @@ engine.runRenderLoop(() => {
     rig.update(dt, control.yaw, control.pitch, me, me.fwd, me.speed, me.running, firstPerson);
     traveller.body.setEnabled(!firstPerson);
     traveller.cloak.setEnabled(!firstPerson);
-    // the dense grass disc follows, refilling only when we leave the patch
-    flora.grass.follow(me.x, me.z);
+
+    // The world streams around wherever you are. The budget is what keeps
+    // tile building from ever becoming a hitch: a frame spends at most this
+    // many milliseconds on it and picks up where it left off next frame.
+    if (chunks) chunks.update(me.x, me.z, 4);
+    else flora.grass.follow(me.x, me.z);
+
+    fauna.update(dt, me.x, me.z);
+    announcePlace(me.x, me.z, dt);
 
     // once you have walked a little way, the hints have done their job
     if (!hintsGone) {
@@ -189,6 +280,17 @@ canvas.addEventListener('touchmove', (e) => {
 canvas.addEventListener('touchend', () => { touchId = null; control.key('KeyW', false); }, { passive: true });
 
 /* ---------- test + authoring hooks ---------- */
+
+/** Bring the world in around a point. Camera hooks jump; streaming has to
+    catch up before a screenshot, or the shot is of an empty ring. */
+function settle(x, z) {
+  if (chunks) chunks.prime(x, z);
+  else flora.grass.follow(x, z);
+}
+
+/** the ground material, whichever path built it */
+const groundMaterial = () => (chunks ? chunks.mats[0] : terrain.mat);
+
 window.__LL = {
   /** move the day: 0 = dawn on the shore … 1 = night */
   setTime(t) { setSkyTime(sky, t); return sky.label; },
@@ -197,14 +299,14 @@ window.__LL = {
     frozen = true;
     camera.position.set(px, py, pz);
     camera.setTarget(new B.Vector3(tx, ty, tz));
-    flora.grass.follow(px, pz);
+    settle(px, pz);
   },
   /** stand the camera on the ground at (x,z), looking toward (lx,lz) */
   stand(x, z, lx, lz, eye) {
     frozen = true;
     const h = field.heightAt(x, z);
     camera.position.set(x, h + (eye == null ? 1.7 : eye), z);
-    flora.grass.follow(x, z);
+    settle(x, z);
     const lh = field.heightAt(lx, lz);
     camera.setTarget(new B.Vector3(lx, lh + 2, lz));
   },
@@ -216,12 +318,14 @@ window.__LL = {
     const d = sky.sunDir;
     const lx = x + d.x * 120, lz = z + d.z * 120;
     camera.setTarget(new B.Vector3(lx, field.heightAt(lx, lz) + 30, lz));
-    flora.grass.follow(x, z);
+    settle(x, z);
     return { sun: [d.x.toFixed(2), d.y.toFixed(2), d.z.toFixed(2)] };
   },
   heightAt: (x, z) => field.heightAt(x, z),
-  /** move the dense grass disc to a point (the traveller will drive this) */
-  grassAt(x, z) { return flora.grass.refocus(x, z); },
+  /** bring the world in around a point without moving the camera */
+  settle(x, z) { settle(x, z); return chunks ? chunks.mem().resident : null; },
+  /** stop the traveller driving the world, so a test can stream where it likes */
+  freeze(on) { frozen = on !== false; return frozen; },
   skyKeys: () => SKY_KEYS.map(k => ({ id: k.id, at: k.at, label: k.label })),
   stats() {
     return {
@@ -235,7 +339,9 @@ window.__LL = {
       time: sky.t,
       label: sky.label,
       reduced: REDUCED,
-      flora: flora.counts,
+      streaming: !!chunks,
+      flora: chunks ? chunks.mem().instances : flora.counts,
+      fauna: fauna.counts,
     };
   },
   /** tests: isolate parts of the pipeline */
@@ -246,8 +352,23 @@ window.__LL = {
     water.mesh.setEnabled(DBG.water);
     return { ...DBG };
   },
-  wire(on) { terrain.mesh.material.wireframe = !!on; return !!on; },
-  cull(on) { terrain.mesh.material.backFaceCulling = !!on; return !!on; },
+  wire(on) { groundMaterial().wireframe = !!on; return !!on; },
+  /** tests: hide every streamed terrain tile, leaving the coarse island */
+  tiles(on) {
+    if (!chunks) return null;
+    for (const t of chunks.tiles.values()) if (t.mesh) t.mesh.setEnabled(!!on);
+    return !!on;
+  },
+  /** tests: hide the always-resident coarse island */
+  far(on) { if (chunks) chunks.far.mesh.setEnabled(!!on); return !!on; },
+  /** tests: hide everything that was instanced, leaving bare ground */
+  props(on) {
+    if (!chunks) return null;
+    for (const n in chunks.species) chunks.species[n].mesh.setEnabled(!!on);
+    chunks.grass.mesh.setEnabled(!!on);
+    return !!on;
+  },
+  cull(on) { groundMaterial().backFaceCulling = !!on; return !!on; },
   /** flat albedo for the ground, magenta for the sea — shows what is what */
   flat(on) { sky.debug = on ? 1 : 0; return !!on; },
   /** tests: skip the fade and clear the overlay immediately */
@@ -259,9 +380,47 @@ window.__LL = {
   goto(x, z, heading) { frozen = false; control.place(x, z, heading);
     traveller.reset(control.me, control.me.heading);
     rig.snap(control.yaw, control.pitch, control.me);
-    flora.grass.refocus(x, z); return { x: control.me.x, y: control.me.y, z: control.me.z }; },
+    settle(x, z); return { x: control.me.x, y: control.me.y, z: control.me.z }; },
   /** where the traveller is and what it is doing */
   who() { const m = control.me; return { x:+m.x.toFixed(2), y:+m.y.toFixed(2), z:+m.z.toFixed(2),
     heading:+m.heading.toFixed(2), speed:+m.speed.toFixed(2), running:+m.running.toFixed(2) }; },
+  /** what streaming is holding right now — the proof that memory stays flat */
+  mem() {
+    if (!chunks) return { streaming: false, meshes: scene.meshes.length,
+                          vertices: scene.getTotalVertices(),
+                          heapMB: (performance.memory && performance.memory.usedJSHeapSize)
+                            ? +(performance.memory.usedJSHeapSize / 1048576).toFixed(1) : null };
+    return Object.assign({ streaming: true }, chunks.mem());
+  },
+  /** the exact bytes one tile generated, for the determinism check */
+  tileSnapshot(i, j) { return chunks ? chunks.snapshot(i, j) : null; },
+  tileOf(x, z) { const T = chunks ? chunks.tileSize : 64;
+    return { i: Math.floor(x / T), j: Math.floor(z / T) }; },
+  /** the climate under a point */
+  biomeAt(x, z) {
+    const h = field.heightAt(x, z);
+    const w = field.climate.climateAt(x, z, h, field.inlandOf(x, z), field.moistureAt(x, z));
+    return { h: +h.toFixed(2), biome: field.climate.dominant(w),
+             weights: Object.fromEntries(Object.entries(w)
+               .filter(([k, v]) => typeof v === 'number' && v > 0.01)
+               .map(([k, v]) => [k, +v.toFixed(3)])) };
+  },
+  where() { return placeShown; },
+  /** where the built things ended up */
+  sites() {
+    const s = {};
+    for (const k of ['templeSite', 'stonesSite', 'gateSite']) {
+      const v = landmarks[k];
+      if (v) s[k.replace('Site', '')] = { x: Math.round(v.x), z: Math.round(v.z), h: +v.h.toFixed(1) };
+    }
+    if (landmarks.items.boatHome) {
+      const b = landmarks.items.boatHome;
+      s.boat = { x: Math.round(b.x), z: Math.round(b.z), y: +b.y.toFixed(2) };
+    }
+    s.lake = field.lake ? { x: field.lake.x, z: field.lake.z, r: field.lake.r,
+                            level: +field.lakeLevel.toFixed(2) } : null;
+    return s;
+  },
+  boot: BOOT,
   ready: true,
 };
