@@ -28,7 +28,7 @@ export const SKY_KEYS = [
     rimCol:  C(1.00, 0.72, 0.50),   rimStr: 0.55, rimPow: 3.0,
     sunSize: 900, sunGlow: 0.42,
     fogDensity: 0.0020, fogStrength: 1.0, fogHeight: 0.016,
-    exposure: 1.05, contrast: 1.30,
+    exposure: 1.05, contrast: 1.15,
   },
   {
     id: 'earlyMorning', at: 0.17, label: 'The Grove',
@@ -39,7 +39,7 @@ export const SKY_KEYS = [
     rimCol:  C(0.86, 0.93, 1.00),   rimStr: 0.42, rimPow: 3.4,
     sunSize: 1400, sunGlow: 0.22,
     fogDensity: 0.0016, fogStrength: 0.95, fogHeight: 0.014,
-    exposure: 1.12, contrast: 1.22,
+    exposure: 1.12, contrast: 1.12,
   },
   {
     id: 'midMorning', at: 0.33, label: 'The Listening Water',
@@ -50,7 +50,7 @@ export const SKY_KEYS = [
     rimCol:  C(0.80, 0.92, 1.00),   rimStr: 0.38, rimPow: 3.6,
     sunSize: 1800, sunGlow: 0.16,
     fogDensity: 0.0012, fogStrength: 0.92, fogHeight: 0.011,
-    exposure: 1.14, contrast: 1.18,
+    exposure: 1.14, contrast: 1.10,
   },
   {
     id: 'noon', at: 0.48, label: 'The Dune Sea',
@@ -61,7 +61,7 @@ export const SKY_KEYS = [
     rimCol:  C(1.00, 0.96, 0.86),   rimStr: 0.30, rimPow: 4.0,
     sunSize: 2400, sunGlow: 0.12,
     fogDensity: 0.0011, fogStrength: 0.88, fogHeight: 0.010,
-    exposure: 1.05, contrast: 1.16,
+    exposure: 1.05, contrast: 1.09,
   },
   {
     id: 'afternoon', at: 0.62, label: 'The Frost Shelf',
@@ -72,7 +72,7 @@ export const SKY_KEYS = [
     rimCol:  C(0.78, 0.90, 1.00),   rimStr: 0.50, rimPow: 3.0,
     sunSize: 1600, sunGlow: 0.20,
     fogDensity: 0.0014, fogStrength: 1.0, fogHeight: 0.012,
-    exposure: 1.16, contrast: 1.20,
+    exposure: 1.16, contrast: 1.11,
   },
   {
     id: 'goldenHour', at: 0.76, label: 'The Neon Port',
@@ -83,7 +83,7 @@ export const SKY_KEYS = [
     rimCol:  C(1.00, 0.76, 0.50),   rimStr: 0.62, rimPow: 2.8,
     sunSize: 1000, sunGlow: 0.40,
     fogDensity: 0.0018, fogStrength: 1.0, fogHeight: 0.015,
-    exposure: 1.10, contrast: 1.28,
+    exposure: 1.10, contrast: 1.14,
   },
   {
     id: 'lastLight', at: 0.88, label: 'The Spire',
@@ -94,7 +94,7 @@ export const SKY_KEYS = [
     rimCol:  C(1.00, 0.62, 0.44),   rimStr: 0.70, rimPow: 2.6,
     sunSize: 700, sunGlow: 0.50,
     fogDensity: 0.0021, fogStrength: 1.0, fogHeight: 0.017,
-    exposure: 1.20, contrast: 1.34,
+    exposure: 1.20, contrast: 1.17,
   },
   {
     id: 'night', at: 1.00, label: 'The Glide Home',
@@ -105,7 +105,7 @@ export const SKY_KEYS = [
     rimCol:  C(0.56, 0.70, 1.00),   rimStr: 0.75, rimPow: 2.4,
     sunSize: 2600, sunGlow: 0.10,
     fogDensity: 0.0017, fogStrength: 1.0, fogHeight: 0.013,
-    exposure: 1.30, contrast: 1.40,
+    exposure: 1.30, contrast: 1.20,
   },
 ];
 
@@ -133,7 +133,7 @@ export function createSkyState(BABYLON) {
     rimStr: 0.5, rimPow: 3, sunSize: 1000, sunGlow: 0.3,
     fogDensity: 0.0015, fogStrength: 1, fogHeight: 0.013,
     debug: 0,
-    exposure: 1.1, contrast: 1.25,
+    exposure: 1.1, contrast: 1.12,
     elevation: 0, azimuth: 0,
   };
 }

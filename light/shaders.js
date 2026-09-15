@@ -117,7 +117,7 @@ export const LIGHT_FN = /* glsl */`
 
     // hemisphere ambient: sky above, warm bounce below
     float up  = N.y * 0.5 + 0.5;
-    vec3  amb = mix(uGroundCol, uAmbCol, up) * 0.55;
+    vec3  amb = mix(uGroundCol, uAmbCol, up) * 0.64;
 
     vec3 col = albedo * (sun + amb + bandLift);
 
