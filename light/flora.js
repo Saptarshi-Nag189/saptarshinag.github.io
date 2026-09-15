@@ -74,7 +74,20 @@ function scatter(field, rng, n, o) {
    Materials
    ========================================================================== */
 
-function instancedVertex(shaders, body) {
+function instancedVertex(shaders, body, nearFade) {
+  /* A third-person camera sits behind the traveller, so it walks into trees he
+     never touches — and being inside a canopy fills the screen with enormous
+     flat facets and hides the character completely. Anything tall collapses
+     toward its own base as the camera closes on it. Collapsing rather than
+     fading keeps the geometry opaque: no alpha, no sorting, no cost. */
+  const fade = nearFade
+    ? `
+      vec3 iCentre = vec3(finalWorld[3][0], finalWorld[3][1], finalWorld[3][2]);
+      float keep = smoothstep(${nearFade[0].toFixed(2)}, ${nearFade[1].toFixed(2)},
+                              distance(iCentre.xz, uCamPos.xz));
+      wp.xyz = iCentre + (wp.xyz - iCentre) * keep;`
+    : '';
+
   return /* glsl */`
     precision highp float;
     #include<instancesDeclaration>
@@ -85,6 +98,7 @@ function instancedVertex(shaders, body) {
     attribute vec3 aTint;
     uniform mat4 viewProjection;
     uniform float uTime;
+    uniform vec3 uCamPos;
     varying vec3 vWorld; varying vec3 vNormal; varying vec3 vTint;
     varying float vSway; varying vec3 vVCol; varying float vLeaf;
     ${shaders.WIND_FN}
@@ -96,7 +110,7 @@ function instancedVertex(shaders, body) {
       vVCol = color.rgb;
       vSway = uv.y;
       vLeaf = uv.x;          // 1 = takes the instance tint, 0 = keeps its own colour
-      ${body}
+      ${body}${fade}
       vWorld = wp.xyz;
       gl_Position = viewProjection * wp;
     }`;
@@ -152,7 +166,7 @@ export function makePropMaterial(BABYLON, scene, shaders, name, opts) {
     opts.wind ? `
       float phase = wp.x * 0.21 + wp.z * 0.33;
       wp.xyz = applyWind(wp.xyz, vSway, phase, ${opts.wind.toFixed(2)});
-    ` : '');
+    ` : '', opts.nearFade);
 
   BABYLON.Effect.ShadersStore[name + 'FragmentShader'] = /* glsl */`
     precision highp float;
@@ -653,7 +667,7 @@ export const SPECIES = [
   {
     name: 'broadleaf', rngSalt: 10193, perTile: 140, islandCount: 3600,
     geom: (B, sc, f) => broadleafGeometry(B, sc, f),
-    mat: { wind: 0.16, shadeSoft: 0.40, bandLift: 0.06, rimScale: 0.9 },
+    mat: { wind: 0.16, shadeSoft: 0.40, bandLift: 0.06, rimScale: 0.9, nearFade: [1.1, 3.4] },
     rule: {
       effort: 6, minY: 2.4, maxY: 78, maxSlope: 0.42,
       // dense where it is forest, scattered where it is meadow
@@ -665,7 +679,7 @@ export const SPECIES = [
   {
     name: 'pine', rngSalt: 20411, perTile: 100, islandCount: 2400,
     geom: (B, sc, f) => pineGeometry(B, sc, f),
-    mat: { wind: 0.07, shadeSoft: 0.44, bandLift: 0.07, rimScale: 0.9 },
+    mat: { wind: 0.07, shadeSoft: 0.44, bandLift: 0.07, rimScale: 0.9, nearFade: [1.1, 3.2] },
     rule: {
       effort: 6, minY: 8, maxY: 118, maxSlope: 0.52,
       // pine takes over from broadleaf as the ground gets cold and high
@@ -686,7 +700,7 @@ export const SPECIES = [
   {
     name: 'blossom', rngSalt: 30637, perTile: 4, islandCount: 190,
     geom: (B, sc, f) => broadleafGeometry(B, sc, f),
-    mat: { wind: 0.20, shadeSoft: 0.46, bandLift: 0.14, rimScale: 1.0 },
+    mat: { wind: 0.20, shadeSoft: 0.46, bandLift: 0.14, rimScale: 1.0, nearFade: [1.1, 3.4] },
     rule: {
       effort: 10, minY: 4, maxY: 54, maxSlope: 0.34,
       pick: (w) => clamp((w.meadow * 0.8 + w.forest * 0.5 + w.marsh * 0.6)
@@ -700,7 +714,7 @@ export const SPECIES = [
   {
     name: 'palm', rngSalt: 40763, perTile: 16, islandCount: 420,
     geom: (B, sc) => palmGeometry(B, sc),
-    mat: { wind: 0.26, shadeSoft: 0.42, bandLift: 0.08, rimScale: 0.95, cull: false },
+    mat: { wind: 0.26, shadeSoft: 0.42, bandLift: 0.08, rimScale: 0.95, cull: false, nearFade: [1.2, 3.6] },
     rule: {
       effort: 8, minY: 1.2, maxY: 26, maxSlope: 0.30,
       pick: (w) => clamp((w.beach * 0.9 + w.desert * 0.35 + w.marsh * 0.5)
