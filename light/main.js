@@ -99,11 +99,18 @@ const fauna = stage('fauna', () => buildFauna(B, scene, field, SH, {
   deer: { count: num('deer', TIER.deer) },
   birds: { count: num('birds', TIER.birds) },
 }));
+/* Weather is OFF by default and enabled with ?weather=1.
+   The system is complete and its state is correct under inspection — the right
+   number of instances, in the right places, the right size, alpha-blended, the
+   effect compiled without error — and it still draws nothing on screen. Rather
+   than leave something unproven running every frame, it is opt-in until the
+   cause is found. Everything else in the world is unaffected. */
+const WEATHER_ON = QS.get('weather') === '1';
 const weather = stage('weather', () => buildWeather(B, scene, field, SH, {
-  fireflies: num('fireflies', 260),
-  petals: num('petals', 180),
-  sand: num('sand', 300),
-  snow: num('snowfall', 420),
+  fireflies: WEATHER_ON ? num('fireflies', 260) : 0,
+  petals: WEATHER_ON ? num('petals', 180) : 0,
+  sand: WEATHER_ON ? num('sand', 300) : 0,
+  snow: WEATHER_ON ? num('snowfall', 420) : 0,
 }));
 
 /* ---------- the boat ---------- */

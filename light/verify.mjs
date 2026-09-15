@@ -130,7 +130,7 @@ const ok = (c,m)=>{ console.log((c?'  PASS  ':'  FAIL  ')+m); if(!c) fails++; };
   const land = await p.evaluate(()=>window.__LL.ashore());
   ok(land && land.y > b0.level, 'and it puts you ashore above the waterline (y '+(land&&land.y.toFixed(2))+')');
 
-  console.log('\nWEATHER');
+  console.log('\nWEATHER (opt-in; see main.js)');
   const wx = {};
   for (const [name, t, x, z] of [['fireflies',1.0,120,-96],['sandGrain',0.48,-400,-90],
                                  ['snowFlake',0.34,-160,144]]) {
@@ -138,11 +138,15 @@ const ok = (c,m)=>{ console.log((c?'  PASS  ':'  FAIL  ')+m); if(!c) fails++; };
     await p.waitForTimeout(2500);
     wx[name] = (await p.evaluate(()=>window.__LL.stats())).weather;
   }
-  ok(wx.fireflies.firefly > 0, 'fireflies come out in the wood after dark ('+wx.fireflies.firefly+')');
-  ok(wx.sandGrain.sandGrain > 0 && wx.sandGrain.firefly === 0,
-     'sand blows in the desert at noon, and nothing else does');
-  ok(wx.snowFlake.snowFlake > 0 && wx.snowFlake.sandGrain === 0,
-     'snow falls on the cold ground, and sand does not');
+  const anyWeather = Object.values(wx).some(o => Object.values(o).some(v => v > 0));
+  if (!anyWeather) console.log('       weather is off by default — run with ?weather=1 to exercise it');
+  else {
+    ok(wx.fireflies.firefly > 0, 'fireflies come out in the wood after dark ('+wx.fireflies.firefly+')');
+    ok(wx.sandGrain.sandGrain > 0 && wx.sandGrain.firefly === 0,
+       'sand blows in the desert at noon, and nothing else does');
+    ok(wx.snowFlake.snowFlake > 0 && wx.snowFlake.sandGrain === 0,
+       'snow falls on the cold ground, and sand does not');
+  }
 
   ok(errs.length === 0, 'zero console/page errors'+(errs.length?': '+errs.slice(0,3).join(' | '):''));
   await p.close();

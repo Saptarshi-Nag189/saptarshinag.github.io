@@ -25,8 +25,11 @@ import { makeRNG, clamp, lerp, smoothstep } from './noise.js';
 
 /* -------------------------------------------------------------------------- */
 
-function quadMesh(BABYLON, scene, name, size, aspect) {
-  const w = size * (aspect || 1) * 0.5, h = size * 0.5;
+/* A UNIT quad. The per-particle size arrives as aAnim.y and is applied in the
+   vertex shader; baking a size in here as well multiplies the two and yields
+   sub-pixel specks that are present, correct, and invisible. */
+function quadMesh(BABYLON, scene, name, aspect) {
+  const w = (aspect || 1) * 0.5, h = 0.5;
   const pos = [-w, -h, 0, w, -h, 0, -w, h, 0, w, h, 0];
   const uv = [0, 0, 1, 0, 0, 1, 1, 1];
   const idx = [0, 1, 2, 1, 3, 2];
@@ -54,15 +57,14 @@ function particleMaterial(BABYLON, scene, shaders, name, opts) {
     attribute vec3 aTint;
     attribute vec2 aAnim;                 // x = alpha, y = size
     uniform mat4 viewProjection;
-    uniform mat4 uInvView;                // camera basis, for billboarding
+    uniform vec3 uRight;                  // camera basis, for billboarding
+    uniform vec3 uUp;
     uniform float uTime;
     varying vec2 vUV; varying vec3 vTint; varying float vAlpha; varying vec3 vWorld;
     void main(){
       #include<instancesVertex>
       vec3 centre = vec3(finalWorld[3][0], finalWorld[3][1], finalWorld[3][2]);
-      vec3 right = vec3(uInvView[0][0], uInvView[0][1], uInvView[0][2]);
-      vec3 up    = vec3(uInvView[1][0], uInvView[1][1], uInvView[1][2]);
-      vec3 wp = centre + (right * position.x + up * position.y) * aAnim.y;
+      vec3 wp = centre + (uRight * position.x + uUp * position.y) * aAnim.y;
       vUV = uv; vTint = aTint; vAlpha = aAnim.x; vWorld = wp;
       gl_Position = viewProjection * vec4(wp, 1.0);
     }`;
@@ -87,12 +89,17 @@ function particleMaterial(BABYLON, scene, shaders, name, opts) {
 
   const mat = new BABYLON.ShaderMaterial(name + 'Mat', scene,
     { vertex: name, fragment: name },
-    shaders.shaderOptions(['color', 'aTint', 'aAnim'], ['viewProjection', 'uInvView']));
+    shaders.shaderOptions(['color', 'aTint', 'aAnim'], ['viewProjection', 'uRight', 'uUp']));
   mat.backFaceCulling = false;
-  mat.alpha = 0.999;                     // tells Babylon to treat it as blended
   mat.alphaMode = opts.glow ? BABYLON.Constants.ALPHA_ADD : BABYLON.Constants.ALPHA_COMBINE;
   mat.needDepthPrePass = false;
   mat.disableDepthWrite = true;          // particles must never occlude each other
+  /* shaderOptions() declares needAlphaBlending: false, which puts this in the
+     OPAQUE pass — where alphaMode is never consulted and a firefly is just a
+     small solid square. Saying so explicitly is what actually turns blending
+     on, and without it the whole system renders and is invisible. */
+  mat.needAlphaBlending = () => true;
+  mat.alpha = 0.999;
   return mat;
 }
 
@@ -108,7 +115,7 @@ function particleMaterial(BABYLON, scene, shaders, name, opts) {
  */
 function createDrift(BABYLON, scene, field, shaders, spec) {
   const CAP = spec.cap;
-  const mesh = quadMesh(BABYLON, scene, spec.name, spec.size, spec.aspect);
+  const mesh = quadMesh(BABYLON, scene, spec.name, spec.aspect);
   mesh.material = particleMaterial(BABYLON, scene, shaders, spec.name, spec);
   mesh.isPickable = false;
   mesh.alwaysSelectAsActiveMesh = true;
@@ -199,7 +206,7 @@ export function buildWeather(BABYLON, scene, field, shaders, opts) {
 
   if (N('fireflies', 260) > 0) systems.push(createDrift(BABYLON, scene, field, shaders, {
     name: 'firefly', salt: 9101, cap: N('fireflies', 260),
-    size: 0.20, aspect: 1, core: 0.02, glow: true, twinkle: 2.4,
+    size: 0.42, aspect: 1, core: 0.02, glow: true, twinkle: 2.4,
     box: 34, height: 6.5, base: 0.5, ground: true,
     fall: 0, drift: 0.55, wind: 0.12, swirl: 0.9, bob: 0.8,
     tint: (r) => [1.0, 0.86 + r() * 0.12, 0.34 + r() * 0.24],
@@ -209,7 +216,7 @@ export function buildWeather(BABYLON, scene, field, shaders, opts) {
 
   if (N('petals', 180) > 0) systems.push(createDrift(BABYLON, scene, field, shaders, {
     name: 'petal', salt: 9203, cap: N('petals', 180),
-    size: 0.16, aspect: 1.7, core: 0.18,
+    size: 0.22, aspect: 1.7, core: 0.18,
     box: 26, height: 9, base: 0.4, ground: true,
     fall: 0.55, drift: 0.9, wind: 0.35, swirl: 1.5,
     tint: (r) => (r() < 0.5 ? [0.98, 0.76, 0.84] : [0.99, 0.92, 0.95]),
@@ -220,7 +227,7 @@ export function buildWeather(BABYLON, scene, field, shaders, opts) {
 
   if (N('sand', 300) > 0) systems.push(createDrift(BABYLON, scene, field, shaders, {
     name: 'sandGrain', salt: 9307, cap: N('sand', 300),
-    size: 0.13, aspect: 3.2, core: 0.30,
+    size: 0.18, aspect: 3.2, core: 0.30,
     box: 32, height: 3.2, base: 0.15, ground: true,
     fall: 0.1, drift: 0.7, wind: 4.2, swirl: 2.2,
     tint: (r) => { const j = 0.86 + r() * 0.24; return [0.90 * j, 0.80 * j, 0.62 * j]; },
@@ -231,7 +238,7 @@ export function buildWeather(BABYLON, scene, field, shaders, opts) {
 
   if (N('snow', 420) > 0) systems.push(createDrift(BABYLON, scene, field, shaders, {
     name: 'snowFlake', salt: 9411, cap: N('snow', 420),
-    size: 0.14, aspect: 1, core: 0.12,
+    size: 0.20, aspect: 1, core: 0.12,
     box: 30, height: 22, base: 0.2, ground: true,
     fall: 1.5, drift: 0.8, wind: 0.6, swirl: 0.7,
     tint: (r) => { const j = 0.9 + r() * 0.16; return [0.94 * j, 0.96 * j, 1.0 * j]; },
@@ -239,19 +246,24 @@ export function buildWeather(BABYLON, scene, field, shaders, opts) {
   }));
 
   const mats = systems.map((s) => s.mesh.material);
-  const inv = new BABYLON.Matrix();
+  const camRight = new BABYLON.Vector3(), camUp = new BABYLON.Vector3();
 
   function update(dt, camera, x, z, sky, timeSec, scale) {
     if (!systems.length) return;
     const h = field.heightAt(x, z);
     const w = field.climate.climateAt(x, z, h, field.inlandOf(x, z), field.moistureAt(x, z));
     const cam = camera.position;
-    // the camera's basis, so every quad can face it without a per-particle rotation
-    camera.getWorldMatrix().invertToRef(inv);
-    const view = camera.getViewMatrix();
-    view.invertToRef(inv);
+    /* The camera's right and up, read straight off its world matrix and sent as
+       plain vectors. Sending the matrix instead means relying on how Babylon's
+       row-major storage is reinterpreted column-major by GLSL — and if that is
+       wrong the basis comes out zero, every quad collapses to a point, and the
+       whole system renders perfectly while being completely invisible. */
+    const wm = camera.getWorldMatrix().m;
+    camRight.set(wm[0], wm[1], wm[2]);
+    camUp.set(wm[4], wm[5], wm[6]);
     for (const s of systems) {
-      s.mesh.material.setMatrix('uInvView', inv);
+      s.mesh.material.setVector3('uRight', camRight);
+      s.mesh.material.setVector3('uUp', camUp);
       s.update(dt, cam, w, sky, timeSec, scale);
     }
   }
