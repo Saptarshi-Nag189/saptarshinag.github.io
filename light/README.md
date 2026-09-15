@@ -138,7 +138,7 @@ close enough to see.
 | `fauna.js` | deer that graze, wander and bolt; three flocks of birds. Legs and wings animate in the vertex shader. |
 | `boat.js` | the verb that only works on water. |
 | `weather.js` | fireflies, petals, blowing sand, falling snow — each tied to a biome and an hour. |
-| `quality.js` | guess a tier from static hints, then measure and ratchet **down** only. |
+| `quality.js` | guess a tier from static hints, then measure and ratchet **down** only — plus a four-state control (auto / low / med / high) in the HUD, on **Q**, remembered across visits. |
 | `verify-stream.mjs` | the determinism and memory proofs. |
 
 ### How streaming works, in one paragraph

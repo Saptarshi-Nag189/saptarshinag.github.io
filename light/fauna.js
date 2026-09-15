@@ -209,7 +209,7 @@ export function buildDeer(BABYLON, scene, field, shaders, opts) {
   const sv = new BABYLON.Vector3(), pv = new BABYLON.Vector3();
 
   function writeInstances() {
-    for (let i = 0; i < herd.length; i++) {
+    for (let i = 0; i < visible; i++) {
       const d = herd[i];
       sv.set(d.scale, d.scale, d.scale);
       pv.set(d.x, d.y, d.z);
@@ -230,6 +230,12 @@ export function buildDeer(BABYLON, scene, field, shaders, opts) {
     }
   }
 
+  /* The herd is built once at full size and then CAPPED. Rebuilding it to
+     change density would mean re-scattering home ranges, which would teleport
+     every animal; capping lets quality move up and down freely and the deer
+     that remain stay exactly where they were. */
+  let visible = herd.length;
+
   let bound = false;
   writeInstances();
   mesh.thinInstanceSetBuffer('aTint', T, 3, true);
@@ -239,7 +245,7 @@ export function buildDeer(BABYLON, scene, field, shaders, opts) {
 
   function update(dt, px, pz) {
     dt = Math.min(dt, 0.06);
-    for (let i = 0; i < herd.length; i++) {
+    for (let i = 0; i < visible; i++) {
       const d = herd[i];
       const toYou = Math.hypot(d.x - px, d.z - pz);
 
@@ -284,7 +290,13 @@ export function buildDeer(BABYLON, scene, field, shaders, opts) {
     writeInstances();
   }
 
-  return { mesh, herd, update, count: herd.length };
+  function setDensity(f) {
+    visible = Math.max(0, Math.min(herd.length, Math.round(herd.length * f)));
+    mesh.thinInstanceCount = visible;
+    return visible;
+  }
+
+  return { mesh, herd, update, setDensity, get count() { return visible; } };
 }
 
 /* ==========================================================================
@@ -377,7 +389,7 @@ export function buildBirds(BABYLON, scene, field, shaders, opts) {
       fl.cx += Math.sin(fl.drift + clock * 0.03) * 3.4 * dt;
       fl.cz += Math.cos(fl.drift * 1.3 + clock * 0.026) * 3.4 * dt;
     }
-    for (let i = 0; i < COUNT; i++) {
+    for (let i = 0; i < visible; i++) {
       const b = birds[i];
       b.a += b.f.spin * dt;
       b.flap += dt * b.rate;
@@ -406,7 +418,10 @@ export function buildBirds(BABYLON, scene, field, shaders, opts) {
       mesh.thinInstanceSetBuffer('aAnim', A, 2, true);
       bound = true;
     }
+    mesh.thinInstanceCount = visible;
   }
+
+  let visible = COUNT;
 
   let bound = false;
   update(0);
@@ -415,7 +430,13 @@ export function buildBirds(BABYLON, scene, field, shaders, opts) {
   // the flock roams far; let it draw wherever it is
   mesh.alwaysSelectAsActiveMesh = true;
 
-  return { mesh, update, count: COUNT };
+  function setDensity(f) {
+    visible = Math.max(0, Math.min(COUNT, Math.round(COUNT * f)));
+    mesh.thinInstanceCount = visible;
+    return visible;
+  }
+
+  return { mesh, update, setDensity, get count() { return visible; } };
 }
 
 /* -------------------------------------------------------------------------- */
@@ -429,10 +450,20 @@ export function buildFauna(BABYLON, scene, field, shaders, opts) {
   if (birds) mats.push(birds.mesh.material);
   return {
     deer, birds, mats,
-    counts: { deer: deer ? deer.count : 0, birds: birds ? birds.count : 0 },
+    // a getter, not a snapshot: density moves at runtime and a stale count
+    // makes the quality control look like it did nothing
+    get counts() {
+      return { deer: deer ? deer.count : 0, birds: birds ? birds.count : 0 };
+    },
     update(dt, px, pz) {
       if (deer) deer.update(dt, px, pz);
       if (birds) birds.update(dt);
+    },
+    /** scale the living population without rebuilding it */
+    setDensity(f) {
+      if (deer) deer.setDensity(f);
+      if (birds) birds.setDensity(f);
+      return { deer: deer ? deer.count : 0, birds: birds ? birds.count : 0 };
     },
   };
 }

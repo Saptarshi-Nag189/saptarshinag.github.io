@@ -32,7 +32,10 @@ export const TIERS = {
             weatherScale: 1.0,  bloomKernel: 64, grain: 3.0, scaling: 1.0, deer: 26, birds: 54 },
 };
 
-const ORDER = ['low', 'mid', 'high'];
+export const TIER_ORDER = ['low', 'mid', 'high'];
+export const TIER_LABEL = { low: 'low', mid: 'medium', high: 'high' };
+
+const ORDER = TIER_ORDER;
 
 /**
  * A first guess from what the browser will tell us for free.
@@ -116,7 +119,24 @@ export function createGovernor(engine, opts) {
     get name() { return name; },
     get locked() { return locked; },
     lock() { locked = true; },
+
+    /**
+     * Choose a tier by hand. This LOCKS the governor: an explicit choice beats
+     * a measurement, and nothing is more annoying than a setting that undoes
+     * itself a few seconds after you pick it.
+     */
     set(n) { if (TIERS[n]) { name = n; locked = true; } return name; },
+
+    /**
+     * Hand it back. The measurement window and the step budget both reset, so
+     * auto gets a fresh look at a machine that may now be doing something
+     * different — and starts from whatever tier is currently applied.
+     */
+    auto() {
+      locked = false;
+      steps = 0; elapsed = 0; acc = 0; frames = 0;
+      return name;
+    },
     stats() { return { name, steps, locked, fpsWindows: history.slice(-6) }; },
   };
 }

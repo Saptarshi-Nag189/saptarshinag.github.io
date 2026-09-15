@@ -73,6 +73,30 @@
     background:rgba(20,14,34,.42);border:1px solid rgba(255,255,255,.22);border-radius:999px;
     padding:9px 15px;backdrop-filter:blur(10px);transition:.2s}
   #ledgerBtn:hover{background:rgba(20,14,34,.66);border-color:rgba(255,217,138,.55);color:#ffd98a}
+  /* graphics quality — four states, always visible, never in the way */
+  #quality{position:fixed;top:56px;right:18px;z-index:22;display:flex;align-items:center;gap:1px;
+    background:rgba(20,14,34,.42);border:1px solid rgba(255,255,255,.18);border-radius:999px;
+    padding:3px;backdrop-filter:blur(10px)}
+  #quality span{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;
+    color:rgba(243,238,255,.58);cursor:pointer;border-radius:999px;padding:5px 9px;
+    transition:background .18s ease,color .18s ease;user-select:none}
+  #quality span:hover{color:#fff;background:rgba(255,255,255,.10)}
+  #quality span[aria-pressed="true"]{color:#1a1430;background:#ffd98a;font-weight:600}
+  #qualityHint{position:fixed;top:56px;right:18px;z-index:21;pointer-events:none}
+
+  /* the toast that says what just changed */
+  #toast{position:fixed;top:96px;right:18px;z-index:23;font-family:var(--mono);font-size:10px;
+    letter-spacing:.14em;text-transform:uppercase;color:rgba(255,245,235,.9);
+    background:rgba(18,12,30,.6);border:1px solid rgba(255,217,138,.34);border-radius:999px;
+    padding:6px 12px;backdrop-filter:blur(8px);pointer-events:none;
+    opacity:0;transform:translateY(-4px);transition:opacity .3s ease,transform .3s ease}
+  #toast.show{opacity:1;transform:translateY(0)}
+
+  @media (max-width:640px){
+    #quality{top:auto;bottom:118px;right:10px}
+    #toast{top:auto;bottom:158px;right:10px}
+  }
+
   #ledger{position:fixed;inset:0;z-index:50;overflow-y:auto;padding:6vh 5vw 10vh;
     background:rgba(10,8,20,.93);backdrop-filter:blur(18px);
     opacity:0;pointer-events:none;transition:opacity .45s ease}
@@ -123,8 +147,17 @@
   <span><b>shift</b> run</span>
   <span><b>V</b> first person</span>
   <span><b>E</b> use</span>
+  <span><b>Q</b> quality</span>
   <span><b>L</b> read it plainly</span>
 </div>
+
+<div id="quality" role="group" aria-label="Graphics quality">
+  <span data-q="auto"  aria-pressed="true"  title="Match the machine (Q)">auto</span>
+  <span data-q="low"   aria-pressed="false" title="Fastest">low</span>
+  <span data-q="mid"   aria-pressed="false" title="Balanced">med</span>
+  <span data-q="high"  aria-pressed="false" title="Best looking">high</span>
+</div>
+<div id="toast"></div>
 
 <div id="prompt"></div>
 

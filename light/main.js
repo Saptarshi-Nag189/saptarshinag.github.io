@@ -12,7 +12,7 @@ import { createTraveller } from './traveller.js';
 import { createCameraRig, createController } from './camera.js';
 import { createBoat } from './boat.js';
 import { buildWeather } from './weather.js';
-import { guessTier, createGovernor, TIERS } from './quality.js';
+import { guessTier, createGovernor, TIERS, TIER_ORDER, TIER_LABEL } from './quality.js';
 import * as SH from './shaders.js';
 import { clamp, lerp } from './noise.js';
 
@@ -54,8 +54,15 @@ const STREAM = QS.get('stream') !== '0';
    The guess happens BEFORE anything is built, so a phone never allocates a
    desktop's worth of tiles and then throws them away. */
 const forcedTier = QS.get('tier');
-const startTier = (forcedTier && TIERS[forcedTier]) ? forcedTier : guessTier(engine);
-const gov = createGovernor(engine, { start: startTier, locked: !!forcedTier });
+const savedTier = (() => {
+  // a choice made last visit should survive; a broken storage must not break boot
+  try { return localStorage.getItem('longlight.quality'); } catch (e) { return null; }
+})();
+const chosen = (forcedTier && (TIERS[forcedTier] || forcedTier === 'auto')) ? forcedTier
+             : ((savedTier && (TIERS[savedTier] || savedTier === 'auto')) ? savedTier : null);
+const startTier = (chosen && TIERS[chosen]) ? chosen : guessTier(engine);
+// only an explicit tier locks the governor; 'auto' deliberately leaves it free
+const gov = createGovernor(engine, { start: startTier, locked: !!(chosen && TIERS[chosen]) });
 let TIER = TIERS[startTier];
 engine.setHardwareScalingLevel(TIER.scaling / Math.min(window.devicePixelRatio || 1, 2));
 
@@ -96,8 +103,8 @@ const landmarks = stage('landmarks', () => buildLandmarks(B, scene, field, SH, {
   shards: num('shards', 260),
 }));
 const fauna = stage('fauna', () => buildFauna(B, scene, field, SH, {
-  deer: { count: num('deer', TIER.deer) },
-  birds: { count: num('birds', TIER.birds) },
+  deer: { count: num('deer', TIERS.high.deer) },
+  birds: { count: num('birds', TIERS.high.birds) },
 }));
 /* Weather is OFF by default and enabled with ?weather=1.
    The system is complete and its state is correct under inspection — the right
@@ -186,20 +193,110 @@ function applyTimeOfDay() {
   landmarks.update(sky);
 }
 
-/* ---------- the governor, ratcheting down if the guess was generous ------ */
-function governQuality(dt) {
-  const dropped = gov.step(dt);
-  if (!dropped) return;
-  TIER = TIERS[dropped];
+/* ---------- quality: one place that applies a tier to everything --------- */
+
+/**
+ * @param name     'low' | 'mid' | 'high'
+ * @param rebuild  false while the world is still booting, when the chunk
+ *                 manager has not been primed yet and there is nothing to redo
+ */
+function applyTier(name, rebuild, quiet) {
+  TIER = TIERS[name];
   engine.setHardwareScalingLevel(TIER.scaling / Math.min(window.devicePixelRatio || 1, 2));
   pipeline.bloomKernel = TIER.bloomKernel;
   pipeline.grainEnabled = TIER.grain > 0;
   pipeline.grain.intensity = TIER.grain;
-  if (chunks) chunks.setQuality({
-    nearRings: TIER.nearRings, midRings: TIER.midRings,
-    grassScale: TIER.grassScale, floraScale: TIER.floraScale,
+  fauna.setDensity(TIER.deer / TIERS.high.deer);
+
+  if (chunks && rebuild !== false) {
+    const changed = chunks.setQuality({
+      nearRings: TIER.nearRings, midRings: TIER.midRings,
+      grassScale: TIER.grassScale, floraScale: TIER.floraScale,
+    });
+    // setQuality drops every tile; put the ground back under your feet at once
+    // rather than letting it stream in and leaving you standing on the far field
+    if (changed) chunks.prime(control.me.x, control.me.z, chunks.rings.near);
+  }
+  showQuality(quiet);
+  return name;
+}
+
+/** Pick a tier by hand, or hand control back to the governor. */
+function setQuality(choice) {
+  if (choice === 'auto') {
+    gov.auto();
+    remember('auto');
+    showQuality();
+    return 'auto';
+  }
+  if (!TIERS[choice]) return currentChoice();
+  gov.set(choice);
+  applyTier(choice, true);
+  remember(choice);
+  return choice;
+}
+
+function remember(v) {
+  try { localStorage.setItem('longlight.quality', v); } catch (e) { /* private window */ }
+}
+const currentChoice = () => (gov.locked ? gov.name : 'auto');
+
+/* ---------- the governor, ratcheting down if the guess was generous ------ */
+function governQuality(dt) {
+  const dropped = gov.step(dt);
+  if (!dropped) return;
+  applyTier(dropped, true);
+}
+
+/* ---------- the quality control -----------------------------------------
+   Four states rather than three: low / medium / high are explicit choices that
+   stick, and 'auto' hands the decision back to the governor. A setting that
+   quietly overrides itself is worse than no setting, so picking a tier locks
+   the measurement off until you choose auto again. */
+const qualityEl = document.getElementById('quality');
+const toastEl = document.getElementById('toast');
+let toastTimer = 0;
+
+function toast(msg) {
+  if (!toastEl) return;
+  toastEl.textContent = msg;
+  toastEl.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2200);
+}
+
+function showQuality(quiet) {
+  const choice = currentChoice();
+  if (qualityEl) {
+    for (const el of qualityEl.querySelectorAll('span')) {
+      el.setAttribute('aria-pressed', String(el.dataset.q === choice));
+    }
+  }
+  if (!quiet) {
+    toast(choice === 'auto'
+      ? 'quality · auto (' + TIER_LABEL[gov.name] + ')'
+      : 'quality · ' + TIER_LABEL[choice]);
+  }
+}
+
+function cycleQuality() {
+  const order = ['auto'].concat(TIER_ORDER);
+  const i = order.indexOf(currentChoice());
+  return setQuality(order[(i + 1) % order.length]);
+}
+
+if (qualityEl) {
+  qualityEl.addEventListener('click', (e) => {
+    const el = e.target.closest('span[data-q]');
+    if (!el) return;
+    setQuality(el.dataset.q);
+    canvas.focus();
   });
 }
+
+/* Apply the starting tier for real, now that the pipeline and the fauna both
+   exist. No rebuild: the chunk manager was primed at this tier already. */
+applyTier(startTier, false, true);
 
 /* ---------- naming the land you are standing in ----------
    The card only appears once a biome has held for a moment. Without that
@@ -334,6 +431,7 @@ let pointerLocked = false;
 addEventListener('keydown', (e) => {
   if (e.code === 'KeyP') { /* photo mode lands in a later phase */ }
   if (e.code === 'KeyV') { firstPerson = !firstPerson; }
+  if (e.code === 'KeyQ') { cycleQuality(); return; }
   if (e.code === 'KeyE' && boat && !frozen) {
     if (boat.aboard) {
       const land = boat.disembark();
@@ -531,12 +629,10 @@ window.__LL = {
     if (l) { control.place(l.x, l.z, boat.state.heading); traveller.reset(control.me, control.me.heading); }
     return l; },
   /** what the quality governor decided, and why */
-  quality() { return Object.assign({ tier: gov.name }, gov.stats(), { applied: TIER }); },
-  setTier(n) { const r = gov.set(n); TIER = TIERS[r];
-    engine.setHardwareScalingLevel(TIER.scaling / Math.min(window.devicePixelRatio || 1, 2));
-    if (chunks) chunks.setQuality({ nearRings: TIER.nearRings, midRings: TIER.midRings,
-      grassScale: TIER.grassScale, floraScale: TIER.floraScale });
-    return r; },
+  quality() { return Object.assign({ tier: gov.name, choice: currentChoice() }, gov.stats(),
+    { applied: TIER, fauna: fauna.counts }); },
+  setTier(n) { return setQuality(n); },
+  cycleQuality() { return cycleQuality(); },
   boot: BOOT,
   ready: true,
 };
