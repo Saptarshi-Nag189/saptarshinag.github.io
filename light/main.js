@@ -10,6 +10,9 @@ import { buildLandmarks } from './landmarks.js';
 import { buildFauna } from './fauna.js';
 import { createTraveller } from './traveller.js';
 import { createCameraRig, createController } from './camera.js';
+import { createBoat } from './boat.js';
+import { buildWeather } from './weather.js';
+import { guessTier, createGovernor, TIERS } from './quality.js';
 import * as SH from './shaders.js';
 import { clamp, lerp } from './noise.js';
 
@@ -47,6 +50,15 @@ const QS = new URLSearchParams(location.search);
 const num = (k, d) => (QS.has(k) ? Math.max(0, parseInt(QS.get(k), 10) || 0) : d);
 const STREAM = QS.get('stream') !== '0';
 
+/* ---------- quality: guess first, measure second ----------
+   The guess happens BEFORE anything is built, so a phone never allocates a
+   desktop's worth of tiles and then throws them away. */
+const forcedTier = QS.get('tier');
+const startTier = (forcedTier && TIERS[forcedTier]) ? forcedTier : guessTier(engine);
+const gov = createGovernor(engine, { start: startTier, locked: !!forcedTier });
+let TIER = TIERS[startTier];
+engine.setHardwareScalingLevel(TIER.scaling / Math.min(window.devicePixelRatio || 1, 2));
+
 /* boot timings — the only way to know which stage is actually the slow one */
 const BOOT = {};
 const stage = (k, fn) => { const t = performance.now(); const r = fn(); BOOT[k] = Math.round(performance.now() - t); return r; };
@@ -64,8 +76,10 @@ let chunks = null, terrain = null, flora = null;
 if (STREAM) {
   chunks = stage('chunkInit', () => createChunkManager(B, scene, field, SH, {
     tile: 64,
-    nearRings: num('near', 2),
-    midRings: num('mid', 5),
+    nearRings: num('near', TIER.nearRings),
+    midRings: num('mid', TIER.midRings),
+    grassScale: TIER.grassScale,
+    floraScale: TIER.floraScale,
     grassPerTile: num('grasstile', 2600),
   }));
 } else {
@@ -82,9 +96,20 @@ const landmarks = stage('landmarks', () => buildLandmarks(B, scene, field, SH, {
   shards: num('shards', 260),
 }));
 const fauna = stage('fauna', () => buildFauna(B, scene, field, SH, {
-  deer: { count: num('deer', 26) },
-  birds: { count: num('birds', 54) },
+  deer: { count: num('deer', TIER.deer) },
+  birds: { count: num('birds', TIER.birds) },
 }));
+const weather = stage('weather', () => buildWeather(B, scene, field, SH, {
+  fireflies: num('fireflies', 260),
+  petals: num('petals', 180),
+  sand: num('sand', 300),
+  snow: num('snowfall', 420),
+}));
+
+/* ---------- the boat ---------- */
+const boat = (landmarks.items.boat && landmarks.items.boatHome)
+  ? createBoat(field, landmarks.items.boat, landmarks.items.boatHome, {})
+  : null;
 
 /* ---------- the traveller, the rig, the hands ---------- */
 const traveller = createTraveller(B, scene, SH, {});
@@ -103,7 +128,8 @@ const worldMats = [skyObj.mat, water.mat, traveller.mat]
   .concat(lake ? [lake.mat] : [])
   .concat(chunks ? chunks.mats : [terrain.mat].concat(flora.mats))
   .concat(landmarks.mats)
-  .concat(fauna.mats);
+  .concat(fauna.mats)
+  .concat(weather.mats);
 
 /* ---------- post-processing: the dreamy half of the look ---------- */
 const pipeline = new B.DefaultRenderingPipeline('longlight', true, scene, [camera]);
@@ -113,7 +139,7 @@ pipeline.fxaaEnabled = true;
 pipeline.bloomEnabled = true;
 pipeline.bloomThreshold = 0.86;
 pipeline.bloomWeight = 0.38;
-pipeline.bloomKernel = 64;
+pipeline.bloomKernel = TIER.bloomKernel;
 pipeline.bloomScale = 0.55;
 
 pipeline.imageProcessingEnabled = true;
@@ -124,8 +150,8 @@ pipeline.imageProcessing.vignetteWeight = 1.5;
 pipeline.imageProcessing.vignetteStretch = 0.4;
 pipeline.imageProcessing.vignetteCameraFov = 1.1;
 
-pipeline.grainEnabled = true;
-pipeline.grain.intensity = 3.0;
+pipeline.grainEnabled = TIER.grain > 0;
+pipeline.grain.intensity = TIER.grain;
 pipeline.grain.animated = true;
 
 pipeline.depthOfFieldEnabled = false;   // enabled per-tier; costly under software GL
@@ -151,6 +177,21 @@ function applyTimeOfDay() {
   pipeline.bloomWeight = lerp(0.28, 0.58, clamp(sky.sunGlow / 0.5, 0, 1));
   // lanterns burn brightest when the sky is darkest
   landmarks.update(sky);
+}
+
+/* ---------- the governor, ratcheting down if the guess was generous ------ */
+function governQuality(dt) {
+  const dropped = gov.step(dt);
+  if (!dropped) return;
+  TIER = TIERS[dropped];
+  engine.setHardwareScalingLevel(TIER.scaling / Math.min(window.devicePixelRatio || 1, 2));
+  pipeline.bloomKernel = TIER.bloomKernel;
+  pipeline.grainEnabled = TIER.grain > 0;
+  pipeline.grain.intensity = TIER.grain;
+  if (chunks) chunks.setQuality({
+    nearRings: TIER.nearRings, midRings: TIER.midRings,
+    grassScale: TIER.grassScale, floraScale: TIER.floraScale,
+  });
 }
 
 /* ---------- naming the land you are standing in ----------
@@ -203,6 +244,22 @@ function liftVeil() {
   setTimeout(() => veil.remove(), 1400);
 }
 
+const EMPTY_KEYS = Object.create(null);
+
+/* ---------- the prompt that appears when something is within reach ------- */
+const promptEl = document.getElementById('prompt');
+let promptShown = false;
+function updatePrompt(me) {
+  if (!promptEl || !boat) return;
+  const want = boat.aboard ? 'step ashore' : (boat.canBoard(me.x, me.z) ? 'take the boat' : null);
+  if (!!want !== promptShown || (want && promptEl.dataset.k !== want)) {
+    promptShown = !!want;
+    promptEl.dataset.k = want || '';
+    promptEl.innerHTML = want ? '<b>E</b> ' + want : '';
+    promptEl.classList.toggle('show', !!want);
+  }
+}
+
 let firstPerson = false;
 let hintsGone = false;
 let walked = 0;
@@ -216,9 +273,27 @@ engine.runRenderLoop(() => {
   const t = (now - t0) / 1000;
 
   if (!frozen) {
-    const me = control.update(dt);
-    traveller.update(dt, me, me.heading, me.speed, me.running, t);
-    rig.update(dt, control.yaw, control.pitch, me, me.fwd, me.speed, me.running, firstPerson);
+    let me, subject, fwd, speed, running;
+
+    if (boat && boat.aboard) {
+      // Rowing. The traveller is cargo: seated, no gait, carried by the hull.
+      const bs = boat.update(dt, control.keys, t);
+      const seat = boat.seat();
+      control.place(bs.x, bs.z, bs.heading);
+      me = control.me;
+      traveller.update(dt, seat, seat.heading, 0, 0, t);
+      subject = { x: bs.x, y: bs.y, z: bs.z };
+      fwd = { x: Math.sin(bs.heading), z: Math.cos(bs.heading) };
+      speed = Math.abs(bs.speed); running = 0;
+    } else {
+      me = control.update(dt);
+      if (boat) boat.update(dt, EMPTY_KEYS, t);      // she still rides the swell
+      traveller.update(dt, me, me.heading, me.speed, me.running, t);
+      subject = me; fwd = me.fwd; speed = me.speed; running = me.running;
+    }
+
+    updatePrompt(me);
+    rig.update(dt, control.yaw, control.pitch, subject, fwd, speed, running, firstPerson);
     traveller.body.setEnabled(!firstPerson);
     traveller.cloak.setEnabled(!firstPerson);
 
@@ -229,7 +304,9 @@ engine.runRenderLoop(() => {
     else flora.grass.follow(me.x, me.z);
 
     fauna.update(dt, me.x, me.z);
+    weather.update(dt, camera, me.x, me.z, sky, t, TIER.weatherScale);
     announcePlace(me.x, me.z, dt);
+    governQuality(dt);
 
     // once you have walked a little way, the hints have done their job
     if (!hintsGone) {
@@ -250,6 +327,14 @@ let pointerLocked = false;
 addEventListener('keydown', (e) => {
   if (e.code === 'KeyP') { /* photo mode lands in a later phase */ }
   if (e.code === 'KeyV') { firstPerson = !firstPerson; }
+  if (e.code === 'KeyE' && boat && !frozen) {
+    if (boat.aboard) {
+      const land = boat.disembark();
+      if (land) { control.place(land.x, land.z, boat.state.heading); traveller.reset(control.me, control.me.heading); }
+    } else if (boat.canBoard(control.me.x, control.me.z)) {
+      boat.board();
+    }
+  }
   if (['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code)) e.preventDefault();
   control.key(e.code, true);
 });
@@ -342,6 +427,8 @@ window.__LL = {
       streaming: !!chunks,
       flora: chunks ? chunks.mem().instances : flora.counts,
       fauna: fauna.counts,
+      weather: weather.counts(),
+      tier: gov.name,
     };
   },
   /** tests: isolate parts of the pipeline */
@@ -421,6 +508,28 @@ window.__LL = {
                             level: +field.lakeLevel.toFixed(2) } : null;
     return s;
   },
+  /** tests: the boat, and riding it */
+  boat() {
+    if (!boat) return null;
+    const s = boat.state;
+    return { x:+s.x.toFixed(2), y:+s.y.toFixed(2), z:+s.z.toFixed(2),
+             heading:+s.heading.toFixed(2), speed:+s.speed.toFixed(2), aboard: s.aboard,
+             lakeT: +field.lakeT(s.x, s.z).toFixed(3), level: +field.lakeLevel.toFixed(2) };
+  },
+  board() { if (!boat) return false; frozen = false;
+    control.place(boat.state.x + 2, boat.state.z + 2, boat.state.heading);
+    const ok = boat.canBoard(control.me.x, control.me.z); if (ok) boat.board(); return ok; },
+  ashore() { if (!boat || !boat.aboard) return null;
+    const l = boat.disembark();
+    if (l) { control.place(l.x, l.z, boat.state.heading); traveller.reset(control.me, control.me.heading); }
+    return l; },
+  /** what the quality governor decided, and why */
+  quality() { return Object.assign({ tier: gov.name }, gov.stats(), { applied: TIER }); },
+  setTier(n) { const r = gov.set(n); TIER = TIERS[r];
+    engine.setHardwareScalingLevel(TIER.scaling / Math.min(window.devicePixelRatio || 1, 2));
+    if (chunks) chunks.setQuality({ nearRings: TIER.nearRings, midRings: TIER.midRings,
+      grassScale: TIER.grassScale, floraScale: TIER.floraScale });
+    return r; },
   boot: BOOT,
   ready: true,
 };

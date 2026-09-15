@@ -88,15 +88,33 @@ export function createCameraRig(BABYLON, scene, camera, field, opts) {
     }
 
     // where the rig would like to be: behind and above, along the orbit yaw
-    const back = cfg.dist * (1 + running * 0.14);
+    let back = cfg.dist * (1 + running * 0.14);
     const cp = Math.cos(pitch);
-    wantPos.set(
-      subject.x - Math.sin(yaw) * cp * back,
-      subject.y + cfg.height - Math.sin(pitch) * back,
-      subject.z - Math.cos(yaw) * cp * back);
+    const bx = -Math.sin(yaw) * cp, bz = -Math.cos(yaw) * cp;
+    const by = cfg.height - Math.sin(pitch);
 
-    // never let the rig sink into the hill it is orbiting
-    const ground = field.heightAt(wantPos.x, wantPos.z) + 0.9;
+    /* Walk the boom outward and stop where the hill gets in the way.
+       Lifting the camera instead — which is the obvious thing, and what this
+       did first — makes it climb the slope behind you and stare down at the
+       traveller's hood on any steep ground. Shortening the boom keeps the eye
+       level and just brings the camera closer, which is what a camera operator
+       backing into a hillside would actually do. */
+    const CLEAR = 0.85;
+    for (let s = 1; s <= 6; s++) {
+      const d = back * (s / 6);
+      const gx = subject.x + bx * d, gz = subject.z + bz * d;
+      const eye = subject.y + cfg.height - Math.sin(pitch) * d;
+      if (eye < field.heightAt(gx, gz) + CLEAR) { back = back * ((s - 1) / 6); break; }
+    }
+    back = Math.max(back, cfg.dist * 0.28);        // never end up inside the figure
+
+    wantPos.set(
+      subject.x + bx * back,
+      subject.y + cfg.height - Math.sin(pitch) * back,
+      subject.z + bz * back);
+
+    // and as a last resort, do not end up under the ground
+    const ground = field.heightAt(wantPos.x, wantPos.z) + 0.55;
     if (wantPos.y < ground) wantPos.y = ground;
 
     // look AHEAD of the subject, by more the faster it moves
@@ -235,7 +253,7 @@ export function createController(field, opts) {
   }
 
   return {
-    me, key, orbit, update,
+    me, key, orbit, update, keys,
     get yaw() { return yaw; },
     get pitch() { return pitch; },
     set yaw(v) { yaw = v; },

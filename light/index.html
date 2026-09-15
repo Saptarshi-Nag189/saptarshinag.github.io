@@ -43,6 +43,15 @@
     border-radius:999px;padding:6px 11px;backdrop-filter:blur(8px);white-space:nowrap}
   #keys b{color:#ffd9a8;font-weight:600}
 
+  /* the prompt that appears when something is within reach */
+  #prompt{position:fixed;left:50%;bottom:80px;transform:translateX(-50%) translateY(6px);z-index:19;
+    font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+    color:rgba(255,245,235,.92);background:rgba(18,12,30,.55);border:1px solid rgba(255,217,138,.42);
+    border-radius:999px;padding:8px 15px;backdrop-filter:blur(8px);pointer-events:none;
+    opacity:0;transition:opacity .28s ease, transform .28s ease}
+  #prompt.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  #prompt b{color:#ffd9a8;font-weight:600}
+
   /* corner chip */
   #chip{position:fixed;top:16px;left:18px;z-index:20;font-family:var(--mono);font-size:10.5px;
     letter-spacing:.24em;text-transform:uppercase;color:rgba(255,245,235,.72);
@@ -113,8 +122,11 @@
   <span><b>W A S D</b> walk</span>
   <span><b>shift</b> run</span>
   <span><b>V</b> first person</span>
+  <span><b>E</b> use</span>
   <span><b>L</b> read it plainly</span>
 </div>
+
+<div id="prompt"></div>
 
 <div id="placeCard"><div class="t1" id="placeName"></div><div class="t2" id="placeSub"></div></div>
 
