@@ -143,6 +143,7 @@ if (RIG_ON) {
     cloth: [0.66, 0.31, 0.25],
     trim: [0.86, 0.74, 0.52],
     clips: { idle: 'idle', walk: 'walk', run: 'run' },
+    hood: true, hoodRadius: 0.135, hoodLift: 0.05,
   }).then((r) => {
     rigged = r;
     traveller.body.setEnabled(false);       // the cone stands down; the cape stays
@@ -423,20 +424,26 @@ engine.runRenderLoop(() => {
       const seat = boat.seat();
       control.place(bs.x, bs.z, bs.heading);
       me = control.me;
-      traveller.update(dt, seat, seat.heading, 0, 0, t);
       if (rigged) { rigged.root.position.set(seat.x, seat.y, seat.z);
                     rigged.root.rotation.y = seat.heading;
-                    rigged.setSpeed(dt, 0, WALK_AT, RUN_AT); }
+                    rigged.setSpeed(dt, 0, WALK_AT, RUN_AT);
+                    rigged.follow(seat.heading); }
+      traveller.update(dt, seat, seat.heading, 0, 0, t, rigged ? rigged.shoulders() : null);
       subject = { x: bs.x, y: bs.y, z: bs.z };
       fwd = { x: Math.sin(bs.heading), z: Math.cos(bs.heading) };
       speed = Math.abs(bs.speed); running = 0;
     } else {
       me = control.update(dt);
       if (boat) boat.update(dt, EMPTY_KEYS, t);      // she still rides the swell
-      traveller.update(dt, me, me.heading, me.speed, me.running, t);
+      /* Order matters: the figure moves and animates first, THEN the cape is
+         told where its shoulders ended up. Reversed, the cape hangs one frame
+         behind the body and visibly lags on every turn. */
       if (rigged) { rigged.root.position.set(me.x, me.y, me.z);
                     rigged.root.rotation.y = me.heading;
-                    rigged.setSpeed(dt, me.speed, WALK_AT, RUN_AT); }
+                    rigged.setSpeed(dt, me.speed, WALK_AT, RUN_AT);
+                    rigged.follow(me.heading); }
+      traveller.update(dt, me, me.heading, me.speed, me.running, t,
+                       rigged ? rigged.shoulders() : null);
       subject = me; fwd = me.fwd; speed = me.speed; running = me.running;
     }
 

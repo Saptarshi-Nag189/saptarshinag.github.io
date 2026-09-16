@@ -86,6 +86,56 @@ function riggedMaterial(BABYLON, scene, shaders, opts) {
 }
 
 /**
+ * A hood, built in code and carried on the head bone.
+ *
+ * Without it the rigged model is an anonymous mannequin — it is nobody. A hood
+ * is the cheapest possible way to turn a generic humanoid into a specific
+ * character, and together with the cape and the red-ochre cloth it reads as
+ * the same cloaked traveller the procedural figure was.
+ */
+function buildHood(BABYLON, scene, mat, r) {
+  const parts = [];
+
+  const shell = BABYLON.MeshBuilder.CreateIcoSphere('hoodShell',
+    { radius: r, subdivisions: 2, flat: false }, scene);
+  shell.scaling.set(1.06, 1.16, 1.24);
+  shell.bakeCurrentTransformIntoVertices();
+  // draw the back up and behind into a soft peak — that shape is the whole
+  // difference between "wearing a hood" and "wearing a helmet"
+  {
+    const p = shell.getVerticesData(BABYLON.VertexBuffer.PositionKind);
+    for (let i = 0; i < p.length; i += 3) {
+      const back = Math.max(0, -p[i + 2] / (r * 1.3));
+      p[i + 1] += back * r * 0.72;
+      p[i + 2] -= back * r * 0.52;
+      // and open the front, so a face-shadow reads instead of a closed ball
+      const front = Math.max(0, p[i + 2] / (r * 1.2));
+      p[i + 2] -= front * r * 0.30;
+      p[i] *= 1 - front * 0.18;
+    }
+    shell.setVerticesData(BABYLON.VertexBuffer.PositionKind, p, false);
+    const n = [];
+    BABYLON.VertexData.ComputeNormals(p, shell.getIndices(), n);
+    shell.setVerticesData(BABYLON.VertexBuffer.NormalKind, n, false);
+  }
+  parts.push(shell);
+
+  // a collar, so the hood meets the shoulders instead of floating on the neck
+  const collar = BABYLON.MeshBuilder.CreateCylinder('hoodCollar',
+    { height: r * 0.5, diameterTop: r * 2.0, diameterBottom: r * 2.5, tessellation: 12 }, scene);
+  collar.position.y = -r * 1.15;
+  collar.bakeCurrentTransformIntoVertices();
+  parts.push(collar);
+
+  const hood = BABYLON.Mesh.MergeMeshes(parts, true, true, undefined, false, false);
+  hood.name = 'hood';
+  hood.material = mat;
+  hood.isPickable = false;
+  hood.alwaysSelectAsActiveMesh = true;
+  return hood;
+}
+
+/**
  * Load a rigged glTF and drive it by speed.
  *
  * @param spec.url       the .glb
@@ -176,6 +226,12 @@ export async function loadRigged(BABYLON, scene, shaders, spec) {
 
   const skeleton = res.skeletons && res.skeletons[0] ? res.skeletons[0] : null;
 
+  /* The hood rides the head bone's world position rather than being parented to
+     it: bone local axes differ between rigs, and following the position while
+     taking the body's heading is both predictable and enough. */
+  let hood = null;
+  if (spec.hood !== false) hood = buildHood(BABYLON, scene, mat, (spec.hoodRadius || 0.135));
+
   /** A bone by name-fragment, so the cape can hang off the spine. */
   function bone(fragment) {
     if (!skeleton) return null;
@@ -183,12 +239,44 @@ export async function loadRigged(BABYLON, scene, shaders, spec) {
     return skeleton.bones.find((b) => b.name.toLowerCase().includes(f)) || null;
   }
 
+  /* Where a bone actually IS this frame, in world space.
+     The cape used to hang from a fixed height above the feet, which was
+     shoulder height on the old cone and lands somewhere around the hips on a
+     humanoid — so it draped over the backside instead of the shoulders. */
+  const _bw = new BABYLON.Vector3();
+  const anchorMesh = skinned[0] || null;
+  let headBone = null, shoulderBone = null;
+  function boneWorld(b) {
+    if (!b || !anchorMesh) return null;
+    b.getAbsolutePositionToRef(anchorMesh, _bw);
+    return _bw;
+  }
+
+  /** Put the hood where the head is, this frame. */
+  function follow(heading) {
+    if (!hood) return;
+    if (!headBone) headBone = bone('head');
+    const w = boneWorld(headBone);
+    if (!w) { hood.setEnabled(false); return; }
+    hood.setEnabled(true);
+    hood.position.set(w.x, w.y + (spec.hoodLift == null ? 0.045 : spec.hoodLift), w.z);
+    hood.rotation.y = heading;
+  }
+
+  /** Where the cape should hang from, this frame. */
+  function shoulders() {
+    if (!shoulderBone) shoulderBone = bone('spine2') || bone('spine1') || bone('neck') || bone('spine');
+    return boneWorld(shoulderBone);
+  }
+
   return {
-    root, mat, meshes: skinned, skeleton, setSpeed, bone, scale,
+    root, mat, meshes: skinned, skeleton, setSpeed, bone, boneWorld, scale,
+    hood, follow, shoulders,
     clips: { idle, walk, run },
     names: Object.keys(groups),
-    setEnabled(v) { root.setEnabled(v); },
+    setEnabled(v) { root.setEnabled(v); if (hood) hood.setEnabled(v); },
     dispose() {
+      if (hood) hood.dispose(false, true);
       for (const g of res.animationGroups) g.dispose();
       for (const m of res.meshes) m.dispose(false, true);
       root.dispose();

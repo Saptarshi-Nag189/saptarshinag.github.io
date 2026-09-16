@@ -140,16 +140,22 @@ function createCloak(BABYLON, scene, mat, opts) {
   const tmp = new BABYLON.Vector3();
   const e1 = new BABYLON.Vector3(), e2 = new BABYLON.Vector3(), nrm = new BABYLON.Vector3();
 
-  function update(dt, ox, oy, oz, hs, hc, speed, windT) {
+  function update(dt, ox, oy, oz, hs, hc, speed, windT, anchorAt) {
     // the figure's right, and its back
     const rx = hc, rz = -hs;
     const bx = -hs, bz = -hc;
 
+    /* Hang from the shoulders. With a rigged figure that means the actual
+       shoulder bone, passed in each frame; the fixed height is only the
+       fallback for the procedural cone it was originally built for. */
+    const ax = anchorAt ? anchorAt.x : ox;
+    const ay = anchorAt ? anchorAt.y : oy + 1.28;
+    const az = anchorAt ? anchorAt.z : oz;
     for (let s = 0; s < 2; s++) {
       const side = s ? -1 : 1;
-      anchor[s].set(ox + rx * profile[0] * 0.5 * side + bx * 0.13,
-                    oy + 1.28,
-                    oz + rz * profile[0] * 0.5 * side + bz * 0.13);
+      anchor[s].set(ax + rx * profile[0] * 0.5 * side + bx * 0.10,
+                    ay,
+                    az + rz * profile[0] * 0.5 * side + bz * 0.10);
     }
 
     const gust = 0.6 + 0.4 * Math.sin(windT * 0.8);
@@ -174,7 +180,7 @@ function createCloak(BABYLON, scene, mat, opts) {
         pt.p.z += (pt.p.z - pt.o.z) * 0.90 + fz * dt * dt * 9;
         pt.o.copyFrom(tmp);
         // never let the hem sink through the ground the figure stands on
-        if (pt.p.y < oy + 0.10) pt.p.y = oy + 0.10;
+        if (pt.p.y < oy + 0.06) pt.p.y = oy + 0.06;
       }
 
       // relaxation: pull each link back to its rest length, anchor pinned
@@ -190,6 +196,24 @@ function createCloak(BABYLON, scene, mat, opts) {
           a.x += dx * k * wa; a.y += dy * k * wa; a.z += dz * k * wa;
           b.x -= dx * k * wb; b.y -= dy * k * wb; b.z -= dz * k * wb;
         }
+      }
+    }
+
+    /* A hard leash to the anchor. Relaxation alone is iterative and can lose
+       ground when the anchor moves fast — which it now does, because it is a
+       bone on an animating skeleton rather than a fixed height. Without this
+       the cape crept to roughly twice its chain length and hung to the ankles. */
+    for (let s2 = 0; s2 < 2; s2++) {
+      const ch = chains[s2];
+      for (let i = 1; i < N; i++) {
+        const maxR = i * seg * 1.02;
+        const px = ch[i].p.x - anchor[s2].x;
+        const py = ch[i].p.y - anchor[s2].y;
+        const pz = ch[i].p.z - anchor[s2].z;
+        const d2 = px * px + py * py + pz * pz;
+        if (d2 <= maxR * maxR) continue;
+        const k = maxR / Math.sqrt(d2);
+        ch[i].p.set(anchor[s2].x + px * k, anchor[s2].y + py * k, anchor[s2].z + pz * k);
       }
     }
 
@@ -330,7 +354,7 @@ export function createTraveller(BABYLON, scene, shaders, opts) {
     /* Sized for a humanoid, not the old cone. At the cone's dimensions it hung
        shoulder-to-knee and 0.7m wide, which covered the legs completely — the
        walk was happening underneath a curtain. */
-    points: 9, segLen: 0.072, halfWidth: 0.25,
+    points: 9, segLen: 0.068, halfWidth: 0.21,
     rgb: [CLOTH[0] * 1.10, CLOTH[1] * 0.92, CLOTH[2] * 0.90],
   });
 
@@ -352,7 +376,7 @@ export function createTraveller(BABYLON, scene, shaders, opts) {
    * @param speed   metres/second
    * @param running 0..1
    */
-  function update(dt, pos, heading, speed, running, timeSec) {
+  function update(dt, pos, heading, speed, running, timeSec, anchorAt) {
     state.x = pos.x; state.y = pos.y; state.z = pos.z;
     state.heading = heading;
 
@@ -374,7 +398,7 @@ export function createTraveller(BABYLON, scene, shaders, opts) {
     const hs = Math.sin(heading), hc = Math.cos(heading);
     while (clothAcc >= CLOTH_H) {
       clothAcc -= CLOTH_H;
-      cloak.update(CLOTH_H, pos.x, pos.y, pos.z, hs, hc, speed, timeSec);
+      cloak.update(CLOTH_H, pos.x, pos.y, pos.z, hs, hc, speed, timeSec, anchorAt);
     }
   }
 
