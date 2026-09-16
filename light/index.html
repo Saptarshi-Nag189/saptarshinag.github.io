@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>THE LONG LIGHT — Saptarshi Nag</title>
+<meta name="description" content="One world, many lands, one day's light — an explorable world built around the work of Saptarshi Nag, AI/ML engineer.">
+<style>
+  :root{
+    --ink:#2b2740; --soft:#7a7194; --gold:#ffd98a; --rose:#ff9ecb;
+    --sans:'Quicksand',ui-rounded,system-ui,sans-serif;
+    --mono:ui-monospace,'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;overflow:hidden;background:#06070d;color:#f3eeff;
+    font-family:var(--sans);-webkit-font-smoothing:antialiased}
+  #view{position:fixed;inset:0;display:block;width:100%;height:100%;touch-action:none;outline:none}
+
+  /* a faint grade over the whole frame — the last 3% of the look */
+  #grade{position:fixed;inset:0;z-index:3;pointer-events:none;
+    background:radial-gradient(ellipse 86% 78% at 50% 44%, transparent 52%, rgba(20,10,40,.34) 100%)}
+
+  /* loading veil */
+  #veil{position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:18px;
+    background:linear-gradient(175deg,#1a1430 0%,#3a2240 45%,#8c4a3c 100%);
+    transition:opacity 1.1s ease}
+  #veil.gone{opacity:0;pointer-events:none}
+  #veil .orb{width:54px;height:54px;border-radius:50%;
+    background:radial-gradient(circle at 36% 32%,#fff,#ffd08a 52%,#e0653f 100%);
+    box-shadow:0 0 60px rgba(255,160,110,.75);animation:breathe 2.6s ease-in-out infinite}
+  @keyframes breathe{50%{transform:scale(1.13)}}
+  #veil p{font-size:14px;letter-spacing:.06em;color:#e8cfc4;opacity:.85}
+  #veilTitle{font-size:12px;letter-spacing:.42em;text-transform:uppercase;color:#ffcfa8;opacity:.9}
+
+  /* controls, taught before they are needed and faded once they are known */
+  #keys{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:18;
+    display:flex;gap:7px;flex-wrap:wrap;justify-content:center;max-width:92vw;
+    pointer-events:none;transition:opacity 1.2s ease}
+  #keys.gone{opacity:0}
+  #keys span{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+    color:rgba(255,245,235,.82);background:rgba(18,12,30,.42);border:1px solid rgba(255,255,255,.18);
+    border-radius:999px;padding:6px 11px;backdrop-filter:blur(8px);white-space:nowrap}
+  #keys b{color:#ffd9a8;font-weight:600}
+
+  /* the prompt that appears when something is within reach */
+  #prompt{position:fixed;left:50%;bottom:80px;transform:translateX(-50%) translateY(6px);z-index:19;
+    font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+    color:rgba(255,245,235,.92);background:rgba(18,12,30,.55);border:1px solid rgba(255,217,138,.42);
+    border-radius:999px;padding:8px 15px;backdrop-filter:blur(8px);pointer-events:none;
+    opacity:0;transition:opacity .28s ease, transform .28s ease}
+  #prompt.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  #prompt b{color:#ffd9a8;font-weight:600}
+
+  /* corner chip */
+  #chip{position:fixed;top:16px;left:18px;z-index:20;font-family:var(--mono);font-size:10.5px;
+    letter-spacing:.24em;text-transform:uppercase;color:rgba(255,245,235,.72);
+    text-shadow:0 1px 14px rgba(0,0,0,.6);pointer-events:none}
+  #chip b{color:#ffd9a8;font-weight:600}
+
+  /* the land you are in */
+  #placeCard{position:fixed;top:14%;left:50%;transform:translateX(-50%);z-index:15;
+    text-align:center;pointer-events:none;opacity:0;transition:opacity 1.4s ease}
+  #placeCard.show{opacity:1}
+  #placeCard .t1{font-size:clamp(24px,4vw,40px);font-weight:600;letter-spacing:.02em;
+    text-shadow:0 2px 30px rgba(0,0,0,.55)}
+  #placeCard .t2{margin-top:6px;font-family:var(--mono);font-size:10.5px;letter-spacing:.34em;
+    text-transform:uppercase;opacity:.82;text-shadow:0 1px 14px rgba(0,0,0,.6)}
+
+  /* The Ledger — real DOM: SEO surface, no-WebGL fallback, screen-reader path */
+  #ledgerBtn{position:fixed;top:16px;right:18px;z-index:22;font-family:var(--mono);font-size:10.5px;
+    letter-spacing:.14em;text-transform:uppercase;color:#f3eeff;cursor:pointer;
+    background:rgba(20,14,34,.42);border:1px solid rgba(255,255,255,.22);border-radius:999px;
+    padding:9px 15px;backdrop-filter:blur(10px);transition:.2s}
+  #ledgerBtn:hover{background:rgba(20,14,34,.66);border-color:rgba(255,217,138,.55);color:#ffd98a}
+  /* graphics quality — four states, always visible, never in the way */
+  #quality{position:fixed;top:56px;right:18px;z-index:22;display:flex;align-items:center;gap:1px;
+    background:rgba(20,14,34,.42);border:1px solid rgba(255,255,255,.18);border-radius:999px;
+    padding:3px;backdrop-filter:blur(10px)}
+  #quality span{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;
+    color:rgba(243,238,255,.58);cursor:pointer;border-radius:999px;padding:5px 9px;
+    transition:background .18s ease,color .18s ease;user-select:none}
+  #quality span:hover{color:#fff;background:rgba(255,255,255,.10)}
+  #quality span[aria-pressed="true"]{color:#1a1430;background:#ffd98a;font-weight:600}
+  #qualityHint{position:fixed;top:56px;right:18px;z-index:21;pointer-events:none}
+
+  /* the toast that says what just changed */
+  #toast{position:fixed;top:96px;right:18px;z-index:23;font-family:var(--mono);font-size:10px;
+    letter-spacing:.14em;text-transform:uppercase;color:rgba(255,245,235,.9);
+    background:rgba(18,12,30,.6);border:1px solid rgba(255,217,138,.34);border-radius:999px;
+    padding:6px 12px;backdrop-filter:blur(8px);pointer-events:none;
+    opacity:0;transform:translateY(-4px);transition:opacity .3s ease,transform .3s ease}
+  #toast.show{opacity:1;transform:translateY(0)}
+
+  @media (max-width:640px){
+    #quality{top:auto;bottom:118px;right:10px}
+    #toast{top:auto;bottom:158px;right:10px}
+  }
+
+  #ledger{position:fixed;inset:0;z-index:50;overflow-y:auto;padding:6vh 5vw 10vh;
+    background:rgba(10,8,20,.93);backdrop-filter:blur(18px);
+    opacity:0;pointer-events:none;transition:opacity .45s ease}
+  #ledger.open{opacity:1;pointer-events:auto}
+  #ledger .wrap{max-width:760px;margin:0 auto}
+  #ledgerClose{position:fixed;top:16px;right:18px;z-index:52;font-family:var(--mono);font-size:11px;
+    color:#f3eeff;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.25);
+    border-radius:999px;padding:9px 15px;cursor:pointer}
+
+  /* The Ledger's typography — plain, readable, unhurried */
+  #ledger .lhead h1{font-size:clamp(28px,5vw,46px);font-weight:600;letter-spacing:-.01em}
+  #ledger .role{margin-top:4px;font-family:var(--mono);font-size:11px;letter-spacing:.26em;
+    text-transform:uppercase;color:#ffd9a8}
+  #ledger .blurb{margin-top:16px;max-width:60ch;font-size:15.5px;line-height:1.66;color:#d9d2ea}
+  #ledger .links{margin-top:18px;display:flex;flex-wrap:wrap;gap:10px}
+  #ledger .links a{font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;color:#f3eeff;
+    text-decoration:none;border:1px solid rgba(255,255,255,.22);border-radius:999px;padding:7px 13px}
+  #ledger .links a:hover{border-color:#ffd98a;color:#ffd98a}
+  #ledger .lsec{margin-top:46px}
+  #ledger .lsec h2{font-family:var(--mono);font-size:10.5px;letter-spacing:.32em;text-transform:uppercase;
+    color:#9f95bd;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,.12)}
+  #ledger .item{margin-top:26px}
+  #ledger .item h3{font-size:17px;font-weight:600}
+  #ledger .item .meta{margin-top:3px;font-family:var(--mono);font-size:11.5px;color:#9f95bd;line-height:1.6}
+  #ledger ul{margin-top:10px;padding-left:18px}
+  #ledger li{margin-top:7px;font-size:14.5px;line-height:1.62;color:#ddd6ee}
+  #ledger b{color:#ffd98a;font-weight:600}
+  #ledger .lfoot{margin-top:56px;padding-top:18px;border-top:1px solid rgba(255,255,255,.12);
+    font-size:13px;color:#9f95bd}
+
+  @media (prefers-reduced-motion: reduce){
+    #veil .orb{animation:none}
+    #placeCard,#veil{transition-duration:.2s}
+  }
+</style>
+</head>
+<body>
+
+<canvas id="view" tabindex="0"></canvas>
+<div id="grade"></div>
+
+<div id="chip">the <b>long light</b> · saptarshi nag</div>
+<button id="ledgerBtn" aria-controls="ledger" aria-expanded="false">read it plainly</button>
+
+<div id="keys">
+  <span><b>click</b> to look around</span>
+  <span><b>W A S D</b> walk</span>
+  <span><b>shift</b> run</span>
+  <span><b>V</b> first person</span>
+  <span><b>E</b> use</span>
+  <span><b>Q</b> quality</span>
+  <span><b>L</b> read it plainly</span>
+</div>
+
+<div id="quality" role="group" aria-label="Graphics quality">
+  <span data-q="auto"  aria-pressed="true"  title="Match the machine (Q)">auto</span>
+  <span data-q="low"   aria-pressed="false" title="Fastest">low</span>
+  <span data-q="mid"   aria-pressed="false" title="Balanced">med</span>
+  <span data-q="high"  aria-pressed="false" title="Best looking">high</span>
+</div>
+<div id="toast"></div>
+
+<div id="prompt"></div>
+
+<div id="placeCard"><div class="t1" id="placeName"></div><div class="t2" id="placeSub"></div></div>
+
+<!-- The Ledger: every fact, as real text. Present in the DOM from the first byte,
+     so it works with WebGL disabled, for screen readers, and for search engines. -->
+<main id="ledger" aria-hidden="true">
+  <button id="ledgerClose">close</button>
+  <div class="wrap" id="ledgerBody"></div>
+</main>
+
+<div id="veil">
+  <div class="orb"></div>
+  <div id="veilTitle">the long light</div>
+  <p id="veilMsg">a world is growing…</p>
+</div>
+
+<!-- The Ledger renders first and on its own: it must survive a failed or
+     absent WebGL context, because it is the fallback for exactly that case. -->
+<script type="module">
+  import { renderLedger } from './ledger.js';
+  renderLedger(document.getElementById('ledgerBody'));
+</script>
+
+<script src="lib/babylon.js"></script>
+<script type="module" src="main.js"></script>
+<script>
+  /* Ledger open/close — plain DOM, works even if the 3D scene never boots */
+  (function(){
+    const btn = document.getElementById('ledgerBtn');
+    const panel = document.getElementById('ledger');
+    const close = document.getElementById('ledgerClose');
+    function set(open){
+      panel.classList.toggle('open', open);
+      panel.setAttribute('aria-hidden', String(!open));
+      btn.setAttribute('aria-expanded', String(open));
+    }
+    btn.addEventListener('click', () => set(true));
+    close.addEventListener('click', () => set(false));
+    addEventListener('keydown', e => {
+      if (e.key === 'Escape') set(false);
+      if ((e.key === 'l' || e.key === 'L') && document.activeElement.tagName !== 'INPUT') {
+        set(!panel.classList.contains('open'));
+      }
+    });
+  })();
+</script>
+</body>
+</html>
