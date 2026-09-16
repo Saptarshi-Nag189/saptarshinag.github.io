@@ -140,6 +140,10 @@ close enough to see.
 | `weather.js` | fireflies, petals, blowing sand, falling snow — each tied to a biome and an hour. |
 | `quality.js` | guess a tier from static hints, then measure and ratchet **down** only — plus a four-state control (auto / low / med / high) in the HUD, on **Q**, remembered across visits. |
 | `verify-stream.mjs` | the determinism and memory proofs. |
+| `twin.js` | **the one file to edit to change what the twin says.** Fairy lines, the Q&A corpus, and the substring scorer that picks between them. |
+| `companion.js` | the fairy herself — an additive billboard that rides off his left shoulder — and the chat drawer she opens. |
+| `verify-twin.mjs` | the corpus, checked as data: no browser, no server. |
+| `verify-input.mjs` | the thumbstick's maths, at good frame rates and terrible ones. |
 
 ### How streaming works, in one paragraph
 
@@ -183,3 +187,77 @@ evicted, and regenerates with byte-identical instance buffers.
    exactly the −0.25 m it was placed at, and the tile surface matches
    `heightAt` to 3 mm. Billow dunes simply occlude what stands behind them.
    Measure before fixing.
+
+## The twin, and a controller for a thumb
+
+Two things the world was missing: a way to ask it a question, and a way to play
+it on the device most people will open the link on.
+
+### The fairy
+
+Ported from `/wander/`, where she was the best thing in the build. She is one
+additive billboard positioned entirely in the vertex shader — a hot core inside
+a soft halo, no texture — riding off the traveller's left shoulder and lagging
+into his turns. She burns brighter as the light goes.
+
+Everything she says lives in **`twin.js`** and nothing else: `FAIRY` for her own
+lines, `CORPUS` for the Q&A. `window.TwinBrain = { ready, kind, answer(q) }` is
+the same socket `/wander/` used, so a real in-browser model can take over later
+without touching the drawer.
+
+The local brain scores an intent by the total length of the patterns a question
+matched, plus a small bonus for matching several of them. That bonus is not a
+flourish — without it, "tell me about the pulsar work at ncra" scored 13 for the
+opener "tell me about" in the biography and only 10 for "pulsar" + "ncra", so a
+question about pulsars got answered with a résumé summary. `verify-twin.mjs`
+pins that case and thirteen others, and asserts the house rule directly: every
+headline metric names the project it came from, and the phone number that lives
+on the CV appears nowhere.
+
+The chat's real work is not fighting the game, and every guard is a lesson from
+the old build: the input stops key events propagating (or typing "was" walks the
+traveller backwards into the sea), the **T** hotkey is ignored while a field has
+focus (or you cannot type the letter that opens it), Escape closes and hands
+focus back to the canvas, the greeting is added once rather than on every open,
+and answers type themselves in **on the clock, driven by rAF**. Both halves of
+that matter: a reveal counted in characters-per-tick is starved to a crawl on a
+device whose main thread is busy rendering, and a 16 ms `setInterval` on a page
+rendering at one frame a second may not fire at all — which in the sandbox left
+the visitor staring at an empty bubble. `requestAnimationFrame` ticks whenever
+the page advances, so the worst case is the whole answer arriving one frame
+late rather than never.
+
+### Touch
+
+The first pass was "the left third of the screen means forward". That is not a
+control scheme: you cannot steer, you cannot stroll, and a third of the screen
+you want to look around with is a walk button.
+
+It is now a real thumbstick bottom-left with a run toggle and a use button
+bottom-right. The stick is **analog** — a half push strolls — which meant
+teaching the controller that intent has a magnitude and not just four booleans:
+`control.axis(x, z, run)` sits beside `control.key()` and speaks over it while
+held. Run is a toggle rather than a hold, because holding a second button while
+your other thumb steers is a two-hand problem nobody wants on a phone.
+
+The stick reaches the boat too. `boat.js` read the keyboard directly, so a
+phone could board her with the use button and then sit there — and the boat is
+the one verb in the world that needs one.
+
+The pads live in a `pointer-events:none` overlay with only the pads themselves
+clickable, so a finger that lands on glass reaches the canvas as a camera drag
+and a finger that lands on the stick never does. On a touch device the quality
+strip moves back to the top-right — the bottom-right corner now belongs to the
+buttons — and the keyboard legend, which names keys the device does not have,
+is hidden.
+
+### Measuring input is not a job for the browser here
+
+The software renderer manages one or two frames a second at a phone's device
+pixel ratio, so a browser reading of "speed 1.01 after letting go" says nothing
+about the release logic and everything about SwiftShader. The controller is a
+pure function of a height field, some intent and `dt`, so `verify-input.mjs`
+supplies the frame rate directly: a full push is **3.90 m/s** and a 45% push is
+**1.75 m/s**, run is **8.75 m/s**, each of the four cardinal pushes turns him to
+the right heading, letting go stops him dead at 60, 20 **and 8** fps, and the
+same stick rows and steers the boat.

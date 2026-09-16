@@ -128,12 +128,16 @@ function createCloak(BABYLON, scene, mat, opts) {
   mesh.isPickable = false;
   mesh.alwaysSelectAsActiveMesh = true;
 
-  // A constant-width ribbon reads as a plank. Real capes are narrow at the
-  // collar, widest across the back and drawn to a point at the hem.
+  /* A constant-width ribbon reads as a plank, so this used to bulge in the
+     middle and draw back to a point at the hem. On a 0.55 m cape over a 1.78 m
+     figure that silhouette is not a cape at all — it is a rounded red bib
+     sitting over the small of his back, which is exactly what it looked like.
+     A cape is narrow at the collar and WIDEST at the hem: it flares, it never
+     comes back to a point. */
   const profile = new Float32Array(N);
   for (let i = 0; i < N; i++) {
     const u = i / (N - 1);
-    profile[i] = halfW * 2 * (0.42 + 1.05 * Math.sin(Math.PI * Math.min(u * 1.06, 1)) * (1 - u * 0.55));
+    profile[i] = halfW * 2 * (0.84 + 0.62 * u);
   }
 
   const anchor = [new BABYLON.Vector3(), new BABYLON.Vector3()];
@@ -354,7 +358,11 @@ export function createTraveller(BABYLON, scene, shaders, opts) {
     /* Sized for a humanoid, not the old cone. At the cone's dimensions it hung
        shoulder-to-knee and 0.7m wide, which covered the legs completely — the
        walk was happening underneath a curtain. */
-    points: 9, segLen: 0.068, halfWidth: 0.21,
+    /* 12 x 0.082 = 0.90 m of cape. It hangs from the shoulder line at 1.41 m
+       to roughly 0.51 m — below the knee on a 1.78 m figure. The previous
+       0.61 m reached the hips and no further, which is why it read as
+       something bunched around his backside rather than a cape. */
+    points: 12, segLen: 0.082, halfWidth: 0.24,
     rgb: [CLOTH[0] * 1.10, CLOTH[1] * 0.92, CLOTH[2] * 0.90],
   });
 

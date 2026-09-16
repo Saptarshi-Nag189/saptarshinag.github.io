@@ -13,6 +13,7 @@ import { createCameraRig, createController } from './camera.js';
 import { createBoat } from './boat.js';
 import { loadRigged } from './rigged.js';
 import { buildWeather } from './weather.js';
+import { createCompanion } from './companion.js';
 import { guessTier, createGovernor, TIERS, TIER_ORDER, TIER_LABEL } from './quality.js';
 import * as SH from './shaders.js';
 import { clamp, lerp } from './noise.js';
@@ -169,7 +170,16 @@ stage('prime', () => {
   else flora.grass.refocus(control.me.x, control.me.z);
 });
 
-const worldMats = [skyObj.mat, water.mat, traveller.mat]
+/* ---------- the fairy, and the twin she speaks for ----------
+   /wander/ had her and she was the best thing in it: a light that follows you,
+   and a way for a visitor to ask a question instead of reading a wall. */
+const companion = createCompanion(B, scene, SH, {});
+/* Group 1 is drawn after the world. Babylon clears depth between rendering
+   groups by default, which would let the fairy shine straight through a hill —
+   she is a light in the world, not an overlay on it. */
+scene.setRenderingAutoClearDepthStencil(1, false, false, false);
+
+const worldMats = [skyObj.mat, water.mat, traveller.mat, companion.mat]
   .concat(lake ? [lake.mat] : [])
   .concat(chunks ? chunks.mats : [terrain.mat].concat(flora.mats))
   .concat(landmarks.mats)
@@ -420,7 +430,7 @@ engine.runRenderLoop(() => {
 
     if (boat && boat.aboard) {
       // Rowing. The traveller is cargo: seated, no gait, carried by the hull.
-      const bs = boat.update(dt, control.keys, t);
+      const bs = boat.update(dt, control.keys, t, control.stick);
       const seat = boat.seat();
       control.place(bs.x, bs.z, bs.heading);
       me = control.me;
@@ -461,6 +471,7 @@ engine.runRenderLoop(() => {
 
     fauna.update(dt, me.x, me.z);
     weather.update(dt, camera, me.x, me.z, sky, t, TIER.weatherScale);
+    companion.update(dt, camera, subject, me.heading, sky, t);
     announcePlace(me.x, me.z, dt);
     governQuality(dt);
 
@@ -484,19 +495,23 @@ addEventListener('keydown', (e) => {
   if (e.code === 'KeyP') { /* photo mode lands in a later phase */ }
   if (e.code === 'KeyV') { firstPerson = !firstPerson; }
   if (e.code === 'KeyQ') { cycleQuality(); return; }
-  if (e.code === 'KeyE' && boat && !frozen) {
-    if (boat.aboard) {
-      const land = boat.disembark();
-      if (land) { control.place(land.x, land.z, boat.state.heading); traveller.reset(control.me, control.me.heading); }
-    } else if (boat.canBoard(control.me.x, control.me.z)) {
-      boat.board();
-    }
-  }
+  if (e.code === 'KeyE') useAction();
   if (['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code)) e.preventDefault();
   control.key(e.code, true);
 });
 addEventListener('keyup', (e) => control.key(e.code, false));
 addEventListener('blur', () => { for (const k of ['KeyW','KeyA','KeyS','KeyD','ShiftLeft','ShiftRight']) control.key(k, false); });
+
+/** board or leave the boat — bound to E, and to the touch pad's own button */
+function useAction() {
+  if (!boat || frozen) return;
+  if (boat.aboard) {
+    const land = boat.disembark();
+    if (land) { control.place(land.x, land.z, boat.state.heading); traveller.reset(control.me, control.me.heading); }
+  } else if (boat.canBoard(control.me.x, control.me.z)) {
+    boat.board();
+  }
+}
 
 canvas.addEventListener('click', () => { if (!pointerLocked) canvas.requestPointerLock(); });
 document.addEventListener('pointerlockchange', () => { pointerLocked = document.pointerLockElement === canvas; });
@@ -505,12 +520,84 @@ addEventListener('mousemove', (e) => {
   control.orbit(e.movementX * 0.0022, -e.movementY * 0.0016);
 });
 
-/* touch: drag anywhere to look, and the left third acts as a walk pad */
+/* ---------- touch ----------------------------------------------------------
+   The first pass here was "the left third of the screen means forward", which
+   is not a control scheme — you cannot steer, you cannot stroll, and half the
+   screen you want to look around with is a walk button.
+
+   So: a real thumbstick bottom-left (analog, so a half push strolls), a run
+   toggle and a use button bottom-right, and everything else on the canvas is
+   the camera. The pads live in #touch, which is pointer-events:none except on
+   the pads themselves, so a finger that lands on glass reaches the canvas and
+   a finger that lands on the stick never becomes a camera drag. */
+const IS_TOUCH = matchMedia('(pointer: coarse)').matches || (navigator.maxTouchPoints || 0) > 0;
+if (IS_TOUCH) document.body.classList.add('touch');
+
+(function touchPad() {
+  const stick = document.getElementById('stick');
+  const knob = document.getElementById('knob');
+  const runBtn = document.getElementById('tRun');
+  const useBtn = document.getElementById('tUse');
+  if (!stick || !knob) return;
+
+  const R = 40;                     // how far the knob travels, in px
+  let stickId = null, running = false;
+
+  function setKnob(dx, dy) {
+    knob.style.transform = `translate(${dx}px, ${dy}px)`;
+  }
+  function drive(e) {
+    const r = stick.getBoundingClientRect();
+    let dx = e.clientX - (r.left + r.width / 2);
+    let dy = e.clientY - (r.top + r.height / 2);
+    const m = Math.hypot(dx, dy) || 1;
+    // the knob stops at the ring; the *intent* saturates there too
+    const k = Math.min(1, R / m);
+    setKnob(dx * k, dy * k);
+    const mag = Math.min(1, m / R);
+    // screen up is forward; the controller takes (right, forward)
+    control.axis((dx / m) * mag, (-dy / m) * mag, running);
+  }
+  function release() {
+    stickId = null;
+    stick.classList.remove('on');
+    setKnob(0, 0);
+    control.axis(0, 0, false);
+  }
+
+  stick.addEventListener('pointerdown', (e) => {
+    stickId = e.pointerId;
+    // capture keeps the moves coming when the thumb slides off the ring; a
+    // synthetic pointer has nothing to capture, so this must not be fatal
+    try { stick.setPointerCapture(e.pointerId); } catch (err) { /* fine */ }
+    stick.classList.add('on');
+    drive(e);
+    e.preventDefault();
+  });
+  stick.addEventListener('pointermove', (e) => { if (e.pointerId === stickId) drive(e); });
+  for (const ev of ['pointerup', 'pointercancel', 'lostpointercapture']) {
+    stick.addEventListener(ev, (e) => { if (e.pointerId === stickId) release(); });
+  }
+
+  /* Run is a TOGGLE, not a hold. Holding a second button down while your other
+     thumb steers is a two-hand problem nobody wants on a phone. */
+  if (runBtn) runBtn.addEventListener('pointerdown', (e) => {
+    running = !running;
+    runBtn.classList.toggle('on', running);
+    if (stickId !== null) drive(e);            // take effect without re-pushing
+    else control.axis(0, 0, false);
+    e.preventDefault();
+  });
+
+  if (useBtn) useBtn.addEventListener('pointerdown', (e) => { useAction(); e.preventDefault(); });
+})();
+
+/* the camera: any drag on the canvas itself, one finger at a time */
 let touchId = null, lastTX = 0, lastTY = 0;
 canvas.addEventListener('touchstart', (e) => {
+  if (touchId !== null) return;
   const t = e.changedTouches[0];
   touchId = t.identifier; lastTX = t.clientX; lastTY = t.clientY;
-  if (t.clientX < innerWidth * 0.33) control.key('KeyW', true);
 }, { passive: true });
 canvas.addEventListener('touchmove', (e) => {
   for (const t of e.changedTouches) {
@@ -519,7 +606,11 @@ canvas.addEventListener('touchmove', (e) => {
     lastTX = t.clientX; lastTY = t.clientY;
   }
 }, { passive: true });
-canvas.addEventListener('touchend', () => { touchId = null; control.key('KeyW', false); }, { passive: true });
+for (const ev of ['touchend', 'touchcancel']) {
+  canvas.addEventListener(ev, (e) => {
+    for (const t of e.changedTouches) if (t.identifier === touchId) touchId = null;
+  }, { passive: true });
+}
 
 /* ---------- test + authoring hooks ---------- */
 
@@ -694,6 +785,19 @@ window.__LL = {
              clips: rigged.names, bones: rigged.skeleton ? rigged.skeleton.bones.length : 0,
              have: { idle: !!rigged.clips.idle, walk: !!rigged.clips.walk, run: !!rigged.clips.run } };
   },
+  /** the fairy and her twin: is the light in, and what does she answer with */
+  twin() {
+    return { mesh: companion.mesh.isEnabled(), brain: companion.brainKind(),
+             open: companion.open,
+             pos: [+companion.pos.x.toFixed(2), +companion.pos.y.toFixed(2), +companion.pos.z.toFixed(2)] };
+  },
+  /** ask the twin a question the way the input box does */
+  async ask(q) { companion.toggle(true); const a = await window.TwinBrain.answer(q); companion.add('twin', a); return a; },
+  chat(open) { companion.toggle(open); return companion.open; },
+  /** drive the virtual thumbstick from a test */
+  stick(x, z, run) { control.axis(x, z, run); return { x, z, run: !!run }; },
+  touch: () => ({ enabled: document.body.classList.contains('touch'),
+                  pads: ['stick', 'knob', 'tRun', 'tUse'].every((i) => !!document.getElementById(i)) }),
   boot: BOOT,
   ready: true,
 };

@@ -62,7 +62,12 @@ export function createBoat(field, mesh, home, opts) {
     return null;
   }
 
-  function update(dt, keys, timeSec) {
+  /**
+   * @param stick optional analog intent {x, z, mag} from the touch thumbstick.
+   *   Without it the boat reads the keyboard only, and a phone could board her
+   *   but never row her — the one verb in the world that needed a boat.
+   */
+  function update(dt, keys, timeSec, stick) {
     dt = Math.min(dt, 0.05);
 
     let fwd = 0, turn = 0;
@@ -71,6 +76,8 @@ export function createBoat(field, mesh, home, opts) {
       if (keys['KeyS'] || keys['ArrowDown']) fwd -= 1;
       if (keys['KeyA'] || keys['ArrowLeft']) turn -= 1;
       if (keys['KeyD'] || keys['ArrowRight']) turn += 1;
+      // a held stick speaks over the keys, and its push is the throttle
+      if (stick && stick.mag > 0.08) { fwd = stick.z; turn = stick.x; }
     }
 
     // a boat with no way on answers the helm badly; that is correct

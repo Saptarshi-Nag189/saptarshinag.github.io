@@ -263,8 +263,24 @@ export async function loadRigged(BABYLON, scene, shaders, spec) {
     hood.rotation.y = heading;
   }
 
-  /** Where the cape should hang from, this frame. */
+  /* Where the cape should hang from, this frame — the midpoint of the two
+     shoulder bones, which on this rig sits 1.41 m above the feet. spine2, the
+     first thing tried here, is 1.30 m: mid-back, a full 11 cm lower, and a
+     cape hung from the middle of someone's back looks like it slipped off. */
+  const _sl = new BABYLON.Vector3(), _mid = new BABYLON.Vector3();
+  let shoulderL = null, shoulderR = null, shoulderPair = 0;
   function shoulders() {
+    if (!shoulderPair) {
+      shoulderL = bone('leftShoulder'); shoulderR = bone('rightShoulder');
+      shoulderPair = shoulderL && shoulderR ? 1 : -1;
+    }
+    if (shoulderPair === 1) {
+      shoulderL.getAbsolutePositionToRef(anchorMesh, _sl);
+      _mid.copyFrom(_sl);
+      shoulderR.getAbsolutePositionToRef(anchorMesh, _sl);
+      _mid.addInPlace(_sl).scaleInPlace(0.5);
+      return _mid;
+    }
     if (!shoulderBone) shoulderBone = bone('spine2') || bone('spine1') || bone('neck') || bone('spine');
     return boneWorld(shoulderBone);
   }

@@ -193,7 +193,19 @@ export function createController(field, opts) {
   const keys = Object.create(null);
   let yaw = me.heading, pitch = -0.12;
 
+  /* A thumbstick is not a key. Phones need a direction and a *magnitude* —
+     a half-pushed stick should stroll, not sprint — so analog intent lives
+     beside the keyboard rather than being faked as four booleans. */
+  const stick = { x: 0, z: 0, mag: 0, run: false };
+
   function key(code, down) { keys[code] = down; }
+  function axis(x, z, run) {
+    const m = Math.hypot(x, z);
+    if (m > 1) { x /= m; z /= m; }
+    stick.x = x; stick.z = z;
+    stick.mag = Math.min(1, m);
+    stick.run = !!run;
+  }
   function orbit(dx, dy) {
     yaw -= dx;
     pitch = clamp(pitch + dy, -0.85, 0.62);
@@ -208,8 +220,10 @@ export function createController(field, opts) {
     if (keys['KeyS'] || keys['ArrowDown']) iz -= 1;
     if (keys['KeyA'] || keys['ArrowLeft']) ix -= 1;
     if (keys['KeyD'] || keys['ArrowRight']) ix += 1;
-    const mag = Math.hypot(ix, iz);
-    const wantRun = !!(keys['ShiftLeft'] || keys['ShiftRight'] || opts.forceRun);
+    // a held thumbstick speaks over the keyboard
+    if (stick.mag > 0.08) { ix = stick.x; iz = stick.z; }
+    const mag = Math.min(1, Math.hypot(ix, iz));
+    const wantRun = !!(keys['ShiftLeft'] || keys['ShiftRight'] || stick.run || opts.forceRun);
 
     me.running += ((mag > 0 && wantRun ? 1 : 0) - me.running) * Math.min(1, dt * 4.5);
 
@@ -228,7 +242,8 @@ export function createController(field, opts) {
       while (d < -Math.PI) d += Math.PI * 2;
       me.heading += d * Math.min(1, dt * TURN);
 
-      targetSpeed = lerp(WALK, RUN, me.running);
+      // mag < 1 only ever comes from a part-pushed stick
+      targetSpeed = lerp(WALK, RUN, me.running) * mag;
 
       /* Uphill is slower, downhill a little faster — the land should be felt.
          But sampled over 1.2m and allowed down to 0.35x, this throttled you
@@ -274,7 +289,9 @@ export function createController(field, opts) {
   }
 
   return {
-    me, key, orbit, update, keys,
+    me, key, axis, orbit, update, keys,
+    /* the raw analog intent, so the boat can be rowed by the same thumb */
+    stick,
     get yaw() { return yaw; },
     get pitch() { return pitch; },
     set yaw(v) { yaw = v; },
