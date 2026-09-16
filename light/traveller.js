@@ -57,6 +57,13 @@ function figureMaterial(BABYLON, scene, shaders) {
       if (uDebug > 0.5) { gl_FragColor = vec4(vCol, 1.0); return; }
       vec3 N = normalize(vNormal);
       vec3 V = normalize(uCamPos - vWorld);
+      /* The cape is a one-sided ribbon drawn with culling off, so half the
+         time the viewer is looking at its back and the normal points away.
+         Lit with that normal it came out a flat pale slab — cardboard hanging
+         off his shoulder. Shade whichever face is actually facing us. (The
+         procedural body shares this material but is a closed solid, so its
+         back faces are hidden either way and this costs it nothing.) */
+      if (dot(N, V) < 0.0) N = -N;
       // full rim: this silhouette must never be lost against the land
       vec3 col = toonLit(vCol, N, V, 0.36, 0.12, 1.0);
       col = applyAerial(col, vWorld);

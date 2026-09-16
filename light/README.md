@@ -261,3 +261,47 @@ supplies the frame rate directly: a full push is **3.90 m/s** and a 45% push is
 **1.75 m/s**, run is **8.75 m/s**, each of the four cardinal pushes turns him to
 the right heading, letting go stops him dead at 60, 20 **and 8** fps, and the
 same stick rows and steers the boat.
+
+## Dressing a downloaded rig with no texture
+
+The rig is a nude mannequin. Discarding its material and painting the whole of
+it one robe colour did not dress it — it produced a naked man in a hood and a
+cape, which is exactly what it looked like on a phone. There is no texture to
+paint and no garment mesh to add.
+
+But there is a T-pose, and a T-pose is a dressmaker's pattern. Where a vertex
+sits on the body — its height, and its spread from the centre line — says what
+it should be wearing, and it says so in the *rest* pose, identically in every
+frame of every animation. Read the skinned position instead and the trousers
+slide up his legs as he walks.
+
+So `garment()` in the fragment shader cuts boots, trousers, a sash, a tunic,
+sleeves and bare hands out of thresholds. No extra geometry, no extra draw
+call, one extra varying.
+
+Three things had to be true first, and each one was wrong before it was right:
+
+1. **The two skinned meshes in the file do not share a frame.** One node
+   carries a negative Y scale, so raw `position.y` counts *downward* on it.
+   Body coordinates are now resolved once on the CPU at load, pushed through
+   each mesh's own rest-pose node matrix, and stored as an `aBody` attribute.
+2. **They are not in metres either.** Those nodes carry a 0.01 unit scale that
+   a parent compensates for, so dividing by the root scaling does not recover
+   metres — the first attempt did that and dressed him head to toe in boot
+   leather, every vertex landing below the ankle threshold. `aBody` is now a
+   **fraction of his height**: soles 0, crown 1. That cannot be wrong whatever
+   the transforms do, and it survives changing `spec.height`.
+3. **Anything sharing the material must carry `aBody`.** The hood is
+   procedural geometry with no body coordinates, so it arrived as (0,0,0) —
+   below the ankle — and the man's hood was cut from boot leather. It now gets
+   a constant squarely in the tunic band, because a hood is robe cloth.
+
+The way to debug all three was to set each garment to a garish flat colour with
+`uDebug` on and look: tunic green, skin blue, trousers yellow, boots magenta,
+sash red. Every fault above was obvious in one screenshot and invisible in the
+lit render.
+
+Also fixed while looking at him: the cape is a one-sided ribbon drawn with
+culling off, so from the side the viewer sees its back, the normal points away,
+and it lit as a flat pale slab of cardboard. It now shades whichever face is
+actually pointing at the camera.

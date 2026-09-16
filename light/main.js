@@ -141,8 +141,14 @@ if (RIG_ON) {
     name: 'traveller3d',
     url: 'assets/traveller.glb',
     height: 1.78,
+    /* He is dressed in the shader, cut from the bind pose — the downloaded rig
+       is a nude mannequin and one flat colour over all of it just made a naked
+       man in a cape. Tunic, sash, trousers, boots, skin. */
     cloth: [0.66, 0.31, 0.25],
     trim: [0.86, 0.74, 0.52],
+    trouser: [0.25, 0.21, 0.26],
+    boot: [0.15, 0.12, 0.14],
+    skin: [0.55, 0.38, 0.29],
     clips: { idle: 'idle', walk: 'walk', run: 'run' },
     hood: true, hoodRadius: 0.135, hoodLift: 0.05,
   }).then((r) => {
