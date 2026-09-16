@@ -245,9 +245,18 @@ export function buildDeer(BABYLON, scene, field, shaders, opts) {
 
   function update(dt, px, pz) {
     dt = Math.min(dt, 0.06);
+    /* Ported from the old wander build: gate every animated thing behind a
+       cheap compare before doing any real work. A deer four hundred metres
+       away, invisible through the fog, does not need simulating — and the
+       squared test avoids a sqrt for the ones that fail it. */
+    const FAR2 = 260 * 260;
+
     for (let i = 0; i < visible; i++) {
       const d = herd[i];
-      const toYou = Math.hypot(d.x - px, d.z - pz);
+      const ddx = d.x - px, ddz = d.z - pz;
+      const far2 = ddx * ddx + ddz * ddz;
+      if (far2 > FAR2) continue;
+      const toYou = Math.sqrt(far2);
 
       let want = 0;
       if (toYou < FLEE) {

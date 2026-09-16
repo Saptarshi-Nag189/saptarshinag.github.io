@@ -171,8 +171,13 @@ export function createCameraRig(BABYLON, scene, camera, field, opts) {
 
 export function createController(field, opts) {
   opts = opts || {};
-  const WALK = opts.walk || 3.1;
-  const RUN = opts.run || 7.0;
+  /* Obstacles. Without this the traveller walks through every tree on the
+     island — the only thing the step used to test was whether the ground ahead
+     was above sea level. */
+  const solid = opts.colliders || null;
+  const BODY = opts.bodyRadius || 0.42;
+  const WALK = opts.walk || 3.9;
+  const RUN = opts.run || 8.75;
   const ACCEL = opts.accel || 9.0;
   const TURN = opts.turn || 9.5;
 
@@ -225,13 +230,17 @@ export function createController(field, opts) {
 
       targetSpeed = lerp(WALK, RUN, me.running);
 
-      // uphill is slower, downhill a little faster — the land is felt, not
-      // just walked over
-      const ahead = 1.2;
+      /* Uphill is slower, downhill a little faster — the land should be felt.
+         But sampled over 1.2m and allowed down to 0.35x, this throttled you
+         constantly and noisily: it reacted to every bump, and running uphill
+         fell from 7 m/s to under 3. That, not the speed constant, was why the
+         traveller felt sluggish. A 3m baseline reads the actual hill instead of
+         the texture of it, and the clamp is now a nudge rather than a brake. */
+      const ahead = 3.0;
       const hx = me.x + Math.sin(me.heading) * ahead;
       const hz = me.z + Math.cos(me.heading) * ahead;
       const grade = (field.heightAt(hx, hz) - me.y) / ahead;
-      targetSpeed *= clamp(1 - grade * 0.85, 0.35, 1.25);
+      targetSpeed *= clamp(1 - grade * 0.55, 0.72, 1.12);
     }
 
     me.speed += (targetSpeed - me.speed) * Math.min(1, dt * ACCEL);
@@ -241,11 +250,23 @@ export function createController(field, opts) {
     me.fwd.z = Math.cos(me.heading);
 
     if (me.speed > 0) {
-      const nx = me.x + me.fwd.x * me.speed * dt;
-      const nz = me.z + me.fwd.z * me.speed * dt;
+      let nx = me.x + me.fwd.x * me.speed * dt;
+      let nz = me.z + me.fwd.z * me.speed * dt;
+
+      /* Push out of anything solid rather than blocking the whole step. The
+         tangential part of the motion survives, so you brush past a trunk
+         instead of sticking to it. */
+      if (solid) {
+        const r = solid.resolve(me.x, me.z, nx, nz, BODY);
+        nx = r.x; nz = r.z;
+        me.blocked = r.hit;
+      }
+
       const nh = field.heightAt(nx, nz);
-      // the sea is a wall until the boat arrives in a later phase
+      // the sea is a wall until you take the boat out
       if (nh > 0.08) { me.x = nx; me.z = nz; }
+    } else {
+      me.blocked = false;
     }
 
     me.y = field.heightAt(me.x, me.z);

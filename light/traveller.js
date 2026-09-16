@@ -327,7 +327,10 @@ export function createTraveller(BABYLON, scene, shaders, opts) {
   body.alwaysSelectAsActiveMesh = true;
 
   const cloak = createCloak(BABYLON, scene, mat, {
-    points: 11, segLen: 0.082, halfWidth: 0.30,
+    /* Sized for a humanoid, not the old cone. At the cone's dimensions it hung
+       shoulder-to-knee and 0.7m wide, which covered the legs completely — the
+       walk was happening underneath a curtain. */
+    points: 9, segLen: 0.072, halfWidth: 0.25,
     rgb: [CLOTH[0] * 1.10, CLOTH[1] * 0.92, CLOTH[2] * 0.90],
   });
 

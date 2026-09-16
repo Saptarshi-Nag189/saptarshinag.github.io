@@ -11,6 +11,7 @@ import { buildFauna } from './fauna.js';
 import { createTraveller } from './traveller.js';
 import { createCameraRig, createController } from './camera.js';
 import { createBoat } from './boat.js';
+import { loadRigged } from './rigged.js';
 import { buildWeather } from './weather.js';
 import { guessTier, createGovernor, TIERS, TIER_ORDER, TIER_LABEL } from './quality.js';
 import * as SH from './shaders.js';
@@ -127,7 +128,36 @@ const boat = (landmarks.items.boat && landmarks.items.boatHome)
 
 /* ---------- the traveller, the rig, the hands ---------- */
 const traveller = createTraveller(B, scene, SH, {});
-const control = createController(field, { x: WORLD.startX, z: WORLD.startZ, heading: 0 });
+
+/* A rigged figure with real limbs replaces the procedural cone, but it loads
+   asynchronously so the world is walkable immediately and simply gets a better
+   body a moment later. If the load fails for any reason the procedural figure
+   is already standing there — a missing model must not mean no character. */
+let rigged = null;
+const RIG_ON = QS.get('rig') !== '0';
+if (RIG_ON) {
+  loadRigged(B, scene, SH, {
+    name: 'traveller3d',
+    url: 'assets/traveller.glb',
+    height: 1.78,
+    cloth: [0.66, 0.31, 0.25],
+    trim: [0.86, 0.74, 0.52],
+    clips: { idle: 'idle', walk: 'walk', run: 'run' },
+  }).then((r) => {
+    rigged = r;
+    traveller.body.setEnabled(false);       // the cone stands down; the cape stays
+    BOOT.rigged = Math.round(performance.now() - t0);
+  }).catch((e) => {
+    console.warn('rigged traveller unavailable, keeping the procedural one:', e && e.message);
+  });
+
+}
+const control = createController(field, {
+  x: WORLD.startX, z: WORLD.startZ, heading: 0,
+  colliders: chunks ? chunks.colliders : null,
+});
+// the built things are permanent, so they register once rather than per tile
+if (chunks) landmarks.addColliders(chunks.colliders);
 const rig = createCameraRig(B, scene, camera, field, {});
 traveller.reset(control.me, control.me.heading);
 rig.snap(control.yaw, control.pitch, control.me);
@@ -350,6 +380,10 @@ function liftVeil() {
 
 const EMPTY_KEYS = Object.create(null);
 
+/* The speeds the walk and run clips were authored for. Playback is scaled by
+   the ratio of actual speed to these, so the feet never skate. */
+const WALK_AT = 3.9, RUN_AT = 8.75;
+
 /* ---------- the prompt that appears when something is within reach ------- */
 const promptEl = document.getElementById('prompt');
 let promptShown = false;
@@ -370,6 +404,10 @@ let walked = 0;
 let last = performance.now();
 
 engine.runRenderLoop(() => {
+  // ported from the old wander build: a hidden tab has no business simulating
+  // a world, streaming tiles or animating a herd
+  if (document.hidden) return;
+
   frames++;
   const now = performance.now();
   const dt = Math.min((now - last) / 1000, 0.05);
@@ -386,6 +424,9 @@ engine.runRenderLoop(() => {
       control.place(bs.x, bs.z, bs.heading);
       me = control.me;
       traveller.update(dt, seat, seat.heading, 0, 0, t);
+      if (rigged) { rigged.root.position.set(seat.x, seat.y, seat.z);
+                    rigged.root.rotation.y = seat.heading;
+                    rigged.setSpeed(dt, 0, WALK_AT, RUN_AT); }
       subject = { x: bs.x, y: bs.y, z: bs.z };
       fwd = { x: Math.sin(bs.heading), z: Math.cos(bs.heading) };
       speed = Math.abs(bs.speed); running = 0;
@@ -393,13 +434,17 @@ engine.runRenderLoop(() => {
       me = control.update(dt);
       if (boat) boat.update(dt, EMPTY_KEYS, t);      // she still rides the swell
       traveller.update(dt, me, me.heading, me.speed, me.running, t);
+      if (rigged) { rigged.root.position.set(me.x, me.y, me.z);
+                    rigged.root.rotation.y = me.heading;
+                    rigged.setSpeed(dt, me.speed, WALK_AT, RUN_AT); }
       subject = me; fwd = me.fwd; speed = me.speed; running = me.running;
     }
 
     updatePrompt(me);
     rig.update(dt, control.yaw, control.pitch, subject, fwd, speed, running, firstPerson);
-    traveller.body.setEnabled(!firstPerson);
+    traveller.body.setEnabled(!firstPerson && !rigged);
     traveller.cloak.setEnabled(!firstPerson);
+    if (rigged) rigged.setEnabled(!firstPerson);
 
     // The world streams around wherever you are. The budget is what keeps
     // tile building from ever becoming a hitch: a frame spends at most this
@@ -530,6 +575,8 @@ window.__LL = {
       label: sky.label,
       reduced: REDUCED,
       streaming: !!chunks,
+      colliders: chunks ? chunks.colliders.count : 0,
+      blocked: !!control.me.blocked,
       flora: chunks ? chunks.mem().instances : flora.counts,
       fauna: fauna.counts,
       weather: weather.counts(),
@@ -633,6 +680,13 @@ window.__LL = {
     { applied: TIER, fauna: fauna.counts }); },
   setTier(n) { return setQuality(n); },
   cycleQuality() { return cycleQuality(); },
+  /** the rigged figure: is it in, and what did it bring */
+  rig() {
+    if (!rigged) return { loaded: false };
+    return { loaded: true, scale: +rigged.scale.toFixed(3),
+             clips: rigged.names, bones: rigged.skeleton ? rigged.skeleton.bones.length : 0,
+             have: { idle: !!rigged.clips.idle, walk: !!rigged.clips.walk, run: !!rigged.clips.run } };
+  },
   boot: BOOT,
   ready: true,
 };
