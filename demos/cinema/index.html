@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>NOW SHOWING — Saptarshi Nag</title>
+<title>NOW SHOWING · Saptarshi Nag</title>
 <meta name="description" content="A film-premiere portfolio for Saptarshi Nag, AI/ML Engineer." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -370,7 +370,7 @@
   <section class="scene" id="titleSeq">
     <div class="title-card" data-card="0"><div class="tc-small">A&nbsp;&nbsp;Saptarshi&nbsp;Nag&nbsp;&nbsp;Production</div></div>
     <div class="title-card" data-card="1"><div class="tc-small">Featuring</div><div class="tc-big">Saptarshi Nag</div><div class="tc-role">AI / ML Engineer</div></div>
-    <div class="title-card" data-card="2"><div class="tc-logline">M.Tech in AI (DIAT, DRDO). Research at NCRA-TIFR &amp; GMRT. Now Project Engineer at C-DAC, building real-time IoT security — Zero Trust &amp; ML threat detection.</div></div>
+    <div class="title-card" data-card="2"><div class="tc-logline">M.Tech in CSE (Artificial Intelligence) from DIAT. Research at NCRA-TIFR &amp; GMRT. Now a Project Engineer at C-DAC, building ML-based attack detection for a Zero Trust IoT framework.</div></div>
   </section>
 
   <!-- 4. THEATRE / SCENE SELECT -->
@@ -379,7 +379,7 @@
       <div class="theatre-top">
         <div class="theatre-kicker">Scene Selection</div>
         <div class="theatre-title">Choose Your Reel</div>
-        <div class="theatre-sub">Saptarshi Nag &mdash; A Feature in Six Reels</div>
+        <div class="theatre-sub">Saptarshi Nag · A Feature in Six Reels</div>
       </div>
       <div class="reels" id="reels"></div>
     </div>
@@ -647,29 +647,29 @@
   // ---------- theatre / reels ----------
   var REELS = [
     {
-      no: "01", icon: '<i class="fa-solid fa-briefcase"></i>', name: "The Career Arc", tag: "Experience",
+      no: "01", icon: '<i aria-hidden="true" class="fa-solid fa-briefcase"></i>', name: "The Career Arc", tag: "Experience",
       render: function () {
-        return '<p class="lead">From radio telescopes to zero-trust IoT &mdash; a researcher\'s journey into applied AI.</p>' +
+        return '<p class="lead">From radio telescopes to Zero Trust IoT: the roles, in order.</p>' +
           '<div class="timeline">' +
-            tl("Jul 2025 &mdash; Present &middot; Chennai, India",
+            tl("Jul 2025 – Present &middot; Chennai, India",
                "Project Engineer, AI Research &amp; IoT Security",
-               "C-DAC &mdash; Centre for Development of Advanced Computing",
+               "C-DAC · Centre for Development of Advanced Computing",
                [
                  "Built a real-time <b>Zero Trust</b> security framework for IoT networks covering WiFi (802.11), BLE, Zigbee, and LoRa; ML-based attack detection feeds a continuous <b>7-pillar device trust score</b> engine.",
                  "Two-stage hybrid detection pipeline: window model (1-second sliding windows, 7 attack classes) + flow model; compared <b>RF, XGBoost, SVM, MLP, and Voting Ensemble</b> across 6 preprocessing iterations with SMOTE and Optuna (TPE).",
-                 "Best results: <b>97.93% accuracy</b> (flow/RF); <b>90.86% accuracy / 86.78% macro F1</b> (window/Voting Ensemble).",
+                 "Best results: <b>96.97% accuracy</b> (flow/RF); <b>90.86% accuracy / 86.78% macro F1</b> (window/Voting Ensemble).",
                  "Engineered <b>63 features</b> from raw PCAPs (Scapy/PyShark). Live PCAP drop-folder pipeline (Watchdog, MD5 dedup, multi-threaded). SPIFFE/SPIRE, mTLS, OTP-based 2FA. Two IoTaIS 2025 papers."
                ]) +
-            tl("Aug 2024 &mdash; Apr 2025 &middot; Pune, India",
+            tl("Aug 2024 – Apr 2025 &middot; Pune, India",
                "Research Intern (M.Tech Project)",
-               "NCRA-TIFR &mdash; National Centre for Radio Astrophysics",
+               "NCRA-TIFR · National Centre for Radio Astrophysics",
                [
                  "<b>ResNet1D + Squeeze-and-Excitation attention</b> for weak pulsar signal detection at low SNR.",
-                 "<b>99.8% F1-score</b> across 70M+ samples; adaptive thresholding for non-stationary noise floors. Ran end-to-end independently."
+                 "<b>99.8% F1-score</b> across 70M+ samples; adaptive thresholding for non-stationary noise floors. Ran it alone, from scoping to write-up."
                ]) +
-            tl("Dec 2023 &mdash; Jan 2024 &middot; Pune, India",
+            tl("Dec 2023 – Jan 2024 &middot; Pune, India",
                "Winter Intern, HPC &amp; Signal Processing Optimisation",
-               "GMRT &mdash; Giant Metrewave Radio Telescope, NCRA-TIFR",
+               "GMRT · Giant Metrewave Radio Telescope, NCRA-TIFR",
                [
                  "Profiled legacy CPU signal filtering pipelines, refactored for multicore execution. <b>Cut latency by 50%</b>, unblocking real-time processing of continuous telescope data streams."
                ]) +
@@ -677,9 +677,9 @@
       }
     },
     {
-      no: "02", icon: '<i class="fa-solid fa-diagram-project"></i>', name: "Featured Works", tag: "Projects",
+      no: "02", icon: '<i aria-hidden="true" class="fa-solid fa-diagram-project"></i>', name: "Featured Works", tag: "Projects",
       render: function () {
-        return '<p class="lead">The headline acts &mdash; selected projects in GPU computing, RAG, and agentic AI.</p>' +
+        return '<p class="lead">The headline acts: projects in GPU computing, RAG and agentic AI.</p>' +
           '<div class="works">' +
             work("GPU-Accelerated F1 Tyre Degradation &amp; Race Strategy", "GPU-Accelerated ML",
               [
@@ -688,14 +688,14 @@
                 "Custom CUDA/CuPy kernels; <b>4.1&times; training speedup</b>."
               ],
               ["Python","PyTorch","CUDA","CuPy","XGBoost"]) +
-            work("Omniscience Pro &mdash; Privacy-First Local RAG System", "Local RAG Engine",
+            work("Omniscience Pro · Privacy-First Local RAG System", "Local RAG Engine",
               [
                 "Multi-modal document ingestion.",
                 "<b>&lt;50 ms</b> vector search (HNSW); <b>&lt;500 ms</b> first-token latency.",
                 "GPU-aware Docker, CI/CD, POSIX file locking."
               ],
               ["Python","LangChain","ChromaDB","Docker"]) +
-            work("ARO &mdash; Autonomous Research Operator", "Multi-Agent LLM",
+            work("ARO · Autonomous Research Operator", "Multi-Agent LLM",
               [
                 "Multi-agent LLM workflows as directed graphs; Flask SSE streaming; React frontend.",
                 "Adversarial audit found &amp; fixed <b>16 vulnerabilities</b> (auth, SSRF, input validation, CORS)."
@@ -711,7 +711,7 @@
       }
     },
     {
-      no: "03", icon: '<i class="fa-solid fa-microchip"></i>', name: "The Craft", tag: "Skills",
+      no: "03", icon: '<i aria-hidden="true" class="fa-solid fa-microchip"></i>', name: "The Craft", tag: "Skills",
       render: function () {
         var groups = [
           ["fa-code", "Languages", ["Python (advanced)","C++ (proficient)","C","Bash","SQL"]],
@@ -720,9 +720,9 @@
           ["fa-database", "Data &amp; Engineering", ["Statistical Anomaly Detection","Time-Series Analysis","CI/CD","Docker","Git","Flask","ChromaDB"]],
           ["fa-robot", "AI &amp; MLOps", ["RAG Systems","LLM Fine-Tuning","Multi-Agent Orchestration (NetworkX, LangChain)","SQLAlchemy"]]
         ];
-        var html = '<p class="lead">The toolkit behind the performance &mdash; from low-level GPU code to LLM systems.</p>';
+        var html = '<p class="lead">The crew: everything from low-level GPU code to LLM systems.</p>';
         groups.forEach(function (g) {
-          html += '<div class="craft-group"><i class="fa-solid ' + g[0] + '"></i>' + g[1] + '</div><div class="craft">';
+          html += '<div class="craft-group"><i aria-hidden="true" class="fa-solid ' + g[0] + '"></i>' + g[1] + '</div><div class="craft">';
           g[2].forEach(function (s) { html += '<span class="chip">' + s + '</span>'; });
           html += '</div>';
         });
@@ -730,9 +730,9 @@
       }
     },
     {
-      no: "04", icon: '<i class="fa-solid fa-book"></i>', name: "Published", tag: "Publications",
+      no: "04", icon: '<i aria-hidden="true" class="fa-solid fa-book"></i>', name: "Published", tag: "Publications",
       render: function () {
-        return '<p class="lead">On the festival circuit &mdash; peer-reviewed work presented at IoTaIS 2025, Bali.</p>' +
+        return '<p class="lead">On the festival circuit: two papers at IoTaIS 2025, Bali.</p>' +
           '<div class="pubs">' +
             pub("Protocol-Aware Continuous Monitoring and Anomaly Detection in IoT Networks", "IoTaIS 2025 &middot; Bali, Indonesia") +
             pub("A Comprehensive Survey on Zero Trust Architecture in IoT Networks", "IoTaIS 2025 &middot; Bali, Indonesia") +
@@ -740,20 +740,20 @@
       }
     },
     {
-      no: "05", icon: '<i class="fa-solid fa-graduation-cap"></i>', name: "Origins", tag: "Education",
+      no: "05", icon: '<i aria-hidden="true" class="fa-solid fa-graduation-cap"></i>', name: "Origins", tag: "Education",
       render: function () {
-        return '<p class="lead">The backstory &mdash; where the training montage began.</p>' +
+        return '<p class="lead">The backstory: where he studied.</p>' +
           '<div class="timeline edu">' +
-            tl("2023 &mdash; 2025", "M.Tech, CSE (Artificial Intelligence)", "DIAT (DRDO), Pune &middot; CGPA 8.64/10.0",
-               ["Defence Institute of Advanced Technology &mdash; specialisation in Artificial Intelligence."]) +
-            tl("2019 &mdash; 2023", "B.Tech, Computer Science &amp; Engineering", "Academy of Technology, Kolkata &middot; CGPA 9.44/10.0",
+            tl("2023 – 2025", "M.Tech, CSE (Artificial Intelligence)", "DIAT (DRDO), Pune &middot; CGPA 8.64/10.0",
+               ["Defence Institute of Advanced Technology, specialising in Artificial Intelligence."]) +
+            tl("2019 – 2023", "B.Tech, Computer Science &amp; Engineering", "Academy of Technology, Kolkata &middot; CGPA 9.44/10.0",
                ["Foundations in computer science, systems, and machine learning."]) +
           '</div>' +
-          '<div class="gate"><i class="fa-solid fa-medal"></i><div class="gate-txt"><b>GATE 2024</b> &mdash; Rank 1790 in Data Science &amp; AI (Top 5%).</div></div>';
+          '<div class="gate"><i aria-hidden="true" class="fa-solid fa-medal"></i><div class="gate-txt"><b>GATE 2024</b>: rank 1790 in Data Science &amp; AI (top 5% of applicants).</div></div>';
       }
     },
     {
-      no: "06", icon: '<i class="fa-solid fa-ticket"></i>', name: "End Credits", tag: "Get in Touch", credits: true,
+      no: "06", icon: '<i aria-hidden="true" class="fa-solid fa-ticket"></i>', name: "End Credits", tag: "Get in Touch", credits: true,
       render: function () { return ""; }
     }
   ];
@@ -768,17 +768,17 @@
     return '<div class="work"><div class="work-name">' + name + '</div><div class="work-tag">' + tag + '</div><div class="work-desc"><ul>' + items + '</ul></div><div class="work-tech">' + chips + '</div></div>';
   }
   function pub(title, venue) {
-    return '<div class="pub"><div class="pub-title">' + title + '</div><div class="pub-venue"><i class="fa-solid fa-book"></i>&nbsp;' + venue + '</div></div>';
+    return '<div class="pub"><div class="pub-title">' + title + '</div><div class="pub-venue"><i aria-hidden="true" class="fa-solid fa-book"></i>&nbsp;' + venue + '</div></div>';
   }
 
   // box office stats prepended to first reel body
   function boxOffice() {
     var stats = [
-      ["97.93%", "IoT Attack Detection"],
-      ["99.8%", "Pulsar F1 Score"],
-      ["4.1&times;", "GPU Speedup"],
-      ["50%", "Latency Cut"],
-      ["70M+", "Samples Processed"]
+      ["96.97%", "flow-attack accuracy (RF) · C-DAC IoT"],
+      ["99.8%", "pulsar F1 · NCRA-TIFR"],
+      ["4.1&times;", "training speedup · F1 tyre model"],
+      ["50%", "latency cut · GMRT pipeline"],
+      ["70M+", "samples · NCRA pulsar search"]
     ];
     var h = '<div class="cr-role" style="margin-bottom:10px">Box Office Records</div><div class="boxoffice">';
     stats.forEach(function (s) { h += '<div class="stat"><div class="stat-num">' + s[0] + '</div><div class="stat-lab">' + s[1] + '</div></div>'; });
@@ -820,10 +820,10 @@
         '<h2>End Credits</h2>' +
         '<div class="cr-block"><div class="cr-role">Directed &amp; Engineered By</div><div class="cr-name">Saptarshi Nag</div></div>' +
         '<div class="cr-block"><div class="cr-role">Role</div><div class="cr-name">AI / ML Engineer</div></div>' +
-        '<div class="cr-block"><div class="cr-role"><i class="fa-solid fa-envelope"></i> Correspondence</div><div class="cr-name"><a href="mailto:saptarshinag18@gmail.com">saptarshinag18@gmail.com</a></div></div>' +
-        '<div class="cr-block"><div class="cr-role"><i class="fa-brands fa-linkedin"></i> LinkedIn</div><div class="cr-name"><a href="https://www.linkedin.com/in/saptarshi18" target="_blank" rel="noopener">/in/saptarshi18</a></div></div>' +
-        '<div class="cr-block"><div class="cr-role"><i class="fa-brands fa-github"></i> GitHub</div><div class="cr-name"><a href="https://github.com/Saptarshi-Nag189" target="_blank" rel="noopener">Saptarshi-Nag189</a></div></div>' +
-        '<div class="cr-block"><div class="cr-role"><i class="fa-solid fa-ticket"></i> Press Kit</div><div style="margin-top:10px">' + ticketHTML() + '</div></div>' +
+        '<div class="cr-block"><div class="cr-role"><i aria-hidden="true" class="fa-solid fa-envelope"></i> Correspondence</div><div class="cr-name"><a href="mailto:saptarshinag18@gmail.com">saptarshinag18@gmail.com</a></div></div>' +
+        '<div class="cr-block"><div class="cr-role"><i aria-hidden="true" class="fa-brands fa-linkedin"></i> LinkedIn</div><div class="cr-name"><a href="https://www.linkedin.com/in/saptarshi18" target="_blank" rel="noopener">/in/saptarshi18</a></div></div>' +
+        '<div class="cr-block"><div class="cr-role"><i aria-hidden="true" class="fa-brands fa-github"></i> GitHub</div><div class="cr-name"><a href="https://github.com/Saptarshi-Nag189" target="_blank" rel="noopener">Saptarshi-Nag189</a></div></div>' +
+        '<div class="cr-block"><div class="cr-role"><i aria-hidden="true" class="fa-solid fa-ticket"></i> Press Kit</div><div style="margin-top:10px">' + ticketHTML() + '</div></div>' +
         '<div class="cr-fin">~ Fin ~</div>' +
         '<div style="height:30vh"></div>' +
       '</div>';
@@ -831,7 +831,7 @@
 
   function ticketHTML() {
     return '<a class="ticket" href="../../saptarshi_resume_linkedin_2026.pdf" download>' +
-      '<span class="ticket-stub"><i class="fa-solid fa-ticket"></i>&nbsp; Admit One</span>' +
+      '<span class="ticket-stub"><i aria-hidden="true" class="fa-solid fa-ticket"></i>&nbsp; Admit One</span>' +
       '<span class="ticket-main"><span class="tm-top">The Premiere &middot; CV</span><span class="tm-mid">Download Resume</span><span class="tm-bot">Saptarshi Nag &middot; 2026</span></span>' +
       '</a>';
   }

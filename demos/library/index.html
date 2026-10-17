@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Infinite Library — Saptarshi Nag</title>
-<meta name="description" content="An endless night library — every book is a chapter of Saptarshi Nag's story.">
+<title>The Infinite Library · Saptarshi Nag</title>
+<meta name="description" content="The portfolio of Saptarshi Nag as a candle-lit library, where each glowing book is a chapter.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&display=swap" rel="stylesheet">
@@ -106,11 +106,11 @@
   <h1>Every life is shelved somewhere.<br>This one glows.</h1>
   <div class="s">eight volumes · reach for the light</div>
 </div>
-<div id="whisper"><b>click a glowing book</b> — or press 1–8 — and it opens on the lectern</div>
+<div id="whisper"><b>click a glowing book</b>, or press 1 to 8, and it opens on the lectern</div>
 
 <div id="bWrap">
   <div id="book">
-    <button id="bClose" aria-label="Close the book"><i class="fa-solid fa-xmark"></i></button>
+    <button id="bClose" aria-label="Close the book"><i aria-hidden="true" class="fa-solid fa-xmark"></i></button>
     <div id="bChap"></div>
     <div id="bKick"></div>
     <h2 id="bTitle"></h2>
@@ -128,13 +128,13 @@ try{ window.SFX && SFX.init({ accent:'#e8b06a', ambient:true, ambientFreq:52 });
 /* ================= VOLUMES ================= */
 var VOLS = [
  { chap:'Volume I', kick:'in which we meet the author', title:'Saptarshi Nag', spine:'#a33b2e',
-   body:'<p><b>AI/ML Engineer</b> at the intersection of security and systems research. M.Tech in Artificial Intelligence (DIAT, DRDO); research at NCRA-TIFR &amp; GMRT; now a Project Engineer at C-DAC building real-time IoT security — Zero Trust with ML threat detection.</p>'+
+   body:'<p><b>AI/ML Engineer</b> at C-DAC Chennai, building ML-based attack detection for a Zero Trust IoT security framework. M.Tech in CSE (Artificial Intelligence) from DIAT, a DRDO institute, and research at NCRA-TIFR and GMRT.</p>'+
         '<p>He works the full ML stack: feature engineering from raw data, model development and optimisation, and production deployment under tight constraints. Earlier chapters include physics-informed neural networks, GPU-accelerated scientific computing, LLM fine-tuning and RAG systems.</p>'+
-        '<div class="mgrid"><div class="mtile"><div class="v">97.93%</div><div class="l">IoT attack detection</div></div>'+
-        '<div class="mtile"><div class="v">99.8%</div><div class="l">pulsar F1</div></div>'+
-        '<div class="mtile"><div class="v">4.1×</div><div class="l">GPU speedup</div></div>'+
-        '<div class="mtile"><div class="v">50%</div><div class="l">latency cut</div></div>'+
-        '<div class="mtile"><div class="v">70M+</div><div class="l">samples</div></div></div>' },
+        '<div class="mgrid"><div class="mtile"><div class="v">96.97%</div><div class="l">flow-attack accuracy (RF) · C-DAC IoT</div></div>'+
+        '<div class="mtile"><div class="v">99.8%</div><div class="l">pulsar F1 · NCRA-TIFR</div></div>'+
+        '<div class="mtile"><div class="v">4.1×</div><div class="l">training speedup · F1 tyre model</div></div>'+
+        '<div class="mtile"><div class="v">50%</div><div class="l">latency cut · GMRT pipeline</div></div>'+
+        '<div class="mtile"><div class="v">70M+</div><div class="l">samples · NCRA pulsar search</div></div></div>' },
  { chap:'Volume II', kick:'the early folios', title:'Education', spine:'#2e5aa3',
    body:'<div class="item"><h3>B.Tech, Computer Science &amp; Engineering</h3><div class="meta">Academy of Technology, Kolkata · 2019–2023 · CGPA 9.44/10.0</div></div>'+
         '<div class="item"><h3>M.Tech, CSE (Artificial Intelligence)</h3><div class="meta">DIAT (DRDO), Pune · 2023–2025 · CGPA 8.64/10.0</div></div>'+
@@ -152,35 +152,35 @@ var VOLS = [
    body:'<p>Project Engineer · AI Research &amp; IoT Security · Jul 2025 – present · Chennai.</p>'+
         '<ul><li>Real-time <b>Zero Trust framework</b> for IoT (WiFi 802.11, BLE, Zigbee, LoRa) feeding a continuous <b>7-pillar device trust score</b>.</li>'+
         '<li>Two-stage hybrid detection: 1-second <b>window model</b> (7 attack classes) + <b>flow model</b>; RF/XGBoost/SVM/MLP/Voting Ensemble across 6 preprocessing iterations with SMOTE + Optuna (TPE).</li>'+
-        '<li>Best: <b>97.93% accuracy</b> (flow/RF); <b>90.86% acc / 86.78% macro F1</b> (window/Ensemble).</li>'+
+        '<li>Best: <b>96.97% accuracy</b> (flow/RF); <b>90.86% acc / 86.78% macro F1</b> (window/Ensemble).</li>'+
         '<li><b>63 features</b> from raw PCAPs (Scapy/PyShark); live PCAP pipeline (Watchdog, MD5 dedup, multi-threaded); SPIFFE/SPIRE, mTLS, OTP 2FA.</li>'+
         '<li>Two papers at <b>IoTaIS 2025</b>, Bali: <b>“Protocol-Aware Continuous Monitoring and Anomaly Detection in IoT Networks”</b> and <b>“A Comprehensive Survey on Zero Trust Architecture in IoT Networks.”</b></li></ul>' },
  { chap:'Volume VI', kick:'four tales of building', title:'Projects', spine:'#b06f1e',
-   body:'<div class="item"><h3>GPU-Accelerated F1 Tyre Degradation &amp; Race Strategy</h3>'+
+   body:'<div class="item"><h3>GPU-accelerated F1 tyre degradation and race strategy</h3>'+
         '<div class="tags"><span class="tag">Python</span><span class="tag">PyTorch</span><span class="tag">CUDA</span><span class="tag">CuPy</span><span class="tag">XGBoost</span></div>'+
         '<ul><li>Hybrid <b>LSTM-XGBoost</b> for tyre wear + pit-stop windows from 10 Hz telemetry.</li>'+
-        '<li><b>PINNs</b> separating thermal and mechanical degradation; custom CUDA/CuPy kernels — <b>4.1× speedup</b>.</li></ul></div>'+
-        '<div class="item"><h3>Omniscience Pro — Privacy-First Local RAG</h3>'+
+        '<li><b>Physics-informed loss</b> separating thermal and mechanical degradation; custom CUDA/CuPy kernels cut training time <b>4.1×</b>.</li></ul></div>'+
+        '<div class="item"><h3>Omniscience Pro · privacy-first local RAG</h3>'+
         '<div class="tags"><span class="tag">Python</span><span class="tag">LangChain</span><span class="tag">ChromaDB</span><span class="tag">Docker</span></div>'+
         '<ul><li>Multi-modal ingestion; <b>&lt;50 ms</b> vector search (HNSW); <b>&lt;500 ms</b> first token; GPU-aware Docker, CI/CD, POSIX locking.</li></ul></div>'+
-        '<div class="item"><h3>ARO — Autonomous Research Operator</h3>'+
+        '<div class="item"><h3>ARO · Autonomous Research Operator</h3>'+
         '<div class="tags"><span class="tag">Python</span><span class="tag">Flask</span><span class="tag">SQLAlchemy</span><span class="tag">NetworkX</span><span class="tag">React</span></div>'+
         '<ul><li>Multi-agent LLM workflows as directed graphs; SSE streaming; React UI; adversarial audit fixed <b>16 vulnerabilities</b>.</li></ul></div>'+
-        '<div class="item"><h3>Llama 3.2 Optimisation</h3>'+
+        '<div class="item"><h3>Llama 3.2 fine-tuning and quantisation</h3>'+
         '<div class="tags"><span class="tag">Python</span><span class="tag">Unsloth</span><span class="tag">Hugging Face</span><span class="tag">PyTorch</span></div>'+
-        '<ul><li>Fine-tuned 1B/3B on <b>21.5k</b> interactions; <b>4-bit quantisation</b>, no meaningful quality drop.</li></ul></div>' },
+        '<ul><li>Fine-tuned 1B and 3B on <b>21.5k</b> interactions; <b>4-bit quantisation</b> with Unsloth for a consumer GPU, with no meaningful quality drop.</li></ul></div>' },
  { chap:'Volume VII', kick:'the appendix of instruments', title:'Skills', spine:'#2f7c86',
    body:'<div class="skillg"><h4>Languages</h4><div class="tags"><span class="tag">Python (advanced)</span><span class="tag">C++ (proficient)</span><span class="tag">C</span><span class="tag">Bash</span><span class="tag">SQL</span></div></div>'+
-        '<div class="skillg"><h4>ML &amp; Scientific Computing</h4><div class="tags"><span class="tag">PyTorch</span><span class="tag">XGBoost</span><span class="tag">Scikit-learn</span><span class="tag">PINNs</span><span class="tag">NumPy</span><span class="tag">SciPy</span></div></div>'+
-        '<div class="skillg"><h4>HPC &amp; Systems</h4><div class="tags"><span class="tag">CUDA</span><span class="tag">CuPy</span><span class="tag">Parallel Processing</span><span class="tag">Quantisation (4/8-bit)</span><span class="tag">Latency Optimisation</span><span class="tag">Linux</span></div></div>'+
-        '<div class="skillg"><h4>Data &amp; Engineering</h4><div class="tags"><span class="tag">Statistical Anomaly Detection</span><span class="tag">Time-Series</span><span class="tag">CI/CD</span><span class="tag">Docker</span><span class="tag">Git</span><span class="tag">Flask</span><span class="tag">ChromaDB</span></div></div>'+
-        '<div class="skillg"><h4>AI &amp; MLOps</h4><div class="tags"><span class="tag">RAG Systems</span><span class="tag">LLM Fine-Tuning</span><span class="tag">Multi-Agent Orchestration</span><span class="tag">SQLAlchemy</span></div></div>' },
+        '<div class="skillg"><h4>ML &amp; scientific computing</h4><div class="tags"><span class="tag">PyTorch</span><span class="tag">XGBoost</span><span class="tag">Scikit-learn</span><span class="tag">PINNs</span><span class="tag">NumPy</span><span class="tag">SciPy</span></div></div>'+
+        '<div class="skillg"><h4>HPC &amp; systems</h4><div class="tags"><span class="tag">CUDA</span><span class="tag">CuPy</span><span class="tag">parallel processing</span><span class="tag">Quantisation (4/8-bit)</span><span class="tag">latency optimisation</span><span class="tag">Linux</span></div></div>'+
+        '<div class="skillg"><h4>Data &amp; engineering</h4><div class="tags"><span class="tag">statistical anomaly detection</span><span class="tag">Time-Series</span><span class="tag">CI/CD</span><span class="tag">Docker</span><span class="tag">Git</span><span class="tag">Flask</span><span class="tag">ChromaDB</span></div></div>'+
+        '<div class="skillg"><h4>AI &amp; MLOps</h4><div class="tags"><span class="tag">RAG</span><span class="tag">LLM fine-tuning</span><span class="tag">multi-agent orchestration</span><span class="tag">SQLAlchemy</span></div></div>' },
  { chap:'Final Volume', kick:'a letter left between pages', title:'Write to the Author', spine:'#5a5f9e',
-   body:'<p>Open to research collaborations, engineering roles, and interesting problems.</p>'+
-        '<div class="links"><a href="mailto:saptarshinag18@gmail.com"><i class="fa-solid fa-envelope"></i>saptarshinag18@gmail.com</a>'+
-        '<a href="https://www.linkedin.com/in/saptarshi18" target="_blank" rel="noopener"><i class="fa-brands fa-linkedin"></i>/in/saptarshi18</a>'+
-        '<a href="https://github.com/Saptarshi-Nag189" target="_blank" rel="noopener"><i class="fa-brands fa-github"></i>Saptarshi-Nag189</a>'+
-        '<a href="../../saptarshi_resume_linkedin_2026.pdf" target="_blank" rel="noopener"><i class="fa-solid fa-file-arrow-down"></i>the author\'s CV</a></div>' }
+   body:'<p>Open to research collaborations and engineering roles.</p>'+
+        '<div class="links"><a href="mailto:saptarshinag18@gmail.com"><i aria-hidden="true" class="fa-solid fa-envelope"></i>saptarshinag18@gmail.com</a>'+
+        '<a href="https://www.linkedin.com/in/saptarshi18" target="_blank" rel="noopener"><i aria-hidden="true" class="fa-brands fa-linkedin"></i>/in/saptarshi18</a>'+
+        '<a href="https://github.com/Saptarshi-Nag189" target="_blank" rel="noopener"><i aria-hidden="true" class="fa-brands fa-github"></i>Saptarshi-Nag189</a>'+
+        '<a href="../../saptarshi_resume_linkedin_2026.pdf" target="_blank" rel="noopener"><i aria-hidden="true" class="fa-solid fa-file-arrow-down"></i>the author\'s CV</a></div>' }
 ];
 
 /* ================= SCENE ================= */

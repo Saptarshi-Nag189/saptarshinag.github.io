@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Night Drive — Saptarshi Nag</title>
+<title>Night Drive · Saptarshi Nag</title>
 <meta name="description" content="A first-person night drive through the career of Saptarshi Nag, AI/ML Engineer.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -149,20 +149,20 @@
 <canvas id="road"></canvas>
 
 <div id="intro">
-  <div class="kicker"><i class="fa-solid fa-road"></i>&nbsp; route 2019 → present</div>
+  <div class="kicker"><i aria-hidden="true" class="fa-solid fa-road"></i>&nbsp; route 2019 → present</div>
   <h1>Drive the <b>night.</b></h1>
-  <p class="sub">One highway, eight exits — every exit is a chapter of Saptarshi Nag's story.
+  <p class="sub">One highway with eight exits, and each exit is a chapter of Saptarshi Nag's work.
     Hold to accelerate, ease off to coast, and pull over wherever the signs interest you.</p>
-  <button class="go" id="startBtn"><i class="fa-solid fa-car-side"></i>&nbsp; start the engine</button>
+  <button class="go" id="startBtn"><i aria-hidden="true" class="fa-solid fa-car-side"></i>&nbsp; start the engine</button>
   <div class="keys">hold <b>W</b> / <b>↑</b> / <b>touch</b> to drive &nbsp;·&nbsp; <b>click a stop</b> below to fast-travel</div>
 </div>
 
-<div id="hint"><b>hold</b> to drive — the next exit is ahead</div>
+<div id="hint"><b>hold</b> to drive to the next exit</div>
 <div id="route" aria-label="Route stops"></div>
 
 <div id="cardWrap">
   <div id="card">
-    <button id="cardClose" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+    <button id="cardClose" aria-label="Close"><i aria-hidden="true" class="fa-solid fa-xmark"></i></button>
     <div class="signhead">
       <span class="exitno" id="cExit"></span>
       <div class="kick" id="cKick"></div>
@@ -170,7 +170,7 @@
       <div class="sub" id="cSub"></div>
     </div>
     <div class="cbody" id="cBody"></div>
-    <button id="cardNext"><i class="fa-solid fa-road"></i>&nbsp; back on the road</button>
+    <button id="cardNext"><i aria-hidden="true" class="fa-solid fa-road"></i>&nbsp; back on the road</button>
   </div>
 </div>
 
@@ -185,30 +185,30 @@ try{ window.SFX && SFX.init({ accent:'#7fe08f', ambient:false }); }catch(e){}
 function esc(s){ return s; }
 var STOPS = [
  { id:'origins', label:'Origins', icon:'fa-graduation-cap', exit:'EXIT 1', kick:'where the road begins',
-   title:'Origins — Education', sub:'Kolkata → Pune · 2019 → 2025',
+   title:'Origins · Education', sub:'Kolkata → Pune · 2019 → 2025',
    body:'<div class="item"><h3>B.Tech, Computer Science & Engineering</h3><div class="meta">Academy of Technology, Kolkata · 2019–2023 · CGPA 9.44/10.0</div></div>'+
         '<div class="item"><h3>M.Tech, CSE (Artificial Intelligence)</h3><div class="meta">Defence Institute of Advanced Technology (DIAT, DRDO), Pune · 2023–2025 · CGPA 8.64/10.0</div></div>'+
         '<div class="item"><h3>GATE 2024</h3><div class="meta">Rank 1790 · Data Science &amp; AI · top 5%</div></div>' },
  { id:'gmrt', label:'GMRT', icon:'fa-satellite-dish', exit:'EXIT 2', kick:'career · winter internship',
-   title:'GMRT — Giant Metrewave Radio Telescope', sub:'NCRA-TIFR · Pune · Dec 2023 – Jan 2024 · HPC & Signal Processing',
-   body:'<p>First stint at one of the world\'s largest radio telescope arrays — optimising the signal-processing path everything else depends on.</p>'+
+   title:'GMRT · Giant Metrewave Radio Telescope', sub:'NCRA-TIFR · Pune · Dec 2023 – Jan 2024 · HPC & Signal Processing',
+   body:'<p>A winter internship at GMRT, one of the largest radio telescope arrays in the world, speeding up its signal-filtering pipeline.</p>'+
         '<ul><li>Profiled legacy <b>CPU signal-filtering pipelines</b> and refactored them for <b>multicore execution</b>.</li>'+
         '<li>Cut latency by <b>50%</b>, unblocking <b>real-time processing</b> of continuous telescope data streams.</li></ul>' },
  { id:'ncra', label:'NCRA-TIFR', icon:'fa-star', exit:'EXIT 3', kick:'career · research internship',
-   title:'NCRA-TIFR — Weak Pulsar Detection', sub:'M.Tech project · Pune · Aug 2024 – Apr 2025',
+   title:'NCRA-TIFR · weak pulsar detection', sub:'M.Tech project · Pune · Aug 2024 – Apr 2025',
    body:'<ul><li>Designed a <b>ResNet1D + Squeeze-and-Excitation attention</b> architecture for weak pulsar signal detection at low SNR.</li>'+
         '<li>Achieved <b>99.8% F1-score</b> across <b>70M+ samples</b>; adaptive thresholding for non-stationary noise floors.</li>'+
-        '<li>Ran the project end-to-end independently — scoping through deployment and write-up.</li></ul>'+
-        '<div class="mgrid"><div class="mtile"><div class="v">99.8%</div><div class="l">pulsar F1-score</div></div>'+
-        '<div class="mtile"><div class="v">70M+</div><div class="l">samples processed</div></div></div>' },
+        '<li>Ran the project alone, from scoping through deployment and the write-up.</li></ul>'+
+        '<div class="mgrid"><div class="mtile"><div class="v">99.8%</div><div class="l">pulsar F1 · NCRA-TIFR</div></div>'+
+        '<div class="mtile"><div class="v">70M+</div><div class="l">samples · NCRA pulsar search</div></div></div>' },
  { id:'cdac', label:'C-DAC', icon:'fa-shield-halved', exit:'EXIT 4', kick:'career · current role',
-   title:'C-DAC — AI Research & IoT Security', sub:'Project Engineer · Chennai · Jul 2025 – present',
-   body:'<ul><li>Built a real-time <b>Zero Trust security framework</b> for IoT networks — WiFi (802.11), BLE, Zigbee, LoRa — feeding a continuous <b>7-pillar device trust score</b> engine.</li>'+
+   title:'C-DAC · AI Research & IoT Security', sub:'Project Engineer · Chennai · Jul 2025 – present',
+   body:'<ul><li>Built a real-time <b>Zero Trust security framework</b> for IoT networks covering WiFi (802.11), BLE, Zigbee and LoRa, feeding a continuous <b>7-pillar device trust score</b>.</li>'+
         '<li>Two-stage hybrid detection: <b>window model</b> (1-second windows, 7 attack classes) + <b>flow model</b>; RF, XGBoost, SVM, MLP and Voting Ensemble compared over 6 preprocessing iterations with SMOTE + Optuna (TPE).</li>'+
-        '<li>Best results: <b>97.93% accuracy</b> (flow/RF); <b>90.86% accuracy / 86.78% macro F1</b> (window/Ensemble).</li>'+
+        '<li>Best results: <b>96.97% accuracy</b> (flow/RF); <b>90.86% accuracy / 86.78% macro F1</b> (window/Ensemble).</li>'+
         '<li>Engineered <b>63 features</b> from raw PCAPs (Scapy/PyShark); live PCAP drop-folder pipeline (Watchdog, MD5 dedup, multi-threaded).</li>'+
         '<li><b>SPIFFE/SPIRE</b> workload identity, mTLS, OTP-based 2FA. Two papers at <b>IoTaIS 2025</b>.</li></ul>'+
-        '<div class="mgrid"><div class="mtile"><div class="v">97.93%</div><div class="l">attack-detection accuracy</div></div>'+
+        '<div class="mgrid"><div class="mtile"><div class="v">96.97%</div><div class="l">flow-attack accuracy (RF) · C-DAC IoT</div></div>'+
         '<div class="mtile"><div class="v">63</div><div class="l">features from raw PCAPs</div></div></div>' },
  { id:'projects', label:'Projects', icon:'fa-diagram-project', exit:'EXIT 5', kick:'the workshop',
    title:'Featured Projects', sub:'four builds worth pulling over for',
@@ -216,12 +216,12 @@ var STOPS = [
         '<div class="tags"><span class="tag">Python</span><span class="tag">PyTorch</span><span class="tag">CUDA</span><span class="tag">CuPy</span><span class="tag">XGBoost</span></div>'+
         '<ul><li>Hybrid <b>LSTM-XGBoost</b> for tyre wear + pit-stop windows from 10 Hz telemetry.</li>'+
         '<li><b>Physics-informed loss (PINNs)</b> separating thermal and mechanical degradation.</li>'+
-        '<li>Custom CUDA/CuPy kernels — <b>4.1× training speedup</b>.</li></ul></div>'+
-        '<div class="item"><h3>Omniscience Pro — Privacy-First Local RAG</h3>'+
+        '<li>Custom CUDA/CuPy kernels cut training time <b>4.1×</b>.</li></ul></div>'+
+        '<div class="item"><h3>Omniscience Pro · privacy-first local RAG</h3>'+
         '<div class="tags"><span class="tag">Python</span><span class="tag">LangChain</span><span class="tag">ChromaDB</span><span class="tag">Docker</span></div>'+
         '<ul><li>Local multi-modal ingestion; <b>&lt;50 ms</b> vector search (HNSW); <b>&lt;500 ms</b> first-token latency.</li>'+
         '<li>GPU-aware Docker, CI/CD, POSIX file locking.</li></ul></div>'+
-        '<div class="item"><h3>ARO — Autonomous Research Operator</h3>'+
+        '<div class="item"><h3>ARO · Autonomous Research Operator</h3>'+
         '<div class="tags"><span class="tag">Python</span><span class="tag">Flask</span><span class="tag">SQLAlchemy</span><span class="tag">NetworkX</span><span class="tag">React</span></div>'+
         '<ul><li>Multi-agent LLM workflows as directed graphs; Flask SSE streaming; React UI.</li>'+
         '<li>Adversarial audit found &amp; fixed <b>16 vulnerabilities</b> (auth, SSRF, input validation, CORS).</li></ul></div>'+
@@ -232,26 +232,26 @@ var STOPS = [
    title:'Skills', sub:'what\'s in the trunk',
    body:'<div class="skillg"><h4>Languages</h4><div class="tags"><span class="tag">Python (advanced)</span><span class="tag">C++ (proficient)</span><span class="tag">C</span><span class="tag">Bash</span><span class="tag">SQL</span></div></div>'+
         '<div class="skillg"><h4>ML & Scientific Computing</h4><div class="tags"><span class="tag">PyTorch</span><span class="tag">XGBoost</span><span class="tag">Scikit-learn</span><span class="tag">PINNs</span><span class="tag">NumPy</span><span class="tag">SciPy</span></div></div>'+
-        '<div class="skillg"><h4>HPC & Systems</h4><div class="tags"><span class="tag">CUDA</span><span class="tag">CuPy</span><span class="tag">Parallel Processing</span><span class="tag">Quantisation (4/8-bit)</span><span class="tag">Latency Optimisation</span><span class="tag">Linux</span></div></div>'+
-        '<div class="skillg"><h4>Data & Engineering</h4><div class="tags"><span class="tag">Statistical Anomaly Detection</span><span class="tag">Time-Series</span><span class="tag">CI/CD</span><span class="tag">Docker</span><span class="tag">Git</span><span class="tag">Flask</span><span class="tag">ChromaDB</span></div></div>'+
-        '<div class="skillg"><h4>AI & MLOps</h4><div class="tags"><span class="tag">RAG Systems</span><span class="tag">LLM Fine-Tuning</span><span class="tag">Multi-Agent Orchestration</span><span class="tag">SQLAlchemy</span></div></div>' },
+        '<div class="skillg"><h4>HPC & Systems</h4><div class="tags"><span class="tag">CUDA</span><span class="tag">CuPy</span><span class="tag">parallel processing</span><span class="tag">Quantisation (4/8-bit)</span><span class="tag">latency optimisation</span><span class="tag">Linux</span></div></div>'+
+        '<div class="skillg"><h4>Data & Engineering</h4><div class="tags"><span class="tag">statistical anomaly detection</span><span class="tag">Time-Series</span><span class="tag">CI/CD</span><span class="tag">Docker</span><span class="tag">Git</span><span class="tag">Flask</span><span class="tag">ChromaDB</span></div></div>'+
+        '<div class="skillg"><h4>AI & MLOps</h4><div class="tags"><span class="tag">RAG</span><span class="tag">LLM fine-tuning</span><span class="tag">multi-agent orchestration</span><span class="tag">SQLAlchemy</span></div></div>' },
  { id:'papers', label:'Papers', icon:'fa-book', exit:'EXIT 7', kick:'published work',
    title:'Publications', sub:'IoTaIS 2025 · Bali, Indonesia',
    body:'<div class="item"><h3>Protocol-Aware Continuous Monitoring and Anomaly Detection in IoT Networks</h3><div class="meta">IoTaIS 2025 · Bali</div></div>'+
         '<div class="item"><h3>A Comprehensive Survey on Zero Trust Architecture in IoT Networks</h3><div class="meta">IoTaIS 2025 · Bali</div></div>' },
- { id:'dest', label:'Contact', icon:'fa-flag-checkered', exit:'DESTINATION', kick:'journey\'s end — for now',
-   title:'Saptarshi Nag — AI/ML Engineer', sub:'trip records & how to reach the driver',
-   body:'<p>AI/ML engineer at the intersection of security and systems research. The odometer so far:</p>'+
-        '<div class="mgrid"><div class="mtile"><div class="v">97.93%</div><div class="l">IoT attack detection</div></div>'+
-        '<div class="mtile"><div class="v">99.8%</div><div class="l">pulsar F1-score</div></div>'+
-        '<div class="mtile"><div class="v">4.1×</div><div class="l">GPU speedup</div></div>'+
-        '<div class="mtile"><div class="v">50%</div><div class="l">latency cut</div></div>'+
-        '<div class="mtile"><div class="v">70M+</div><div class="l">samples</div></div></div>'+
+ { id:'dest', label:'Contact', icon:'fa-flag-checkered', exit:'DESTINATION', kick:'the last exit',
+   title:'Saptarshi Nag · AI/ML Engineer', sub:'trip records & how to reach the driver',
+   body:'<p>AI/ML engineer at C-DAC Chennai, working on IoT intrusion detection. The odometer so far:</p>'+
+        '<div class="mgrid"><div class="mtile"><div class="v">96.97%</div><div class="l">flow-attack accuracy (RF) · C-DAC IoT</div></div>'+
+        '<div class="mtile"><div class="v">99.8%</div><div class="l">pulsar F1 · NCRA-TIFR</div></div>'+
+        '<div class="mtile"><div class="v">4.1×</div><div class="l">training speedup · F1 tyre model</div></div>'+
+        '<div class="mtile"><div class="v">50%</div><div class="l">latency cut · GMRT pipeline</div></div>'+
+        '<div class="mtile"><div class="v">70M+</div><div class="l">samples · NCRA pulsar search</div></div></div>'+
         '<div class="links" style="margin-top:16px">'+
-        '<a href="mailto:saptarshinag18@gmail.com"><i class="fa-solid fa-envelope"></i>saptarshinag18@gmail.com</a>'+
-        '<a href="https://www.linkedin.com/in/saptarshi18" target="_blank" rel="noopener"><i class="fa-brands fa-linkedin"></i>/in/saptarshi18</a>'+
-        '<a href="https://github.com/Saptarshi-Nag189" target="_blank" rel="noopener"><i class="fa-brands fa-github"></i>Saptarshi-Nag189</a>'+
-        '<a href="../../saptarshi_resume_linkedin_2026.pdf" target="_blank" rel="noopener"><i class="fa-solid fa-file-arrow-down"></i>download CV</a></div>' }
+        '<a href="mailto:saptarshinag18@gmail.com"><i aria-hidden="true" class="fa-solid fa-envelope"></i>saptarshinag18@gmail.com</a>'+
+        '<a href="https://www.linkedin.com/in/saptarshi18" target="_blank" rel="noopener"><i aria-hidden="true" class="fa-brands fa-linkedin"></i>/in/saptarshi18</a>'+
+        '<a href="https://github.com/Saptarshi-Nag189" target="_blank" rel="noopener"><i aria-hidden="true" class="fa-brands fa-github"></i>Saptarshi-Nag189</a>'+
+        '<a href="../../saptarshi_resume_linkedin_2026.pdf" target="_blank" rel="noopener"><i aria-hidden="true" class="fa-solid fa-file-arrow-down"></i>download CV</a></div>' }
 ];
 
 /* ================= WORLD / DRIVING MODEL ================= */
@@ -500,7 +500,7 @@ function arrive(i){
   current=i; visited[i]=true;
   sfx('radio');
   document.getElementById('cExit').textContent=STOPS[i].exit;
-  document.getElementById('cKick').innerHTML='<i class="fa-solid '+STOPS[i].icon+'"></i> '+STOPS[i].kick;
+  document.getElementById('cKick').innerHTML='<i aria-hidden="true" class="fa-solid '+STOPS[i].icon+'"></i> '+STOPS[i].kick;
   document.getElementById('cTitle').textContent=STOPS[i].title;
   document.getElementById('cSub').textContent=STOPS[i].sub;
   document.getElementById('cBody').innerHTML=STOPS[i].body;

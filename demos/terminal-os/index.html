@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>terminal-os — Saptarshi Nag</title>
+<title>terminal-os · Saptarshi Nag</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700;800&display=swap" rel="stylesheet">
@@ -151,20 +151,20 @@
     <div id="scrollback" aria-live="polite"></div>
 
     <div class="chips" id="chips" style="display:none">
-      <button class="chip" data-cmd="help"><i class="fa-solid fa-circle-question"></i>help</button>
-      <button class="chip" data-cmd="whoami"><i class="fa-solid fa-user"></i>whoami</button>
-      <button class="chip" data-cmd="experience"><i class="fa-solid fa-briefcase"></i>experience</button>
-      <button class="chip" data-cmd="ls projects/"><i class="fa-solid fa-folder-open"></i>ls projects/</button>
-      <button class="chip" data-cmd="skills"><i class="fa-solid fa-microchip"></i>skills</button>
-      <button class="chip" data-cmd="publications"><i class="fa-solid fa-book"></i>publications</button>
-      <button class="chip" data-cmd="education"><i class="fa-solid fa-graduation-cap"></i>education</button>
-      <button class="chip" data-cmd="contact"><i class="fa-solid fa-envelope"></i>contact</button>
-      <button class="chip" data-cmd="run pulsar-detect"><i class="fa-solid fa-satellite-dish"></i>run pulsar-detect</button>
-      <button class="chip" data-cmd="sudo hire-me"><i class="fa-solid fa-user-shield"></i>sudo hire-me</button>
+      <button class="chip" data-cmd="help"><i aria-hidden="true" class="fa-solid fa-circle-question"></i>help</button>
+      <button class="chip" data-cmd="whoami"><i aria-hidden="true" class="fa-solid fa-user"></i>whoami</button>
+      <button class="chip" data-cmd="experience"><i aria-hidden="true" class="fa-solid fa-briefcase"></i>experience</button>
+      <button class="chip" data-cmd="ls projects/"><i aria-hidden="true" class="fa-solid fa-folder-open"></i>ls projects/</button>
+      <button class="chip" data-cmd="skills"><i aria-hidden="true" class="fa-solid fa-microchip"></i>skills</button>
+      <button class="chip" data-cmd="publications"><i aria-hidden="true" class="fa-solid fa-book"></i>publications</button>
+      <button class="chip" data-cmd="education"><i aria-hidden="true" class="fa-solid fa-graduation-cap"></i>education</button>
+      <button class="chip" data-cmd="contact"><i aria-hidden="true" class="fa-solid fa-envelope"></i>contact</button>
+      <button class="chip" data-cmd="run pulsar-detect"><i aria-hidden="true" class="fa-solid fa-satellite-dish"></i>run pulsar-detect</button>
+      <button class="chip" data-cmd="sudo hire-me"><i aria-hidden="true" class="fa-solid fa-user-shield"></i>sudo hire-me</button>
     </div>
 
     <div class="inputrow" id="inputrow" style="display:none">
-      <span class="prompt"><i class="fa-solid fa-terminal"></i><span class="g">saptarshi</span><span class="at">@</span><span class="g">os</span>:<span class="a">~</span>$</span>
+      <span class="prompt"><i aria-hidden="true" class="fa-solid fa-terminal"></i><span class="g">saptarshi</span><span class="at">@</span><span class="g">os</span>:<span class="a">~</span>$</span>
       <div class="field">
         <input id="cmd" type="text" autocomplete="off" autocapitalize="off"
                autocorrect="off" spellcheck="false" aria-label="terminal input">
@@ -249,7 +249,7 @@
 
   /* ---------- Content data ---------- */
   const NAME = "Saptarshi Nag";
-  const TAGLINE = "AI/ML engineer at the intersection of security and systems research.";
+  const TAGLINE = "AI/ML engineer at C-DAC Chennai, working on IoT intrusion detection.";
   const projects = {
     "f1-tyre-strategy": {
       icon:"fa-flag-checkered",
@@ -266,7 +266,7 @@
     },
     "omniscience-pro": {
       icon:"fa-database",
-      title:"Omniscience Pro — Privacy-First Local RAG System",
+      title:"Omniscience Pro · Privacy-First Local RAG System",
       stack:"Python · LangChain · ChromaDB · Docker",
       lines:[
         "Local, privacy-first RAG supporting multi-modal document ingestion.",
@@ -277,7 +277,7 @@
     },
     "aro": {
       icon:"fa-diagram-project",
-      title:"ARO — Autonomous Research Operator (Multi-Agent LLM Platform)",
+      title:"ARO · Autonomous Research Operator (Multi-Agent LLM Platform)",
       stack:"Python · Flask · SQLAlchemy · NetworkX · React",
       lines:[
         "Multi-agent LLM workflows as directed graphs (NetworkX); Flask backend",
@@ -311,70 +311,70 @@
   const commands = {
     help(){
       out([
-        ['<span class="hl"><i class="fa-solid fa-circle-question"></i> Available commands</span>',''],
+        ['<span class="hl"><i aria-hidden="true" class="fa-solid fa-circle-question"></i> Available commands</span>',''],
         ['',''],
-        ['  <i class="fa-solid fa-user ic-dim"></i> <span class="g">whoami</span>         who am I',''],
-        ['  <i class="fa-solid fa-folder ic-dim"></i> <span class="g">ls</span>             list the filesystem',''],
-        ['  <i class="fa-solid fa-briefcase ic-dim"></i> <span class="g">experience</span>     <span class="dim">(cat experience.log)</span> career history',''],
-        ['  <i class="fa-solid fa-folder-open ic-dim"></i> <span class="g">ls projects/</span>   list projects · <span class="g">cat projects/&lt;name&gt;</span>',''],
-        ['  <i class="fa-solid fa-microchip ic-dim"></i> <span class="g">skills</span>         tech stack',''],
-        ['  <i class="fa-solid fa-book ic-dim"></i> <span class="g">publications</span>   published papers',''],
-        ['  <i class="fa-solid fa-graduation-cap ic-dim"></i> <span class="g">education</span>      degrees &amp; results',''],
-        ['  <i class="fa-solid fa-envelope ic-dim"></i> <span class="g">contact</span>        reach me / download CV',''],
-        ['  <i class="fa-solid fa-satellite-dish ic-a"></i> <span class="a">run pulsar-detect</span>  &lt;run the detection routine&gt;',''],
-        ['  <i class="fa-solid fa-user-shield ic-a"></i> <span class="a">sudo hire-me</span>   &lt;privileged op&gt;',''],
-        ['  <i class="fa-solid fa-eraser ic-dim"></i> <span class="g">clear</span>          clear the screen',''],
+        ['  <i aria-hidden="true" class="fa-solid fa-user ic-dim"></i> <span class="g">whoami</span>         who am I',''],
+        ['  <i aria-hidden="true" class="fa-solid fa-folder ic-dim"></i> <span class="g">ls</span>             list the filesystem',''],
+        ['  <i aria-hidden="true" class="fa-solid fa-briefcase ic-dim"></i> <span class="g">experience</span>     <span class="dim">(cat experience.log)</span> career history',''],
+        ['  <i aria-hidden="true" class="fa-solid fa-folder-open ic-dim"></i> <span class="g">ls projects/</span>   list projects · <span class="g">cat projects/&lt;name&gt;</span>',''],
+        ['  <i aria-hidden="true" class="fa-solid fa-microchip ic-dim"></i> <span class="g">skills</span>         tech stack',''],
+        ['  <i aria-hidden="true" class="fa-solid fa-book ic-dim"></i> <span class="g">publications</span>   published papers',''],
+        ['  <i aria-hidden="true" class="fa-solid fa-graduation-cap ic-dim"></i> <span class="g">education</span>      degrees &amp; results',''],
+        ['  <i aria-hidden="true" class="fa-solid fa-envelope ic-dim"></i> <span class="g">contact</span>        reach me / download CV',''],
+        ['  <i aria-hidden="true" class="fa-solid fa-satellite-dish ic-a"></i> <span class="a">run pulsar-detect</span>  &lt;run the detection routine&gt;',''],
+        ['  <i aria-hidden="true" class="fa-solid fa-user-shield ic-a"></i> <span class="a">sudo hire-me</span>   &lt;privileged op&gt;',''],
+        ['  <i aria-hidden="true" class="fa-solid fa-eraser ic-dim"></i> <span class="g">clear</span>          clear the screen',''],
         ['',''],
-        ['  <span class="dim"><i class="fa-solid fa-lightbulb ic-a"></i> tip:</span> <i class="fa-solid fa-arrows-up-down ic-dim"></i> history · <span class="hl">Tab</span> autocomplete · click a chip below',''],
+        ['  <span class="dim"><i aria-hidden="true" class="fa-solid fa-lightbulb ic-a"></i> tip:</span> <i aria-hidden="true" class="fa-solid fa-arrows-up-down ic-dim"></i> history · <span class="hl">Tab</span> autocomplete · click a chip below',''],
       ]);
     },
     whoami(){
       out([
-        ['<span class="hl"><i class="fa-solid fa-user"></i> '+NAME+'</span> — <span class="a">AI/ML Engineer</span>',''],
+        ['<span class="hl"><i aria-hidden="true" class="fa-solid fa-user"></i> '+NAME+'</span> · <span class="a">AI/ML Engineer</span>',''],
         ['<span class="dim">'+TAGLINE+'</span>',''],
         ['',''],
-        ['AI/ML engineer with an M.Tech in Artificial Intelligence (DIAT, DRDO) and',''],
-        ['research experience at NCRA-TIFR and GMRT. Works across the full stack of',''],
-        ['an ML project: feature engineering from raw data, model development and',''],
-        ['optimisation, and production deployment under tight performance constraints.',''],
+        ['AI/ML engineer with an M.Tech in CSE (Artificial Intelligence) from DIAT,',''],
+        ['a DRDO institute, and research experience at NCRA-TIFR and GMRT. He works',''],
+        ['across the whole of an ML project, from features built out of raw data to',''],
+        ['deployment under tight performance limits.',''],
         ['',''],
-        ['Current work at <span class="g">C-DAC</span> focuses on real-time IoT security using a Zero',''],
-        ['Trust framework with ML-based threat detection across multiple wireless',''],
-        ['protocols. Past projects span physics-informed neural networks,',''],
-        ['GPU-accelerated scientific computing, LLM fine-tuning, and RAG systems.',''],
+        ['At <span class="g">C-DAC</span> he builds ML-based attack detection for a Zero Trust',''],
+        ['IoT framework that covers several wireless protocols. Other work covers',''],
+        ['physics-informed neural networks, GPU-accelerated scientific computing,',''],
+        ['LLM fine-tuning and RAG systems.',''],
         ['',''],
-        ['<span class="dim"><i class="fa-solid fa-chart-line ic-a"></i> ── headline metrics ──────────────────────────</span>',''],
-        ['  <i class="fa-solid fa-shield-halved ic-a"></i> <span class="a">97.93%</span>  IoT attack-detection accuracy',''],
-        ['  <i class="fa-solid fa-satellite-dish ic-a"></i> <span class="a">99.8%</span>   pulsar-detection F1-score',''],
-        ['  <i class="fa-solid fa-gauge-high ic-a"></i> <span class="a">4.1x</span>    GPU training speedup',''],
-        ['  <i class="fa-solid fa-bolt ic-a"></i> <span class="a">50%</span>     signal-pipeline latency cut',''],
-        ['  <i class="fa-solid fa-database ic-a"></i> <span class="a">70M+</span>    samples processed',''],
+        ['<span class="dim"><i aria-hidden="true" class="fa-solid fa-chart-line ic-a"></i> ── headline metrics ──────────────────────────</span>',''],
+        ['  <i aria-hidden="true" class="fa-solid fa-shield-halved ic-a"></i> <span class="a">96.97%</span>  flow-attack accuracy (RF), C-DAC Zero Trust IoT',''],
+        ['  <i aria-hidden="true" class="fa-solid fa-satellite-dish ic-a"></i> <span class="a">99.8%</span>   pulsar F1, NCRA-TIFR ResNet1D',''],
+        ['  <i aria-hidden="true" class="fa-solid fa-gauge-high ic-a"></i> <span class="a">4.1×</span>    training speedup, F1 tyre model CUDA kernels',''],
+        ['  <i aria-hidden="true" class="fa-solid fa-bolt ic-a"></i> <span class="a">50%</span>     latency cut, GMRT filtering pipeline',''],
+        ['  <i aria-hidden="true" class="fa-solid fa-database ic-a"></i> <span class="a">70M+</span>    samples, NCRA pulsar search',''],
       ]);
     },
     ls(arg){
       if(arg && /^projects\/?$/.test(arg.trim())){
-        out([['<span class="dim"><i class="fa-solid fa-folder-open"></i> projects/</span>',''],['','']].concat(
-          Object.keys(projects).map(k=>['  <i class="fa-solid '+projects[k].icon+'"></i> <span class="g">'+k+'</span>  <span class="dim">'+esc(projects[k].stack)+'</span>',''])
-        ).concat([['',''],['<span class="dim"><i class="fa-solid fa-arrow-right ic-a"></i> cat projects/&lt;name&gt;</span>','']]));
+        out([['<span class="dim"><i aria-hidden="true" class="fa-solid fa-folder-open"></i> projects/</span>',''],['','']].concat(
+          Object.keys(projects).map(k=>['  <i aria-hidden="true" class="fa-solid '+projects[k].icon+'"></i> <span class="g">'+k+'</span>  <span class="dim">'+esc(projects[k].stack)+'</span>',''])
+        ).concat([['',''],['<span class="dim"><i aria-hidden="true" class="fa-solid fa-arrow-right ic-a"></i> cat projects/&lt;name&gt;</span>','']]));
         return;
       }
       out([
-        ['<span class="dim">drwxr-xr-x</span>  <i class="fa-solid fa-folder"></i> <span class="g">projects/</span>',''],
-        ['<span class="dim">-rw-r--r--</span>  <i class="fa-solid fa-file-lines ic-dim"></i> <span class="hl">experience.log</span>',''],
-        ['<span class="dim">-rw-r--r--</span>  <i class="fa-solid fa-file-lines ic-dim"></i> skills.txt',''],
-        ['<span class="dim">-rw-r--r--</span>  <i class="fa-solid fa-file-lines ic-dim"></i> publications.bib',''],
-        ['<span class="dim">-rw-r--r--</span>  <i class="fa-solid fa-file-lines ic-dim"></i> education.yml',''],
-        ['<span class="dim">-rw-r--r--</span>  <i class="fa-solid fa-address-card ic-dim"></i> contact.vcf',''],
-        ['<span class="dim">-rwx------</span>  <i class="fa-solid fa-user-shield ic-a"></i> <span class="a">hire-me.sh</span>',''],
+        ['<span class="dim">drwxr-xr-x</span>  <i aria-hidden="true" class="fa-solid fa-folder"></i> <span class="g">projects/</span>',''],
+        ['<span class="dim">-rw-r--r--</span>  <i aria-hidden="true" class="fa-solid fa-file-lines ic-dim"></i> <span class="hl">experience.log</span>',''],
+        ['<span class="dim">-rw-r--r--</span>  <i aria-hidden="true" class="fa-solid fa-file-lines ic-dim"></i> skills.txt',''],
+        ['<span class="dim">-rw-r--r--</span>  <i aria-hidden="true" class="fa-solid fa-file-lines ic-dim"></i> publications.bib',''],
+        ['<span class="dim">-rw-r--r--</span>  <i aria-hidden="true" class="fa-solid fa-file-lines ic-dim"></i> education.yml',''],
+        ['<span class="dim">-rw-r--r--</span>  <i aria-hidden="true" class="fa-solid fa-address-card ic-dim"></i> contact.vcf',''],
+        ['<span class="dim">-rwx------</span>  <i aria-hidden="true" class="fa-solid fa-user-shield ic-a"></i> <span class="a">hire-me.sh</span>',''],
       ]);
     },
     experience(){
       out([
-        ['<span class="hl"><i class="fa-solid fa-briefcase"></i> experience.log</span>',''],
+        ['<span class="hl"><i aria-hidden="true" class="fa-solid fa-briefcase"></i> experience.log</span>',''],
         ['',''],
-        ['<span class="g"><i class="fa-solid fa-shield-halved"></i> C-DAC</span> <span class="dim">(Centre for Development of Advanced Computing)</span>',''],
+        ['<span class="g"><i aria-hidden="true" class="fa-solid fa-shield-halved"></i> C-DAC</span> <span class="dim">(Centre for Development of Advanced Computing)</span>',''],
         ['  Project Engineer, AI Research &amp; IoT Security',''],
-        ['  <span class="dim"><i class="fa-solid fa-calendar"></i> Jul 2025 – Present · <i class="fa-solid fa-location-dot"></i> Chennai, India</span>',''],
+        ['  <span class="dim"><i aria-hidden="true" class="fa-solid fa-calendar"></i> Jul 2025 – Present · <i aria-hidden="true" class="fa-solid fa-location-dot"></i> Chennai, India</span>',''],
         ['  <span class="a">·</span> Built a real-time Zero Trust security framework for IoT networks',''],
         ['    covering WiFi (802.11), BLE, Zigbee, and LoRa; ML-based attack',''],
         ['    detection feeds a continuous 7-pillar device trust score engine.',''],
@@ -383,7 +383,7 @@
         ['    Compared RF, XGBoost, SVM, MLP, and Voting Ensemble across 6',''],
         ['    preprocessing iterations with SMOTE and Optuna (TPE) hyperparameter',''],
         ['    search.',''],
-        ['  <span class="a">·</span> Best results: <span class="a">97.93%</span> accuracy (flow/RF); <span class="a">90.86%</span> accuracy /',''],
+        ['  <span class="a">·</span> Best results: <span class="a">96.97%</span> accuracy (flow/RF); <span class="a">90.86%</span> accuracy /',''],
         ['    <span class="a">86.78%</span> macro F1 (window/Voting Ensemble).',''],
         ['  <span class="a">·</span> Engineered 63 statistical and behavioural features from raw PCAPs',''],
         ['    using Scapy and PyShark (MAC entropy, frame rate statistics, sequence',''],
@@ -394,21 +394,21 @@
         ['  <span class="a">·</span> Integrated SPIFFE/SPIRE workload identity, mTLS, OTP-based 2FA.',''],
         ['    Co-authored two papers published at IoTaIS 2025.',''],
         ['',''],
-        ['<span class="g"><i class="fa-solid fa-satellite-dish"></i> NCRA-TIFR</span> <span class="dim">(National Centre for Radio Astrophysics)</span>',''],
+        ['<span class="g"><i aria-hidden="true" class="fa-solid fa-satellite-dish"></i> NCRA-TIFR</span> <span class="dim">(National Centre for Radio Astrophysics)</span>',''],
         ['  Research Intern (M.Tech Project)',''],
-        ['  <span class="dim"><i class="fa-solid fa-calendar"></i> Aug 2024 – Apr 2025 · <i class="fa-solid fa-location-dot"></i> Pune, India</span>',''],
+        ['  <span class="dim"><i aria-hidden="true" class="fa-solid fa-calendar"></i> Aug 2024 – Apr 2025 · <i aria-hidden="true" class="fa-solid fa-location-dot"></i> Pune, India</span>',''],
         ['  <span class="a">·</span> Designed a ResNet1D architecture with Squeeze-and-Excitation',''],
         ['    attention for weak pulsar signal detection in noisy astrophysical',''],
         ['    data at low SNR.',''],
         ['  <span class="a">·</span> Achieved <span class="a">99.8%</span> F1-score across 70M+ samples; built adaptive',''],
         ['    thresholding for non-stationary noise floors across observation',''],
         ['    sessions.',''],
-        ['  <span class="a">·</span> Ran the project end-to-end independently: scoping through deployment',''],
+        ['  <span class="a">·</span> Ran the project alone, from scoping through deployment',''],
         ['    and write-up.',''],
         ['',''],
-        ['<span class="g"><i class="fa-solid fa-tower-broadcast"></i> GMRT</span> <span class="dim">(Giant Metrewave Radio Telescope, NCRA-TIFR)</span>',''],
+        ['<span class="g"><i aria-hidden="true" class="fa-solid fa-tower-broadcast"></i> GMRT</span> <span class="dim">(Giant Metrewave Radio Telescope, NCRA-TIFR)</span>',''],
         ['  Winter Intern, HPC &amp; Signal Processing Optimisation',''],
-        ['  <span class="dim"><i class="fa-solid fa-calendar"></i> Dec 2023 – Jan 2024 · <i class="fa-solid fa-location-dot"></i> Pune, India</span>',''],
+        ['  <span class="dim"><i aria-hidden="true" class="fa-solid fa-calendar"></i> Dec 2023 – Jan 2024 · <i aria-hidden="true" class="fa-solid fa-location-dot"></i> Pune, India</span>',''],
         ['  <span class="a">·</span> Profiled legacy CPU signal filtering pipelines, refactored for',''],
         ['    multicore execution.',''],
         ['  <span class="a">·</span> Cut latency by <span class="a">50%</span>, unblocking real-time processing of continuous',''],
@@ -417,51 +417,51 @@
     },
     skills(){
       out([
-        ['<span class="hl"><i class="fa-solid fa-microchip"></i> skills.txt</span>',''],
+        ['<span class="hl"><i aria-hidden="true" class="fa-solid fa-microchip"></i> skills.txt</span>',''],
         ['',''],
-        ['<span class="g"><i class="fa-solid fa-code"></i> Languages</span>',''],
+        ['<span class="g"><i aria-hidden="true" class="fa-solid fa-code"></i> Languages</span>',''],
         ['  <span class="g">Python</span> <span class="dim">(advanced)</span> · <span class="g">C++</span> <span class="dim">(proficient)</span> · <span class="g">C</span> · <span class="g">Bash</span> · <span class="g">SQL</span>',''],
         ['',''],
-        ['<span class="g"><i class="fa-solid fa-brain"></i> ML &amp; Scientific Computing</span>',''],
+        ['<span class="g"><i aria-hidden="true" class="fa-solid fa-brain"></i> ML &amp; Scientific Computing</span>',''],
         ['  <span class="g">PyTorch</span> · <span class="g">XGBoost</span> · <span class="g">Scikit-learn</span> · <span class="g">PINNs</span> · <span class="g">NumPy</span> · <span class="g">SciPy</span>',''],
         ['',''],
-        ['<span class="g"><i class="fa-solid fa-server"></i> HPC &amp; Systems</span>',''],
+        ['<span class="g"><i aria-hidden="true" class="fa-solid fa-server"></i> HPC &amp; Systems</span>',''],
         ['  <span class="g">CUDA</span> · <span class="g">CuPy</span> · <span class="g">Parallel Processing</span> · <span class="g">Model Quantisation</span>',''],
         ['  <span class="dim">(4-bit / 8-bit)</span> · <span class="g">Latency Optimisation</span> · <span class="g">Linux</span>',''],
         ['',''],
-        ['<span class="g"><i class="fa-solid fa-diagram-project"></i> Data &amp; Engineering</span>',''],
+        ['<span class="g"><i aria-hidden="true" class="fa-solid fa-diagram-project"></i> Data &amp; Engineering</span>',''],
         ['  <span class="g">Statistical Anomaly Detection</span> · <span class="g">Time-Series Analysis</span> · <span class="g">CI/CD</span>',''],
         ['  <span class="g">Docker</span> · <span class="g">Git</span> · <span class="g">Flask</span> · <span class="g">ChromaDB</span>',''],
         ['',''],
-        ['<span class="g"><i class="fa-solid fa-robot"></i> AI &amp; MLOps</span>',''],
+        ['<span class="g"><i aria-hidden="true" class="fa-solid fa-robot"></i> AI &amp; MLOps</span>',''],
         ['  <span class="g">RAG Systems</span> · <span class="g">LLM Fine-Tuning</span> · <span class="g">Multi-Agent Orchestration</span>',''],
         ['  <span class="dim">(NetworkX, LangChain)</span> · <span class="g">SQLAlchemy</span>',''],
       ]);
     },
     publications(){
       out([
-        ['<span class="hl"><i class="fa-solid fa-book"></i> publications.bib</span>',''],
+        ['<span class="hl"><i aria-hidden="true" class="fa-solid fa-book"></i> publications.bib</span>',''],
         ['',''],
         ['<span class="a">[1]</span> <span class="hl">Protocol-Aware Continuous Monitoring and Anomaly</span>',''],
         ['    <span class="hl">Detection in IoT Networks</span>',''],
-        ['    <span class="dim"><i class="fa-solid fa-location-dot"></i> IoTaIS 2025, Bali</span>',''],
+        ['    <span class="dim"><i aria-hidden="true" class="fa-solid fa-location-dot"></i> IoTaIS 2025, Bali</span>',''],
         ['',''],
         ['<span class="a">[2]</span> <span class="hl">A Comprehensive Survey on Zero Trust Architecture</span>',''],
         ['    <span class="hl">in IoT Networks</span>',''],
-        ['    <span class="dim"><i class="fa-solid fa-location-dot"></i> IoTaIS 2025, Bali</span>',''],
+        ['    <span class="dim"><i aria-hidden="true" class="fa-solid fa-location-dot"></i> IoTaIS 2025, Bali</span>',''],
       ]);
     },
     education(){
       out([
-        ['<span class="hl"><i class="fa-solid fa-graduation-cap"></i> education.yml</span>',''],
+        ['<span class="hl"><i aria-hidden="true" class="fa-solid fa-graduation-cap"></i> education.yml</span>',''],
         ['',''],
-        ['<span class="g"><i class="fa-solid fa-graduation-cap"></i> M.Tech, CSE (Artificial Intelligence)</span>',''],
+        ['<span class="g"><i aria-hidden="true" class="fa-solid fa-graduation-cap"></i> M.Tech, CSE (Artificial Intelligence)</span>',''],
         ['  DIAT (DRDO), Pune · 2023–2025 · CGPA <span class="a">8.64/10.0</span>',''],
         ['',''],
-        ['<span class="g"><i class="fa-solid fa-graduation-cap"></i> B.Tech, CSE</span>',''],
+        ['<span class="g"><i aria-hidden="true" class="fa-solid fa-graduation-cap"></i> B.Tech, CSE</span>',''],
         ['  Academy of Technology, Kolkata · 2019–2023 · CGPA <span class="a">9.44/10.0</span>',''],
         ['',''],
-        ['<span class="g"><i class="fa-solid fa-award"></i> GATE 2024</span> — Data Science &amp; AI',''],
+        ['<span class="g"><i aria-hidden="true" class="fa-solid fa-award"></i> GATE 2024</span> · Data Science &amp; AI',''],
         ['  Rank <span class="a">1790</span> · Top <span class="a">5%</span>',''],
       ]);
     },
@@ -542,14 +542,14 @@
     await wait(140);
     out([['','']].concat([
       ['  <span class="g">▸ pulsar locked</span>  ·  period <span class="a">1.337 ms</span>  ·  DM <span class="a">26.8</span>',''],
-      ['  <span class="hl">99.8% F1</span> — pulsar-detect: <span class="g">SUCCESS</span>','']
+      ['  <span class="hl">99.8% F1</span> · pulsar-detect: <span class="g">SUCCESS</span>','']
     ]));
     sfx('success');
   }
   async function hireMe(){
     out([['<span class="dim">[sudo] authenticating recruiter...</span>','']]);
     await wait(260);
-    out([['  privilege escalation: <span class="g">granted</span> <i class="fa-solid fa-bolt ic-a"></i>','']]);
+    out([['  privilege escalation: <span class="g">granted</span> <i aria-hidden="true" class="fa-solid fa-bolt ic-a"></i>','']]);
     await wait(180);
     out([['','']].concat([
       ['<span class="a">  ┌──────────────────────────────────────────┐</span>',''],
@@ -693,7 +693,7 @@
   async function boot(){
     sb.innerHTML=''; pinned = true;
     const seq = [
-      ['<span class="dim">saptarshi-os</span> <span class="g">v5.0</span> <span class="dim">— phosphor build</span>', 12],
+      ['<span class="dim">saptarshi-os</span> <span class="g">v5.0</span> <span class="dim">· phosphor build</span>', 12],
       ['<span class="dim">[ 0.000000 ] booting saptarshi-os...</span>', 30],
       ['<span class="dim">[ 0.214 ] cpu: 16 cores · cuda devices detected</span>', 30],
       ['<span class="dim">[ 0.519 ] memory check ....... <span class="g">70,000,000 samples cached OK</span></span>', 24],
@@ -715,7 +715,7 @@
     banner.forEach(l=>el(esc(l), 'ascii'));
     blank();
     el('<span class="hl">'+NAME+'</span> <span class="dim">·</span> <span class="a">AI/ML Engineer</span>  '
-       + '<span class="dim">— interactive shell ready.</span>', '');
+       + '<span class="dim">· interactive shell ready.</span>', '');
     el('Type <span class="g">help</span> and hit <span class="a">Enter</span>, or click a command below.', '');
     blank();
 

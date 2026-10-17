@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Overworld — Saptarshi Nag</title>
+<title>Overworld · Saptarshi Nag</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -170,13 +170,13 @@
 <body>
 <canvas id="game"></canvas>
 
-<a id="back" class="chrome" href="../index.html"><i class="fa-solid fa-arrow-left"></i> demos</a>
-<div id="tag" class="chrome"><i class="fa-solid fa-gamepad"></i>concept demo</div>
+<a id="back" class="chrome" href="../index.html"><i aria-hidden="true" class="fa-solid fa-arrow-left"></i> demos</a>
+<div id="tag" class="chrome"><i aria-hidden="true" class="fa-solid fa-gamepad"></i>concept demo</div>
 
 <div id="hint"><b>WASD</b>/<kbd>↑↓←→</kbd> move · walk to a sign · press <kbd>E</kbd> to enter</div>
 
 <div id="legend">
-  <h4><i class="fa-solid fa-map"></i> Zones</h4>
+  <h4><i aria-hidden="true" class="fa-solid fa-map"></i> Zones</h4>
   <div id="legendList"></div>
 </div>
 
@@ -185,12 +185,12 @@
 <div id="panelWrap">
   <div id="panel">
     <div id="phead">
-      <div class="badge" id="pbadge"><i class="fa-solid fa-star"></i></div>
+      <div class="badge" id="pbadge"><i aria-hidden="true" class="fa-solid fa-star"></i></div>
       <div>
         <h2 id="ptitle">Title</h2>
         <div class="sub" id="psub">Subtitle</div>
       </div>
-      <button id="pclose" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+      <button id="pclose" aria-label="Close"><i aria-hidden="true" class="fa-solid fa-xmark"></i></button>
     </div>
     <div id="pbody"></div>
   </div>
@@ -198,13 +198,13 @@
 
 <div id="touch">
   <div id="joy"><div id="stick"></div></div>
-  <div id="abtn"><i class="fa-solid fa-hand-pointer"></i></div>
+  <div id="abtn"><i aria-hidden="true" class="fa-solid fa-hand-pointer"></i></div>
 </div>
 
 <div id="intro">
-  <h1><span>Saptarshi Nag</span> — Overworld</h1>
+  <h1><span>Saptarshi Nag</span> · Overworld</h1>
   <p>An explorable little world. Walk to each signpost to read a section of the portfolio.</p>
-  <button id="startBtn"><i class="fa-solid fa-play"></i> Enter the World</button>
+  <button id="startBtn"><i aria-hidden="true" class="fa-solid fa-play"></i> Enter the World</button>
   <div class="ctrls"><span><kbd>W A S D</kbd> move</span><span><kbd>E</kbd> enter</span><span><kbd>Esc</kbd> leave</span></div>
 </div>
 
@@ -216,7 +216,7 @@
   ================================================================= */
   var ZONES = [
     { id:'hub', name:'About / Hub', icon:'fa-house-user', color:'#ffd34d', x:0,  y:0,  build:aboutPanel,
-      sub:'Saptarshi Nag — AI/ML Engineer' },
+      sub:'Saptarshi Nag · AI/ML Engineer' },
     { id:'exp', name:'Experience', icon:'fa-briefcase', color:'#ff9f6e', x:-8, y:-6, build:expPanel,
       sub:'Where I have built things' },
     { id:'proj', name:'Projects', icon:'fa-flask', color:'#7ce0ff', x:8, y:-6, build:projPanel,
@@ -236,24 +236,24 @@
   function esc(s){return s;}
   function aboutPanel(){
     return ''+
-    '<p class="lead">AI/ML engineer at the intersection of security and systems research.</p>'+
+    '<p class="lead">AI/ML engineer at C-DAC Chennai, working on IoT intrusion detection.</p>'+
     '<h3>Bio</h3>'+
-    '<p>M.Tech in Artificial Intelligence (DIAT, DRDO); research at NCRA-TIFR &amp; GMRT; now Project Engineer at C-DAC building real-time IoT security (Zero Trust + ML threat detection).</p>'+
-    '<p>Works across the full ML stack — feature engineering from raw data, model development &amp; optimisation, production deployment under tight performance constraints. Past work spans physics-informed neural networks, GPU-accelerated scientific computing, LLM fine-tuning, and RAG systems.</p>'+
+    '<p>M.Tech in CSE (Artificial Intelligence) from DIAT, a DRDO institute, and research at NCRA-TIFR and GMRT. Now a Project Engineer at C-DAC, building ML-based attack detection for a Zero Trust IoT framework.</p>'+
+    '<p>He works across the whole of an ML project, from features built out of raw data to deployment under tight performance limits. Other work covers physics-informed neural networks, GPU-accelerated scientific computing, LLM fine-tuning and RAG systems.</p>'+
     '<h3>Explore</h3>'+
     '<p>Walk this world to discover Experience, Projects, Skills, Publications, Education, the Stats plaza, and Contact. Each signpost opens a full section.</p>';
   }
   function expPanel(){
     var jobs=[
       {r:'Project Engineer, AI Research &amp; IoT Security',c:'C-DAC',d:'Jul 2025–Present',l:'Chennai',
-       b:'Built a real-time Zero Trust security framework for IoT (WiFi/BLE/Zigbee/LoRa) feeding a continuous 7-pillar device trust score; two-stage hybrid detection (1s window model, 7 attack classes, + flow model); compared RF/XGBoost/SVM/MLP/Voting Ensemble over 6 preprocessing iterations with SMOTE + Optuna(TPE); best 97.93% accuracy (flow/RF), 90.86% acc / 86.78% macro F1 (window/Ensemble); engineered 63 features from raw PCAPs (Scapy/PyShark); live PCAP pipeline (Watchdog, MD5 dedup, multi-threaded); SPIFFE/SPIRE, mTLS, OTP 2FA; two IoTaIS 2025 papers.'},
+       b:'Built a real-time Zero Trust security framework for IoT (WiFi/BLE/Zigbee/LoRa) feeding a continuous 7-pillar device trust score; two-stage hybrid detection (1s window model, 7 attack classes, + flow model); compared RF/XGBoost/SVM/MLP/Voting Ensemble over 6 preprocessing iterations with SMOTE + Optuna(TPE); best 96.97% accuracy (flow/RF), 90.86% acc / 86.78% macro F1 (window/Ensemble); engineered 63 features from raw PCAPs (Scapy/PyShark); live PCAP pipeline (Watchdog, MD5 dedup, multi-threaded); SPIFFE/SPIRE, mTLS, OTP 2FA; two IoTaIS 2025 papers.'},
       {r:'Research Intern (M.Tech)',c:'NCRA-TIFR',d:'Aug 2024–Apr 2025',l:'Pune',
-       b:'ResNet1D + Squeeze-and-Excitation attention for weak pulsar detection at low SNR; 99.8% F1 across 70M+ samples; adaptive thresholding for non-stationary noise; ran end-to-end independently.'},
+       b:'ResNet1D + Squeeze-and-Excitation attention for weak pulsar detection at low SNR; 99.8% F1 across 70M+ samples; adaptive thresholding for non-stationary noise; he ran it alone.'},
       {r:'Winter Intern, HPC &amp; Signal Processing',c:'GMRT',d:'Dec 2023–Jan 2024',l:'Pune',
        b:'Profiled legacy CPU signal filtering, refactored for multicore; cut latency 50%, enabling real-time telescope stream processing.'}
     ];
     return jobs.map(function(j){
-      return '<div class="card"><div class="rowtop"><strong>'+j.c+' — '+j.r+'</strong>'+
+      return '<div class="card"><div class="rowtop"><strong>'+j.c+' · '+j.r+'</strong>'+
         '<span class="meta">'+j.d+'</span></div><div class="loc">'+j.l+'</div>'+
         '<p>'+j.b+'</p></div>';
     }).join('');
@@ -263,10 +263,10 @@
       {n:'GPU-Accelerated F1 Tyre Degradation &amp; Race Strategy',
        t:['Python','PyTorch','CUDA','CuPy','XGBoost'],
        b:'Hybrid LSTM-XGBoost for tyre wear + pit-stop window prediction from 10 Hz telemetry; PINNs separating thermal/mechanical degradation; custom CUDA/CuPy kernels; 4.1x speedup.'},
-      {n:'Omniscience Pro — Privacy-First Local RAG',
+      {n:'Omniscience Pro · Privacy-First Local RAG',
        t:['Python','LangChain','ChromaDB','Docker'],
        b:'Multi-modal ingestion; &lt;50 ms vector search (HNSW); &lt;500 ms first-token latency; GPU-aware Docker, CI/CD, POSIX locking.'},
-      {n:'ARO — Autonomous Research Operator',
+      {n:'ARO · Autonomous Research Operator',
        t:['Python','Flask','SQLAlchemy','NetworkX','React'],
        b:'Multi-agent LLM workflows as directed graphs; Flask SSE streaming; React UI; adversarial audit fixed 16 vulns (auth, SSRF, input validation, CORS).'},
       {n:'Llama 3.2 Optimisation',
@@ -298,7 +298,7 @@
       {t:'A Comprehensive Survey on Zero Trust Architecture in IoT Networks',v:'IoTaIS 2025, Bali'}
     ];
     return pubs.map(function(p){
-      return '<div class="card"><strong><i class="fa-solid fa-book" style="color:var(--accent);margin-right:8px"></i>'+p.t+'</strong>'+
+      return '<div class="card"><strong><i aria-hidden="true" class="fa-solid fa-book" style="color:var(--accent);margin-right:8px"></i>'+p.t+'</strong>'+
         '<div class="loc">'+p.v+'</div></div>';
     }).join('');
   }
@@ -316,11 +316,11 @@
   }
   function statsPanel(){
     var ms=[
-      ['97.93%','IoT attack-detection accuracy'],
-      ['99.8%','pulsar-detection F1'],
-      ['4.1x','GPU training speedup'],
-      ['50%','signal-pipeline latency cut'],
-      ['70M+','samples processed']
+      ['96.97%','flow-attack accuracy (RF) · C-DAC IoT'],
+      ['99.8%','pulsar F1 · NCRA-TIFR'],
+      ['4.1×','training speedup · F1 tyre model'],
+      ['50%','latency cut · GMRT pipeline'],
+      ['70M+','samples · NCRA pulsar search']
     ];
     return '<h3>Records</h3><div class="metricgrid">'+
       ms.map(function(m){return '<div class="metric"><div class="v">'+m[0]+'</div><div class="l">'+m[1]+'</div></div>';}).join('')+
@@ -329,10 +329,10 @@
   function contactPanel(){
     return '<p class="lead">Open to research-leaning ML / security engineering roles and collaborations.</p>'+
       '<div class="contactbtns">'+
-      '<a href="mailto:saptarshinag18@gmail.com"><i class="fa-solid fa-envelope"></i> saptarshinag18@gmail.com</a>'+
-      '<a href="https://www.linkedin.com/in/saptarshi18" target="_blank" rel="noopener"><i class="fa-brands fa-linkedin"></i> linkedin.com/in/saptarshi18</a>'+
-      '<a href="https://github.com/Saptarshi-Nag189" target="_blank" rel="noopener"><i class="fa-brands fa-github"></i> github.com/Saptarshi-Nag189</a>'+
-      '<a href="../../saptarshi_resume_linkedin_2026.pdf" target="_blank" rel="noopener"><i class="fa-solid fa-file-pdf"></i> Download CV (PDF)</a>'+
+      '<a href="mailto:saptarshinag18@gmail.com"><i aria-hidden="true" class="fa-solid fa-envelope"></i> saptarshinag18@gmail.com</a>'+
+      '<a href="https://www.linkedin.com/in/saptarshi18" target="_blank" rel="noopener"><i aria-hidden="true" class="fa-brands fa-linkedin"></i> linkedin.com/in/saptarshi18</a>'+
+      '<a href="https://github.com/Saptarshi-Nag189" target="_blank" rel="noopener"><i aria-hidden="true" class="fa-brands fa-github"></i> github.com/Saptarshi-Nag189</a>'+
+      '<a href="../../saptarshi_resume_linkedin_2026.pdf" target="_blank" rel="noopener"><i aria-hidden="true" class="fa-solid fa-file-pdf"></i> Download CV (PDF)</a>'+
       '</div>';
   }
 
@@ -482,7 +482,7 @@
     document.getElementById('psub').textContent=z.sub;
     var b=document.getElementById('pbadge');
     b.style.background='linear-gradient(135deg,'+z.color+','+shade(z.color,-25)+')';
-    b.innerHTML='<i class="fa-solid '+z.icon+'"></i>';
+    b.innerHTML='<i aria-hidden="true" class="fa-solid '+z.icon+'"></i>';
     document.getElementById('pbody').innerHTML=z.build();
     document.getElementById('pbody').scrollTop=0;
     panelWrap.classList.add('open');
@@ -515,7 +515,7 @@
     var L=document.getElementById('legendList');
     ZONES.forEach(function(z){
       var d=document.createElement('div'); d.className='lz';
-      d.innerHTML='<span class="dot" style="background:'+z.color+'"></span><i class="fa-solid '+z.icon+'"></i>'+z.name.replace(/&amp;/g,'&');
+      d.innerHTML='<span class="dot" style="background:'+z.color+'"></span><i aria-hidden="true" class="fa-solid '+z.icon+'"></i>'+z.name.replace(/&amp;/g,'&');
       d.addEventListener('mouseenter',function(){ window.SFX&&SFX.play('hover'); });
       d.addEventListener('click',function(){
         // teleport-walk: just snap target near zone (nice for quick nav)

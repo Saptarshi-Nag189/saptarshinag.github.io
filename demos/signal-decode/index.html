@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Signal Decode — Saptarshi Nag</title>
+  <title>Signal Decode · Saptarshi Nag</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
@@ -177,7 +177,7 @@
   <div class="vignette"></div>
   <div class="scanlines"></div>
 
-  <a class="top-left" href="../index.html"><i class="fa-solid fa-chevron-left"></i> demos</a>
+  <a class="top-left" href="../index.html"><i aria-hidden="true" class="fa-solid fa-chevron-left"></i> demos</a>
   <span class="concept-tag">concept demo · 04</span>
 
   <div class="hud hud-tl">
@@ -199,7 +199,7 @@
 
   <!-- decoded content -->
   <div class="panel" id="panel">
-    <div class="eyebrow" id="eyebrow">// carrier locked — transmission decoded</div>
+    <div class="eyebrow" id="eyebrow">// carrier locked · transmission decoded</div>
     <h1 id="title"></h1>
     <div class="role" id="role"></div>
     <div class="tagline" id="tagline"></div>
@@ -212,14 +212,14 @@
       <div class="nav-row">
         <div class="chips" id="chips"></div>
         <a class="chip" href="../../saptarshi_resume_linkedin_2026.pdf" target="_blank" rel="noopener"
-          style="border-color: var(--amber); color: var(--amber);"><i class="fa-solid fa-download"></i> cv.pdf</a>
+          style="border-color: var(--amber); color: var(--amber);"><i aria-hidden="true" class="fa-solid fa-download"></i> cv.pdf</a>
       </div>
     </div>
   </div>
 
   <!-- tuner -->
   <div class="tuner" id="tuner">
-    <div class="tune-hint" id="hint"><i class="fa-solid fa-satellite-dish"></i> &nbsp;◂ drag to tune the frequency ▸</div>
+    <div class="tune-hint" id="hint"><i aria-hidden="true" class="fa-solid fa-satellite-dish"></i> &nbsp;◂ drag to tune the frequency ▸</div>
     <div class="dial-area" id="dial">
       <div class="dial-track">
         <div class="target-zone" id="targetZone"></div>
@@ -231,7 +231,7 @@
       <span class="freq-now" id="freqNow">1.420 GHz</span>
       <span>1.430 GHz</span>
     </div>
-    <button class="btn" id="autoBtn"><i class="fa-solid fa-wand-magic-sparkles"></i> auto-tune</button>
+    <button class="btn" id="autoBtn"><i aria-hidden="true" class="fa-solid fa-wand-magic-sparkles"></i> auto-tune</button>
   </div>
 
   <script>
@@ -244,17 +244,17 @@
     const NAME = 'SAPTARSHI NAG';
     const ROLE = 'AI / ML Engineer';
     const METRICS = [
-      { v: '97.93%', l: 'IoT attack detection' },
-      { v: '99.8%', l: 'pulsar F1-score' },
-      { v: '4.1×', l: 'GPU speedup' },
-      { v: '50%', l: 'latency cut' },
-      { v: '70M+', l: 'samples' },
+      { v: '96.97%', l: 'flow-attack accuracy (RF) · C-DAC IoT' },
+      { v: '99.8%', l: 'pulsar F1 · NCRA-TIFR' },
+      { v: '4.1×', l: 'training speedup · F1 tyre model' },
+      { v: '50%', l: 'latency cut · GMRT pipeline' },
+      { v: '70M+', l: 'samples · NCRA pulsar search' },
     ];
-    const TAGLINE = 'AI/ML engineer at the intersection of security and systems research.';
-    const BIO = 'AI/ML engineer with an M.Tech in Artificial Intelligence (DIAT, DRDO) and research experience at NCRA-TIFR and GMRT. Works across the full ML stack: feature engineering from raw data, model development and optimisation, and production deployment under tight performance constraints. Current work at C-DAC focuses on real-time IoT security using a Zero Trust framework with ML-based threat detection across multiple wireless protocols. Past projects span physics-informed neural networks, GPU-accelerated scientific computing, LLM fine-tuning, and RAG systems.';
+    const TAGLINE = 'AI/ML engineer at C-DAC Chennai, working on IoT intrusion detection.';
+    const BIO = 'AI/ML engineer with an M.Tech in CSE (Artificial Intelligence) from DIAT, a DRDO institute, and research experience at NCRA-TIFR and GMRT. He works across the whole of an ML project, from features built out of raw data to deployment under tight performance limits. At C-DAC he builds ML-based attack detection for a Zero Trust IoT framework that covers several wireless protocols. Other work covers physics-informed neural networks, GPU-accelerated scientific computing, LLM fine-tuning and RAG systems.';
 
     // icon shorthand
-    function fa(name) { return `<i class="fa-solid ${name}"></i>`; }
+    function fa(name) { return `<i aria-hidden="true" class="fa-solid ${name}"></i>`; }
 
     function entry({ icon, title, org, meta, bullets, stack }) {
       const metaHtml = meta && meta.length
@@ -263,7 +263,7 @@
         ? `<ul class="bullets">${bullets.map(b => `<li>${b}</li>`).join('')}</ul>` : '';
       const stackHtml = stack && stack.length
         ? `<div class="stack">${stack.map(s => `<span class="tag">${s}</span>`).join('')}</div>` : '';
-      const orgHtml = org ? ` — <span class="org">${org}</span>` : '';
+      const orgHtml = org ? ` · <span class="org">${org}</span>` : '';
       return `<div class="entry"><div class="entry-title">${fa(icon)}<span>${title}</span>${orgHtml}</div>${metaHtml}${bulletHtml}${stackHtml}</div>`;
     }
     function group({ icon, label, items }) {
@@ -276,7 +276,7 @@
 
     const CHANNELS = {
       experience: {
-        head: 'CH.01 — EXPERIENCE LOG', icon: 'fa-briefcase',
+        head: 'CH.01 · EXPERIENCE LOG', icon: 'fa-briefcase',
         html:
           entry({
             icon: 'fa-microchip',
@@ -286,7 +286,7 @@
             bullets: [
               'Built a real-time <b>Zero Trust</b> security framework for IoT networks covering WiFi (802.11), BLE, Zigbee, and LoRa; ML-based attack detection feeds a continuous <b>7-pillar device trust score</b> engine.',
               'Two-stage hybrid detection pipeline: window model (1-second sliding windows, 7 attack classes) + flow model for longer-duration patterns. Compared RF, XGBoost, SVM, MLP, and Voting Ensemble across 6 preprocessing iterations with <b>SMOTE</b> and <b>Optuna (TPE)</b>.',
-              'Best results: <b>97.93% accuracy</b> (flow/RF); <b>90.86% accuracy / 86.78% macro F1</b> (window/Voting Ensemble).',
+              'Best results: <b>96.97% accuracy</b> (flow/RF); <b>90.86% accuracy / 86.78% macro F1</b> (window/Voting Ensemble).',
               'Engineered <b>63 statistical and behavioural features</b> from raw PCAPs using Scapy and PyShark.',
               'Live PCAP drop-folder pipeline via Watchdog: MD5 deduplication, multi-threaded extraction, batch inference, thread-safe locking. Integrated <b>SPIFFE/SPIRE, mTLS, OTP-based 2FA</b>. Co-authored two IoTaIS 2025 papers.',
             ],
@@ -298,7 +298,7 @@
             meta: ['Aug 2024–Apr 2025', 'Pune, India'],
             bullets: [
               '<b>ResNet1D</b> architecture with <b>Squeeze-and-Excitation</b> attention for weak pulsar signal detection at low SNR.',
-              '<b>99.8% F1-score</b> across 70M+ samples; adaptive thresholding for non-stationary noise floors. Ran end-to-end independently.',
+              '<b>99.8% F1-score</b> across 70M+ samples; adaptive thresholding for non-stationary noise floors. He ran it alone.',
             ],
           }) +
           entry({
@@ -312,7 +312,7 @@
           }),
       },
       projects: {
-        head: 'CH.02 — PROJECTS', icon: 'fa-diagram-project',
+        head: 'CH.02 · PROJECTS', icon: 'fa-diagram-project',
         html:
           entry({
             icon: 'fa-gauge-high',
@@ -326,7 +326,7 @@
           }) +
           entry({
             icon: 'fa-database',
-            title: 'Omniscience Pro — Privacy-First Local RAG System',
+            title: 'Omniscience Pro · Privacy-First Local RAG System',
             bullets: [
               'Multi-modal document ingestion; <b>&lt;50 ms vector search</b> (HNSW); <b>&lt;500 ms first-token latency</b>.',
               'GPU-aware Docker, CI/CD, POSIX file locking.',
@@ -335,7 +335,7 @@
           }) +
           entry({
             icon: 'fa-robot',
-            title: 'ARO — Autonomous Research Operator',
+            title: 'ARO · Autonomous Research Operator',
             bullets: [
               'Multi-agent LLM workflows as <b>directed graphs</b>; Flask SSE streaming; React frontend.',
               'Adversarial audit found &amp; fixed <b>16 vulnerabilities</b> (auth, SSRF, input validation, CORS).',
@@ -352,7 +352,7 @@
           }),
       },
       skills: {
-        head: 'CH.03 — SKILLS', icon: 'fa-microchip',
+        head: 'CH.03 · SKILLS', icon: 'fa-microchip',
         html:
           group({ icon: 'fa-code', label: 'Languages', items: '<b>Python</b> (advanced), <b>C++</b> (proficient), C, Bash, SQL' }) +
           group({ icon: 'fa-brain', label: 'ML & Scientific Computing', items: 'PyTorch, XGBoost, Scikit-learn, <b>PINNs</b>, NumPy, SciPy' }) +
@@ -361,7 +361,7 @@
           group({ icon: 'fa-network-wired', label: 'AI & MLOps', items: '<b>RAG Systems</b>, LLM Fine-Tuning, Multi-Agent Orchestration (NetworkX, LangChain), SQLAlchemy' }),
       },
       publications: {
-        head: 'CH.04 — PUBLICATIONS', icon: 'fa-book',
+        head: 'CH.04 · PUBLICATIONS', icon: 'fa-book',
         html:
           entry({
             icon: 'fa-file-lines',
@@ -375,7 +375,7 @@
           }),
       },
       education: {
-        head: 'CH.05 — EDUCATION', icon: 'fa-graduation-cap',
+        head: 'CH.05 · EDUCATION', icon: 'fa-graduation-cap',
         html:
           entry({
             icon: 'fa-graduation-cap',
@@ -393,11 +393,11 @@
             icon: 'fa-award',
             title: 'GATE 2024',
             meta: ['Data Science & AI'],
-            bullets: ['Rank <b>1790</b> in Data Science &amp; AI (<b>Top 5%</b>).'],
+            bullets: ['Rank <b>1790</b> in Data Science &amp; AI (<b>top 5%</b> of applicants).'],
           }),
       },
       contact: {
-        head: 'CH.06 — COMMS', icon: 'fa-envelope',
+        head: 'CH.06 · COMMS', icon: 'fa-envelope',
         html:
           comm({ icon: 'fa-envelope', lbl: 'Email', body: '<a href="mailto:saptarshinag18@gmail.com">saptarshinag18@gmail.com</a>' }) +
           comm({ icon: 'fa-linkedin-in', brand: true, lbl: 'LinkedIn', body: '<a href="https://www.linkedin.com/in/saptarshi18" target="_blank" rel="noopener">/in/saptarshi18</a>' }) +
@@ -577,7 +577,7 @@
     function renderChips() {
       const chips = document.getElementById('chips');
       chips.innerHTML = CH_ORDER.map(k =>
-        `<span class="chip${k === currentCh ? ' active' : ''}" data-ch="${k}"><i class="fa-solid ${CH_ICONS[k]}"></i>${k}</span>`).join('');
+        `<span class="chip${k === currentCh ? ' active' : ''}" data-ch="${k}"><i aria-hidden="true" class="fa-solid ${CH_ICONS[k]}"></i>${k}</span>`).join('');
       chips.querySelectorAll('.chip').forEach(c => {
         c.addEventListener('click', () => {
           if (c.dataset.ch === currentCh) { sfx('beep'); return; }
@@ -594,7 +594,7 @@
       currentCh = key;
       renderChips();
       const ch = CHANNELS[key];
-      document.getElementById('chanHead').innerHTML = `<i class="fa-solid ${ch.icon}"></i>${ch.head}`;
+      document.getElementById('chanHead').innerHTML = `<i aria-hidden="true" class="fa-solid ${ch.icon}"></i>${ch.head}`;
       const body = document.getElementById('chanBody');
       body.scrollTop = 0;
       body.innerHTML = ch.html;
@@ -627,9 +627,9 @@
       const title = document.getElementById('title');
       const role = document.getElementById('role');
       document.getElementById('tagline').innerHTML =
-        `<i class="fa-solid fa-satellite-dish"></i>${TAGLINE}`;
+        `<i aria-hidden="true" class="fa-solid fa-satellite-dish"></i>${TAGLINE}`;
       document.getElementById('bio').innerHTML =
-        `<i class="fa-solid fa-circle-info"></i>${BIO}`;
+        `<i aria-hidden="true" class="fa-solid fa-circle-info"></i>${BIO}`;
       scrambleTo(title, NAME, 700).then(() => scrambleTo(role, ROLE, 500));
       // decode metrics values
       if (!reduce) {
