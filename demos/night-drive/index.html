@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Night Drive — Saptarshi Nag</title>
+<title>Night Drive · Saptarshi Nag</title>
+<link rel="icon" href="../../icon.ico">
 <meta name="description" content="A first-person night drive through the career of Saptarshi Nag, AI/ML Engineer.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,6 +13,7 @@
 <link rel="stylesheet" href="../_shared/chrome.css">
 <script src="../_shared/chrome.js" data-accent="#7fe08f" data-tag="night drive"></script>
 <script src="../_shared/sfx.js"></script>
+<script src="../_shared/a11y.js"></script>
 <style>
   :root{
     --green:#7fe08f;          /* highway sign green */
@@ -61,7 +63,7 @@
     padding:0 clamp(9px,1.7vw,19px);cursor:pointer;flex:none}
   .stopdot .d{width:11px;height:11px;border-radius:50%;background:#232c3c;
     border:2px solid #39465d;transition:.25s}
-  .stopdot .l{font-family:var(--mono);font-size:9px;letter-spacing:.09em;color:var(--dim);
+  .stopdot .l{font-family:var(--mono);font-size:12px;letter-spacing:.09em;color:var(--dim);
     text-transform:uppercase;white-space:nowrap;transition:.25s}
   .stopdot:hover .d{border-color:var(--green)}
   .stopdot.visited .d{background:var(--green);border-color:var(--green);box-shadow:0 0 10px rgba(127,224,143,.6)}
@@ -91,12 +93,12 @@
   #card::-webkit-scrollbar{width:8px}
   #card::-webkit-scrollbar-thumb{background:rgba(127,224,143,.3);border-radius:6px}
   /* the card header styled as a highway sign board */
-  .signhead{background:linear-gradient(180deg,#227a46,#175c33);border-bottom:3px solid #0f4023;
-    border-radius:15px 15px 0 0;padding:22px 30px 18px;position:relative}
-  .signhead .exitno{position:absolute;top:14px;right:18px;font-family:var(--mono);font-size:10.5px;
-    letter-spacing:.18em;color:rgba(255,255,255,.75);border:1.5px solid rgba(255,255,255,.5);
+  .signhead{background:linear-gradient(180deg,#1b5e37,#144d2c);border-bottom:3px solid #0f4023;
+    border-radius:15px 15px 0 0;padding:22px 30px 18px 68px;position:relative}
+  .signhead .exitno{position:absolute;top:14px;right:18px;font-family:var(--mono);font-size:11.5px;
+    letter-spacing:.18em;color:rgba(255,255,255,.92);border:1.5px solid rgba(255,255,255,.6);
     border-radius:6px;padding:4px 9px;text-transform:uppercase}
-  .signhead .kick{font-family:var(--mono);font-size:10.5px;letter-spacing:.24em;
+  .signhead .kick{font-family:var(--mono);font-size:11.5px;letter-spacing:.24em;
     text-transform:uppercase;color:#cdeed8;margin-bottom:7px;display:flex;align-items:center;gap:8px}
   .signhead h2{font-size:clamp(20px,3vw,27px);font-weight:700;color:#fff;letter-spacing:-.01em;line-height:1.15}
   .signhead .sub{margin-top:5px;font-size:13px;color:#bfe3cb}
@@ -104,19 +106,19 @@
   .cbody p{margin-bottom:13px}
   .cbody .item{border-left:2px solid var(--line);padding:3px 0 3px 16px;margin-bottom:18px}
   .cbody .item h3{font-size:16px;font-weight:600;color:#fff;margin-bottom:2px}
-  .cbody .item .meta{font-family:var(--mono);font-size:11px;color:var(--dim);margin-bottom:8px}
+  .cbody .item .meta{font-family:var(--mono);font-size:12px;color:var(--dim);margin-bottom:8px}
   .cbody ul{list-style:none;margin:4px 0 10px}
   .cbody ul li{position:relative;padding:5px 0 5px 20px;font-size:13.5px;line-height:1.55}
   .cbody ul li::before{content:"\f105";font-family:"Font Awesome 6 Free";font-weight:900;
     position:absolute;left:2px;top:6px;color:var(--green);font-size:11px}
   .cbody b{color:#fff;font-weight:600}
   .tags{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 14px}
-  .tag{font-family:var(--mono);font-size:10.5px;color:var(--green);background:rgba(127,224,143,.08);
+  .tag{font-family:var(--mono);font-size:12px;color:var(--green);background:rgba(127,224,143,.08);
     border:1px solid var(--line);border-radius:5px;padding:3px 9px}
   .mgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:11px;margin:8px 0 6px}
   .mtile{background:rgba(127,224,143,.05);border:1px solid var(--line);border-radius:11px;padding:13px}
   .mtile .v{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--green);line-height:1}
-  .mtile .l{font-size:11px;color:var(--dim);margin-top:5px;line-height:1.35}
+  .mtile .l{font-size:12px;color:var(--dim);margin-top:5px;line-height:1.35}
   .skillg{margin-bottom:13px}
   .skillg h4{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;
     color:var(--green);margin-bottom:7px}
@@ -124,7 +126,7 @@
     font-size:14px;margin:5px 20px 5px 0;transition:.18s}
   .links a:hover{text-shadow:0 0 12px rgba(255,210,127,.6)}
   .links a i{width:18px;text-align:center}
-  #cardClose{position:absolute;top:14px;left:16px;width:34px;height:34px;border-radius:9px;
+  #cardClose{position:absolute;top:14px;left:16px;width:40px;height:40px;border-radius:9px;
     border:1px solid rgba(255,255,255,.3);background:rgba(0,0,0,.25);color:#fff;cursor:pointer;
     font-size:13px;display:flex;align-items:center;justify-content:center;transition:.18s;z-index:2}
   #cardClose:hover{background:rgba(0,0,0,.45)}
@@ -138,10 +140,15 @@
   }
   @media (max-width:640px){
     .stopdot .l{display:none}
-    .signhead{padding:20px 20px 15px}
+    .signhead{padding:20px 20px 15px 66px}
     .cbody{padding:18px 20px 0}
     #cardNext{margin-left:20px}
   }
+
+  /* accessibility pass: route stops are tappable on a phone, and focus is visible */
+  .stopdot{min-height:28px;min-width:24px}
+  .stopdot:focus-visible,#cardClose:focus-visible,#cardNext:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+  @media (max-width:640px){ .stopdot{min-width:30px;min-height:32px;justify-content:center} }
 </style>
 </head>
 <body>
@@ -149,20 +156,20 @@
 <canvas id="road"></canvas>
 
 <div id="intro">
-  <div class="kicker"><i class="fa-solid fa-road"></i>&nbsp; route 2019 → present</div>
+  <div class="kicker"><i aria-hidden="true" class="fa-solid fa-road"></i>&nbsp; route 2019 → present</div>
   <h1>Drive the <b>night.</b></h1>
-  <p class="sub">One highway, eight exits — every exit is a chapter of Saptarshi Nag's story.
+  <p class="sub">One highway with eight exits, and each exit is a chapter of Saptarshi Nag's work.
     Hold to accelerate, ease off to coast, and pull over wherever the signs interest you.</p>
-  <button class="go" id="startBtn"><i class="fa-solid fa-car-side"></i>&nbsp; start the engine</button>
+  <button class="go" id="startBtn"><i aria-hidden="true" class="fa-solid fa-car-side"></i>&nbsp; start the engine</button>
   <div class="keys">hold <b>W</b> / <b>↑</b> / <b>touch</b> to drive &nbsp;·&nbsp; <b>click a stop</b> below to fast-travel</div>
 </div>
 
-<div id="hint"><b>hold</b> to drive — the next exit is ahead</div>
+<div id="hint"><b>hold</b> to drive to the next exit</div>
 <div id="route" aria-label="Route stops"></div>
 
 <div id="cardWrap">
   <div id="card">
-    <button id="cardClose" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+    <button id="cardClose" aria-label="Close"><i aria-hidden="true" class="fa-solid fa-xmark"></i></button>
     <div class="signhead">
       <span class="exitno" id="cExit"></span>
       <div class="kick" id="cKick"></div>
@@ -170,7 +177,7 @@
       <div class="sub" id="cSub"></div>
     </div>
     <div class="cbody" id="cBody"></div>
-    <button id="cardNext"><i class="fa-solid fa-road"></i>&nbsp; back on the road</button>
+    <button id="cardNext"><i aria-hidden="true" class="fa-solid fa-road"></i>&nbsp; back on the road</button>
   </div>
 </div>
 
@@ -185,30 +192,30 @@ try{ window.SFX && SFX.init({ accent:'#7fe08f', ambient:false }); }catch(e){}
 function esc(s){ return s; }
 var STOPS = [
  { id:'origins', label:'Origins', icon:'fa-graduation-cap', exit:'EXIT 1', kick:'where the road begins',
-   title:'Origins — Education', sub:'Kolkata → Pune · 2019 → 2025',
+   title:'Origins · Education', sub:'Kolkata → Pune · 2019 → 2025',
    body:'<div class="item"><h3>B.Tech, Computer Science & Engineering</h3><div class="meta">Academy of Technology, Kolkata · 2019–2023 · CGPA 9.44/10.0</div></div>'+
         '<div class="item"><h3>M.Tech, CSE (Artificial Intelligence)</h3><div class="meta">Defence Institute of Advanced Technology (DIAT, DRDO), Pune · 2023–2025 · CGPA 8.64/10.0</div></div>'+
         '<div class="item"><h3>GATE 2024</h3><div class="meta">Rank 1790 · Data Science &amp; AI · top 5%</div></div>' },
  { id:'gmrt', label:'GMRT', icon:'fa-satellite-dish', exit:'EXIT 2', kick:'career · winter internship',
-   title:'GMRT — Giant Metrewave Radio Telescope', sub:'NCRA-TIFR · Pune · Dec 2023 – Jan 2024 · HPC & Signal Processing',
-   body:'<p>First stint at one of the world\'s largest radio telescope arrays — optimising the signal-processing path everything else depends on.</p>'+
+   title:'GMRT · Giant Metrewave Radio Telescope', sub:'NCRA-TIFR · Pune · Dec 2023 – Jan 2024 · HPC & Signal Processing',
+   body:'<p>A winter internship at GMRT, one of the largest radio telescope arrays in the world, speeding up its signal-filtering pipeline.</p>'+
         '<ul><li>Profiled legacy <b>CPU signal-filtering pipelines</b> and refactored them for <b>multicore execution</b>.</li>'+
         '<li>Cut latency by <b>50%</b>, unblocking <b>real-time processing</b> of continuous telescope data streams.</li></ul>' },
  { id:'ncra', label:'NCRA-TIFR', icon:'fa-star', exit:'EXIT 3', kick:'career · research internship',
-   title:'NCRA-TIFR — Weak Pulsar Detection', sub:'M.Tech project · Pune · Aug 2024 – Apr 2025',
+   title:'NCRA-TIFR · weak pulsar detection', sub:'M.Tech project · Pune · Aug 2024 – Apr 2025',
    body:'<ul><li>Designed a <b>ResNet1D + Squeeze-and-Excitation attention</b> architecture for weak pulsar signal detection at low SNR.</li>'+
         '<li>Achieved <b>99.8% F1-score</b> across <b>70M+ samples</b>; adaptive thresholding for non-stationary noise floors.</li>'+
-        '<li>Ran the project end-to-end independently — scoping through deployment and write-up.</li></ul>'+
-        '<div class="mgrid"><div class="mtile"><div class="v">99.8%</div><div class="l">pulsar F1-score</div></div>'+
-        '<div class="mtile"><div class="v">70M+</div><div class="l">samples processed</div></div></div>' },
+        '<li>Ran the project alone, from scoping through deployment and the write-up.</li></ul>'+
+        '<div class="mgrid"><div class="mtile"><div class="v">99.8%</div><div class="l">pulsar F1 · NCRA-TIFR</div></div>'+
+        '<div class="mtile"><div class="v">70M+</div><div class="l">samples · NCRA pulsar search</div></div></div>' },
  { id:'cdac', label:'C-DAC', icon:'fa-shield-halved', exit:'EXIT 4', kick:'career · current role',
-   title:'C-DAC — AI Research & IoT Security', sub:'Project Engineer · Chennai · Jul 2025 – present',
-   body:'<ul><li>Built a real-time <b>Zero Trust security framework</b> for IoT networks — WiFi (802.11), BLE, Zigbee, LoRa — feeding a continuous <b>7-pillar device trust score</b> engine.</li>'+
+   title:'C-DAC · AI Research & IoT Security', sub:'Project Engineer · Chennai · Jul 2025 – present',
+   body:'<ul><li>Built a real-time <b>Zero Trust security framework</b> for IoT networks covering WiFi (802.11), BLE, Zigbee and LoRa, feeding a continuous <b>7-pillar device trust score</b>.</li>'+
         '<li>Two-stage hybrid detection: <b>window model</b> (1-second windows, 7 attack classes) + <b>flow model</b>; RF, XGBoost, SVM, MLP and Voting Ensemble compared over 6 preprocessing iterations with SMOTE + Optuna (TPE).</li>'+
-        '<li>Best results: <b>97.93% accuracy</b> (flow/RF); <b>90.86% accuracy / 86.78% macro F1</b> (window/Ensemble).</li>'+
+        '<li>Best results: <b>96.97% accuracy</b> (flow/RF); <b>90.86% accuracy / 86.78% macro F1</b> (window/Ensemble).</li>'+
         '<li>Engineered <b>63 features</b> from raw PCAPs (Scapy/PyShark); live PCAP drop-folder pipeline (Watchdog, MD5 dedup, multi-threaded).</li>'+
         '<li><b>SPIFFE/SPIRE</b> workload identity, mTLS, OTP-based 2FA. Two papers at <b>IoTaIS 2025</b>.</li></ul>'+
-        '<div class="mgrid"><div class="mtile"><div class="v">97.93%</div><div class="l">attack-detection accuracy</div></div>'+
+        '<div class="mgrid"><div class="mtile"><div class="v">96.97%</div><div class="l">flow-attack accuracy (RF) · C-DAC IoT</div></div>'+
         '<div class="mtile"><div class="v">63</div><div class="l">features from raw PCAPs</div></div></div>' },
  { id:'projects', label:'Projects', icon:'fa-diagram-project', exit:'EXIT 5', kick:'the workshop',
    title:'Featured Projects', sub:'four builds worth pulling over for',
@@ -216,12 +223,12 @@ var STOPS = [
         '<div class="tags"><span class="tag">Python</span><span class="tag">PyTorch</span><span class="tag">CUDA</span><span class="tag">CuPy</span><span class="tag">XGBoost</span></div>'+
         '<ul><li>Hybrid <b>LSTM-XGBoost</b> for tyre wear + pit-stop windows from 10 Hz telemetry.</li>'+
         '<li><b>Physics-informed loss (PINNs)</b> separating thermal and mechanical degradation.</li>'+
-        '<li>Custom CUDA/CuPy kernels — <b>4.1× training speedup</b>.</li></ul></div>'+
-        '<div class="item"><h3>Omniscience Pro — Privacy-First Local RAG</h3>'+
+        '<li>Custom CUDA/CuPy kernels cut training time <b>4.1×</b>.</li></ul></div>'+
+        '<div class="item"><h3>Omniscience Pro · privacy-first local RAG</h3>'+
         '<div class="tags"><span class="tag">Python</span><span class="tag">LangChain</span><span class="tag">ChromaDB</span><span class="tag">Docker</span></div>'+
         '<ul><li>Local multi-modal ingestion; <b>&lt;50 ms</b> vector search (HNSW); <b>&lt;500 ms</b> first-token latency.</li>'+
         '<li>GPU-aware Docker, CI/CD, POSIX file locking.</li></ul></div>'+
-        '<div class="item"><h3>ARO — Autonomous Research Operator</h3>'+
+        '<div class="item"><h3>ARO · Autonomous Research Operator</h3>'+
         '<div class="tags"><span class="tag">Python</span><span class="tag">Flask</span><span class="tag">SQLAlchemy</span><span class="tag">NetworkX</span><span class="tag">React</span></div>'+
         '<ul><li>Multi-agent LLM workflows as directed graphs; Flask SSE streaming; React UI.</li>'+
         '<li>Adversarial audit found &amp; fixed <b>16 vulnerabilities</b> (auth, SSRF, input validation, CORS).</li></ul></div>'+
@@ -232,26 +239,26 @@ var STOPS = [
    title:'Skills', sub:'what\'s in the trunk',
    body:'<div class="skillg"><h4>Languages</h4><div class="tags"><span class="tag">Python (advanced)</span><span class="tag">C++ (proficient)</span><span class="tag">C</span><span class="tag">Bash</span><span class="tag">SQL</span></div></div>'+
         '<div class="skillg"><h4>ML & Scientific Computing</h4><div class="tags"><span class="tag">PyTorch</span><span class="tag">XGBoost</span><span class="tag">Scikit-learn</span><span class="tag">PINNs</span><span class="tag">NumPy</span><span class="tag">SciPy</span></div></div>'+
-        '<div class="skillg"><h4>HPC & Systems</h4><div class="tags"><span class="tag">CUDA</span><span class="tag">CuPy</span><span class="tag">Parallel Processing</span><span class="tag">Quantisation (4/8-bit)</span><span class="tag">Latency Optimisation</span><span class="tag">Linux</span></div></div>'+
-        '<div class="skillg"><h4>Data & Engineering</h4><div class="tags"><span class="tag">Statistical Anomaly Detection</span><span class="tag">Time-Series</span><span class="tag">CI/CD</span><span class="tag">Docker</span><span class="tag">Git</span><span class="tag">Flask</span><span class="tag">ChromaDB</span></div></div>'+
-        '<div class="skillg"><h4>AI & MLOps</h4><div class="tags"><span class="tag">RAG Systems</span><span class="tag">LLM Fine-Tuning</span><span class="tag">Multi-Agent Orchestration</span><span class="tag">SQLAlchemy</span></div></div>' },
+        '<div class="skillg"><h4>HPC & Systems</h4><div class="tags"><span class="tag">CUDA</span><span class="tag">CuPy</span><span class="tag">parallel processing</span><span class="tag">Quantisation (4/8-bit)</span><span class="tag">latency optimisation</span><span class="tag">Linux</span></div></div>'+
+        '<div class="skillg"><h4>Data & Engineering</h4><div class="tags"><span class="tag">statistical anomaly detection</span><span class="tag">Time-Series</span><span class="tag">CI/CD</span><span class="tag">Docker</span><span class="tag">Git</span><span class="tag">Flask</span><span class="tag">ChromaDB</span></div></div>'+
+        '<div class="skillg"><h4>AI & MLOps</h4><div class="tags"><span class="tag">RAG</span><span class="tag">LLM fine-tuning</span><span class="tag">multi-agent orchestration</span><span class="tag">SQLAlchemy</span></div></div>' },
  { id:'papers', label:'Papers', icon:'fa-book', exit:'EXIT 7', kick:'published work',
    title:'Publications', sub:'IoTaIS 2025 · Bali, Indonesia',
    body:'<div class="item"><h3>Protocol-Aware Continuous Monitoring and Anomaly Detection in IoT Networks</h3><div class="meta">IoTaIS 2025 · Bali</div></div>'+
         '<div class="item"><h3>A Comprehensive Survey on Zero Trust Architecture in IoT Networks</h3><div class="meta">IoTaIS 2025 · Bali</div></div>' },
- { id:'dest', label:'Contact', icon:'fa-flag-checkered', exit:'DESTINATION', kick:'journey\'s end — for now',
-   title:'Saptarshi Nag — AI/ML Engineer', sub:'trip records & how to reach the driver',
-   body:'<p>AI/ML engineer at the intersection of security and systems research. The odometer so far:</p>'+
-        '<div class="mgrid"><div class="mtile"><div class="v">97.93%</div><div class="l">IoT attack detection</div></div>'+
-        '<div class="mtile"><div class="v">99.8%</div><div class="l">pulsar F1-score</div></div>'+
-        '<div class="mtile"><div class="v">4.1×</div><div class="l">GPU speedup</div></div>'+
-        '<div class="mtile"><div class="v">50%</div><div class="l">latency cut</div></div>'+
-        '<div class="mtile"><div class="v">70M+</div><div class="l">samples</div></div></div>'+
+ { id:'dest', label:'Contact', icon:'fa-flag-checkered', exit:'DESTINATION', kick:'the last exit',
+   title:'Saptarshi Nag · AI/ML Engineer', sub:'trip records & how to reach the driver',
+   body:'<p>AI/ML engineer at C-DAC Chennai, working on IoT intrusion detection. The odometer so far:</p>'+
+        '<div class="mgrid"><div class="mtile"><div class="v">96.97%</div><div class="l">flow-attack accuracy (RF) · C-DAC IoT</div></div>'+
+        '<div class="mtile"><div class="v">99.8%</div><div class="l">pulsar F1 · NCRA-TIFR</div></div>'+
+        '<div class="mtile"><div class="v">4.1×</div><div class="l">training speedup · F1 tyre model</div></div>'+
+        '<div class="mtile"><div class="v">50%</div><div class="l">latency cut · GMRT pipeline</div></div>'+
+        '<div class="mtile"><div class="v">70M+</div><div class="l">samples · NCRA pulsar search</div></div></div>'+
         '<div class="links" style="margin-top:16px">'+
-        '<a href="mailto:saptarshinag18@gmail.com"><i class="fa-solid fa-envelope"></i>saptarshinag18@gmail.com</a>'+
-        '<a href="https://www.linkedin.com/in/saptarshi18" target="_blank" rel="noopener"><i class="fa-brands fa-linkedin"></i>/in/saptarshi18</a>'+
-        '<a href="https://github.com/Saptarshi-Nag189" target="_blank" rel="noopener"><i class="fa-brands fa-github"></i>Saptarshi-Nag189</a>'+
-        '<a href="../../saptarshi_resume_linkedin_2026.pdf" target="_blank" rel="noopener"><i class="fa-solid fa-file-arrow-down"></i>download CV</a></div>' }
+        '<a href="mailto:saptarshinag18@gmail.com"><i aria-hidden="true" class="fa-solid fa-envelope"></i>saptarshinag18@gmail.com</a>'+
+        '<a href="https://www.linkedin.com/in/saptarshi18" target="_blank" rel="noopener"><i aria-hidden="true" class="fa-brands fa-linkedin"></i>/in/saptarshi18</a>'+
+        '<a href="https://github.com/Saptarshi-Nag189" target="_blank" rel="noopener"><i aria-hidden="true" class="fa-brands fa-github"></i>Saptarshi-Nag189</a>'+
+        '<a href="../../saptarshi_resume_linkedin_2026.pdf" target="_blank" rel="noopener"><i aria-hidden="true" class="fa-solid fa-file-arrow-down"></i>download CV</a></div>' }
 ];
 
 /* ================= WORLD / DRIVING MODEL ================= */
@@ -487,6 +494,9 @@ function updateRoute(){
 }
 function fastTravel(i){
   sfx('select'); closeCard(true);
+  /* With reduced motion the animation loop never runs, so autopilot never arrived and no
+     chapter could open at all. Jump to the exit and open it instead of driving there. */
+  if(REDUCED){ cam=Math.max(0,stopZ[i]-40); speed=0; draw(); arrive(i); return; }
   if(Math.abs((stopZ[i]-40)-cam)<10){ arrive(i); return; }
   if(stopZ[i]-40<cam){ cam=Math.max(0,stopZ[i]-460); }  /* wormhole back, then drive in */
   autopilot=i;
@@ -500,18 +510,19 @@ function arrive(i){
   current=i; visited[i]=true;
   sfx('radio');
   document.getElementById('cExit').textContent=STOPS[i].exit;
-  document.getElementById('cKick').innerHTML='<i class="fa-solid '+STOPS[i].icon+'"></i> '+STOPS[i].kick;
+  document.getElementById('cKick').innerHTML='<i aria-hidden="true" class="fa-solid '+STOPS[i].icon+'"></i> '+STOPS[i].kick;
   document.getElementById('cTitle').textContent=STOPS[i].title;
   document.getElementById('cSub').textContent=STOPS[i].sub;
   document.getElementById('cBody').innerHTML=STOPS[i].body;
   document.getElementById('card').scrollTop=0;
   wrapEl.classList.add('open');
+  if(DLG) DLG.opened();
   updateRoute();
 }
 function closeCard(silent){
   if(current<0) return;
   if(!silent) sfx('back');
-  current=-1; wrapEl.classList.remove('open'); updateRoute();
+  current=-1; wrapEl.classList.remove('open'); if(DLG) DLG.closed(); updateRoute();
 }
 document.getElementById('cardClose').addEventListener('click',function(){ closeCard(); });
 document.getElementById('cardNext').addEventListener('click',function(){
@@ -519,6 +530,8 @@ document.getElementById('cardNext').addEventListener('click',function(){
   try{ window.SFX && SFX.revTo(0.7,420); }catch(e){}
 });
 wrapEl.addEventListener('click',function(e){ if(e.target===wrapEl) closeCard(); });
+/* the card is a real dialog; the route strip below already gives the keyboard a way to every exit */
+var DLG = window.A11Y ? A11Y.dialog(wrapEl, document.getElementById('card'), document.getElementById('cardClose'), 'cTitle') : null;
 addEventListener('keydown',function(e){ if(e.key==='Escape') closeCard(); });
 
 /* ================= INPUT ================= */

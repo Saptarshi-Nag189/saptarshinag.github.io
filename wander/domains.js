@@ -3,7 +3,7 @@
    Doors on the overworld → soft bloom → prebuilt interiors with stations.
    Six runnable machines. The twin chat (TwinBrain socket for future Llama).
    ========================================================================== */
-import { DOMAINS, FAIRY, CORPUS, CORPUS_FALLBACK } from './twin-data.js';
+import { DOMAINS, FAIRY, CORPUS, CORPUS_FALLBACK, scoreIntent } from './twin-data.js';
 import { buildDungeons } from './dungeons.js';
 
 export function initDomains(ctx){
@@ -155,7 +155,7 @@ function machineDone(msg){
 
 const MACHINES={
   gmrt(host){
-    host.innerHTML='<p style="font-size:13px;color:#7a7194;margin-bottom:10px">The telescope\'s stream pours onto one waterwheel while three sit still. <b>Open the side channels.</b></p>';
+    host.innerHTML='<p style="font-size:13px;color:#5f5677;margin-bottom:10px">The telescope\'s data pours onto one waterwheel while three sit still. <b>Open the side channels</b> to spread it out (simulated).</p>';
     const C=mkCanvas(host,190);
     const row=document.createElement('div'); row.className='crow'; host.appendChild(row);
     let opened=0, lat=240;
@@ -163,7 +163,7 @@ const MACHINES={
       const b=document.createElement('button'); b.className='cbtn';
       b.textContent='open channel '+i;
       b.addEventListener('click',()=>{ if(b.disabled)return; b.disabled=true; opened++; lat=240-opened*40; sfx('splash');
-        if(opened===3){ lat=120; machineDone(); stampRow(host,['GMRT · NCRA-TIFR · winter 2023','multicore refactor','latency −50% · real-time unblocked']); }});
+        if(opened===3){ lat=120; machineDone(); stampRow(host,['GMRT · NCRA-TIFR · Dec 2023 – Jan 2024','multicore refactor','latency −50%, in real time']); }});
       row.appendChild(b);
     }
     let t=0;
@@ -188,13 +188,13 @@ const MACHINES={
     });
   },
   pulsar(host){
-    host.innerHTML='<p style="font-size:13px;color:#7a7194;margin-bottom:10px">A dead star ticks in this pool. <b>Sweep the folding period</b> — stack its turns until it surfaces. (Real epoch folding.)</p>';
+    host.innerHTML='<p style="font-size:13px;color:#5f5677;margin-bottom:10px">A synthetic pulsar is hidden in this pool. <b>Sweep the folding period</b> to stack its turns until the pulse shows. This is real epoch folding.</p>';
     const C=mkCanvas(host,180);
     const row=document.createElement('div'); row.className='crow'; host.appendChild(row);
     const read=document.createElement('span'); read.className='cread'; row.appendChild(read);
     const sl=document.createElement('input'); sl.type='range'; sl.className='cslider';
     sl.min=5000; sl.max=10000; sl.value=5000; row.appendChild(sl);
-    const auto=document.createElement('button'); auto.className='cbtn'; auto.textContent='let his model fold'; row.appendChild(auto);
+    const auto=document.createElement('button'); auto.className='cbtn'; auto.textContent='sweep it for me'; row.appendChild(auto);
     const P0=0.7168, NP=90, BIN=72; let P=0.5, locked=false;
     const seed=[]; for(let k=0;k<NP;k++){ seed.push([]); for(let b=0;b<BIN;b++) seed[k].push(Math.random()-0.5); }
     function fold(Pv){
@@ -214,7 +214,7 @@ const MACHINES={
       read.innerHTML='PERIOD<br><b>'+P.toFixed(4)+' s</b><br><span style="font-size:10px">SNR '+res.snr.toFixed(1)+(res.snr>4?' ▲':'')+'</span>';
       if(!locked&&res.snr>8){ locked=true; sfx('lock'); machineDone();
         let beats=0; const iv=setInterval(()=>{ sfx('pulse'); if(++beats>10) clearInterval(iv); },P0*1000);
-        stampRow(host,['pulsar found · 0.7168 s','his ResNet1D+SE · 99.8% F1','70M+ samples · NCRA-TIFR']); } }
+        stampRow(host,['pulsar found · 0.7168 s','his ResNet1D + SE detector · 99.8% F1','70M+ samples · NCRA-TIFR']); } }
     sl.addEventListener('input',()=>{ setP(sl.value/10000); if(Math.random()<0.4) sfx('static'); });
     auto.addEventListener('click',()=>{ auto.disabled=true; let i=0,steps=30,s0=P;
       const iv=setInterval(()=>{ i++; const v=s0+(P0-s0)*(i/steps); sl.value=Math.round(v*10000); setP(v); if(i>=steps) clearInterval(iv); },40); });
@@ -230,12 +230,12 @@ const MACHINES={
       x.shadowColor=x.strokeStyle; x.shadowBlur=locked?14:5; x.stroke(); x.shadowBlur=0;
       if(locked){ x.fillStyle='rgba(255,217,138,'+(0.5+0.5*Math.sin(t*8))+')';
         x.font='700 12px JetBrains Mono'; x.textAlign='center';
-        x.fillText('♥ its heartbeat — every 0.7168 s',w/2,22); }
+        x.fillText('one pulse every 0.7168 s',w/2,22); }
     });
     setP(0.5);
   },
   f1(host){
-    host.innerHTML='<p style="font-size:13px;color:#7a7194;margin-bottom:10px">His PINN splits tyre wear into <b>thermal</b> and <b>mechanical</b>. The race runs — <b>box when you believe.</b></p>';
+    host.innerHTML='<p style="font-size:13px;color:#5f5677;margin-bottom:10px">His physics-informed model splits tyre wear into <b>thermal</b> and <b>mechanical</b>. The stint is simulated. <b>Press BOX when you think it\'s time.</b></p>';
     const C=mkCanvas(host,190);
     const row=document.createElement('div'); row.className='crow'; host.appendChild(row);
     const box=document.createElement('button'); box.className='cbtn'; box.textContent='█ BOX BOX BOX'; row.appendChild(box);
@@ -244,9 +244,9 @@ const MACHINES={
     const gr=l=>Math.max(0,1-(th(l)*0.55+me(l)*0.45));
     box.addEventListener('click',()=>{ if(over||boxed)return; boxed=lap; box.disabled=true; sfx('upshift');
       setTimeout(()=>{ over=true; const d=Math.abs(boxed-OPT)*0.8+(boxed>20?(boxed-20)*1.2:0);
-        box.textContent=d<1?'PERFECT — you matched the model':'+'+d.toFixed(1)+'s vs the model (lap '+OPT+')';
-        machineDone(); stampRow(host,['PINN thermal/mech split','LSTM-XGBoost · 10 Hz telemetry','4.1× CUDA speedup']); },700); });
-    loop(()=>{ if(!over&&!boxed){ ff++; if(ff%44===0&&lap<LAPS){ lap++; if(lap>=LAPS){ boxed=LAPS; box.disabled=true; box.textContent='tyre cliff — the model would have saved you'; setTimeout(()=>{over=true; machineDone(); stampRow(host,['PINN thermal/mech split','4.1× CUDA speedup']);},600); } } }
+        box.textContent=d<1?'PERFECT · same lap as the model':'+'+d.toFixed(1)+'s vs the model (lap '+OPT+')';
+        machineDone(); stampRow(host,['thermal and mechanical wear, split','LSTM-XGBoost · 10 Hz telemetry','CUDA kernels · 4.1× faster training']); },700); });
+    loop(()=>{ if(!over&&!boxed){ ff++; if(ff%44===0&&lap<LAPS){ lap++; if(lap>=LAPS){ boxed=LAPS; box.disabled=true; box.textContent='tyre cliff: the model would have stopped earlier'; setTimeout(()=>{over=true; machineDone(); stampRow(host,['thermal and mechanical wear, split','CUDA kernels · 4.1× faster training']);},600); } } }
       const {x,w,h}=C; x.fillStyle='#241f38'; x.fillRect(0,0,w,h);
       const gx=40,gy=14,gw=w-58,gh=h-48;
       x.strokeStyle='rgba(255,255,255,.15)'; x.strokeRect(gx,gy,gw,gh);
@@ -266,7 +266,7 @@ const MACHINES={
     });
   },
   oracle(host){
-    host.innerHTML='<p style="font-size:13px;color:#7a7194;margin-bottom:10px">Omniscience Pro, live: pick a question and <b>watch retrieval happen</b> in embedding space.</p>';
+    host.innerHTML='<p style="font-size:13px;color:#5f5677;margin-bottom:10px">A sketch of how Omniscience Pro retrieves: <b>pick a question</b> and watch the nearest chunks light up in embedding space (simulated).</p>';
     const wrap=document.createElement('div'); wrap.style.cssText='display:flex;gap:12px;flex-wrap:wrap'; host.appendChild(wrap);
     const left=document.createElement('div'); left.style.cssText='flex:1;min-width:190px;display:flex;flex-direction:column;gap:7px';
     const right=document.createElement('div'); right.style.cssText='flex:1.4;min-width:240px';
@@ -278,9 +278,9 @@ const MACHINES={
     const chunks=[]; for(let i=0;i<46;i++) chunks.push({x:Math.random(),y:Math.random(),hot:0});
     let q=null, answered=0, t=0;
     const QS=[
-      ['How fast is retrieval?','Vector search answers in <b style="color:#ffd98a">&lt;50 ms</b> (HNSW) and first token in <b style="color:#ffd98a">&lt;500 ms</b> — fully offline. [omniscience-pro]'],
-      ['What did the audit find?','His own red-team pass on ARO found and fixed <b style="color:#ffd98a">16 vulnerabilities</b> — auth, SSRF, validation, CORS. [aro]'],
-      ['How was Llama shrunk?','Fine-tuned Llama 3.2 on <b style="color:#ffd98a">21.5k</b> interactions, quantised to <b style="color:#ffd98a">4-bit</b> with Unsloth — quality intact. [llama-3.2]']
+      ['How fast is it?','Vector search in <b style="color:#ffd98a">under 50 ms</b> (HNSW) and the first token in <b style="color:#ffd98a">under 500 ms</b>, on consumer hardware. [omniscience-pro]'],
+      ['How does it run?','In a GPU-aware Docker container with a full CI/CD pipeline. POSIX file locking keeps concurrent sessions safe. [omniscience-pro]'],
+      ['What does it ingest?','Documents of several kinds, indexed locally in ChromaDB with LangChain. [omniscience-pro]']
     ];
     QS.forEach(([qq,aa])=>{
       const b=document.createElement('button'); b.className='cbtn'; b.style.fontSize='11.5px'; b.textContent=qq;
@@ -289,12 +289,12 @@ const MACHINES={
         const near=chunks.map((c,i)=>({i,d:(c.x-q.x)**2+(c.y-q.y)**2})).sort((a,b)=>a.d-b.d).slice(0,3);
         out.innerHTML='<span style="color:#8fd8ff">» '+qq+'</span><br>searching…';
         setTimeout(()=>{ near.forEach(o=>chunks[o.i].hot=1); sfx('sonar');
-          out.innerHTML+='<br><span style="color:#9defc9">3 chunks · 43 ms</span><br>';
+          out.innerHTML+='<br><span style="color:#9defc9">3 chunks retrieved</span><br>';
           let k=0; const iv=setInterval(()=>{ k+=4;
-            out.innerHTML='<span style="color:#8fd8ff">» '+qq+'</span><br><span style="color:#9defc9">3 chunks · 43 ms</span><br>'+aa.slice(0,k);
+            out.innerHTML='<span style="color:#8fd8ff">» '+qq+'</span><br><span style="color:#9defc9">3 chunks retrieved</span><br>'+aa.slice(0,k);
             out.scrollTop=1e6; if(k%12===0) sfx('type');
             if(k>=aa.length){ clearInterval(iv); chunks.forEach(c=>c.hot=0); q=null;
-              if(++answered===2){ machineDone(); stampRow(host,['<50 ms search · <500 ms token','LangChain · ChromaDB · Docker']); } }
+              if(++answered===2){ machineDone(); stampRow(host,['<50 ms search · <500 ms to first token','LangChain · ChromaDB · Docker']); } }
           },20); },600);
       });
       left.appendChild(b);
@@ -310,7 +310,7 @@ const MACHINES={
     });
   },
   aro(host){
-    host.innerHTML='<p style="font-size:13px;color:#7a7194;margin-bottom:10px">ARO runs research as a living graph of agents. <b>Give it a task</b> and watch them light.</p>';
+    host.innerHTML='<p style="font-size:13px;color:#5f5677;margin-bottom:10px">ARO runs multi-agent LLM workflows as a directed graph. <b>Give it a task</b> and watch each agent light up in turn (simulated).</p>';
     const C=mkCanvas(host,180);
     const row=document.createElement('div'); row.className='crow'; host.appendChild(row);
     const go=document.createElement('button'); go.className='cbtn'; go.textContent='▶ run: "survey zero-trust for IoT"'; row.appendChild(go);
@@ -320,7 +320,7 @@ const MACHINES={
     go.addEventListener('click',()=>{ if(running)return; running=true; go.disabled=true;
       let i=0; const iv=setInterval(()=>{ lit=i; sfx('blip'); i++;
         if(i>NODES.length){ clearInterval(iv); machineDone();
-          stampRow(host,['agent graphs · NetworkX','Flask SSE · React','16 vulns found & fixed']); } },650); });
+          stampRow(host,['agent graphs in NetworkX','Flask SSE · React','16 vulnerabilities found and fixed']); } },650); });
     loop(()=>{ t+=0.02; const {x,w,h}=C;
       x.fillStyle='#241f38'; x.fillRect(0,0,w,h);
       EDGES.forEach(([a,b])=>{ const A=NODES[a],B=NODES[b];
@@ -335,14 +335,14 @@ const MACHINES={
     });
   },
   wifi(host){
-    host.innerHTML='<p style="font-size:13px;color:#7a7194;margin-bottom:10px">His C-DAC watch, live: management frames flow — until a <b>deauth storm</b> hits. The window model flags it. <b>You quarantine.</b></p>';
+    host.innerHTML='<p style="font-size:13px;color:#5f5677;margin-bottom:10px">His C-DAC work, simulated: management frames flow until a <b>deauth flood</b> starts. The window model flags the device, and <b>you quarantine it.</b></p>';
     const C=mkCanvas(host,190);
     const row=document.createElement('div'); row.className='crow'; host.appendChild(row);
     const qb=document.createElement('button'); qb.className='cbtn'; qb.textContent='quarantine flagged device'; qb.disabled=true; row.appendChild(qb);
     const DEV=['cam','lock','therm','plug','sense'];
     let t=0,phase='calm',victim=0,contained=false; const trust=DEV.map(()=>100);
     qb.addEventListener('click',()=>{ if(phase!=='attack'||contained)return; contained=true; phase='ok'; sfx('lock');
-      machineDone(); stampRow(host,['C-DAC IoT detection: 97.93% · <1 ms/window','XGBoost + MLP on the edge','SHAP explainability · 2× IoTaIS\'25']); });
+      machineDone(); stampRow(host,['flow model 96.97% accuracy (RF)','window model 90.86% / 86.78% macro F1','2 papers at IoTaIS 2025']); });
     loop(()=>{ t++;
       if(phase==='calm'&&t>140){ phase='attack'; qb.disabled=false; sfx('error'); }
       if(phase==='attack'&&!contained){ trust[victim]=Math.max(10,trust[victim]-0.4); if(t%60===0) sfx('beep'); }
@@ -368,13 +368,13 @@ const MACHINES={
         x.fillRect(12+c*14,wy,10,10); }
       x.font='700 10px JetBrains Mono'; x.textAlign='left';
       x.fillStyle=phase==='attack'&&!contained?'#ff8a9a':phase==='ok'?'#9defc9':'#cbc3e8';
-      x.fillText(phase==='calm'?'ALL TRUSTED':phase==='attack'?'⚠ DEAUTH-FLOOD p=0.97 → quarantine cam':'CONTAINED ✓',12,16);
+      x.fillText(phase==='calm'?'ALL TRUSTED':phase==='attack'?'⚠ DEAUTH FLOOD → quarantine cam':'CONTAINED ✓',12,16);
     });
   }
 };
 const MACHINE_META={
-  gmrt:['the listening river','GMRT — make the telescope breathe'],
-  pulsar:['the listening river','NCRA — find the pulsar'],
+  gmrt:['the listening river','GMRT · spread the pipeline'],
+  pulsar:['the listening river','NCRA · find the pulsar'],
   f1:['the atelier · machine 01','F1 Tyre Lab'],
   oracle:['the atelier · machine 02','Omniscience Console'],
   aro:['the atelier · machine 03','ARO Table'],
@@ -388,7 +388,7 @@ const LocalBrain={
     q=(q||'').toLowerCase();
     let best=null,score=0;
     for(const item of CORPUS){
-      let s=0; for(const p of item.p) if(q.includes(p)) s+=p.length;
+      const s=scoreIntent(q,item.p);
       if(s>score){ score=s; best=item; }
     }
     return Promise.resolve(best?best.a:CORPUS_FALLBACK);
@@ -411,9 +411,9 @@ async function loadFullBrain(){
   llmLoading=true;
   brainBar.classList.add('show');
   try{
-    const mod=await import('../brain/llm-brain.js');
+    const mod=await import('./brain/llm-brain.js');
     const llm=mod.createLLMBrain({
-      corpus:CORPUS, fallback:LocalBrain,
+      corpus:CORPUS, fallback:LocalBrain, score:scoreIntent,
       onProgress:(pct)=>{ brainFill.style.width=pct+'%'; brainMsg.textContent='downloading the full brain · '+pct+'%'; },
       onStatus:(st)=>{ brainMsg.textContent=st; }
     });
@@ -424,14 +424,14 @@ async function loadFullBrain(){
       brainKind.textContent='digital twin · SmolLM2-360M in your browser';
       brainBar.classList.remove('show');
       try{ localStorage.setItem('wander-llm','1'); }catch(e){}
-      addMsg('twin','My full brain is awake — a real 360M-parameter model running right here in your browser, grounded in his story. Ask away. ✧');
+      addMsg('twin','My full brain is awake: SmolLM2, a 360M-parameter model, running in your browser. It phrases the same facts I keep, so ask away. ✧');
     }else{
       brainBar.classList.remove('show');
-      addMsg('twin',"I couldn't wake the full brain here (it needs a network + WebGPU or WASM). No matter — my local mind knows everything important.");
+      addMsg('twin',"I couldn't load the full brain here. It needs a network connection and WebGPU or WebAssembly. I'll keep answering from the facts I have.");
     }
   }catch(e){
     brainBar.classList.remove('show');
-    addMsg('twin',"The full brain didn't load this time — my local mind continues, and it never gets his numbers wrong.");
+    addMsg('twin',"The full brain didn't load this time, so I'll keep answering from the facts I have.");
   }
   llmLoading=false;
 }
@@ -455,11 +455,16 @@ async function ask(){
   const q=chatQ.value.trim(); if(!q) return;
   chatQ.value=''; addMsg('you',q); sfx('click');
   const a=await window.TwinBrain.answer(q);
-  /* typed reveal */
+  /* Typed reveal, paced by the clock and driven by rAF. Three characters per
+     18 ms tick crawled on a busy main thread, which is the device a visitor is
+     most likely to have: the 3D world is rendering at the same time. */
   const m=document.createElement('div'); m.className='m twin'; chatLog.appendChild(m);
-  let k=0; const iv=setInterval(()=>{ k+=3; m.textContent=a.slice(0,k); chatLog.scrollTop=1e6;
-    if(k%9===0) sfx('type');
-    if(k>=a.length){ clearInterval(iv); m.textContent=a; } },18);
+  const DUR=Math.min(1400,240+a.length*9), t0=performance.now(); let last=0;
+  const tick=()=>{ const k=Math.ceil(a.length*Math.min(1,(performance.now()-t0)/DUR));
+    m.textContent=a.slice(0,k); chatLog.scrollTop=1e6;
+    if(k-last>=9){ last=k; sfx('type'); }
+    if(k<a.length) requestAnimationFrame(tick); };
+  requestAnimationFrame(tick);
 }
 chatGo.addEventListener('click',ask);
 chatQ.addEventListener('keydown',e=>{
@@ -528,7 +533,7 @@ function overworldTick(dt,ms){
       if(!REDUCED) announce={door:d, t:0, dur:2.6};
       sfx('chime');
       const DD=DOMAINS[d.id];
-      fairySay('Look — '+DD.door+'. '+DD.name+' waits inside. ✧', 5200);
+      fairySay('Look, '+DD.door+'. '+DD.name+' is inside. ✧', 5200);
     }
     if(isNear) near=d;
   }

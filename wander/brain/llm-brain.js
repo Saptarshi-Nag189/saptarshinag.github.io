@@ -8,13 +8,16 @@
    ========================================================================== */
 const MODEL_ID='HuggingFaceTB/SmolLM2-360M-Instruct';
 
-export function createLLMBrain({corpus, fallback, onProgress, onStatus}){
+export function createLLMBrain({corpus, fallback, onProgress, onStatus, score}){
   let generator=null;
 
   function retrieve(q,k){
     q=q.toLowerCase();
     return corpus
-      .map(item=>{ let s=0; for(const p of item.p) if(q.includes(p)) s+=p.length; return {s,a:item.a}; })
+      .map(item=>{ let s=0;
+        if(score) s=score(q,item.p);
+        else for(const p of item.p) if(q.includes(p)) s+=p.length;
+        return {s,a:item.a}; })
       .sort((a,b)=>b.s-a.s)
       .slice(0,k)
       .filter(x=>x.s>0)
@@ -53,12 +56,13 @@ export function createLLMBrain({corpus, fallback, onProgress, onStatus}){
       if(!generator) return fallback.answer(q);
       try{
         const facts=retrieve(q,3);
-        const context=facts.length?facts.join('\n'):'(no matching fact — say you only know his portfolio topics)';
+        const context=facts.length?facts.join('\n'):'(no matching fact: say you only know about his work, studies and projects)';
         const messages=[
           {role:'system', content:
-            "You are Saptarshi Nag's digital twin — a calm, warm fairy companion in his portfolio game. "+
-            "Answer the visitor's question in first person about Saptarshi ('he'), in 1-3 short sentences, "+
-            "using ONLY the facts below. If the facts don't cover it, say so gently and suggest what you do know.\n\nFACTS:\n"+context},
+            "You are Saptarshi Nag's digital twin, a calm and warm fairy companion in his portfolio game. "+
+            "Speak as yourself and refer to Saptarshi as 'he'. Answer the visitor's question in 1 to 3 short sentences, "+
+            "using ONLY the facts below, and copy every number exactly as written. Do not add facts, names or numbers. "+
+            "If the facts don't cover the question, say so gently and suggest what you do know.\n\nFACTS:\n"+context},
           {role:'user', content:q}
         ];
         const out=await generator(messages,{max_new_tokens:130, do_sample:false, return_full_text:false});

@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>NOW SHOWING — Saptarshi Nag</title>
+<title>Movie Premiere · Saptarshi Nag</title>
+<link rel="icon" href="../../icon.ico">
 <meta name="description" content="A film-premiere portfolio for Saptarshi Nag, AI/ML Engineer." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -19,6 +20,7 @@
     --gold-bright: #f6dca0;
     --red: #7a1413;
     --red-bright: #a31f1d;
+    --red-text: #e05a50; /* the red for words: 5.6:1 on the black, where #a31f1d was 2.5:1 */
     --black: #060504;
     --ink: #0d0b09;
     --cream: #efe6d4;
@@ -80,7 +82,7 @@
   body.letterbox .bar { height: 7vh; }
 
   /* ===== Top chrome ===== */
-  .chrome { position: fixed; z-index: 9500; font-family: var(--cond); letter-spacing: .12em; text-transform: uppercase; font-size: 12px; }
+  .chrome { position: fixed; z-index: 9500; font-family: var(--cond); letter-spacing: .12em; text-transform: uppercase; font-size:12px; }
   #backLink {
     top: 16px; left: 18px; color: var(--gold); text-decoration: none;
     padding: 6px 12px; border: 1px solid rgba(232,193,112,0.35); border-radius: 2px;
@@ -88,7 +90,7 @@
   }
   #backLink:hover { background: rgba(232,193,112,0.14); color: var(--gold-bright); }
   #conceptTag {
-    top: 18px; right: 18px; color: var(--muted); opacity: .65; font-size: 10px;
+    top: 18px; right: 18px; color: var(--muted); opacity: .65; font-size:11.5px;
     letter-spacing: .2em; border: 1px solid rgba(185,173,150,0.2); padding: 5px 9px; border-radius: 2px;
   }
 
@@ -96,7 +98,7 @@
   .btn {
     font-family: var(--cond); text-transform: uppercase; letter-spacing: .14em;
     background: transparent; color: var(--gold); border: 1px solid var(--gold-dim);
-    padding: 11px 22px; cursor: pointer; border-radius: 2px; font-size: 13px;
+    padding: 11px 22px; cursor: pointer; border-radius: 2px; font-size:13px;
     transition: .25s; position: relative;
   }
   .btn:hover { background: var(--gold); color: var(--ink); box-shadow: 0 0 24px rgba(232,193,112,0.4); }
@@ -104,7 +106,7 @@
   .btn.ghost:hover { background: rgba(232,193,112,0.1); color: var(--gold); box-shadow: none; }
 
   #skipIntro {
-    position: fixed; bottom: 20px; right: 22px; z-index: 9600; font-size: 11px; padding: 8px 16px;
+    position: fixed; bottom: 20px; right: 22px; z-index: 9600; font-size:12px; padding: 0 18px; min-height: 44px;
     opacity: 0; pointer-events: none; transition: opacity .4s;
   }
   #skipIntro.show { opacity: 1; pointer-events: auto; }
@@ -136,7 +138,7 @@
     background: #4a3a1c; box-shadow: 0 0 2px #000;
   }
   .bulb.on { background: var(--gold-bright); box-shadow: 0 0 10px var(--gold), 0 0 18px rgba(232,193,112,0.7); }
-  .nowshowing { font-family: var(--cond); color: var(--red-bright); letter-spacing: .42em; font-size: clamp(13px, 2.2vw, 20px); font-weight: 600; text-shadow: 0 0 14px rgba(163,31,29,0.6); }
+  .nowshowing { font-family: var(--cond); color: var(--red-text); letter-spacing: .42em; font-size: clamp(13px, 2.2vw, 20px); font-weight: 600; text-shadow: 0 0 14px rgba(163,31,29,0.6); }
   .marquee-name { font-family: var(--serif); font-weight: 900; color: var(--gold); font-size: clamp(36px, 8vw, 92px); line-height: 1; margin: 14px 0 8px; text-shadow: 0 4px 30px rgba(232,193,112,0.35); }
   .marquee-sub { font-family: var(--cond); color: var(--cream); letter-spacing: .3em; font-size: clamp(11px, 1.6vw, 16px); text-transform: uppercase; opacity: .85; }
   .marquee-cta { margin-top: 34px; }
@@ -152,7 +154,7 @@
   .title-card.show { opacity: 1; }
   .tc-small { font-family: var(--cond); letter-spacing: .5em; text-transform: uppercase; color: var(--muted); font-size: clamp(12px, 1.8vw, 18px); }
   .tc-big { font-family: var(--serif); font-weight: 900; color: var(--gold); font-size: clamp(40px, 9vw, 110px); line-height: 1.02; margin: 10px 0; text-shadow: 0 6px 40px rgba(232,193,112,0.3); }
-  .tc-role { font-family: var(--cond); letter-spacing: .34em; text-transform: uppercase; color: var(--red-bright); font-size: clamp(13px, 2vw, 22px); font-weight: 500; }
+  .tc-role { font-family: var(--cond); letter-spacing: .34em; text-transform: uppercase; color: var(--red-text); font-size: clamp(13px, 2vw, 22px); font-weight: 500; }
   .tc-logline { font-family: var(--body); color: var(--muted); max-width: 640px; margin: 18px auto 0; font-size: clamp(12px, 1.5vw, 15px); line-height: 1.7; font-style: italic; }
 
   /* ===== 4. THEATRE / SCENE SELECT ===== */
@@ -161,9 +163,9 @@
   .theatre-top {
     text-align: center; padding: 9vh 20px 14px;
   }
-  .theatre-kicker { font-family: var(--cond); letter-spacing: .4em; text-transform: uppercase; color: var(--red-bright); font-size: 13px; }
+  .theatre-kicker { font-family: var(--cond); letter-spacing: .4em; text-transform: uppercase; color: var(--red-text); font-size:13px; }
   .theatre-title { font-family: var(--serif); font-weight: 900; color: var(--gold); font-size: clamp(28px, 5vw, 56px); margin: 6px 0 2px; text-shadow: 0 4px 30px rgba(232,193,112,0.3); }
-  .theatre-sub { font-family: var(--cond); letter-spacing: .26em; text-transform: uppercase; color: var(--muted); font-size: 12px; }
+  .theatre-sub { font-family: var(--cond); letter-spacing: .26em; text-transform: uppercase; color: var(--muted); font-size:12px; }
 
   .reels {
     flex: 1; display: grid; grid-template-columns: repeat(3, minmax(0,1fr));
@@ -182,10 +184,10 @@
     background: linear-gradient(90deg, transparent, var(--gold), transparent); opacity: .5;
   }
   .reel:hover, .reel:focus-visible { transform: translateY(-5px); border-color: var(--gold); box-shadow: 0 14px 40px rgba(0,0,0,0.6), 0 0 0 1px rgba(232,193,112,0.25); outline: none; }
-  .reel-no { font-family: var(--cond); color: var(--gold-dim); font-size: 12px; letter-spacing: .3em; position: absolute; top: 16px; right: 18px; }
-  .reel-icon { font-size: 26px; margin-bottom: auto; opacity: .9; }
+  .reel-no { font-family: var(--cond); color: var(--gold-dim); font-size:12px; letter-spacing: .3em; position: absolute; top: 16px; right: 18px; }
+  .reel-icon { font-size:26px; margin-bottom: auto; opacity: .9; }
   .reel-name { font-family: var(--serif); font-weight: 700; color: var(--gold-bright); font-size: clamp(18px, 2.2vw, 24px); margin-bottom: 3px; }
-  .reel-tag { font-family: var(--cond); letter-spacing: .2em; text-transform: uppercase; color: var(--muted); font-size: 11px; }
+  .reel-tag { font-family: var(--cond); letter-spacing: .2em; text-transform: uppercase; color: var(--muted); font-size:11px; }
 
   /* ===== 5. SCREEN (reel playback) ===== */
   #screen { z-index: 130; }
@@ -195,9 +197,9 @@
   }
   #screen.shown #screenInner { opacity: 1; }
   .screen-head { display: flex; align-items: baseline; gap: 18px; padding: 22px clamp(24px, 7vw, 110px) 4px; flex-wrap: wrap; }
-  .screen-no { font-family: var(--cond); color: var(--gold-dim); letter-spacing: .3em; font-size: 13px; }
+  .screen-no { font-family: var(--cond); color: var(--gold-dim); letter-spacing: .3em; font-size:13px; }
   .screen-title { font-family: var(--serif); font-weight: 900; color: var(--gold); font-size: clamp(26px, 4.4vw, 50px); }
-  .screen-tag { font-family: var(--cond); letter-spacing: .24em; text-transform: uppercase; color: var(--red-bright); font-size: 12px; }
+  .screen-tag { font-family: var(--cond); letter-spacing: .24em; text-transform: uppercase; color: var(--red-text); font-size:12px; }
   .screen-body {
     flex: 1; overflow-y: auto; padding: 14px clamp(24px, 7vw, 110px) 30px;
     scrollbar-width: thin; scrollbar-color: var(--gold-dim) transparent;
@@ -210,32 +212,32 @@
   .timeline { border-left: 2px solid rgba(232,193,112,0.3); margin-left: 8px; }
   .tl-item { position: relative; padding: 0 0 26px 26px; }
   .tl-item::before { content: ""; position: absolute; left: -8px; top: 4px; width: 13px; height: 13px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 12px rgba(232,193,112,0.6); }
-  .tl-when { font-family: var(--cond); letter-spacing: .2em; color: var(--gold-dim); text-transform: uppercase; font-size: 12px; }
-  .tl-role { font-family: var(--serif); font-weight: 700; color: var(--gold-bright); font-size: 21px; margin: 2px 0; }
-  .tl-where { color: var(--muted); font-size: 13px; margin-bottom: 6px; font-family: var(--cond); letter-spacing: .12em; }
-  .tl-desc { color: var(--cream); font-size: 14px; line-height: 1.6; opacity: .92; }
+  .tl-when { font-family: var(--cond); letter-spacing: .2em; color: var(--gold-dim); text-transform: uppercase; font-size:12px; }
+  .tl-role { font-family: var(--serif); font-weight: 700; color: var(--gold-bright); font-size:21px; margin: 2px 0; }
+  .tl-where { color: var(--muted); font-size:13px; margin-bottom: 6px; font-family: var(--cond); letter-spacing: .12em; }
+  .tl-desc { color: var(--cream); font-size:14px; line-height: 1.6; opacity: .92; }
 
   .boxoffice { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px,1fr)); gap: 14px; margin-bottom: 6px; }
   .stat { border: 1px solid rgba(232,193,112,0.2); padding: 16px; border-radius: 4px; text-align: center; background: rgba(20,14,8,0.5); }
   .stat-num { font-family: var(--serif); font-weight: 900; color: var(--gold); font-size: clamp(22px, 3vw, 32px); }
-  .stat-lab { font-family: var(--cond); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); font-size: 11px; margin-top: 4px; }
+  .stat-lab { font-family: var(--cond); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); font-size:11px; margin-top: 4px; }
 
   .works { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px,1fr)); gap: 16px; }
   .work { border: 1px solid rgba(232,193,112,0.2); border-radius: 4px; padding: 18px; background: linear-gradient(160deg, rgba(24,16,9,0.7), rgba(9,7,5,0.9)); transition: .25s; }
   .work:hover { border-color: var(--gold); transform: translateY(-3px); }
-  .work-name { font-family: var(--serif); font-weight: 700; color: var(--gold-bright); font-size: 19px; }
-  .work-tag { font-family: var(--cond); letter-spacing: .18em; text-transform: uppercase; color: var(--red-bright); font-size: 11px; margin: 3px 0 8px; }
-  .work-desc { color: var(--cream); font-size: 13px; line-height: 1.55; opacity: .9; }
+  .work-name { font-family: var(--serif); font-weight: 700; color: var(--gold-bright); font-size:19px; }
+  .work-tag { font-family: var(--cond); letter-spacing: .18em; text-transform: uppercase; color: var(--red-text); font-size:11px; margin: 3px 0 8px; }
+  .work-desc { color: var(--cream); font-size:13px; line-height: 1.55; opacity: .9; }
   .work-tech { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px; }
-  .chip { font-family: var(--cond); letter-spacing: .08em; font-size: 11px; color: var(--gold); border: 1px solid rgba(232,193,112,0.3); padding: 3px 9px; border-radius: 20px; }
+  .chip { font-family: var(--cond); letter-spacing: .08em; font-size:11px; color: var(--gold); border: 1px solid rgba(232,193,112,0.3); padding: 3px 9px; border-radius: 20px; }
 
   .craft { display: flex; flex-wrap: wrap; gap: 10px; }
-  .craft .chip { font-size: 13px; padding: 7px 14px; background: rgba(20,14,8,0.5); }
+  .craft .chip { font-size:13px; padding: 7px 14px; background: rgba(20,14,8,0.5); }
   .craft .chip:hover { background: var(--gold); color: var(--ink); }
 
   .pubs .pub { border-left: 3px solid var(--red-bright); padding: 4px 0 4px 16px; margin-bottom: 18px; }
-  .pub-title { font-family: var(--serif); font-weight: 600; color: var(--gold-bright); font-size: 18px; line-height: 1.3; }
-  .pub-venue { font-family: var(--cond); letter-spacing: .16em; text-transform: uppercase; color: var(--muted); font-size: 12px; margin-top: 4px; }
+  .pub-title { font-family: var(--serif); font-weight: 600; color: var(--gold-bright); font-size:18px; line-height: 1.3; }
+  .pub-venue { font-family: var(--cond); letter-spacing: .16em; text-transform: uppercase; color: var(--muted); font-size:12px; margin-top: 4px; }
   .pub-venue i { color: var(--gold-dim); }
 
   .edu .tl-item::before { background: var(--red-bright); box-shadow: 0 0 12px rgba(163,31,29,0.6); }
@@ -247,32 +249,32 @@
 
   /* bullet lists inside reels */
   .tl-bullets { list-style: none; margin: 8px 0 0; padding: 0; }
-  .tl-bullets li { position: relative; padding: 4px 0 4px 22px; color: var(--cream); font-size: 13.5px; line-height: 1.55; opacity: .9; }
+  .tl-bullets li { position: relative; padding: 4px 0 4px 22px; color: var(--cream); font-size:13.5px; line-height: 1.55; opacity: .9; }
   .tl-bullets li::before { content: ""; position: absolute; left: 4px; top: 12px; width: 6px; height: 6px; border-radius: 50%; background: var(--gold-dim); }
   .tl-bullets li b { color: var(--gold-bright); font-weight: 600; }
 
   .work-desc ul { list-style: none; margin: 8px 0 0; padding: 0; }
-  .work-desc ul li { position: relative; padding: 3px 0 3px 18px; font-size: 12.5px; line-height: 1.5; }
+  .work-desc ul li { position: relative; padding: 3px 0 3px 18px; font-size:12.5px; line-height: 1.5; }
   .work-desc ul li::before { content: ""; position: absolute; left: 2px; top: 11px; width: 5px; height: 5px; border-radius: 50%; background: var(--red-bright); }
 
   /* skill group label with icon */
-  .craft-group { margin: 16px 0 8px; display: flex; align-items: center; gap: 9px; font-family: var(--cond); letter-spacing: .22em; text-transform: uppercase; color: var(--gold); font-size: 13px; }
-  .craft-group i { color: var(--gold-dim); font-size: 14px; }
+  .craft-group { margin: 16px 0 8px; display: flex; align-items: center; gap: 9px; font-family: var(--cond); letter-spacing: .22em; text-transform: uppercase; color: var(--gold); font-size:13px; }
+  .craft-group i { color: var(--gold-dim); font-size:14px; }
 
-  .pub-meta { font-family: var(--cond); letter-spacing: .14em; text-transform: uppercase; color: var(--gold-dim); font-size: 11px; margin-top: 3px; display: flex; align-items: center; gap: 6px; }
+  .pub-meta { font-family: var(--cond); letter-spacing: .14em; text-transform: uppercase; color: var(--gold-dim); font-size:11px; margin-top: 3px; display: flex; align-items: center; gap: 6px; }
 
   .gate { margin-top: 14px; border: 1px solid rgba(163,31,29,0.5); border-radius: 4px; padding: 12px 16px; background: rgba(122,20,19,0.12); display: flex; align-items: center; gap: 12px; }
-  .gate i { color: var(--red-bright); font-size: 20px; }
-  .gate-txt { font-size: 13.5px; color: var(--cream); }
+  .gate i { color: var(--red-text); font-size:20px; }
+  .gate-txt { font-size:13.5px; color: var(--cream); }
   .gate-txt b { color: var(--gold-bright); }
 
   /* contact reel (non-credits) */
   .contact-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap: 14px; margin-bottom: 22px; }
   .contact-card { display: flex; align-items: center; gap: 14px; border: 1px solid rgba(232,193,112,0.22); border-radius: 4px; padding: 14px 16px; background: rgba(20,14,8,0.5); text-decoration: none; transition: .25s; }
   .contact-card:hover { border-color: var(--gold); transform: translateY(-3px); box-shadow: 0 10px 28px rgba(0,0,0,0.5); }
-  .contact-card i { font-size: 22px; color: var(--gold); width: 28px; text-align: center; }
-  .contact-card .cc-lab { font-family: var(--cond); letter-spacing: .2em; text-transform: uppercase; color: var(--muted); font-size: 10px; }
-  .contact-card .cc-val { color: var(--gold-bright); font-size: 14px; }
+  .contact-card i { font-size:22px; color: var(--gold); width: 28px; text-align: center; }
+  .contact-card .cc-lab { font-family: var(--cond); letter-spacing: .2em; text-transform: uppercase; color: var(--muted); font-size:11.5px; }
+  .contact-card .cc-val { color: var(--gold-bright); font-size:14px; }
 
   /* ===== END CREDITS ===== */
   #creditsRoll { position: absolute; inset: 7vh 0; overflow: hidden; display: none; z-index: 1; }
@@ -280,16 +282,17 @@
   .credits-track {
     position: absolute; left: 0; right: 0; top: 100%;
     text-align: center; padding: 0 20px;
-    animation: rollUp 38s linear forwards;
+    animation: rollUp 32s linear forwards;
   }
-  @keyframes rollUp { to { transform: translateY(-180%); } }
+  /* ends with the last line at the bottom edge, so the roll can hand over to scrolling */
+  @keyframes rollUp { to { transform: translateY(-100%); } }
   .credits-track h2 { font-family: var(--serif); font-weight: 900; color: var(--gold); font-size: clamp(30px,6vw,64px); margin: 30px 0 8px; }
   .cr-block { margin: 30px 0; }
-  .cr-role { font-family: var(--cond); letter-spacing: .3em; text-transform: uppercase; color: var(--muted); font-size: 13px; }
-  .cr-name { font-family: var(--serif); color: var(--gold-bright); font-size: 22px; margin-top: 2px; }
+  .cr-role { font-family: var(--cond); letter-spacing: .3em; text-transform: uppercase; color: var(--muted); font-size:13px; }
+  .cr-name { font-family: var(--serif); color: var(--gold-bright); font-size:22px; margin-top: 2px; }
   .cr-name a { color: var(--gold); text-decoration: none; border-bottom: 1px solid rgba(232,193,112,0.4); }
   .cr-name a:hover { color: var(--gold-bright); }
-  .cr-fin { font-family: var(--serif); font-style: italic; color: var(--red-bright); font-size: clamp(26px,5vw,48px); margin-top: 50px; }
+  .cr-fin { font-family: var(--serif); font-style: italic; color: var(--red-text); font-size: clamp(26px,5vw,48px); margin-top: 50px; }
 
   /* ===== Ticket stub CV ===== */
   .ticket {
@@ -298,11 +301,11 @@
     background: linear-gradient(120deg, #1a1109, #0d0806); transition: .25s; margin-top: 8px;
   }
   .ticket:hover { border-color: var(--gold); box-shadow: 0 0 24px rgba(232,193,112,0.3); transform: translateY(-2px); }
-  .ticket-stub { background: var(--red); color: var(--gold-bright); writing-mode: vertical-rl; transform: rotate(180deg); font-family: var(--cond); letter-spacing: .3em; text-transform: uppercase; font-size: 11px; padding: 8px 6px; display: flex; align-items: center; }
+  .ticket-stub { background: var(--red); color: var(--gold-bright); writing-mode: vertical-rl; transform: rotate(180deg); font-family: var(--cond); letter-spacing: .3em; text-transform: uppercase; font-size:11px; padding: 8px 6px; display: flex; align-items: center; }
   .ticket-main { padding: 12px 22px; }
-  .ticket-main .tm-top { font-family: var(--cond); letter-spacing: .24em; text-transform: uppercase; color: var(--muted); font-size: 10px; }
-  .ticket-main .tm-mid { font-family: var(--serif); font-weight: 700; color: var(--gold); font-size: 19px; }
-  .ticket-main .tm-bot { font-family: var(--cond); letter-spacing: .14em; color: var(--gold-dim); font-size: 11px; margin-top: 3px; }
+  .ticket-main .tm-top { font-family: var(--cond); letter-spacing: .24em; text-transform: uppercase; color: var(--muted); font-size:11.5px; }
+  .ticket-main .tm-mid { font-family: var(--serif); font-weight: 700; color: var(--gold); font-size:19px; }
+  .ticket-main .tm-bot { font-family: var(--cond); letter-spacing: .14em; color: var(--gold-dim); font-size:11px; margin-top: 3px; }
 
   /* ===== Curtain transition ===== */
   #curtains { position: fixed; inset: 0; z-index: 6000; pointer-events: none; display: flex; }
@@ -337,6 +340,18 @@
     #creditsRoll { overflow-y: auto; }
     .curtain, #iris, .bar, #screenInner { transition: none !important; }
   }
+
+  /* accessibility pass */
+  #creditsRoll { bottom: calc(7vh + 68px); }
+  .screen-foot { position: relative; z-index: 2; }
+  #screen.credits .screen-head { visibility: hidden; } /* the roll carries its own title */
+  .ticket-main > span { display: block; }
+  .btn { min-height: 44px; }
+  .btn:focus-visible, .reel:focus-visible, .contact-card:focus-visible, .ticket:focus-visible, .cr-name a:focus-visible {
+    outline: 2px solid var(--gold-bright); outline-offset: 3px; }
+  /* the spotlight darkens the corners of the marquee; it lifts once there is text to read */
+  #vignette { transition: opacity .6s; }
+  body:has(#screen.active) #vignette, body:has(#theatre.active) #vignette { opacity: .35; }
 </style>
 </head>
 <body>
@@ -370,16 +385,16 @@
   <section class="scene" id="titleSeq">
     <div class="title-card" data-card="0"><div class="tc-small">A&nbsp;&nbsp;Saptarshi&nbsp;Nag&nbsp;&nbsp;Production</div></div>
     <div class="title-card" data-card="1"><div class="tc-small">Featuring</div><div class="tc-big">Saptarshi Nag</div><div class="tc-role">AI / ML Engineer</div></div>
-    <div class="title-card" data-card="2"><div class="tc-logline">M.Tech in AI (DIAT, DRDO). Research at NCRA-TIFR &amp; GMRT. Now Project Engineer at C-DAC, building real-time IoT security — Zero Trust &amp; ML threat detection.</div></div>
+    <div class="title-card" data-card="2"><div class="tc-logline">M.Tech in CSE (Artificial Intelligence) from DIAT. Research at NCRA-TIFR &amp; GMRT. Now a Project Engineer at C-DAC, building ML-based attack detection for a Zero Trust IoT framework.</div></div>
   </section>
 
   <!-- 4. THEATRE / SCENE SELECT -->
   <section class="scene" id="theatre">
     <div class="theatre-wrap">
       <div class="theatre-top">
-        <div class="theatre-kicker">Scene Selection</div>
-        <div class="theatre-title">Choose Your Reel</div>
-        <div class="theatre-sub">Saptarshi Nag &mdash; A Feature in Six Reels</div>
+        <div class="theatre-kicker">Scene selection</div>
+        <div class="theatre-title">Choose a reel</div>
+        <div class="theatre-sub">Saptarshi Nag · a feature in six reels</div>
       </div>
       <div class="reels" id="reels"></div>
     </div>
@@ -395,8 +410,8 @@
       </div>
       <div class="screen-body" id="scBody"></div>
       <div class="screen-foot">
-        <button class="btn ghost" id="backToTheatre">&larr; Scene Selection</button>
-        <button class="btn ghost" id="nextReel">Next Reel &rarr;</button>
+        <button class="btn ghost" id="backToTheatre">&larr; Scene selection</button>
+        <button class="btn ghost" id="nextReel">Next reel &rarr;</button>
       </div>
     </div>
     <div id="creditsRoll"></div>
@@ -411,7 +426,7 @@
 <div id="iris"></div>
 <div id="vignette"></div>
 <div id="grain"></div>
-<button class="btn" id="skipIntro">Skip Intro &raquo;</button>
+<button class="btn" id="skipIntro">Skip intro &raquo;</button>
 
 <script>
 (function () {
@@ -484,7 +499,10 @@
       marqueeRAF = null;
     }
   }
-  function startBulbs() { if (!marqueeRAF) marqueeRAF = requestAnimationFrame(chaseBulbs); }
+  function startBulbs() {
+    if (REDUCED) { for (var i = 0; i < bulbs.length; i++) bulbs[i].classList.toggle("on", i % 3 === 0); return; }
+    if (!marqueeRAF) marqueeRAF = requestAnimationFrame(chaseBulbs);
+  }
 
   // ---------- countdown leader (canvas) ----------
   var leaderCanvas = $("#leaderCanvas");
@@ -647,29 +665,29 @@
   // ---------- theatre / reels ----------
   var REELS = [
     {
-      no: "01", icon: '<i class="fa-solid fa-briefcase"></i>', name: "The Career Arc", tag: "Experience",
+      no: "01", icon: '<i aria-hidden="true" class="fa-solid fa-briefcase"></i>', name: "The Career Arc", tag: "Experience",
       render: function () {
-        return '<p class="lead">From radio telescopes to zero-trust IoT &mdash; a researcher\'s journey into applied AI.</p>' +
+        return '<p class="lead">From radio telescopes to Zero Trust IoT: the roles, in order.</p>' +
           '<div class="timeline">' +
-            tl("Jul 2025 &mdash; Present &middot; Chennai, India",
+            tl("Jul 2025 – Present &middot; Chennai, India",
                "Project Engineer, AI Research &amp; IoT Security",
-               "C-DAC &mdash; Centre for Development of Advanced Computing",
+               "C-DAC · Centre for Development of Advanced Computing",
                [
                  "Built a real-time <b>Zero Trust</b> security framework for IoT networks covering WiFi (802.11), BLE, Zigbee, and LoRa; ML-based attack detection feeds a continuous <b>7-pillar device trust score</b> engine.",
                  "Two-stage hybrid detection pipeline: window model (1-second sliding windows, 7 attack classes) + flow model; compared <b>RF, XGBoost, SVM, MLP, and Voting Ensemble</b> across 6 preprocessing iterations with SMOTE and Optuna (TPE).",
-                 "Best results: <b>97.93% accuracy</b> (flow/RF); <b>90.86% accuracy / 86.78% macro F1</b> (window/Voting Ensemble).",
+                 "Best results: <b>96.97% accuracy</b> (flow/RF); <b>90.86% accuracy / 86.78% macro F1</b> (window/Voting Ensemble).",
                  "Engineered <b>63 features</b> from raw PCAPs (Scapy/PyShark). Live PCAP drop-folder pipeline (Watchdog, MD5 dedup, multi-threaded). SPIFFE/SPIRE, mTLS, OTP-based 2FA. Two IoTaIS 2025 papers."
                ]) +
-            tl("Aug 2024 &mdash; Apr 2025 &middot; Pune, India",
+            tl("Aug 2024 – Apr 2025 &middot; Pune, India",
                "Research Intern (M.Tech Project)",
-               "NCRA-TIFR &mdash; National Centre for Radio Astrophysics",
+               "NCRA-TIFR · National Centre for Radio Astrophysics",
                [
                  "<b>ResNet1D + Squeeze-and-Excitation attention</b> for weak pulsar signal detection at low SNR.",
-                 "<b>99.8% F1-score</b> across 70M+ samples; adaptive thresholding for non-stationary noise floors. Ran end-to-end independently."
+                 "<b>99.8% F1-score</b> across 70M+ samples; adaptive thresholding for non-stationary noise floors. Ran it alone, from scoping to write-up."
                ]) +
-            tl("Dec 2023 &mdash; Jan 2024 &middot; Pune, India",
+            tl("Dec 2023 – Jan 2024 &middot; Pune, India",
                "Winter Intern, HPC &amp; Signal Processing Optimisation",
-               "GMRT &mdash; Giant Metrewave Radio Telescope, NCRA-TIFR",
+               "GMRT · Giant Metrewave Radio Telescope, NCRA-TIFR",
                [
                  "Profiled legacy CPU signal filtering pipelines, refactored for multicore execution. <b>Cut latency by 50%</b>, unblocking real-time processing of continuous telescope data streams."
                ]) +
@@ -677,9 +695,9 @@
       }
     },
     {
-      no: "02", icon: '<i class="fa-solid fa-diagram-project"></i>', name: "Featured Works", tag: "Projects",
+      no: "02", icon: '<i aria-hidden="true" class="fa-solid fa-diagram-project"></i>', name: "Featured Works", tag: "Projects",
       render: function () {
-        return '<p class="lead">The headline acts &mdash; selected projects in GPU computing, RAG, and agentic AI.</p>' +
+        return '<p class="lead">The headline acts: projects in GPU computing, RAG and agentic AI.</p>' +
           '<div class="works">' +
             work("GPU-Accelerated F1 Tyre Degradation &amp; Race Strategy", "GPU-Accelerated ML",
               [
@@ -688,14 +706,14 @@
                 "Custom CUDA/CuPy kernels; <b>4.1&times; training speedup</b>."
               ],
               ["Python","PyTorch","CUDA","CuPy","XGBoost"]) +
-            work("Omniscience Pro &mdash; Privacy-First Local RAG System", "Local RAG Engine",
+            work("Omniscience Pro · Privacy-First Local RAG System", "Local RAG Engine",
               [
                 "Multi-modal document ingestion.",
                 "<b>&lt;50 ms</b> vector search (HNSW); <b>&lt;500 ms</b> first-token latency.",
                 "GPU-aware Docker, CI/CD, POSIX file locking."
               ],
               ["Python","LangChain","ChromaDB","Docker"]) +
-            work("ARO &mdash; Autonomous Research Operator", "Multi-Agent LLM",
+            work("ARO · Autonomous Research Operator", "Multi-Agent LLM",
               [
                 "Multi-agent LLM workflows as directed graphs; Flask SSE streaming; React frontend.",
                 "Adversarial audit found &amp; fixed <b>16 vulnerabilities</b> (auth, SSRF, input validation, CORS)."
@@ -711,7 +729,7 @@
       }
     },
     {
-      no: "03", icon: '<i class="fa-solid fa-microchip"></i>', name: "The Craft", tag: "Skills",
+      no: "03", icon: '<i aria-hidden="true" class="fa-solid fa-microchip"></i>', name: "The Craft", tag: "Skills",
       render: function () {
         var groups = [
           ["fa-code", "Languages", ["Python (advanced)","C++ (proficient)","C","Bash","SQL"]],
@@ -720,9 +738,9 @@
           ["fa-database", "Data &amp; Engineering", ["Statistical Anomaly Detection","Time-Series Analysis","CI/CD","Docker","Git","Flask","ChromaDB"]],
           ["fa-robot", "AI &amp; MLOps", ["RAG Systems","LLM Fine-Tuning","Multi-Agent Orchestration (NetworkX, LangChain)","SQLAlchemy"]]
         ];
-        var html = '<p class="lead">The toolkit behind the performance &mdash; from low-level GPU code to LLM systems.</p>';
+        var html = '<p class="lead">The crew: everything from low-level GPU code to LLM systems.</p>';
         groups.forEach(function (g) {
-          html += '<div class="craft-group"><i class="fa-solid ' + g[0] + '"></i>' + g[1] + '</div><div class="craft">';
+          html += '<div class="craft-group"><i aria-hidden="true" class="fa-solid ' + g[0] + '"></i>' + g[1] + '</div><div class="craft">';
           g[2].forEach(function (s) { html += '<span class="chip">' + s + '</span>'; });
           html += '</div>';
         });
@@ -730,9 +748,9 @@
       }
     },
     {
-      no: "04", icon: '<i class="fa-solid fa-book"></i>', name: "Published", tag: "Publications",
+      no: "04", icon: '<i aria-hidden="true" class="fa-solid fa-book"></i>', name: "Published", tag: "Publications",
       render: function () {
-        return '<p class="lead">On the festival circuit &mdash; peer-reviewed work presented at IoTaIS 2025, Bali.</p>' +
+        return '<p class="lead">On the festival circuit: two papers at IoTaIS 2025, Bali.</p>' +
           '<div class="pubs">' +
             pub("Protocol-Aware Continuous Monitoring and Anomaly Detection in IoT Networks", "IoTaIS 2025 &middot; Bali, Indonesia") +
             pub("A Comprehensive Survey on Zero Trust Architecture in IoT Networks", "IoTaIS 2025 &middot; Bali, Indonesia") +
@@ -740,20 +758,20 @@
       }
     },
     {
-      no: "05", icon: '<i class="fa-solid fa-graduation-cap"></i>', name: "Origins", tag: "Education",
+      no: "05", icon: '<i aria-hidden="true" class="fa-solid fa-graduation-cap"></i>', name: "Origins", tag: "Education",
       render: function () {
-        return '<p class="lead">The backstory &mdash; where the training montage began.</p>' +
+        return '<p class="lead">The backstory: where he studied.</p>' +
           '<div class="timeline edu">' +
-            tl("2023 &mdash; 2025", "M.Tech, CSE (Artificial Intelligence)", "DIAT (DRDO), Pune &middot; CGPA 8.64/10.0",
-               ["Defence Institute of Advanced Technology &mdash; specialisation in Artificial Intelligence."]) +
-            tl("2019 &mdash; 2023", "B.Tech, Computer Science &amp; Engineering", "Academy of Technology, Kolkata &middot; CGPA 9.44/10.0",
+            tl("2023 – 2025", "M.Tech, CSE (Artificial Intelligence)", "DIAT (DRDO), Pune &middot; CGPA 8.64/10.0",
+               ["Defence Institute of Advanced Technology, specialising in Artificial Intelligence."]) +
+            tl("2019 – 2023", "B.Tech, Computer Science &amp; Engineering", "Academy of Technology, Kolkata &middot; CGPA 9.44/10.0",
                ["Foundations in computer science, systems, and machine learning."]) +
           '</div>' +
-          '<div class="gate"><i class="fa-solid fa-medal"></i><div class="gate-txt"><b>GATE 2024</b> &mdash; Rank 1790 in Data Science &amp; AI (Top 5%).</div></div>';
+          '<div class="gate"><i aria-hidden="true" class="fa-solid fa-medal"></i><div class="gate-txt"><b>GATE 2024</b>: rank 1790 in Data Science &amp; AI (top 5% of applicants).</div></div>';
       }
     },
     {
-      no: "06", icon: '<i class="fa-solid fa-ticket"></i>', name: "End Credits", tag: "Get in Touch", credits: true,
+      no: "06", icon: '<i aria-hidden="true" class="fa-solid fa-ticket"></i>', name: "End Credits", tag: "Get in Touch", credits: true,
       render: function () { return ""; }
     }
   ];
@@ -768,17 +786,17 @@
     return '<div class="work"><div class="work-name">' + name + '</div><div class="work-tag">' + tag + '</div><div class="work-desc"><ul>' + items + '</ul></div><div class="work-tech">' + chips + '</div></div>';
   }
   function pub(title, venue) {
-    return '<div class="pub"><div class="pub-title">' + title + '</div><div class="pub-venue"><i class="fa-solid fa-book"></i>&nbsp;' + venue + '</div></div>';
+    return '<div class="pub"><div class="pub-title">' + title + '</div><div class="pub-venue"><i aria-hidden="true" class="fa-solid fa-book"></i>&nbsp;' + venue + '</div></div>';
   }
 
   // box office stats prepended to first reel body
   function boxOffice() {
     var stats = [
-      ["97.93%", "IoT Attack Detection"],
-      ["99.8%", "Pulsar F1 Score"],
-      ["4.1&times;", "GPU Speedup"],
-      ["50%", "Latency Cut"],
-      ["70M+", "Samples Processed"]
+      ["96.97%", "flow-attack accuracy (RF) · C-DAC IoT"],
+      ["99.8%", "pulsar F1 · NCRA-TIFR"],
+      ["4.1&times;", "training speedup · F1 tyre model"],
+      ["50%", "latency cut · GMRT pipeline"],
+      ["70M+", "samples · NCRA pulsar search"]
     ];
     var h = '<div class="cr-role" style="margin-bottom:10px">Box Office Records</div><div class="boxoffice">';
     stats.forEach(function (s) { h += '<div class="stat"><div class="stat-num">' + s[0] + '</div><div class="stat-lab">' + s[1] + '</div></div>'; });
@@ -820,18 +838,33 @@
         '<h2>End Credits</h2>' +
         '<div class="cr-block"><div class="cr-role">Directed &amp; Engineered By</div><div class="cr-name">Saptarshi Nag</div></div>' +
         '<div class="cr-block"><div class="cr-role">Role</div><div class="cr-name">AI / ML Engineer</div></div>' +
-        '<div class="cr-block"><div class="cr-role"><i class="fa-solid fa-envelope"></i> Correspondence</div><div class="cr-name"><a href="mailto:saptarshinag18@gmail.com">saptarshinag18@gmail.com</a></div></div>' +
-        '<div class="cr-block"><div class="cr-role"><i class="fa-brands fa-linkedin"></i> LinkedIn</div><div class="cr-name"><a href="https://www.linkedin.com/in/saptarshi18" target="_blank" rel="noopener">/in/saptarshi18</a></div></div>' +
-        '<div class="cr-block"><div class="cr-role"><i class="fa-brands fa-github"></i> GitHub</div><div class="cr-name"><a href="https://github.com/Saptarshi-Nag189" target="_blank" rel="noopener">Saptarshi-Nag189</a></div></div>' +
-        '<div class="cr-block"><div class="cr-role"><i class="fa-solid fa-ticket"></i> Press Kit</div><div style="margin-top:10px">' + ticketHTML() + '</div></div>' +
+        '<div class="cr-block"><div class="cr-role"><i aria-hidden="true" class="fa-solid fa-envelope"></i> Correspondence</div><div class="cr-name"><a href="mailto:saptarshinag18@gmail.com">saptarshinag18@gmail.com</a></div></div>' +
+        '<div class="cr-block"><div class="cr-role"><i aria-hidden="true" class="fa-brands fa-linkedin"></i> LinkedIn</div><div class="cr-name"><a href="https://www.linkedin.com/in/saptarshi18" target="_blank" rel="noopener">/in/saptarshi18</a></div></div>' +
+        '<div class="cr-block"><div class="cr-role"><i aria-hidden="true" class="fa-brands fa-github"></i> GitHub</div><div class="cr-name"><a href="https://github.com/Saptarshi-Nag189" target="_blank" rel="noopener">Saptarshi-Nag189</a></div></div>' +
+        '<div class="cr-block"><div class="cr-role"><i aria-hidden="true" class="fa-solid fa-ticket"></i> Press Kit</div><div style="margin-top:10px">' + ticketHTML() + '</div></div>' +
         '<div class="cr-fin">~ Fin ~</div>' +
         '<div style="height:30vh"></div>' +
       '</div>';
   }
 
+  // Stop the roll where it is and let the reader scroll it: at the end of the roll, or as
+  // soon as they try to scroll, tap or tab into it themselves.
+  function settleCredits() {
+    var roll = $("#creditsRoll"), track = $(".credits-track", roll);
+    if (!track || track.dataset.settled) return;
+    var off = roll.getBoundingClientRect().top - track.getBoundingClientRect().top;
+    track.dataset.settled = "1";
+    track.style.animation = "none"; track.style.position = "relative"; track.style.top = "0"; track.style.transform = "none";
+    roll.style.overflowY = "auto";
+    roll.scrollTop = Math.max(0, off);
+  }
+  ["wheel", "touchstart", "pointerdown", "focusin"].forEach(function (ev) {
+    $("#creditsRoll").addEventListener(ev, function () { if (!REDUCED) settleCredits(); }, { passive: true });
+  });
+
   function ticketHTML() {
     return '<a class="ticket" href="../../saptarshi_resume_linkedin_2026.pdf" download>' +
-      '<span class="ticket-stub"><i class="fa-solid fa-ticket"></i>&nbsp; Admit One</span>' +
+      '<span class="ticket-stub"><i aria-hidden="true" class="fa-solid fa-ticket"></i>&nbsp; Admit One</span>' +
       '<span class="ticket-main"><span class="tm-top">The Premiere &middot; CV</span><span class="tm-mid">Download Resume</span><span class="tm-bot">Saptarshi Nag &middot; 2026</span></span>' +
       '</a>';
   }
@@ -850,16 +883,25 @@
     var roll = $("#creditsRoll");
 
     if (r.credits) {
-      body.style.display = "none";
-      foot.style.display = "none";
+      // the body stays (empty) so the footer keeps its place: the way back must never roll away
+      body.innerHTML = "";
+      body.style.display = "";
+      foot.style.display = "flex";
       buildCredits();
       roll.classList.add("active");
+      screenEl.classList.add("credits");
+      roll.scrollTop = 0;
       // restart roll animation
       var track = $(".credits-track", roll);
-      if (track && !REDUCED) { track.style.animation = "none"; void track.offsetWidth; track.style.animation = ""; }
+      if (track && !REDUCED) {
+        track.style.animation = "none"; void track.offsetWidth; track.style.animation = "";
+        track.addEventListener("animationend", settleCredits);
+      }
     } else {
       roll.classList.remove("active");
+      screenEl.classList.remove("credits");
       roll.innerHTML = "";
+      roll.style.overflowY = "";
       body.style.display = "";
       foot.style.display = "flex";
       var html = "";

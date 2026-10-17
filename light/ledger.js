@@ -1,7 +1,7 @@
 /* ==========================================================================
-   ledger.js — THE LEDGER.
+   ledger.js: the ledger.
 
-   Every fact about Saptarshi, as real DOM text.
+   Every fact about Saptarshi, as real DOM text, taken from the linked CV.
 
    The 3D world is the experience; this is the record. It exists because an
    explorable island is the wrong interface for four of the audiences that
@@ -9,55 +9,55 @@
    and a recruiter with ninety seconds. All four get the same facts here, in
    the plain order they expect, with no scene to load first.
 
-   House rule, kept from the rest of the site: EVERY metric names the project
-   it came from. A bare number is not a claim, it is a decoration.
+   House rule, kept from the rest of the site: every metric names the project
+   it came from.
    ========================================================================== */
 
 const LEDGER = {
   name: 'Saptarshi Nag',
   role: 'AI/ML Engineer · Chennai, India',
-  blurb: `Project Engineer at C-DAC working on zero-trust security for IoT, with a
-          research background in radio astronomy pipelines at NCRA-TIFR and GMRT.
-          I build systems where the machine learning has to survive contact with
-          real throughput, real latency budgets and real hardware.`,
+  blurb: `Project Engineer at C-DAC Chennai, building ML-based attack detection for a
+          Zero Trust IoT security framework. Before that, an M.Tech in Computer Science
+          and Engineering (Artificial Intelligence) at DIAT, and research internships at
+          NCRA-TIFR and GMRT.`,
 
   links: [
     ['Email', 'saptarshinag18@gmail.com', 'mailto:saptarshinag18@gmail.com'],
     ['LinkedIn', '/in/saptarshi18', 'https://www.linkedin.com/in/saptarshi18'],
     ['GitHub', 'Saptarshi-Nag189', 'https://github.com/Saptarshi-Nag189'],
+    ['CV', 'PDF', '../saptarshi_resume_linkedin_2026.pdf'],
   ],
 
   experience: [
     {
       org: 'C-DAC, Chennai',
-      role: 'Project Engineer — AI Research & IoT Security',
-      when: 'July 2025 — present',
+      role: 'Project Engineer, AI Research & IoT Security',
+      when: 'July 2025 – present',
       points: [
-        'Built a real-time Zero-Trust framework for IoT across WiFi, BLE, Zigbee and LoRa.',
-        'Two-stage detection (a per-window model and a per-flow model) reaching <b>97.93% accuracy</b> on high-throughput traffic.',
-        'Optimised XGBoost/MLP inference to <b>under 1 ms per window</b>, so it can be deployed at the edge rather than in a datacentre.',
-        'Engineered <b>63 features</b> from raw PCAPs with Scapy and PyShark; SHAP for explainability.',
-        'Identity and transport hardening with SPIFFE/SPIRE, mTLS and OTP-based 2FA.',
-        'SQL pipelines and live dashboards for monitoring.',
-        'Co-authored two papers accepted at <b>IoTaIS 2025, Bali</b>.',
+        'Built a real-time Zero Trust security framework for IoT networks covering WiFi (802.11), BLE, Zigbee and LoRa. ML-based attack detection feeds a continuous 7-pillar device trust score.',
+        'Two-stage detection: a window model classifies 1-second windows of 802.11 management frames into 7 attack classes, and a flow model handles longer patterns. Compared RF, XGBoost, SVM, MLP and a Voting Ensemble.',
+        'Best results: <b>96.97% accuracy</b> on flow classification (RF), and <b>90.86% accuracy / 86.78% macro F1</b> on window classification (Voting Ensemble).',
+        'Engineered <b>63 features</b> from raw PCAP captures with Scapy and PyShark, and a live PCAP drop-folder pipeline with MD5 deduplication and batch inference.',
+        'Integrated SPIFFE/SPIRE workload identity, mTLS and OTP-based 2FA.',
+        'Co-authored two papers on the framework at <b>IoTaIS 2025, Bali</b>.',
       ],
     },
     {
       org: 'NCRA-TIFR, Pune',
-      role: 'Research Intern — pulsar detection',
-      when: 'Aug 2024 — Apr 2025',
+      role: 'Research Intern (M.Tech project)',
+      when: 'Aug 2024 – Apr 2025',
       points: [
-        'ResNet1D with squeeze-and-excitation attention for pulsar candidate classification.',
-        '<b>99.8% F1</b> across <b>70M+ samples</b> of folded candidate data.',
+        'ResNet1D with Squeeze-and-Excitation attention to detect weak pulsar signals against interference at low SNR.',
+        '<b>99.8% F1</b> across <b>70M+ samples</b>, with adaptive thresholds for noise floors that shifted between sessions.',
       ],
     },
     {
       org: 'GMRT (NCRA-TIFR), Pune',
-      role: 'Winter Intern — signal processing',
-      when: 'Dec 2023 — Jan 2024',
+      role: 'Winter Intern, HPC & Signal Processing Optimisation',
+      when: 'Dec 2023 – Jan 2024',
       points: [
-        'Refactored the CPU filtering pipeline for multicore execution.',
-        '<b>50% latency reduction</b> on the GMRT filtering stage.',
+        'Profiled the legacy CPU signal-filtering pipelines and refactored them for multicore execution.',
+        'Cut latency by <b>50%</b>, enough to process the continuous telescope data stream in real time.',
       ],
     },
   ],
@@ -65,56 +65,57 @@ const LEDGER = {
   projects: [
     {
       name: 'Omniscience Pro',
-      what: 'Privacy-first local RAG',
+      what: 'Privacy-first local RAG system',
       points: [
-        'LangChain + ChromaDB, containerised with Docker; nothing leaves the machine.',
-        '<b>Under 50 ms</b> HNSW vector search and <b>under 500 ms</b> to first token.',
-        'Citation-weighted ranking across local, web and academic sources.',
-        'Hardened with path-traversal protection, rate limiting and POSIX file locking.',
+        'Local RAG with multi-modal document ingestion, built on LangChain and ChromaDB.',
+        '<b>Under 50 ms</b> HNSW vector search and <b>under 500 ms</b> to first token, on consumer hardware.',
+        'GPU-aware Docker with a full CI/CD pipeline, and POSIX file locking for safe concurrent sessions.',
       ],
     },
     {
-      name: 'ARO — Autonomous Research Operator',
-      what: 'Multi-agent LLM workflows',
+      name: 'ARO, Autonomous Research Operator',
+      what: 'Multi-agent LLM platform',
       points: [
-        'Agent workflows as NetworkX directed graphs, so execution order is data, not control flow.',
-        'Flask + SSE + React front end; SQLAlchemy/SQLite for persistent agent memory.',
-        'Self-audited: <b>16 vulnerabilities</b> found and fixed.',
+        'Multi-agent LLM workflows as directed graphs in NetworkX.',
+        'Flask backend streaming progress over Server-Sent Events to a React frontend.',
+        'An adversarial audit after the build found and fixed <b>16 vulnerabilities</b> across auth, SSRF, input validation and CORS; SQLAlchemy-backed audit trails.',
       ],
     },
     {
-      name: 'F1 tyre-degradation prediction',
-      what: 'GPU-accelerated, physics-informed',
+      name: 'F1 tyre degradation and race strategy',
+      what: 'GPU-accelerated predictive analytics',
       points: [
-        'Physics-informed loss that splits thermal from mechanical wear rather than fitting one blended curve.',
-        'LSTM + XGBoost over <b>10 Hz</b> telemetry.',
-        'Custom CUDA/CuPy kernels for a <b>4.1× speedup</b>.',
+        'Hybrid LSTM-XGBoost model predicting tyre wear and pit-stop windows from <b>10 Hz</b> telemetry.',
+        'Physics-informed loss separating thermal and mechanical degradation.',
+        'Custom CUDA/CuPy kernels cut training time by <b>4.1×</b>.',
       ],
     },
     {
-      name: 'Llama 3.2 optimisation',
+      name: 'Llama 3.2 for efficient inference',
       what: 'Fine-tuning and quantisation',
       points: [
-        '1B and 3B variants fine-tuned on <b>21.5k interactions</b>.',
-        '4-bit quantisation via Unsloth for single-GPU training and inference.',
+        '1B and 3B models fine-tuned on <b>21.5k</b> domain-specific interactions.',
+        '4-bit quantisation with Unsloth, enough for a consumer GPU, with no meaningful drop in output quality.',
       ],
     },
   ],
 
   education: [
-    ['M.Tech, Computer Science & Engineering (AI)', 'DIAT (DRDO), Pune', '2023 — 2025', 'CGPA 8.64 / 10.0'],
-    ['B.Tech, Computer Science & Engineering', 'Academy of Technology, Kolkata', '2019 — 2023', 'CGPA 9.44 / 10.0'],
+    ['M.Tech, Computer Science & Engineering (Artificial Intelligence)', 'DIAT (DRDO), Pune', '2023–2025', 'CGPA 8.64 / 10.0'],
+    ['B.Tech, Computer Science & Engineering', 'Academy of Technology, Kolkata', '2019–2023', 'CGPA 9.44 / 10.0'],
   ],
   honours: [
-    'GATE 2024, Data Science & AI — All India Rank <b>1790</b> (top 5%).',
-    'Two papers accepted at IoTaIS 2025, Bali (C-DAC zero-trust IoT work).',
+    'GATE 2024, Data Science & AI: rank <b>1790</b>, top 5% of applicants.',
+    'Protocol-Aware Continuous Monitoring and Anomaly Detection in IoT Networks · IoTaIS 2025, Bali.',
+    'A Comprehensive Survey on Zero Trust Architecture in IoT Networks · IoTaIS 2025, Bali.',
   ],
 
   skills: [
-    ['Languages & tools', 'Python (advanced), C++ (proficient), SQL, Bash, Git, Docker, Linux, Flask, Streamlit'],
-    ['Machine learning', 'PyTorch, TensorFlow, Keras, XGBoost, Scikit-learn, physics-informed neural networks'],
-    ['LLM & retrieval', 'LangChain, ChromaDB, Ollama, Llama 3.2, Unsloth, Hugging Face, RAG'],
-    ['Performance', 'CUDA, 4-bit and 8-bit quantisation, HPC, multicore pipeline optimisation'],
+    ['Languages', 'Python (advanced), C++ (proficient), C, Bash, SQL'],
+    ['ML and scientific computing', 'PyTorch, XGBoost, scikit-learn, physics-informed neural networks, NumPy, SciPy'],
+    ['HPC and systems', 'CUDA, CuPy, parallel processing, 4-bit and 8-bit quantisation, latency optimisation, Linux'],
+    ['Data and engineering', 'statistical anomaly detection, time-series analysis, CI/CD, Docker, Git, Flask, ChromaDB'],
+    ['AI and MLOps', 'RAG, LLM fine-tuning, multi-agent orchestration (NetworkX, LangChain), SQLAlchemy'],
   ],
 };
 
@@ -123,7 +124,7 @@ const LEDGER = {
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
 
 /** Facts are authored above; only <b> is meaningful inside a point. */
-const rich = (s) => esc(s).replace(/&lt;b&gt;/g, '<b>').replace(/&lt;\/b&gt;/g, '</b>');
+const rich = (s) => esc(s).replace(/&lt;(\/?)b>/g, '<$1b>'); // esc() leaves '>' alone
 
 function section(title, inner) {
   return `<section class="lsec"><h2>${esc(title)}</h2>${inner}</section>`;
@@ -174,10 +175,10 @@ export function renderLedger(el) {
     ${section('Experience', exp)}
     ${section('Selected projects', proj)}
     ${section('Education', edu)}
-    ${section('Honours', hon)}
+    ${section('Honours and papers', hon)}
     ${section('Skills', sk)}
     <footer class="lfoot">
-      <p>This page is also an explorable world — close this panel to walk it.</p>
+      <p>Close this panel to walk the island it belongs to.</p>
     </footer>`;
 }
 

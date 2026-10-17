@@ -57,6 +57,13 @@ function figureMaterial(BABYLON, scene, shaders) {
       if (uDebug > 0.5) { gl_FragColor = vec4(vCol, 1.0); return; }
       vec3 N = normalize(vNormal);
       vec3 V = normalize(uCamPos - vWorld);
+      /* The cape is a one-sided ribbon drawn with culling off, so half the
+         time the viewer is looking at its back and the normal points away.
+         Lit with that normal it came out a flat pale slab — cardboard hanging
+         off his shoulder. Shade whichever face is actually facing us. (The
+         procedural body shares this material but is a closed solid, so its
+         back faces are hidden either way and this costs it nothing.) */
+      if (dot(N, V) < 0.0) N = -N;
       // full rim: this silhouette must never be lost against the land
       vec3 col = toonLit(vCol, N, V, 0.36, 0.12, 1.0);
       col = applyAerial(col, vWorld);
@@ -128,28 +135,38 @@ function createCloak(BABYLON, scene, mat, opts) {
   mesh.isPickable = false;
   mesh.alwaysSelectAsActiveMesh = true;
 
-  // A constant-width ribbon reads as a plank. Real capes are narrow at the
-  // collar, widest across the back and drawn to a point at the hem.
+  /* A constant-width ribbon reads as a plank, so this used to bulge in the
+     middle and draw back to a point at the hem. On a 0.55 m cape over a 1.78 m
+     figure that silhouette is not a cape at all — it is a rounded red bib
+     sitting over the small of his back, which is exactly what it looked like.
+     A cape is narrow at the collar and WIDEST at the hem: it flares, it never
+     comes back to a point. */
   const profile = new Float32Array(N);
   for (let i = 0; i < N; i++) {
     const u = i / (N - 1);
-    profile[i] = halfW * 2 * (0.42 + 1.05 * Math.sin(Math.PI * Math.min(u * 1.06, 1)) * (1 - u * 0.55));
+    profile[i] = halfW * 2 * (0.84 + 0.62 * u);
   }
 
   const anchor = [new BABYLON.Vector3(), new BABYLON.Vector3()];
   const tmp = new BABYLON.Vector3();
   const e1 = new BABYLON.Vector3(), e2 = new BABYLON.Vector3(), nrm = new BABYLON.Vector3();
 
-  function update(dt, ox, oy, oz, hs, hc, speed, windT) {
+  function update(dt, ox, oy, oz, hs, hc, speed, windT, anchorAt) {
     // the figure's right, and its back
     const rx = hc, rz = -hs;
     const bx = -hs, bz = -hc;
 
+    /* Hang from the shoulders. With a rigged figure that means the actual
+       shoulder bone, passed in each frame; the fixed height is only the
+       fallback for the procedural cone it was originally built for. */
+    const ax = anchorAt ? anchorAt.x : ox;
+    const ay = anchorAt ? anchorAt.y : oy + 1.28;
+    const az = anchorAt ? anchorAt.z : oz;
     for (let s = 0; s < 2; s++) {
       const side = s ? -1 : 1;
-      anchor[s].set(ox + rx * profile[0] * 0.5 * side + bx * 0.13,
-                    oy + 1.28,
-                    oz + rz * profile[0] * 0.5 * side + bz * 0.13);
+      anchor[s].set(ax + rx * profile[0] * 0.5 * side + bx * 0.10,
+                    ay,
+                    az + rz * profile[0] * 0.5 * side + bz * 0.10);
     }
 
     const gust = 0.6 + 0.4 * Math.sin(windT * 0.8);
@@ -174,7 +191,7 @@ function createCloak(BABYLON, scene, mat, opts) {
         pt.p.z += (pt.p.z - pt.o.z) * 0.90 + fz * dt * dt * 9;
         pt.o.copyFrom(tmp);
         // never let the hem sink through the ground the figure stands on
-        if (pt.p.y < oy + 0.10) pt.p.y = oy + 0.10;
+        if (pt.p.y < oy + 0.06) pt.p.y = oy + 0.06;
       }
 
       // relaxation: pull each link back to its rest length, anchor pinned
@@ -190,6 +207,24 @@ function createCloak(BABYLON, scene, mat, opts) {
           a.x += dx * k * wa; a.y += dy * k * wa; a.z += dz * k * wa;
           b.x -= dx * k * wb; b.y -= dy * k * wb; b.z -= dz * k * wb;
         }
+      }
+    }
+
+    /* A hard leash to the anchor. Relaxation alone is iterative and can lose
+       ground when the anchor moves fast — which it now does, because it is a
+       bone on an animating skeleton rather than a fixed height. Without this
+       the cape crept to roughly twice its chain length and hung to the ankles. */
+    for (let s2 = 0; s2 < 2; s2++) {
+      const ch = chains[s2];
+      for (let i = 1; i < N; i++) {
+        const maxR = i * seg * 1.02;
+        const px = ch[i].p.x - anchor[s2].x;
+        const py = ch[i].p.y - anchor[s2].y;
+        const pz = ch[i].p.z - anchor[s2].z;
+        const d2 = px * px + py * py + pz * pz;
+        if (d2 <= maxR * maxR) continue;
+        const k = maxR / Math.sqrt(d2);
+        ch[i].p.set(anchor[s2].x + px * k, anchor[s2].y + py * k, anchor[s2].z + pz * k);
       }
     }
 
@@ -327,7 +362,14 @@ export function createTraveller(BABYLON, scene, shaders, opts) {
   body.alwaysSelectAsActiveMesh = true;
 
   const cloak = createCloak(BABYLON, scene, mat, {
-    points: 11, segLen: 0.082, halfWidth: 0.30,
+    /* Sized for a humanoid, not the old cone. At the cone's dimensions it hung
+       shoulder-to-knee and 0.7m wide, which covered the legs completely — the
+       walk was happening underneath a curtain. */
+    /* 12 x 0.082 = 0.90 m of cape. It hangs from the shoulder line at 1.41 m
+       to roughly 0.51 m — below the knee on a 1.78 m figure. The previous
+       0.61 m reached the hips and no further, which is why it read as
+       something bunched around his backside rather than a cape. */
+    points: 12, segLen: 0.082, halfWidth: 0.24,
     rgb: [CLOTH[0] * 1.10, CLOTH[1] * 0.92, CLOTH[2] * 0.90],
   });
 
@@ -349,7 +391,7 @@ export function createTraveller(BABYLON, scene, shaders, opts) {
    * @param speed   metres/second
    * @param running 0..1
    */
-  function update(dt, pos, heading, speed, running, timeSec) {
+  function update(dt, pos, heading, speed, running, timeSec, anchorAt) {
     state.x = pos.x; state.y = pos.y; state.z = pos.z;
     state.heading = heading;
 
@@ -371,7 +413,7 @@ export function createTraveller(BABYLON, scene, shaders, opts) {
     const hs = Math.sin(heading), hc = Math.cos(heading);
     while (clothAcc >= CLOTH_H) {
       clothAcc -= CLOTH_H;
-      cloak.update(CLOTH_H, pos.x, pos.y, pos.z, hs, hc, speed, timeSec);
+      cloak.update(CLOTH_H, pos.x, pos.y, pos.z, hs, hc, speed, timeSec, anchorAt);
     }
   }
 

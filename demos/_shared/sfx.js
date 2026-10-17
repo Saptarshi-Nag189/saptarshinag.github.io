@@ -16,7 +16,10 @@
   var KEY = 'exp-sfx-muted';
   var AC = window.AudioContext || window.webkitAudioContext;
   var ctx = null, master = null;
-  var muted = (localStorage.getItem(KEY) === '1');
+  /* guarded: where storage is blocked, an unguarded read threw and the whole
+     sound engine never loaded */
+  var muted = false;
+  try { muted = (localStorage.getItem(KEY) === '1'); } catch (e) {}
   var unlocked = false;
   var ambient = null, projector = null, engine = null, chiptune = null, rain = null, clack = null, brook = null, wind = null, crickets = null, hum = null;
   var accent = '#9aa0ff';
@@ -213,7 +216,8 @@
     btn.innerHTML = muted
       ? '<i class="fa-solid fa-volume-xmark"></i>'
       : '<i class="fa-solid fa-volume-high"></i>';
-    btn.setAttribute('aria-label', muted ? 'Unmute' : 'Mute sound');
+    btn.setAttribute('aria-label', 'Sound');
+    btn.setAttribute('aria-pressed', String(!muted));
     btn.style.color = muted ? 'rgba(255,255,255,0.5)' : accent;
   }
   function setMuted(m) {
@@ -231,13 +235,17 @@
     btn.type = 'button';
     var s = btn.style;
     s.position = 'fixed'; s.bottom = '16px'; s.left = '16px'; s.zIndex = '99999';
-    s.width = '38px'; s.height = '38px'; s.borderRadius = '9px';
+    // 44px: Apple's minimum comfortable touch target (accessibility.md > Mobility)
+    s.width = '44px'; s.height = '44px'; s.borderRadius = '10px';
     s.border = '1px solid rgba(255,255,255,0.22)'; s.background = 'rgba(8,8,12,0.6)';
     s.cursor = 'pointer'; s.backdropFilter = 'blur(6px)'; s.webkitBackdropFilter = 'blur(6px)';
-    s.fontSize = '14px'; s.lineHeight = '1'; s.transition = 'transform .15s, border-color .15s';
+    s.fontSize = '15px'; s.lineHeight = '1'; s.transition = 'transform .15s, border-color .15s';
     btn.addEventListener('click', function (e) { e.stopPropagation(); toggleMute(); });
     btn.addEventListener('mouseenter', function () { btn.style.transform = 'scale(1.08)'; btn.style.borderColor = accent; play('hover'); });
     btn.addEventListener('mouseleave', function () { btn.style.transform = 'none'; btn.style.borderColor = 'rgba(255,255,255,0.22)'; });
+    // keyboard users get the same ring a pointer gets on hover
+    btn.addEventListener('focus', function () { btn.style.outline = '2px solid ' + accent; btn.style.outlineOffset = '2px'; });
+    btn.addEventListener('blur', function () { btn.style.outline = 'none'; });
     var attach = function () { if (document.body && !document.getElementById('sfx-mute')) document.body.appendChild(btn); paint(); };
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', attach);
     else attach();

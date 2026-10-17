@@ -11,7 +11,9 @@ import { buildFauna } from './fauna.js';
 import { createTraveller } from './traveller.js';
 import { createCameraRig, createController } from './camera.js';
 import { createBoat } from './boat.js';
+import { loadRigged } from './rigged.js';
 import { buildWeather } from './weather.js';
+import { createCompanion } from './companion.js';
 import { guessTier, createGovernor, TIERS, TIER_ORDER, TIER_LABEL } from './quality.js';
 import * as SH from './shaders.js';
 import { clamp, lerp } from './noise.js';
@@ -127,8 +129,46 @@ const boat = (landmarks.items.boat && landmarks.items.boatHome)
 
 /* ---------- the traveller, the rig, the hands ---------- */
 const traveller = createTraveller(B, scene, SH, {});
-const control = createController(field, { x: WORLD.startX, z: WORLD.startZ, heading: 0 });
-const rig = createCameraRig(B, scene, camera, field, {});
+
+/* A rigged figure with real limbs replaces the procedural cone, but it loads
+   asynchronously so the world is walkable immediately and simply gets a better
+   body a moment later. If the load fails for any reason the procedural figure
+   is already standing there — a missing model must not mean no character. */
+let rigged = null;
+const RIG_ON = QS.get('rig') !== '0';
+if (RIG_ON) {
+  loadRigged(B, scene, SH, {
+    name: 'traveller3d',
+    url: 'assets/traveller.glb',
+    height: 1.78,
+    /* He is dressed in the shader, cut from the bind pose: the downloaded rig
+       is a nude mannequin and one flat colour over all of it just made a naked
+       man in a cape. Vest over a linen shirt, belt, trousers, boots, skin. */
+    cloth: [0.17, 0.21, 0.33],      // the vest: dark indigo wool
+    shirt: [0.82, 0.76, 0.64],      // cream linen: sleeves and collar
+    trim: [0.34, 0.22, 0.15],       // a leather belt
+    trouser: [0.25, 0.21, 0.26],
+    boot: [0.15, 0.12, 0.14],
+    skin: [0.55, 0.38, 0.29],
+    hoodColor: [0.46, 0.18, 0.15],  // the cape's cloth, so hood and cape are one garment
+    clips: { idle: 'idle', walk: 'walk', run: 'run' },
+    hood: true, hoodRadius: 0.135, hoodLift: 0.05,
+  }).then((r) => {
+    rigged = r;
+    traveller.body.setEnabled(false);       // the cone stands down; the cape stays
+    BOOT.rigged = Math.round(performance.now() - t0);
+  }).catch((e) => {
+    console.warn('rigged traveller unavailable, keeping the procedural one:', e && e.message);
+  });
+
+}
+const control = createController(field, {
+  x: WORLD.startX, z: WORLD.startZ, heading: 0,
+  colliders: chunks ? chunks.colliders : null,
+});
+// the built things are permanent, so they register once rather than per tile
+if (chunks) landmarks.addColliders(chunks.colliders);
+const rig = createCameraRig(B, scene, camera, field, { reduced: REDUCED });
 traveller.reset(control.me, control.me.heading);
 rig.snap(control.yaw, control.pitch, control.me);
 // Only the near ring is built before the veil lifts. The rest streams in over
@@ -138,7 +178,16 @@ stage('prime', () => {
   else flora.grass.refocus(control.me.x, control.me.z);
 });
 
-const worldMats = [skyObj.mat, water.mat, traveller.mat]
+/* ---------- the fairy, and the twin she speaks for ----------
+   /wander/ had her and she was the best thing in it: a light that follows you,
+   and a way for a visitor to ask a question instead of reading a wall. */
+const companion = createCompanion(B, scene, SH, {});
+/* Group 1 is drawn after the world. Babylon clears depth between rendering
+   groups by default, which would let the fairy shine straight through a hill —
+   she is a light in the world, not an overlay on it. */
+scene.setRenderingAutoClearDepthStencil(1, false, false, false);
+
+const worldMats = [skyObj.mat, water.mat, traveller.mat, companion.mat]
   .concat(lake ? [lake.mat] : [])
   .concat(chunks ? chunks.mats : [terrain.mat].concat(flora.mats))
   .concat(landmarks.mats)
@@ -287,10 +336,11 @@ function cycleQuality() {
 
 if (qualityEl) {
   qualityEl.addEventListener('click', (e) => {
-    const el = e.target.closest('span[data-q]');
+    const el = e.target.closest('[data-q]');
     if (!el) return;
     setQuality(el.dataset.q);
-    canvas.focus();
+    // a pointer click hands control back to the world; a keyboard press keeps focus on the pill
+    if (e.detail > 0) canvas.focus();
   });
 }
 
@@ -304,12 +354,12 @@ applyTier(startTier, false, true);
    bug rather than as arrival. */
 const PLACES = {
   beach:  ['The Long Strand', 'where the island begins'],
-  desert: ['The Dune Sea', 'dry, and older than the rest'],
-  meadow: ['The Open Meadow', 'the easy middle of the world'],
-  forest: ['The Deep Wood', 'close, and full of quiet'],
-  marsh:  ['The Still Water', 'reeds, and something moored'],
-  rock:   ['The Bare Shoulder', 'above where things grow'],
-  snow:   ['The Frozen Crown', 'the cold top of the light'],
+  desert: ['The Dune Sea', 'dunes on the dry west side'],
+  meadow: ['The Open Meadow', 'grassland across the middle'],
+  forest: ['The Deep Wood', 'dense woodland on the wet east side'],
+  marsh:  ['The Still Water', 'reeds round the lake, and a boat'],
+  rock:   ['The Bare Shoulder', 'bare rock above the treeline'],
+  snow:   ['The Frozen Crown', 'snow on the highest ground'],
 };
 const placeEl = document.getElementById('placeCard');
 const placeName = document.getElementById('placeName');
@@ -343,12 +393,17 @@ function announcePlace(x, z, dt) {
    'load', which fires long before the shaders have compiled */
 const veil = document.getElementById('veil');
 function liftVeil() {
+  window.__llBooted = true;              // index.html stops waiting to show the ledger instead
   if (!veil || veil.classList.contains('gone')) return;
   veil.classList.add('gone');
   setTimeout(() => veil.remove(), 1400);
 }
 
 const EMPTY_KEYS = Object.create(null);
+
+/* The speeds the walk and run clips were authored for. Playback is scaled by
+   the ratio of actual speed to these, so the feet never skate. */
+const WALK_AT = 3.9, RUN_AT = 8.75;
 
 /* ---------- the prompt that appears when something is within reach ------- */
 const promptEl = document.getElementById('prompt');
@@ -370,6 +425,10 @@ let walked = 0;
 let last = performance.now();
 
 engine.runRenderLoop(() => {
+  // ported from the old wander build: a hidden tab has no business simulating
+  // a world, streaming tiles or animating a herd
+  if (document.hidden) return;
+
   frames++;
   const now = performance.now();
   const dt = Math.min((now - last) / 1000, 0.05);
@@ -381,25 +440,38 @@ engine.runRenderLoop(() => {
 
     if (boat && boat.aboard) {
       // Rowing. The traveller is cargo: seated, no gait, carried by the hull.
-      const bs = boat.update(dt, control.keys, t);
+      const bs = boat.update(dt, control.keys, t, control.stick);
       const seat = boat.seat();
       control.place(bs.x, bs.z, bs.heading);
       me = control.me;
-      traveller.update(dt, seat, seat.heading, 0, 0, t);
+      if (rigged) { rigged.root.position.set(seat.x, seat.y, seat.z);
+                    rigged.root.rotation.y = seat.heading;
+                    rigged.setSpeed(dt, 0, WALK_AT, RUN_AT);
+                    rigged.follow(seat.heading); }
+      traveller.update(dt, seat, seat.heading, 0, 0, t, rigged ? rigged.shoulders() : null);
       subject = { x: bs.x, y: bs.y, z: bs.z };
       fwd = { x: Math.sin(bs.heading), z: Math.cos(bs.heading) };
       speed = Math.abs(bs.speed); running = 0;
     } else {
       me = control.update(dt);
       if (boat) boat.update(dt, EMPTY_KEYS, t);      // she still rides the swell
-      traveller.update(dt, me, me.heading, me.speed, me.running, t);
+      /* Order matters: the figure moves and animates first, THEN the cape is
+         told where its shoulders ended up. Reversed, the cape hangs one frame
+         behind the body and visibly lags on every turn. */
+      if (rigged) { rigged.root.position.set(me.x, me.y, me.z);
+                    rigged.root.rotation.y = me.heading;
+                    rigged.setSpeed(dt, me.speed, WALK_AT, RUN_AT);
+                    rigged.follow(me.heading); }
+      traveller.update(dt, me, me.heading, me.speed, me.running, t,
+                       rigged ? rigged.shoulders() : null);
       subject = me; fwd = me.fwd; speed = me.speed; running = me.running;
     }
 
     updatePrompt(me);
     rig.update(dt, control.yaw, control.pitch, subject, fwd, speed, running, firstPerson);
-    traveller.body.setEnabled(!firstPerson);
+    traveller.body.setEnabled(!firstPerson && !rigged);
     traveller.cloak.setEnabled(!firstPerson);
+    if (rigged) rigged.setEnabled(!firstPerson);
 
     // The world streams around wherever you are. The budget is what keeps
     // tile building from ever becoming a hitch: a frame spends at most this
@@ -409,6 +481,7 @@ engine.runRenderLoop(() => {
 
     fauna.update(dt, me.x, me.z);
     weather.update(dt, camera, me.x, me.z, sky, t, TIER.weatherScale);
+    companion.update(dt, camera, subject, me.heading, sky, t);
     announcePlace(me.x, me.z, dt);
     governQuality(dt);
 
@@ -432,19 +505,23 @@ addEventListener('keydown', (e) => {
   if (e.code === 'KeyP') { /* photo mode lands in a later phase */ }
   if (e.code === 'KeyV') { firstPerson = !firstPerson; }
   if (e.code === 'KeyQ') { cycleQuality(); return; }
-  if (e.code === 'KeyE' && boat && !frozen) {
-    if (boat.aboard) {
-      const land = boat.disembark();
-      if (land) { control.place(land.x, land.z, boat.state.heading); traveller.reset(control.me, control.me.heading); }
-    } else if (boat.canBoard(control.me.x, control.me.z)) {
-      boat.board();
-    }
-  }
+  if (e.code === 'KeyE') useAction();
   if (['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code)) e.preventDefault();
   control.key(e.code, true);
 });
 addEventListener('keyup', (e) => control.key(e.code, false));
 addEventListener('blur', () => { for (const k of ['KeyW','KeyA','KeyS','KeyD','ShiftLeft','ShiftRight']) control.key(k, false); });
+
+/** board or leave the boat — bound to E, and to the touch pad's own button */
+function useAction() {
+  if (!boat || frozen) return;
+  if (boat.aboard) {
+    const land = boat.disembark();
+    if (land) { control.place(land.x, land.z, boat.state.heading); traveller.reset(control.me, control.me.heading); }
+  } else if (boat.canBoard(control.me.x, control.me.z)) {
+    boat.board();
+  }
+}
 
 canvas.addEventListener('click', () => { if (!pointerLocked) canvas.requestPointerLock(); });
 document.addEventListener('pointerlockchange', () => { pointerLocked = document.pointerLockElement === canvas; });
@@ -453,12 +530,84 @@ addEventListener('mousemove', (e) => {
   control.orbit(e.movementX * 0.0022, -e.movementY * 0.0016);
 });
 
-/* touch: drag anywhere to look, and the left third acts as a walk pad */
+/* ---------- touch ----------------------------------------------------------
+   The first pass here was "the left third of the screen means forward", which
+   is not a control scheme — you cannot steer, you cannot stroll, and half the
+   screen you want to look around with is a walk button.
+
+   So: a real thumbstick bottom-left (analog, so a half push strolls), a run
+   toggle and a use button bottom-right, and everything else on the canvas is
+   the camera. The pads live in #touch, which is pointer-events:none except on
+   the pads themselves, so a finger that lands on glass reaches the canvas and
+   a finger that lands on the stick never becomes a camera drag. */
+const IS_TOUCH = matchMedia('(pointer: coarse)').matches || (navigator.maxTouchPoints || 0) > 0;
+if (IS_TOUCH) document.body.classList.add('touch');
+
+(function touchPad() {
+  const stick = document.getElementById('stick');
+  const knob = document.getElementById('knob');
+  const runBtn = document.getElementById('tRun');
+  const useBtn = document.getElementById('tUse');
+  if (!stick || !knob) return;
+
+  const R = 40;                     // how far the knob travels, in px
+  let stickId = null, running = false;
+
+  function setKnob(dx, dy) {
+    knob.style.transform = `translate(${dx}px, ${dy}px)`;
+  }
+  function drive(e) {
+    const r = stick.getBoundingClientRect();
+    let dx = e.clientX - (r.left + r.width / 2);
+    let dy = e.clientY - (r.top + r.height / 2);
+    const m = Math.hypot(dx, dy) || 1;
+    // the knob stops at the ring; the *intent* saturates there too
+    const k = Math.min(1, R / m);
+    setKnob(dx * k, dy * k);
+    const mag = Math.min(1, m / R);
+    // screen up is forward; the controller takes (right, forward)
+    control.axis((dx / m) * mag, (-dy / m) * mag, running);
+  }
+  function release() {
+    stickId = null;
+    stick.classList.remove('on');
+    setKnob(0, 0);
+    control.axis(0, 0, false);
+  }
+
+  stick.addEventListener('pointerdown', (e) => {
+    stickId = e.pointerId;
+    // capture keeps the moves coming when the thumb slides off the ring; a
+    // synthetic pointer has nothing to capture, so this must not be fatal
+    try { stick.setPointerCapture(e.pointerId); } catch (err) { /* fine */ }
+    stick.classList.add('on');
+    drive(e);
+    e.preventDefault();
+  });
+  stick.addEventListener('pointermove', (e) => { if (e.pointerId === stickId) drive(e); });
+  for (const ev of ['pointerup', 'pointercancel', 'lostpointercapture']) {
+    stick.addEventListener(ev, (e) => { if (e.pointerId === stickId) release(); });
+  }
+
+  /* Run is a TOGGLE, not a hold. Holding a second button down while your other
+     thumb steers is a two-hand problem nobody wants on a phone. */
+  if (runBtn) runBtn.addEventListener('pointerdown', (e) => {
+    running = !running;
+    runBtn.classList.toggle('on', running);
+    if (stickId !== null) drive(e);            // take effect without re-pushing
+    else control.axis(0, 0, false);
+    e.preventDefault();
+  });
+
+  if (useBtn) useBtn.addEventListener('pointerdown', (e) => { useAction(); e.preventDefault(); });
+})();
+
+/* the camera: any drag on the canvas itself, one finger at a time */
 let touchId = null, lastTX = 0, lastTY = 0;
 canvas.addEventListener('touchstart', (e) => {
+  if (touchId !== null) return;
   const t = e.changedTouches[0];
   touchId = t.identifier; lastTX = t.clientX; lastTY = t.clientY;
-  if (t.clientX < innerWidth * 0.33) control.key('KeyW', true);
 }, { passive: true });
 canvas.addEventListener('touchmove', (e) => {
   for (const t of e.changedTouches) {
@@ -467,7 +616,11 @@ canvas.addEventListener('touchmove', (e) => {
     lastTX = t.clientX; lastTY = t.clientY;
   }
 }, { passive: true });
-canvas.addEventListener('touchend', () => { touchId = null; control.key('KeyW', false); }, { passive: true });
+for (const ev of ['touchend', 'touchcancel']) {
+  canvas.addEventListener(ev, (e) => {
+    for (const t of e.changedTouches) if (t.identifier === touchId) touchId = null;
+  }, { passive: true });
+}
 
 /* ---------- test + authoring hooks ---------- */
 
@@ -530,6 +683,8 @@ window.__LL = {
       label: sky.label,
       reduced: REDUCED,
       streaming: !!chunks,
+      colliders: chunks ? chunks.colliders.count : 0,
+      blocked: !!control.me.blocked,
       flora: chunks ? chunks.mem().instances : flora.counts,
       fauna: fauna.counts,
       weather: weather.counts(),
@@ -633,6 +788,26 @@ window.__LL = {
     { applied: TIER, fauna: fauna.counts }); },
   setTier(n) { return setQuality(n); },
   cycleQuality() { return cycleQuality(); },
+  /** the rigged figure: is it in, and what did it bring */
+  rig() {
+    if (!rigged) return { loaded: false };
+    return { loaded: true, scale: +rigged.scale.toFixed(3),
+             clips: rigged.names, bones: rigged.skeleton ? rigged.skeleton.bones.length : 0,
+             have: { idle: !!rigged.clips.idle, walk: !!rigged.clips.walk, run: !!rigged.clips.run } };
+  },
+  /** the fairy and her twin: is the light in, and what does she answer with */
+  twin() {
+    return { mesh: companion.mesh.isEnabled(), brain: companion.brainKind(),
+             open: companion.open,
+             pos: [+companion.pos.x.toFixed(2), +companion.pos.y.toFixed(2), +companion.pos.z.toFixed(2)] };
+  },
+  /** ask the twin a question the way the input box does */
+  async ask(q) { companion.toggle(true); const a = await window.TwinBrain.answer(q); companion.add('twin', a); return a; },
+  chat(open) { companion.toggle(open); return companion.open; },
+  /** drive the virtual thumbstick from a test */
+  stick(x, z, run) { control.axis(x, z, run); return { x, z, run: !!run }; },
+  touch: () => ({ enabled: document.body.classList.contains('touch'),
+                  pads: ['stick', 'knob', 'tRun', 'tUse'].every((i) => !!document.getElementById(i)) }),
   boot: BOOT,
   ready: true,
 };

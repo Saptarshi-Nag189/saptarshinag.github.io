@@ -1,8 +1,10 @@
-# THE WANDER — ambience recordings (drop-in)
+# The Wander: ambience recordings
 
 The world plays real recordings from this folder when they exist, and falls back
-to the built-in synth ambience when they don't. **Just drop files here with these
-exact names** (`.ogg` preferred, `.mp3` also works) and refresh — no code changes.
+to the built-in synth ambience when they don't. Drop files here with these exact
+names (`.ogg` preferred, `.mp3` also works), then list each one in `RECORDINGS` at
+the top of `../ambience.js`, for example `{ river:'ogg', rain:'mp3' }`. The list
+stops the page from requesting files that aren't there.
 
 | File | What to look for | Suggested search |
 |---|---|---|
@@ -17,9 +19,9 @@ exact names** (`.ogg` preferred, `.mp3` also works) and refresh — no code chan
 | `rain.ogg`   | steady rain on a roof, cozy, no thunder | "rain on roof loop" |
 
 Good free sources (pick CC0 / royalty-free):
-- **pixabay.com/sound-effects** — CC0-like license, no attribution needed (easiest)
-- **freesound.org** — filter by license "Creative Commons 0"
-- **opengameart.org** — filter CC0
+- **pixabay.com/sound-effects**: a CC0-like license with no attribution needed (the easiest)
+- **freesound.org**: filter by the "Creative Commons 0" license
+- **opengameart.org**: filter by CC0
 
 Tips: pick loops 30 s–2 min long; "seamless loop" in the title is ideal.
 Keep files under ~2 MB each so the page stays light (choose 96–128 kbps OGG).

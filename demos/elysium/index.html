@@ -3,8 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Vaporwave Elysium — Saptarshi Nag</title>
-<meta name="description" content="A marble-and-neon afterlife — the portfolio of Saptarshi Nag, drifting in glass.">
+<title>Vaporwave Elysium · Saptarshi Nag</title>
+<link rel="icon" href="../../icon.ico">
+<meta name="description" content="The portfolio of Saptarshi Nag as a vaporwave scene of marble and neon, with each chapter in a pane of glass.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
@@ -12,6 +13,7 @@
 <link rel="stylesheet" href="../_shared/chrome.css">
 <script src="../_shared/chrome.js" data-accent="#ff71ce" data-tag="elysium"></script>
 <script src="../_shared/sfx.js"></script>
+<script src="../_shared/a11y.js"></script>
 <style>
   :root{
     --pink:#ff71ce; --cyan:#01cdfe; --purp:#b967ff; --ink:#fdeffa; --dim:#c39ac0;
@@ -27,18 +29,18 @@
 
   #epigraph{position:fixed;left:50%;top:7.5%;transform:translateX(-50%);z-index:5;text-align:center;
     pointer-events:none;transition:opacity 1s}
-  #epigraph .k{font-family:var(--mono);font-size:10px;letter-spacing:.52em;text-transform:uppercase;
+  #epigraph .k{font-family:var(--mono);font-size:11.5px;letter-spacing:.52em;text-transform:uppercase;
     color:rgba(1,205,254,.85);margin-bottom:10px}
   #epigraph h1{font-family:var(--serif);font-weight:700;font-style:italic;
     font-size:clamp(26px,4.4vw,50px);
     background:linear-gradient(92deg,var(--pink),#ffd9f2 45%,var(--cyan));
     -webkit-background-clip:text;background-clip:text;color:transparent;
     filter:drop-shadow(0 0 26px rgba(255,113,206,.35))}
-  #epigraph .s{margin-top:8px;font-family:var(--mono);font-size:10.5px;letter-spacing:.28em;
+  #epigraph .s{margin-top:8px;font-family:var(--mono);font-size:11.5px;letter-spacing:.28em;
     text-transform:uppercase;color:var(--dim)}
   #epigraph.gone{opacity:0}
   #whisper{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:5;
-    font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;color:var(--dim);
+    font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;color:var(--dim);
     pointer-events:none;transition:opacity .8s;white-space:nowrap}
   #whisper b{color:var(--cyan);font-weight:500}
   #whisper.gone{opacity:0}
@@ -57,7 +59,7 @@
   @keyframes gr{from{opacity:0;transform:translateY(28px) scale(.98)}to{opacity:1;transform:none}}
   #glass::-webkit-scrollbar{width:8px}
   #glass::-webkit-scrollbar-thumb{background:rgba(255,113,206,.35);border-radius:6px}
-  #gKick{font-family:var(--mono);font-size:10.5px;letter-spacing:.26em;text-transform:uppercase;
+  #gKick{font-family:var(--mono);font-size:11.5px;letter-spacing:.26em;text-transform:uppercase;
     color:var(--cyan);margin-bottom:7px;display:flex;align-items:center;gap:8px}
   #gTitle{font-family:var(--serif);font-weight:700;font-size:clamp(23px,3.2vw,30px);
     background:linear-gradient(92deg,#ffd9f2,var(--pink));
@@ -66,21 +68,21 @@
   #gBody p{margin-bottom:13px}
   #gBody .item{border-left:2px solid var(--line);padding:3px 0 3px 15px;margin-bottom:17px}
   #gBody .item h3{font-size:15.5px;font-weight:600;color:#fff;margin-bottom:2px}
-  #gBody .item .meta{font-family:var(--mono);font-size:11px;color:var(--dim);margin-bottom:7px}
+  #gBody .item .meta{font-family:var(--mono);font-size:12px;color:var(--dim);margin-bottom:7px}
   #gBody ul{list-style:none;margin:4px 0 8px}
   #gBody ul li{position:relative;padding:5px 0 5px 20px;font-size:13.5px;line-height:1.55}
   #gBody ul li::before{content:"\f005";font-family:"Font Awesome 6 Free";font-weight:900;
-    position:absolute;left:0;top:7px;color:var(--cyan);font-size:8px}
+    position:absolute;left:0;top:7px;color:var(--cyan);font-size:11px}
   #gBody b{color:#fff;font-weight:600}
   .tags{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 12px}
-  .tag{font-family:var(--mono);font-size:10.5px;color:#ffd9f2;background:rgba(255,113,206,.1);
+  .tag{font-family:var(--mono);font-size:12px;color:#ffd9f2;background:rgba(255,113,206,.1);
     border:1px solid var(--line);border-radius:6px;padding:3px 9px}
   .mgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(115px,1fr));gap:11px;margin:8px 0 4px}
   .mtile{background:rgba(1,205,254,.07);border:1px solid rgba(1,205,254,.25);border-radius:12px;padding:12px}
   .mtile .v{font-family:var(--mono);font-size:19px;font-weight:700;color:var(--cyan);line-height:1}
-  .mtile .l{font-size:10.5px;color:var(--dim);margin-top:5px;line-height:1.35}
+  .mtile .l{font-size:12px;color:var(--dim);margin-top:5px;line-height:1.35}
   .skillg{margin-bottom:12px}
-  .skillg h4{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
+  .skillg h4{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;
     color:var(--purp);margin-bottom:7px}
   .links a{display:inline-flex;align-items:center;gap:9px;color:var(--cyan);text-decoration:none;
     font-size:14px;margin:5px 20px 5px 0;transition:.18s}
@@ -93,6 +95,15 @@
 
   @media (prefers-reduced-motion: reduce){ #gWrap,#glass{animation:none !important} }
   @media (max-width:640px){ #glass{padding:24px 20px} }
+
+  /* accessibility pass: 40px close button, kicker clear of it, hints that wrap on a phone
+     and sit above the sound button (accessibility.md > Mobility; layout.md > Adaptability) */
+  #gClose{width:40px;height:40px;font-size:15px}
+  #gKick{padding-right:46px}
+  #whisper{white-space:normal;width:max-content;max-width:calc(100vw - 32px);text-align:center;line-height:1.55;background:rgba(14,4,26,.66);padding:7px 14px;border-radius:999px;}
+  @media (max-width:640px){ #whisper{bottom:76px} }
+  .kb-only{display:inline} .touch-only{display:none}
+  @media (pointer:coarse){ .kb-only{display:none} .touch-only{display:inline} }
 </style>
 </head>
 <body>
@@ -101,14 +112,14 @@
 
 <div id="epigraph">
   <div class="k">vaporwave elysium</div>
-  <h1>Marble remembers.<br>Neon never sleeps.</h1>
-  <div class="s">eight frames drifting in the forever-sunset</div>
+  <h1>Saptarshi Nag,<br>in marble and neon</h1>
+  <div class="s">eight frames drift past the sunset, each one a part of his work</div>
 </div>
-<div id="whisper"><b>click a drifting frame</b> — or press 1–8 — the glass remembers everything</div>
+<div id="whisper"><span class="kb-only"><b>click a frame</b> or press 1 to 8 to open a chapter</span><span class="touch-only"><b>tap a frame</b> to open a chapter</span></div>
 
 <div id="gWrap">
   <div id="glass">
-    <button id="gClose" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+    <button id="gClose" aria-label="Close"><i aria-hidden="true" class="fa-solid fa-xmark"></i></button>
     <div id="gKick"></div>
     <h2 id="gTitle"></h2>
     <div id="gBody"></div>
@@ -124,60 +135,60 @@ try{ window.SFX && SFX.init({ accent:'#ff71ce', ambient:true, ambientFreq:65 });
 
 /* ================= FRAMES ================= */
 var FRAMES = [
- { label:'About', icon:'fa-user', kick:'the statue with his face', title:'Saptarshi Nag — AI/ML Engineer',
-   body:'<p>AI/ML engineer at the intersection of <b>security and systems research</b>. M.Tech in Artificial Intelligence (DIAT, DRDO); research at NCRA-TIFR &amp; GMRT; now a Project Engineer at C-DAC building real-time IoT security — Zero Trust with ML threat detection.</p>'+
-        '<p>Works the full ML stack: feature engineering from raw data, model development &amp; optimisation, production deployment under tight constraints. Past work spans physics-informed neural networks, GPU-accelerated scientific computing, LLM fine-tuning and RAG systems.</p>'+
-        '<div class="mgrid"><div class="mtile"><div class="v">97.93%</div><div class="l">IoT attack detection</div></div>'+
-        '<div class="mtile"><div class="v">99.8%</div><div class="l">pulsar F1</div></div>'+
-        '<div class="mtile"><div class="v">4.1×</div><div class="l">GPU speedup</div></div>'+
-        '<div class="mtile"><div class="v">50%</div><div class="l">latency cut</div></div>'+
-        '<div class="mtile"><div class="v">70M+</div><div class="l">samples</div></div></div>' },
- { label:'Education', icon:'fa-graduation-cap', kick:'carved at the beginning', title:'Education',
+ { label:'About', icon:'fa-user', kick:'AI/ML engineer · Chennai', title:'Saptarshi Nag · AI/ML Engineer',
+   body:'<p>AI/ML engineer at C-DAC Chennai, building ML-based attack detection for a <b>Zero Trust IoT security framework</b>. M.Tech in CSE (Artificial Intelligence) from DIAT, a DRDO institute, and research at NCRA-TIFR and GMRT.</p>'+
+        '<p>He works across the whole of an ML project, from features built out of raw data to deployment under tight performance limits. His past projects include physics-informed neural networks, GPU-accelerated scientific computing, LLM fine-tuning and RAG systems.</p>'+
+        '<div class="mgrid"><div class="mtile"><div class="v">96.97%</div><div class="l">flow-attack accuracy (RF) · C-DAC IoT</div></div>'+
+        '<div class="mtile"><div class="v">99.8%</div><div class="l">pulsar F1 · NCRA-TIFR</div></div>'+
+        '<div class="mtile"><div class="v">4.1×</div><div class="l">training speedup · F1 tyre model</div></div>'+
+        '<div class="mtile"><div class="v">50%</div><div class="l">latency cut · GMRT pipeline</div></div>'+
+        '<div class="mtile"><div class="v">70M+</div><div class="l">samples · NCRA pulsar search</div></div></div>' },
+ { label:'Education', icon:'fa-graduation-cap', kick:'2019–2025', title:'Education',
    body:'<div class="item"><h3>B.Tech, Computer Science &amp; Engineering</h3><div class="meta">Academy of Technology, Kolkata · 2019–2023 · CGPA 9.44/10.0</div></div>'+
         '<div class="item"><h3>M.Tech, CSE (Artificial Intelligence)</h3><div class="meta">DIAT (DRDO), Pune · 2023–2025 · CGPA 8.64/10.0</div></div>'+
         '<div class="item"><h3>GATE 2024</h3><div class="meta">Rank 1790 · Data Science &amp; AI · top 5%</div></div>' },
- { label:'GMRT', icon:'fa-satellite-dish', kick:'echoes across the marble', title:'GMRT — HPC & Signal Processing',
+ { label:'GMRT', icon:'fa-satellite-dish', kick:'Dec 2023 – Jan 2024', title:'GMRT · HPC & signal processing',
    body:'<p>Winter Intern · Dec 2023 – Jan 2024 · Pune. A season at one of the world\'s largest radio telescope arrays.</p>'+
         '<ul><li>Profiled legacy <b>CPU signal-filtering pipelines</b>, refactored for <b>multicore execution</b>.</li>'+
         '<li>Cut latency by <b>50%</b>, unblocking <b>real-time processing</b> of continuous telescope data streams.</li></ul>' },
- { label:'NCRA-TIFR', icon:'fa-star', kick:'a star kept blinking', title:'NCRA-TIFR — Weak Pulsar Detection',
+ { label:'NCRA-TIFR', icon:'fa-star', kick:'Aug 2024 – Apr 2025', title:'NCRA-TIFR · weak pulsar detection',
    body:'<p>Research Intern (M.Tech project) · Aug 2024 – Apr 2025 · Pune.</p>'+
         '<ul><li><b>ResNet1D + Squeeze-and-Excitation attention</b> for weak pulsar signals at low SNR.</li>'+
         '<li><b>99.8% F1</b> across <b>70M+ samples</b>; adaptive thresholding for non-stationary noise floors.</li>'+
-        '<li>Ran end-to-end independently — scoping through deployment and write-up.</li></ul>' },
- { label:'C-DAC', icon:'fa-shield-halved', kick:'the sentinel of the sunset', title:'C-DAC — AI Research & IoT Security',
+        '<li>Ran it alone, from scoping through deployment and the write-up.</li></ul>' },
+ { label:'C-DAC', icon:'fa-shield-halved', kick:'July 2025 – present', title:'C-DAC · AI Research & IoT Security',
    body:'<p>Project Engineer · Jul 2025 – present · Chennai.</p>'+
         '<ul><li>Real-time <b>Zero Trust framework</b> for IoT (WiFi 802.11, BLE, Zigbee, LoRa) feeding a continuous <b>7-pillar device trust score</b>.</li>'+
         '<li>Two-stage hybrid detection: 1-second <b>window model</b> (7 attack classes) + <b>flow model</b>; RF/XGBoost/SVM/MLP/Voting Ensemble over 6 preprocessing iterations with SMOTE + Optuna (TPE).</li>'+
-        '<li>Best: <b>97.93% accuracy</b> (flow/RF); <b>90.86% acc / 86.78% macro F1</b> (window/Ensemble).</li>'+
+        '<li>Best: <b>96.97% accuracy</b> (flow/RF); <b>90.86% acc / 86.78% macro F1</b> (window/Ensemble).</li>'+
         '<li><b>63 features</b> from raw PCAPs (Scapy/PyShark); live PCAP pipeline (Watchdog, MD5 dedup, multi-threaded); SPIFFE/SPIRE, mTLS, OTP 2FA.</li>'+
         '<li>Two papers at <b>IoTaIS 2025</b>, Bali: <b>“Protocol-Aware Continuous Monitoring and Anomaly Detection in IoT Networks”</b> and <b>“A Comprehensive Survey on Zero Trust Architecture in IoT Networks.”</b></li></ul>' },
- { label:'Projects', icon:'fa-diagram-project', kick:'four monuments', title:'Projects',
-   body:'<div class="item"><h3>GPU-Accelerated F1 Tyre Degradation &amp; Race Strategy</h3>'+
+ { label:'Projects', icon:'fa-diagram-project', kick:'four builds', title:'Projects',
+   body:'<div class="item"><h3>GPU-accelerated F1 tyre degradation and race strategy</h3>'+
         '<div class="tags"><span class="tag">Python</span><span class="tag">PyTorch</span><span class="tag">CUDA</span><span class="tag">CuPy</span><span class="tag">XGBoost</span></div>'+
         '<ul><li>Hybrid <b>LSTM-XGBoost</b> for tyre wear + pit-stop windows from 10 Hz telemetry.</li>'+
-        '<li><b>PINNs</b> separating thermal and mechanical degradation; custom CUDA/CuPy kernels — <b>4.1× speedup</b>.</li></ul></div>'+
-        '<div class="item"><h3>Omniscience Pro — Privacy-First Local RAG</h3>'+
+        '<li><b>Physics-informed loss</b> separating thermal and mechanical degradation; custom CUDA/CuPy kernels cut training time <b>4.1×</b>.</li></ul></div>'+
+        '<div class="item"><h3>Omniscience Pro · privacy-first local RAG</h3>'+
         '<div class="tags"><span class="tag">Python</span><span class="tag">LangChain</span><span class="tag">ChromaDB</span><span class="tag">Docker</span></div>'+
         '<ul><li>Multi-modal ingestion; <b>&lt;50 ms</b> vector search (HNSW); <b>&lt;500 ms</b> first token; GPU-aware Docker, CI/CD, POSIX locking.</li></ul></div>'+
-        '<div class="item"><h3>ARO — Autonomous Research Operator</h3>'+
+        '<div class="item"><h3>ARO · Autonomous Research Operator</h3>'+
         '<div class="tags"><span class="tag">Python</span><span class="tag">Flask</span><span class="tag">SQLAlchemy</span><span class="tag">NetworkX</span><span class="tag">React</span></div>'+
         '<ul><li>Multi-agent LLM workflows as directed graphs; SSE streaming; React UI; adversarial audit fixed <b>16 vulnerabilities</b>.</li></ul></div>'+
-        '<div class="item"><h3>Llama 3.2 Optimisation</h3>'+
+        '<div class="item"><h3>Llama 3.2 fine-tuning and quantisation</h3>'+
         '<div class="tags"><span class="tag">Python</span><span class="tag">Unsloth</span><span class="tag">Hugging Face</span><span class="tag">PyTorch</span></div>'+
-        '<ul><li>Fine-tuned 1B/3B on <b>21.5k</b> interactions; <b>4-bit quantisation</b>, no meaningful quality drop.</li></ul></div>' },
- { label:'Skills', icon:'fa-microchip', kick:'inscriptions on the columns', title:'Skills',
+        '<ul><li>Fine-tuned 1B and 3B on <b>21.5k</b> interactions; <b>4-bit quantisation</b> with Unsloth for a consumer GPU, with no meaningful quality drop.</li></ul></div>' },
+ { label:'Skills', icon:'fa-microchip', kick:'the tools he uses', title:'Skills',
    body:'<div class="skillg"><h4>Languages</h4><div class="tags"><span class="tag">Python (advanced)</span><span class="tag">C++ (proficient)</span><span class="tag">C</span><span class="tag">Bash</span><span class="tag">SQL</span></div></div>'+
-        '<div class="skillg"><h4>ML &amp; Scientific Computing</h4><div class="tags"><span class="tag">PyTorch</span><span class="tag">XGBoost</span><span class="tag">Scikit-learn</span><span class="tag">PINNs</span><span class="tag">NumPy</span><span class="tag">SciPy</span></div></div>'+
-        '<div class="skillg"><h4>HPC &amp; Systems</h4><div class="tags"><span class="tag">CUDA</span><span class="tag">CuPy</span><span class="tag">Parallel Processing</span><span class="tag">Quantisation (4/8-bit)</span><span class="tag">Latency Optimisation</span><span class="tag">Linux</span></div></div>'+
-        '<div class="skillg"><h4>Data &amp; Engineering</h4><div class="tags"><span class="tag">Statistical Anomaly Detection</span><span class="tag">Time-Series</span><span class="tag">CI/CD</span><span class="tag">Docker</span><span class="tag">Git</span><span class="tag">Flask</span><span class="tag">ChromaDB</span></div></div>'+
-        '<div class="skillg"><h4>AI &amp; MLOps</h4><div class="tags"><span class="tag">RAG Systems</span><span class="tag">LLM Fine-Tuning</span><span class="tag">Multi-Agent Orchestration</span><span class="tag">SQLAlchemy</span></div></div>' },
- { label:'Contact', icon:'fa-envelope', kick:'a message beyond the sunset', title:'Reach the Real One',
-   body:'<p>Open to research collaborations, engineering roles, and interesting problems.</p>'+
-        '<div class="links"><a href="mailto:saptarshinag18@gmail.com"><i class="fa-solid fa-envelope"></i>saptarshinag18@gmail.com</a>'+
-        '<a href="https://www.linkedin.com/in/saptarshi18" target="_blank" rel="noopener"><i class="fa-brands fa-linkedin"></i>/in/saptarshi18</a>'+
-        '<a href="https://github.com/Saptarshi-Nag189" target="_blank" rel="noopener"><i class="fa-brands fa-github"></i>Saptarshi-Nag189</a>'+
-        '<a href="../../saptarshi_resume_linkedin_2026.pdf" target="_blank" rel="noopener"><i class="fa-solid fa-file-arrow-down"></i>download CV</a></div>' }
+        '<div class="skillg"><h4>ML &amp; scientific computing</h4><div class="tags"><span class="tag">PyTorch</span><span class="tag">XGBoost</span><span class="tag">Scikit-learn</span><span class="tag">PINNs</span><span class="tag">NumPy</span><span class="tag">SciPy</span></div></div>'+
+        '<div class="skillg"><h4>HPC &amp; systems</h4><div class="tags"><span class="tag">CUDA</span><span class="tag">CuPy</span><span class="tag">parallel processing</span><span class="tag">Quantisation (4/8-bit)</span><span class="tag">latency optimisation</span><span class="tag">Linux</span></div></div>'+
+        '<div class="skillg"><h4>Data &amp; engineering</h4><div class="tags"><span class="tag">statistical anomaly detection</span><span class="tag">Time-Series</span><span class="tag">CI/CD</span><span class="tag">Docker</span><span class="tag">Git</span><span class="tag">Flask</span><span class="tag">ChromaDB</span></div></div>'+
+        '<div class="skillg"><h4>AI &amp; MLOps</h4><div class="tags"><span class="tag">RAG</span><span class="tag">LLM fine-tuning</span><span class="tag">multi-agent orchestration</span><span class="tag">SQLAlchemy</span></div></div>' },
+ { label:'Contact', icon:'fa-envelope', kick:'get in touch', title:'Contact',
+   body:'<p>Open to research collaborations and engineering roles.</p>'+
+        '<div class="links"><a href="mailto:saptarshinag18@gmail.com"><i aria-hidden="true" class="fa-solid fa-envelope"></i>saptarshinag18@gmail.com</a>'+
+        '<a href="https://www.linkedin.com/in/saptarshi18" target="_blank" rel="noopener"><i aria-hidden="true" class="fa-brands fa-linkedin"></i>/in/saptarshi18</a>'+
+        '<a href="https://github.com/Saptarshi-Nag189" target="_blank" rel="noopener"><i aria-hidden="true" class="fa-brands fa-github"></i>Saptarshi-Nag189</a>'+
+        '<a href="../../saptarshi_resume_linkedin_2026.pdf" target="_blank" rel="noopener"><i aria-hidden="true" class="fa-solid fa-file-arrow-down"></i>download CV</a></div>' }
 ];
 
 /* ================= SCENE ================= */
@@ -305,12 +316,14 @@ function draw(now){
     ctx.beginPath(); ctx.moveTo(-fr.w/2+8,-fr.h/2+14); ctx.lineTo(-fr.w/2+26,-fr.h/2+5); ctx.stroke();
     /* label */
     ctx.fillStyle=hov?'#fff':'rgba(253,239,250,.92)';
-    ctx.font='600 '+Math.max(10,fr.w*0.115)+'px "JetBrains Mono",monospace';
+    ctx.font='600 '+Math.max(11,fr.w*0.115)+'px "JetBrains Mono",monospace';
     ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.shadowColor='rgba(20,4,30,.85)'; ctx.shadowBlur=6; /* keeps the label readable over the sun */
     ctx.fillText(FRAMES[f].label.toUpperCase(),0,fr.h*0.12);
     ctx.fillStyle=hov?'#ffd9f2':'rgba(195,154,192,.9)';
-    ctx.font='500 '+Math.max(8,fr.w*0.08)+'px "JetBrains Mono",monospace';
+    ctx.font='500 '+Math.max(11,fr.w*0.08)+'px "JetBrains Mono",monospace';
     ctx.fillText('0'+(f+1),0,-fr.h*0.24);
+    ctx.shadowBlur=0;
     ctx.restore();
   }
 
@@ -391,21 +404,25 @@ addEventListener('keydown',function(e){
 var wrapEl=document.getElementById('gWrap'), epiEl=document.getElementById('epigraph'), whisperEl=document.getElementById('whisper');
 function openFrame(i){
   var f=FRAMES[i];
-  document.getElementById('gKick').innerHTML='<i class="fa-solid '+f.icon+'"></i> '+f.kick;
+  document.getElementById('gKick').innerHTML='<i aria-hidden="true" class="fa-solid '+f.icon+'"></i> '+f.kick;
   document.getElementById('gTitle').textContent=f.title;
   document.getElementById('gBody').innerHTML=f.body;
   document.getElementById('glass').scrollTop=0;
   wrapEl.classList.add('open');
+  if(DLG) DLG.opened();
   epiEl.classList.add('gone'); whisperEl.classList.add('gone');
   sfx('chime');
 }
 function closeFrame(){
   if(!wrapEl.classList.contains('open')) return;
-  wrapEl.classList.remove('open'); epiEl.classList.remove('gone');
+  wrapEl.classList.remove('open'); if(DLG) DLG.closed(); epiEl.classList.remove('gone');
   sfx('click'); sfx('back');
 }
 document.getElementById('gClose').addEventListener('click',closeFrame);
 wrapEl.addEventListener('click',function(e){ if(e.target===wrapEl) closeFrame(); });
+/* keyboard and screen readers: the panel is a real dialog, and a chapter list (hidden until tabbed into) opens what the canvas opens */
+var DLG = window.A11Y ? A11Y.dialog(wrapEl, document.getElementById('glass'), document.getElementById('gClose'), 'gTitle') : null;
+if (window.A11Y) A11Y.chapters(FRAMES.map(function(x){ return x.label; }), function(i){ openFrame(i); });
 
 /* ================= LOOP ================= */
 var raf=null;

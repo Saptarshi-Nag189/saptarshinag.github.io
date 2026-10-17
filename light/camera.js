@@ -45,7 +45,9 @@ export function createCameraRig(BABYLON, scene, camera, field, opts) {
     lookHeight: opts.lookHeight || 1.35,
     lead: opts.lead || 2.2,
     fovWalk: opts.fovWalk || 0.96,          // ~55 deg
-    fovRun: opts.fovRun || 1.19,            // ~68 deg
+    // prefers-reduced-motion: no widening on the run, no roll, no handheld bob
+    calm: !!opts.reduced,
+    fovRun: opts.reduced ? (opts.fovWalk || 0.96) : (opts.fovRun || 1.19),   // ~68 deg
     posLambda: 7.5,
     lookLambda: 10.5,
   };
@@ -135,11 +137,11 @@ export function createCameraRig(BABYLON, scene, camera, field, opts) {
     while (dyaw > Math.PI) dyaw -= Math.PI * 2;
     while (dyaw < -Math.PI) dyaw += Math.PI * 2;
     lastYaw = yaw;
-    const wantRoll = clamp(-dyaw / Math.max(dt, 1e-3) * 0.035, -0.026, 0.026) * (0.4 + running);
+    const wantRoll = cfg.calm ? 0 : clamp(-dyaw / Math.max(dt, 1e-3) * 0.035, -0.026, 0.026) * (0.4 + running);
     roll += (wantRoll - roll) * Math.min(1, dt * 4);
 
     // handheld noise — tiny, and only really present when moving
-    const amp = 0.012 + speed * 0.006;
+    const amp = cfg.calm ? 0 : 0.012 + speed * 0.006;
     const nx = Math.sin(bobT * 1.7) * amp + Math.sin(bobT * 0.9) * amp * 0.5;
     const ny = Math.cos(bobT * 2.3) * amp * 0.8;
 
@@ -171,8 +173,13 @@ export function createCameraRig(BABYLON, scene, camera, field, opts) {
 
 export function createController(field, opts) {
   opts = opts || {};
-  const WALK = opts.walk || 3.1;
-  const RUN = opts.run || 7.0;
+  /* Obstacles. Without this the traveller walks through every tree on the
+     island — the only thing the step used to test was whether the ground ahead
+     was above sea level. */
+  const solid = opts.colliders || null;
+  const BODY = opts.bodyRadius || 0.42;
+  const WALK = opts.walk || 3.9;
+  const RUN = opts.run || 8.75;
   const ACCEL = opts.accel || 9.0;
   const TURN = opts.turn || 9.5;
 
@@ -188,7 +195,19 @@ export function createController(field, opts) {
   const keys = Object.create(null);
   let yaw = me.heading, pitch = -0.12;
 
+  /* A thumbstick is not a key. Phones need a direction and a *magnitude* —
+     a half-pushed stick should stroll, not sprint — so analog intent lives
+     beside the keyboard rather than being faked as four booleans. */
+  const stick = { x: 0, z: 0, mag: 0, run: false };
+
   function key(code, down) { keys[code] = down; }
+  function axis(x, z, run) {
+    const m = Math.hypot(x, z);
+    if (m > 1) { x /= m; z /= m; }
+    stick.x = x; stick.z = z;
+    stick.mag = Math.min(1, m);
+    stick.run = !!run;
+  }
   function orbit(dx, dy) {
     yaw -= dx;
     pitch = clamp(pitch + dy, -0.85, 0.62);
@@ -203,8 +222,10 @@ export function createController(field, opts) {
     if (keys['KeyS'] || keys['ArrowDown']) iz -= 1;
     if (keys['KeyA'] || keys['ArrowLeft']) ix -= 1;
     if (keys['KeyD'] || keys['ArrowRight']) ix += 1;
-    const mag = Math.hypot(ix, iz);
-    const wantRun = !!(keys['ShiftLeft'] || keys['ShiftRight'] || opts.forceRun);
+    // a held thumbstick speaks over the keyboard
+    if (stick.mag > 0.08) { ix = stick.x; iz = stick.z; }
+    const mag = Math.min(1, Math.hypot(ix, iz));
+    const wantRun = !!(keys['ShiftLeft'] || keys['ShiftRight'] || stick.run || opts.forceRun);
 
     me.running += ((mag > 0 && wantRun ? 1 : 0) - me.running) * Math.min(1, dt * 4.5);
 
@@ -223,15 +244,20 @@ export function createController(field, opts) {
       while (d < -Math.PI) d += Math.PI * 2;
       me.heading += d * Math.min(1, dt * TURN);
 
-      targetSpeed = lerp(WALK, RUN, me.running);
+      // mag < 1 only ever comes from a part-pushed stick
+      targetSpeed = lerp(WALK, RUN, me.running) * mag;
 
-      // uphill is slower, downhill a little faster — the land is felt, not
-      // just walked over
-      const ahead = 1.2;
+      /* Uphill is slower, downhill a little faster — the land should be felt.
+         But sampled over 1.2m and allowed down to 0.35x, this throttled you
+         constantly and noisily: it reacted to every bump, and running uphill
+         fell from 7 m/s to under 3. That, not the speed constant, was why the
+         traveller felt sluggish. A 3m baseline reads the actual hill instead of
+         the texture of it, and the clamp is now a nudge rather than a brake. */
+      const ahead = 3.0;
       const hx = me.x + Math.sin(me.heading) * ahead;
       const hz = me.z + Math.cos(me.heading) * ahead;
       const grade = (field.heightAt(hx, hz) - me.y) / ahead;
-      targetSpeed *= clamp(1 - grade * 0.85, 0.35, 1.25);
+      targetSpeed *= clamp(1 - grade * 0.55, 0.72, 1.12);
     }
 
     me.speed += (targetSpeed - me.speed) * Math.min(1, dt * ACCEL);
@@ -241,11 +267,23 @@ export function createController(field, opts) {
     me.fwd.z = Math.cos(me.heading);
 
     if (me.speed > 0) {
-      const nx = me.x + me.fwd.x * me.speed * dt;
-      const nz = me.z + me.fwd.z * me.speed * dt;
+      let nx = me.x + me.fwd.x * me.speed * dt;
+      let nz = me.z + me.fwd.z * me.speed * dt;
+
+      /* Push out of anything solid rather than blocking the whole step. The
+         tangential part of the motion survives, so you brush past a trunk
+         instead of sticking to it. */
+      if (solid) {
+        const r = solid.resolve(me.x, me.z, nx, nz, BODY);
+        nx = r.x; nz = r.z;
+        me.blocked = r.hit;
+      }
+
       const nh = field.heightAt(nx, nz);
-      // the sea is a wall until the boat arrives in a later phase
+      // the sea is a wall until you take the boat out
       if (nh > 0.08) { me.x = nx; me.z = nz; }
+    } else {
+      me.blocked = false;
     }
 
     me.y = field.heightAt(me.x, me.z);
@@ -253,7 +291,9 @@ export function createController(field, opts) {
   }
 
   return {
-    me, key, orbit, update, keys,
+    me, key, axis, orbit, update, keys,
+    /* the raw analog intent, so the boat can be rowed by the same thumb */
+    stick,
     get yaw() { return yaw; },
     get pitch() { return pitch; },
     set yaw(v) { yaw = v; },

@@ -14,7 +14,12 @@ const ok = (c,m)=>{ console.log((c?'  PASS  ':'  FAIL  ')+m); if(!c) fails++; };
   await p.waitForTimeout(3500);
   const r = await p.evaluate(()=>{
     const t = document.getElementById('ledgerBody').innerText;
-    return { len:t.length, has: ['97.93','Saptarshi Nag','C-DAC','99.8','4.1','NCRA','GATE','1790','IoTaIS'].filter(k=>t.includes(k)),
+    const L = document.getElementById('ledger');
+    return { len:t.length, has: ['96.97','Saptarshi Nag','C-DAC','99.8','4.1','NCRA','GATE','1790','IoTaIS'].filter(k=>t.includes(k)),
+             stale: ['97.93','1 ms','SHAP','dashboard'].filter(k=>t.includes(k)),
+             open: L.classList.contains('open') && getComputedStyle(L).opacity > 0.9 && !L.inert,
+             veil: !!document.getElementById('veil'),
+             focus: document.activeElement && document.activeElement.id,
              phone: /\+?\d[\d\s\-]{8,}/.test(t.replace(/\b(19|20)\d\d\b/g,'')),
              heads: document.querySelectorAll('#ledger .lsec h2').length };
   });
@@ -23,6 +28,10 @@ const ok = (c,m)=>{ console.log((c?'  PASS  ':'  FAIL  ')+m); if(!c) fails++; };
   ok(r.has.length === 9, 'every headline fact present: '+r.has.join(', '));
   ok(r.heads === 5, 'all five sections present ('+r.heads+')');
   ok(!r.phone, 'no phone number published (house rule)');
+  ok(r.stale.length === 0, 'no claims the CV does not make ('+(r.stale.join(', ')||'none')+')');
+  ok(r.open && !r.veil, 'the ledger opens on its own and nothing covers it');
+  ok(r.focus === 'ledgerClose', 'focus is inside the ledger ('+r.focus+')');
+  ok(errs.length === 0, 'no page errors without WebGL ('+(errs[0]||'none')+')');
   await ctx.close();
 }
 

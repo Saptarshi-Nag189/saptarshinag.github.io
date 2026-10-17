@@ -174,18 +174,36 @@ function initNav() {
   window.addEventListener('scroll', onScroll, { passive: true });
   onScroll();
 
-  const closeMenu = () => {
+  const isOpen = () => menu.classList.contains('open');
+
+  const closeMenu = (returnFocus) => {
+    if (!isOpen()) return;
     menu.classList.remove('open');
     toggle.classList.remove('open');
     toggle.setAttribute('aria-expanded', 'false');
     document.body.style.overflow = '';
+    if (returnFocus) toggle.focus();
   };
 
   toggle.addEventListener('click', () => {
-    const isOpen = menu.classList.toggle('open');
-    toggle.classList.toggle('open');
-    toggle.setAttribute('aria-expanded', String(isOpen));
-    document.body.style.overflow = isOpen ? 'hidden' : '';
+    const open = menu.classList.toggle('open');
+    toggle.classList.toggle('open', open);
+    toggle.setAttribute('aria-expanded', String(open));
+    document.body.style.overflow = open ? 'hidden' : '';
+    if (open) {
+      const first = menu.querySelector('a');
+      if (first) first.focus();
+    }
+  });
+
+  // Escape closes the full-screen menu and hands focus back to its button
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && isOpen()) closeMenu(true);
+  });
+
+  // growing the window past the breakpoint must not leave the page scroll-locked
+  window.matchMedia('(min-width: 769px)').addEventListener('change', (e) => {
+    if (e.matches) closeMenu(false);
   });
 
   allLinks.forEach((link) => {
@@ -199,7 +217,7 @@ function initNav() {
           window.scrollTo({ top, behavior: REDUCED_MOTION ? 'auto' : 'smooth' });
         }
       }
-      closeMenu();
+      closeMenu(false);
     });
   });
 

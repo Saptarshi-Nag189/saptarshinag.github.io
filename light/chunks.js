@@ -37,6 +37,7 @@
 import { makeRNG, makeNoise2D, clamp, lerp, smoothstep } from './noise.js';
 import { WORLD, buildTerrainTile, buildFarField, makeGroundMaterial, makeFarMaterial } from './terrain.js';
 import { SPECIES, speciesMesh, tuftMesh, grassMaterial } from './flora.js';
+import { createColliders } from './collide.js';
 
 /* ==========================================================================
    Buffer pool
@@ -174,6 +175,10 @@ export function createChunkManager(BABYLON, scene, field, shaders, opts) {
   grass.mesh.isPickable = false;
   grass.mesh.thinInstanceCount = 0;
 
+  /* Colliders live and die with their tile, so obstacle collision inherits the
+     streaming world's lifetime instead of becoming a second thing that leaks. */
+  const colliders = opts.colliders || createColliders();
+
   const tiles = new Map();            // key -> tile
   const queue = [];                   // tiles waiting for work
   let repackNeeded = false;
@@ -228,6 +233,21 @@ export function createChunkManager(BABYLON, scene, field, shaders, opts) {
       const T = pool.take(spots.length * 3);
       def.fill(BABYLON, spots, rng, M, T, field);
       t.species[def.name] = { M, T, n: spots.length };
+
+      /* The collider is free here: the translation is already in the matrix and
+         the radius scales with the instance. Only species that declare a trunk
+         radius block — grass and reeds are brushed through. */
+      if (def.collide) {
+        const ck = key(t.i, t.j);
+        for (let i = 0; i < spots.length; i++) {
+          const o = i * 16;
+          // mean horizontal scale, so a big tree blocks more than a sapling
+          const sx = Math.hypot(M[o], M[o + 1], M[o + 2]);
+          const sz = Math.hypot(M[o + 8], M[o + 9], M[o + 10]);
+          colliders.add(ck, M[o + 12], M[o + 14], def.collide * (sx + sz) * 0.5);
+        }
+        t.hasColliders = true;
+      }
     }
   }
 
@@ -271,6 +291,7 @@ export function createChunkManager(BABYLON, scene, field, shaders, opts) {
    * nothing keeps the tile alive after it leaves the map.
    */
   function disposeTile(t) {
+    if (t.hasColliders) { colliders.removeOwner(key(t.i, t.j)); t.hasColliders = false; }
     if (t.mesh) { t.mesh.dispose(false, true); t.mesh = null; }
     if (t.heights) { pool.give(t.heights); t.heights = null; }
     if (t.species) {
@@ -465,6 +486,7 @@ export function createChunkManager(BABYLON, scene, field, shaders, opts) {
       tiles: tiles.size, resident, pending, queued: queue.length,
       built, disposed,
       instances: inst, totalInstances: total,
+      colliders: colliders.count,
       pooledBytes: p.pooledBytes, poolBins: p.bins,
       poolRecycleRate: p.taken ? +(p.recycled / p.taken).toFixed(3) : 0,
       meshes: scene.meshes.length,
@@ -476,6 +498,7 @@ export function createChunkManager(BABYLON, scene, field, shaders, opts) {
 
   function dispose() {
     for (const [k, t] of tiles) { disposeTile(t); tiles.delete(k); }
+    colliders.clear();
     for (const n in species) species[n].mesh.dispose(false, true);
     grass.mesh.dispose(false, true);
     far.mesh.dispose(false, true);
@@ -487,7 +510,7 @@ export function createChunkManager(BABYLON, scene, field, shaders, opts) {
 
   return {
     update, prime, setQuality, mem, dispose,
-    mats, far, species, grass, tiles, pool,
+    mats, far, species, grass, tiles, pool, colliders,
     get tileSize() { return TILE; },
     get rings() { return { ...rings }; },
     /** tests: the exact bytes a tile produced, for the determinism check */

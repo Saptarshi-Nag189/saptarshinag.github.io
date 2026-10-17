@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Liquid — Saptarshi Nag</title>
+<title>Liquid · Saptarshi Nag</title>
+<link rel="icon" href="../../icon.ico">
 <meta name="description" content="A real-time GPU fluid portfolio for Saptarshi Nag, AI/ML Engineer.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,6 +13,7 @@
 <link rel="stylesheet" href="../_shared/chrome.css">
 <script src="../_shared/chrome.js" data-accent="#59c2ff" data-tag="liquid"></script>
 <script src="../_shared/sfx.js"></script>
+<script src="../_shared/a11y.js"></script>
 <style>
   :root{
     --blue:#59c2ff; --ink:#eaf3fb; --dim:#8fa5bd;
@@ -27,7 +29,7 @@
   /* name floating over the fluid */
   #title{position:fixed;left:50%;top:38%;transform:translate(-50%,-50%);z-index:5;
     text-align:center;pointer-events:none;mix-blend-mode:screen}
-  #title .k{font-family:var(--mono);font-size:clamp(10px,1.4vw,13px);letter-spacing:.44em;
+  #title .k{font-family:var(--mono);font-size:clamp(11.5px,1.4vw,13px);letter-spacing:.44em;
     text-transform:uppercase;color:rgba(150,205,255,.75);margin-bottom:12px}
   #title h1{font-size:clamp(40px,8vw,104px);font-weight:700;letter-spacing:-.03em;line-height:1;
     color:#fff;text-shadow:0 0 60px rgba(89,194,255,.35)}
@@ -52,7 +54,7 @@
   .orb:hover{transform:translateY(-6px) scale(1.07)}
   .orb:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
   .orb .lbl{position:absolute;top:-26px;left:50%;transform:translateX(-50%);
-    font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;
+    font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;
     color:var(--dim);white-space:nowrap;opacity:0;transition:opacity .2s;pointer-events:none}
   .orb:hover .lbl{opacity:1}
 
@@ -72,26 +74,26 @@
   #pIcon{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;
     font-size:19px;color:#04121f;background:var(--pc,var(--blue));margin-bottom:14px;
     box-shadow:0 0 30px -6px var(--pc,var(--blue))}
-  #pKick{font-family:var(--mono);font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;
+  #pKick{font-family:var(--mono);font-size:11.5px;letter-spacing:.24em;text-transform:uppercase;
     color:var(--pc,var(--blue));margin-bottom:6px}
   #pTitle{font-size:clamp(20px,3vw,26px);font-weight:700;letter-spacing:-.01em;margin-bottom:16px}
   #pBody{font-size:14.5px;line-height:1.62;color:#c8d9ea}
   #pBody p{margin-bottom:13px}
   #pBody .item{border-left:2px solid var(--line);padding:3px 0 3px 15px;margin-bottom:17px}
   #pBody .item h3{font-size:15.5px;font-weight:600;color:#fff;margin-bottom:2px}
-  #pBody .item .meta{font-family:var(--mono);font-size:11px;color:var(--dim);margin-bottom:7px}
+  #pBody .item .meta{font-family:var(--mono);font-size:12px;color:var(--dim);margin-bottom:7px}
   #pBody ul{list-style:none;margin:4px 0 8px}
   #pBody ul li{position:relative;padding:5px 0 5px 19px;font-size:13.5px;line-height:1.55}
   #pBody ul li::before{content:"\f043";font-family:"Font Awesome 6 Free";font-weight:900;
-    position:absolute;left:0;top:6px;color:var(--pc,var(--blue));font-size:10px;opacity:.85}
+    position:absolute;left:0;top:6px;color:var(--pc,var(--blue));font-size:11px;opacity:.85}
   #pBody b{color:#fff;font-weight:600}
   .tags{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 12px}
-  .tag{font-family:var(--mono);font-size:10.5px;color:#bfe2ff;background:rgba(89,194,255,.09);
+  .tag{font-family:var(--mono);font-size:12px;color:#bfe2ff;background:rgba(89,194,255,.09);
     border:1px solid var(--line);border-radius:6px;padding:3px 9px}
   .mgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:11px;margin:8px 0 4px}
   .mtile{background:rgba(89,194,255,.06);border:1px solid var(--line);border-radius:12px;padding:13px}
   .mtile .v{font-family:var(--mono);font-size:19px;font-weight:700;color:var(--pc,var(--blue));line-height:1}
-  .mtile .l{font-size:11px;color:var(--dim);margin-top:5px;line-height:1.35}
+  .mtile .l{font-size:12px;color:var(--dim);margin-top:5px;line-height:1.35}
   .skillg{margin-bottom:12px}
   .skillg h4{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;
     color:var(--pc,var(--blue));margin-bottom:7px}
@@ -119,6 +121,17 @@
     #orbs{bottom:70px;gap:9px}
     #panel{padding:24px 20px}
   }
+
+  /* accessibility pass: 40px close button, kicker clear of it, hints that wrap on a phone
+     and sit above the sound button (accessibility.md > Mobility; layout.md > Adaptability) */
+  #pClose{width:40px;height:40px;font-size:15px}
+  #pKick{padding-right:46px}
+  .kb-only{display:inline} .touch-only{display:none}
+  @media (pointer:coarse){ .kb-only{display:none} .touch-only{display:inline} }
+  /* bright dye could wash out the small lines, so they carry a dark halo instead of blending */
+  #title{mix-blend-mode:normal}
+  #title .k,#title .r,#hint{text-shadow:0 0 14px rgba(2,6,16,.95),0 1px 3px rgba(2,6,16,.9)}
+  #hint{font-size:12px}
 </style>
 </head>
 <body>
@@ -130,13 +143,13 @@
   <h1>Saptarshi Nag</h1>
   <div class="r">AI / ML Engineer</div>
 </div>
-<div id="hint"><i class="fa-solid fa-hand-pointer"></i>&nbsp; move to stir · click an orb to burst a chapter open</div>
+<div id="hint"><i aria-hidden="true" class="fa-solid fa-hand-pointer"></i>&nbsp; move to stir · click an orb to burst a chapter open</div>
 
 <div id="orbs" aria-label="Sections"></div>
 
 <div id="panelWrap">
   <div id="panel">
-    <button id="pClose" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+    <button id="pClose" aria-label="Close"><i aria-hidden="true" class="fa-solid fa-xmark"></i></button>
     <div id="pIcon"></div>
     <div id="pKick"></div>
     <h2 id="pTitle"></h2>
@@ -145,7 +158,7 @@
 </div>
 
 <div id="fallback"><div class="fbw">
-  <p class="note"><i class="fa-solid fa-circle-info"></i>&nbsp; WebGL2 is unavailable here — showing the still-water version. All content below.</p>
+  <p class="note"><i aria-hidden="true" class="fa-solid fa-circle-info"></i>&nbsp; WebGL2 is unavailable here, so this is the still-water version. All the content is below.</p>
   <div id="fbBody"></div>
 </div></div>
 
@@ -159,49 +172,49 @@ try{ window.SFX && SFX.init({ accent:'#59c2ff', ambient:true, ambientFreq:58 });
 /* ================= CONTENT ================= */
 var SECTIONS = [
  { id:'about', icon:'fa-user', label:'About', color:[0.35,0.76,1.0], css:'#59c2ff',
-   kick:'the person in the water', title:'Saptarshi Nag — AI/ML Engineer',
-   body:'<p>AI/ML engineer at the intersection of <b>security and systems research</b>. M.Tech in Artificial Intelligence (DIAT, DRDO); research at NCRA-TIFR &amp; GMRT; now a Project Engineer at C-DAC building real-time IoT security — Zero Trust plus ML threat detection.</p>'+
-        '<p>Works across the full ML stack: feature engineering from raw data, model development and optimisation, and production deployment under tight performance constraints. Past work spans physics-informed neural networks, GPU-accelerated scientific computing, LLM fine-tuning, and RAG systems.</p>'+
-        '<div class="mgrid"><div class="mtile"><div class="v">97.93%</div><div class="l">IoT attack detection</div></div>'+
-        '<div class="mtile"><div class="v">99.8%</div><div class="l">pulsar F1-score</div></div>'+
-        '<div class="mtile"><div class="v">4.1×</div><div class="l">GPU speedup</div></div>'+
-        '<div class="mtile"><div class="v">50%</div><div class="l">latency cut</div></div>'+
-        '<div class="mtile"><div class="v">70M+</div><div class="l">samples</div></div></div>' },
+   kick:'the person in the water', title:'Saptarshi Nag · AI/ML Engineer',
+   body:'<p>AI/ML engineer at C-DAC Chennai, building ML-based attack detection for a <b>Zero Trust IoT security framework</b>. M.Tech in CSE (Artificial Intelligence) from DIAT, a DRDO institute, and research at NCRA-TIFR and GMRT.</p>'+
+        '<p>He works across the whole of an ML project, from features built out of raw data to deployment under tight performance limits. His past projects include physics-informed neural networks, GPU-accelerated scientific computing, LLM fine-tuning and RAG systems.</p>'+
+        '<div class="mgrid"><div class="mtile"><div class="v">96.97%</div><div class="l">flow-attack accuracy (RF) · C-DAC IoT</div></div>'+
+        '<div class="mtile"><div class="v">99.8%</div><div class="l">pulsar F1 · NCRA-TIFR</div></div>'+
+        '<div class="mtile"><div class="v">4.1×</div><div class="l">training speedup · F1 tyre model</div></div>'+
+        '<div class="mtile"><div class="v">50%</div><div class="l">latency cut · GMRT pipeline</div></div>'+
+        '<div class="mtile"><div class="v">70M+</div><div class="l">samples · NCRA pulsar search</div></div></div>' },
  { id:'exp', icon:'fa-briefcase', label:'Experience', color:[0.30,1.0,0.65], css:'#4dffa8',
    kick:'three currents', title:'Experience',
-   body:'<div class="item"><h3>C-DAC — Project Engineer, AI Research &amp; IoT Security</h3><div class="meta">Jul 2025 – present · Chennai</div>'+
+   body:'<div class="item"><h3>C-DAC · Project Engineer, AI Research &amp; IoT Security</h3><div class="meta">Jul 2025 – present · Chennai</div>'+
         '<ul><li>Real-time <b>Zero Trust framework</b> for IoT (WiFi 802.11, BLE, Zigbee, LoRa) feeding a continuous <b>7-pillar device trust score</b>.</li>'+
         '<li>Two-stage hybrid detection: 1-second <b>window model</b> (7 attack classes) + <b>flow model</b>; RF/XGBoost/SVM/MLP/Voting Ensemble over 6 preprocessing iterations with SMOTE + Optuna (TPE).</li>'+
-        '<li>Best: <b>97.93% accuracy</b> (flow/RF); <b>90.86% acc / 86.78% macro F1</b> (window/Ensemble).</li>'+
+        '<li>Best: <b>96.97% accuracy</b> (flow/RF); <b>90.86% acc / 86.78% macro F1</b> (window/Ensemble).</li>'+
         '<li><b>63 features</b> engineered from raw PCAPs (Scapy/PyShark); live PCAP pipeline (Watchdog, MD5 dedup, multi-threaded); SPIFFE/SPIRE, mTLS, OTP 2FA; two IoTaIS 2025 papers.</li></ul></div>'+
-        '<div class="item"><h3>NCRA-TIFR — Research Intern (M.Tech project)</h3><div class="meta">Aug 2024 – Apr 2025 · Pune</div>'+
+        '<div class="item"><h3>NCRA-TIFR · Research Intern (M.Tech project)</h3><div class="meta">Aug 2024 – Apr 2025 · Pune</div>'+
         '<ul><li><b>ResNet1D + Squeeze-and-Excitation attention</b> for weak pulsar detection at low SNR.</li>'+
-        '<li><b>99.8% F1</b> across <b>70M+ samples</b>; adaptive thresholding for non-stationary noise; ran end-to-end independently.</li></ul></div>'+
-        '<div class="item"><h3>GMRT — Winter Intern, HPC &amp; Signal Processing</h3><div class="meta">Dec 2023 – Jan 2024 · Pune</div>'+
+        '<li><b>99.8% F1</b> across <b>70M+ samples</b>; adaptive thresholding for non-stationary noise; he ran it alone.</li></ul></div>'+
+        '<div class="item"><h3>GMRT · Winter Intern, HPC &amp; Signal Processing</h3><div class="meta">Dec 2023 – Jan 2024 · Pune</div>'+
         '<ul><li>Profiled legacy CPU signal-filtering pipelines, refactored for <b>multicore</b>; cut latency <b>50%</b> for real-time telescope streams.</li></ul></div>' },
  { id:'proj', icon:'fa-diagram-project', label:'Projects', color:[1.0,0.62,0.30], css:'#ffab54',
    kick:'four vessels', title:'Projects',
-   body:'<div class="item"><h3>GPU-Accelerated F1 Tyre Degradation &amp; Race Strategy</h3>'+
+   body:'<div class="item"><h3>GPU-accelerated F1 tyre degradation and race strategy</h3>'+
         '<div class="tags"><span class="tag">Python</span><span class="tag">PyTorch</span><span class="tag">CUDA</span><span class="tag">CuPy</span><span class="tag">XGBoost</span></div>'+
         '<ul><li>Hybrid <b>LSTM-XGBoost</b> for tyre wear + pit-stop windows from 10 Hz telemetry.</li>'+
         '<li><b>Physics-informed loss (PINNs)</b> separating thermal and mechanical degradation.</li>'+
-        '<li>Custom CUDA/CuPy kernels — <b>4.1× training speedup</b>.</li></ul></div>'+
-        '<div class="item"><h3>Omniscience Pro — Privacy-First Local RAG</h3>'+
+        '<li>Custom CUDA/CuPy kernels cut training time <b>4.1×</b>.</li></ul></div>'+
+        '<div class="item"><h3>Omniscience Pro · privacy-first local RAG</h3>'+
         '<div class="tags"><span class="tag">Python</span><span class="tag">LangChain</span><span class="tag">ChromaDB</span><span class="tag">Docker</span></div>'+
         '<ul><li>Local multi-modal ingestion; <b>&lt;50 ms</b> vector search (HNSW); <b>&lt;500 ms</b> first-token latency; GPU-aware Docker, CI/CD, POSIX locking.</li></ul></div>'+
-        '<div class="item"><h3>ARO — Autonomous Research Operator</h3>'+
+        '<div class="item"><h3>ARO · Autonomous Research Operator</h3>'+
         '<div class="tags"><span class="tag">Python</span><span class="tag">Flask</span><span class="tag">SQLAlchemy</span><span class="tag">NetworkX</span><span class="tag">React</span></div>'+
         '<ul><li>Multi-agent LLM workflows as directed graphs; Flask SSE streaming; React UI; adversarial audit fixed <b>16 vulnerabilities</b>.</li></ul></div>'+
         '<div class="item"><h3>Llama 3.2 Optimisation for Efficient Inference</h3>'+
         '<div class="tags"><span class="tag">Python</span><span class="tag">Unsloth</span><span class="tag">Hugging Face</span><span class="tag">PyTorch</span></div>'+
         '<ul><li>Fine-tuned Llama 3.2 (1B/3B) on <b>21.5k</b> interactions; <b>4-bit quantisation</b> with no meaningful quality drop.</li></ul></div>' },
  { id:'skills', icon:'fa-microchip', label:'Skills', color:[0.72,0.55,1.0], css:'#b28cff',
-   kick:'what the current carries', title:'Skills',
+   kick:'the tools', title:'Skills',
    body:'<div class="skillg"><h4>Languages</h4><div class="tags"><span class="tag">Python (advanced)</span><span class="tag">C++ (proficient)</span><span class="tag">C</span><span class="tag">Bash</span><span class="tag">SQL</span></div></div>'+
-        '<div class="skillg"><h4>ML &amp; Scientific Computing</h4><div class="tags"><span class="tag">PyTorch</span><span class="tag">XGBoost</span><span class="tag">Scikit-learn</span><span class="tag">PINNs</span><span class="tag">NumPy</span><span class="tag">SciPy</span></div></div>'+
-        '<div class="skillg"><h4>HPC &amp; Systems</h4><div class="tags"><span class="tag">CUDA</span><span class="tag">CuPy</span><span class="tag">Parallel Processing</span><span class="tag">Quantisation (4/8-bit)</span><span class="tag">Latency Optimisation</span><span class="tag">Linux</span></div></div>'+
-        '<div class="skillg"><h4>Data &amp; Engineering</h4><div class="tags"><span class="tag">Statistical Anomaly Detection</span><span class="tag">Time-Series</span><span class="tag">CI/CD</span><span class="tag">Docker</span><span class="tag">Git</span><span class="tag">Flask</span><span class="tag">ChromaDB</span></div></div>'+
-        '<div class="skillg"><h4>AI &amp; MLOps</h4><div class="tags"><span class="tag">RAG Systems</span><span class="tag">LLM Fine-Tuning</span><span class="tag">Multi-Agent Orchestration</span><span class="tag">SQLAlchemy</span></div></div>' },
+        '<div class="skillg"><h4>ML &amp; scientific computing</h4><div class="tags"><span class="tag">PyTorch</span><span class="tag">XGBoost</span><span class="tag">Scikit-learn</span><span class="tag">PINNs</span><span class="tag">NumPy</span><span class="tag">SciPy</span></div></div>'+
+        '<div class="skillg"><h4>HPC &amp; systems</h4><div class="tags"><span class="tag">CUDA</span><span class="tag">CuPy</span><span class="tag">parallel processing</span><span class="tag">Quantisation (4/8-bit)</span><span class="tag">latency optimisation</span><span class="tag">Linux</span></div></div>'+
+        '<div class="skillg"><h4>Data &amp; engineering</h4><div class="tags"><span class="tag">statistical anomaly detection</span><span class="tag">Time-Series</span><span class="tag">CI/CD</span><span class="tag">Docker</span><span class="tag">Git</span><span class="tag">Flask</span><span class="tag">ChromaDB</span></div></div>'+
+        '<div class="skillg"><h4>AI &amp; MLOps</h4><div class="tags"><span class="tag">RAG</span><span class="tag">LLM fine-tuning</span><span class="tag">multi-agent orchestration</span><span class="tag">SQLAlchemy</span></div></div>' },
  { id:'pubs', icon:'fa-book', label:'Papers', color:[1.0,0.42,0.55], css:'#ff6b8d',
    kick:'ink that set', title:'Publications',
    body:'<div class="item"><h3>Protocol-Aware Continuous Monitoring and Anomaly Detection in IoT Networks</h3><div class="meta">IoTaIS 2025 · Bali, Indonesia</div></div>'+
@@ -213,41 +226,44 @@ var SECTIONS = [
         '<div class="item"><h3>GATE 2024</h3><div class="meta">Rank 1790 · Data Science &amp; AI · top 5%</div></div>' },
  { id:'contact', icon:'fa-envelope', label:'Contact', color:[0.55,1.0,0.85], css:'#7dffcf',
    kick:'send a ripple back', title:'Contact',
-   body:'<p>Open to research collaborations, engineering roles, and interesting problems.</p>'+
-        '<div class="links"><a href="mailto:saptarshinag18@gmail.com"><i class="fa-solid fa-envelope"></i>saptarshinag18@gmail.com</a>'+
-        '<a href="https://www.linkedin.com/in/saptarshi18" target="_blank" rel="noopener"><i class="fa-brands fa-linkedin"></i>/in/saptarshi18</a>'+
-        '<a href="https://github.com/Saptarshi-Nag189" target="_blank" rel="noopener"><i class="fa-brands fa-github"></i>Saptarshi-Nag189</a>'+
-        '<a href="../../saptarshi_resume_linkedin_2026.pdf" target="_blank" rel="noopener"><i class="fa-solid fa-file-arrow-down"></i>download CV</a></div>' }
+   body:'<p>Open to research collaborations and engineering roles.</p>'+
+        '<div class="links"><a href="mailto:saptarshinag18@gmail.com"><i aria-hidden="true" class="fa-solid fa-envelope"></i>saptarshinag18@gmail.com</a>'+
+        '<a href="https://www.linkedin.com/in/saptarshi18" target="_blank" rel="noopener"><i aria-hidden="true" class="fa-brands fa-linkedin"></i>/in/saptarshi18</a>'+
+        '<a href="https://github.com/Saptarshi-Nag189" target="_blank" rel="noopener"><i aria-hidden="true" class="fa-brands fa-github"></i>Saptarshi-Nag189</a>'+
+        '<a href="../../saptarshi_resume_linkedin_2026.pdf" target="_blank" rel="noopener"><i aria-hidden="true" class="fa-solid fa-file-arrow-down"></i>download CV</a></div>' }
 ];
 
 /* ================= UI (orbs + panel + fallback) ================= */
 var orbsEl=document.getElementById('orbs');
 orbsEl.innerHTML=SECTIONS.map(function(s,i){
   return '<button class="orb" data-i="'+i+'" style="--pc:'+s.css+'" aria-label="'+s.label+'">'+
-    '<span class="lbl">'+s.label+'</span><i class="fa-solid '+s.icon+'"></i></button>';
+    '<span class="lbl">'+s.label+'</span><i aria-hidden="true" class="fa-solid '+s.icon+'"></i></button>';
 }).join('');
 var wrapEl=document.getElementById('panelWrap'), panelEl=document.getElementById('panel');
 function openPanel(i){
   var s=SECTIONS[i];
   panelEl.style.setProperty('--pc',s.css);
-  document.getElementById('pIcon').innerHTML='<i class="fa-solid '+s.icon+'"></i>';
+  document.getElementById('pIcon').innerHTML='<i aria-hidden="true" class="fa-solid '+s.icon+'"></i>';
   document.getElementById('pIcon').style.background=s.css;
   document.getElementById('pKick').textContent=s.kick;
   document.getElementById('pTitle').textContent=s.title;
   document.getElementById('pBody').innerHTML=s.body;
   panelEl.scrollTop=0;
   wrapEl.classList.add('open');
+  if(DLG) DLG.opened();
   sfx('splash');
 }
-function closePanel(){ if(!wrapEl.classList.contains('open'))return; wrapEl.classList.remove('open'); sfx('back'); }
+function closePanel(){ if(!wrapEl.classList.contains('open'))return; wrapEl.classList.remove('open'); if(DLG) DLG.closed(); sfx('back'); }
 document.getElementById('pClose').addEventListener('click',closePanel);
 wrapEl.addEventListener('click',function(e){ if(e.target===wrapEl) closePanel(); });
+/* keyboard and screen readers: the panel is a real dialog */
+var DLG = window.A11Y ? A11Y.dialog(wrapEl, document.getElementById('panel'), document.getElementById('pClose'), 'pTitle') : null;
 addEventListener('keydown',function(e){ if(e.key==='Escape') closePanel(); });
 
 function buildFallback(){
   document.getElementById('fallback').classList.add('show');
   document.getElementById('fbBody').innerHTML=SECTIONS.map(function(s){
-    return '<div style="margin-bottom:34px"><div style="font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:'+s.css+';margin-bottom:8px"><i class="fa-solid '+s.icon+'"></i> '+s.title+'</div>'+s.body+'</div>';
+    return '<div style="margin-bottom:34px"><div style="font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:'+s.css+';margin-bottom:8px"><i aria-hidden="true" class="fa-solid '+s.icon+'"></i> '+s.title+'</div>'+s.body+'</div>';
   }).join('');
   document.getElementById('title').style.display='none';
   document.getElementById('hint').style.display='none';
@@ -521,7 +537,7 @@ if(REDUCED){
   /* a few gentle steps to settle the seed art, then hold still */
   for(var i=0;i<40;i++) step(0.016);
   render();
-  hintEl.innerHTML='<i class="fa-solid fa-hand-pointer"></i>&nbsp; click an orb to open a chapter';
+  hintEl.innerHTML='<i aria-hidden="true" class="fa-solid fa-hand-pointer"></i>&nbsp; click an orb to open a chapter';
   raf=requestAnimationFrame(function r(t){ raf=requestAnimationFrame(r); if(!document.hidden) render(); });
 } else {
   raf=requestAnimationFrame(loop);

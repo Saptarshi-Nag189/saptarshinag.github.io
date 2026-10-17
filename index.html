@@ -1,48 +1,49 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="no-js">
 
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Saptarshi Nag — AI/ML Engineer</title>
+  <title>Saptarshi Nag · AI/ML Engineer</title>
   <meta name="description"
-    content="AI/ML engineer with an M.Tech in Artificial Intelligence from DIAT (DRDO). Research at NCRA-TIFR and GMRT. Production ML systems, real-time IoT security, physics-informed neural networks.">
-  <meta property="og:title" content="Saptarshi Nag — AI/ML Engineer">
-  <meta property="og:description"
-    content="AI/ML engineer at the intersection of security and systems research. DRDO, NCRA-TIFR, C-DAC.">
-  <meta property="og:type" content="website">
+    content="Saptarshi Nag is an AI/ML engineer at C-DAC Chennai, building ML-based attack detection for IoT networks. M.Tech in Computer Science and Engineering (Artificial Intelligence) from DIAT, a DRDO institute, with research at NCRA-TIFR and GMRT.">
+  <meta name="color-scheme" content="dark">
   <meta name="theme-color" content="#0a0a0b">
+  <link rel="canonical" href="https://saptarshi-nag189.github.io/saptarshinag.github.io/">
+  <meta property="og:title" content="Saptarshi Nag · AI/ML Engineer">
+  <meta property="og:description"
+    content="AI/ML engineer at C-DAC Chennai working on IoT intrusion detection. Previously pulsar detection at NCRA-TIFR and pipeline work at GMRT.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://saptarshi-nag189.github.io/saptarshinag.github.io/">
+  <meta name="twitter:card" content="summary">
   <link rel="icon" href="icon.ico">
+  <script>document.documentElement.className = 'js';</script>
 
-  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;600;700;800&display=swap"
     rel="stylesheet">
 
-  <!-- Styles -->
   <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-  <!-- Themed background: grid + canvas signal field -->
   <div class="bg-grid" aria-hidden="true"></div>
   <canvas id="bg" aria-hidden="true"></canvas>
   <div class="scanlines" aria-hidden="true"></div>
 
-  <a href="#hero" class="skip-link">Skip to content</a>
+  <a href="#main" class="skip-link">Skip to content</a>
 
-  <!-- Navigation -->
-  <nav id="nav" role="navigation" aria-label="Main navigation">
+  <nav id="nav" aria-label="Main">
     <div class="nav__inner container">
-      <a href="#hero" class="nav__logo mono" aria-label="Home">
+      <a href="#hero" class="nav__logo mono">
         <span class="nav__logo-user">saptarshi</span><span class="nav__logo-at">@</span><span
           class="nav__logo-host">nag</span><span class="nav__logo-path">:~$</span>
       </a>
 
-      <button class="nav__toggle" id="nav-toggle" aria-label="Toggle menu" aria-expanded="false"
+      <button class="nav__toggle" id="nav-toggle" aria-label="Menu" aria-expanded="false"
         aria-controls="nav-menu">
         <span class="nav__toggle-line"></span>
         <span class="nav__toggle-line"></span>
@@ -53,48 +54,47 @@
         <a href="#experience" class="nav__link mono">experience</a>
         <a href="#projects" class="nav__link mono">projects</a>
         <a href="#publications" class="nav__link mono">publications</a>
+        <a href="#education" class="nav__link mono">education</a>
         <a href="#skills" class="nav__link mono">skills</a>
+        <a href="#explore" class="nav__link mono">play</a>
         <a href="#contact" class="nav__link mono">contact</a>
-        <a href="saptarshi_resume_linkedin_2026.pdf" class="nav__cta mono" target="_blank" rel="noopener">[ cv.pdf
-          ]</a>
+        <a href="saptarshi_resume_linkedin_2026.pdf" class="nav__cta mono" target="_blank" rel="noopener">[ cv.pdf ]</a>
       </div>
     </div>
   </nav>
 
-  <main>
+  <main id="main">
 
     <!-- ==================== HERO ==================== -->
     <section id="hero" class="hero">
       <div class="container">
         <div class="terminal reveal" style="--i:0">
-          <div class="terminal__bar">
+          <div class="terminal__bar" aria-hidden="true">
             <span class="terminal__dot"></span>
             <span class="terminal__dot"></span>
             <span class="terminal__dot"></span>
             <span class="terminal__title mono">saptarshi@nag: ~/portfolio</span>
           </div>
           <div class="terminal__body">
-            <p class="hero__cmd mono"><span class="hero__prompt">$</span> whoami</p>
+            <p class="hero__cmd mono" aria-hidden="true"><span class="hero__prompt">$</span> whoami</p>
             <h1 class="hero__name mono">Saptarshi Nag</h1>
-            <p class="hero__role mono"><span class="hero__chevron">&gt;</span>
-              <span id="typed" class="hero__typed" data-text="AI/ML Engineer"></span><span class="caret"
+            <p class="hero__role mono"><span class="hero__chevron" aria-hidden="true">&gt;</span>
+              <span id="typed" class="hero__typed" data-text="AI/ML Engineer">AI/ML Engineer</span><span class="caret"
                 aria-hidden="true"></span>
             </p>
             <p class="hero__bio">
-              AI/ML engineer with an M.Tech in Artificial Intelligence (DIAT, DRDO) and research
-              experience at NCRA-TIFR and GMRT. Works across the full stack of an ML project:
-              feature engineering from raw data, model development and optimisation, and production
-              deployment under tight performance constraints. Current work at C-DAC focuses on
-              real-time IoT security using a Zero Trust framework with ML-based threat detection
-              across multiple wireless protocols. Past projects span physics-informed neural networks,
-              GPU-accelerated scientific computing, LLM fine-tuning, and RAG systems.
+              AI/ML engineer at C-DAC in Chennai, building ML-based attack detection for a Zero Trust
+              security framework that covers WiFi, BLE, Zigbee and LoRa networks. I studied for an M.Tech
+              in Computer Science and Engineering (Artificial Intelligence) at DIAT, a DRDO institute,
+              and did research at NCRA-TIFR, finding pulsars in noisy radio data, and at GMRT, speeding up
+              the telescope's filtering pipeline. I have also worked on physics-informed neural networks,
+              CUDA kernels, LLM fine-tuning and RAG systems.
             </p>
             <div class="hero__actions">
               <a href="#projects" class="btn btn--primary mono">[ ./view_work ]</a>
               <a href="saptarshi_resume_linkedin_2026.pdf" class="btn btn--ghost mono" target="_blank"
                 rel="noopener">[ ./download_cv.pdf ]</a>
-              <a href="wander/index.html" class="btn btn--ghost mono">[ ✿ the_wander ]</a>
-              <a href="signal/index.html" class="btn btn--ghost mono">[ ▶ run_the_signal ]</a>
+              <a href="#explore" class="btn btn--ghost mono">[ ./play_the_portfolio ]</a>
             </div>
           </div>
         </div>
@@ -103,59 +103,63 @@
     </section>
 
     <!-- ==================== METRICS STRIP ==================== -->
-    <section class="metrics" aria-label="Key results">
-      <div class="container metrics__grid">
-        <div class="metric reveal" style="--i:0">
-          <span class="metric__value mono">97.93<span class="metric__unit">%</span></span>
-          <span class="metric__label mono">IoT attack detection — C-DAC Zero-Trust framework</span>
-        </div>
-        <div class="metric reveal" style="--i:1">
+    <section class="metrics" aria-label="Results, with the project each comes from">
+      <ul class="container metrics__grid">
+        <li class="metric reveal" style="--i:0">
+          <span class="metric__value mono">96.97<span class="metric__unit">%</span></span>
+          <span class="metric__label mono">flow-attack accuracy (RF) · C-DAC Zero Trust IoT framework</span>
+        </li>
+        <li class="metric reveal" style="--i:1">
           <span class="metric__value mono">99.8<span class="metric__unit">%</span></span>
-          <span class="metric__label mono">pulsar detection F1 — NCRA-TIFR ResNet1D</span>
-        </div>
-        <div class="metric reveal" style="--i:2">
-          <span class="metric__value mono">4.1<span class="metric__unit">×</span></span>
-          <span class="metric__label mono">GPU training speedup — F1 tyre-strategy CUDA kernels</span>
-        </div>
-        <div class="metric reveal" style="--i:3">
-          <span class="metric__value mono">50<span class="metric__unit">%</span></span>
-          <span class="metric__label mono">pipeline latency cut — GMRT telescope refactor</span>
-        </div>
-        <div class="metric reveal" style="--i:4">
+          <span class="metric__label mono">pulsar detection F1 · NCRA-TIFR ResNet1D</span>
+        </li>
+        <li class="metric reveal" style="--i:2">
           <span class="metric__value mono">70M<span class="metric__unit">+</span></span>
-          <span class="metric__label mono">samples processed — NCRA pulsar search</span>
-        </div>
-      </div>
+          <span class="metric__label mono">samples searched · NCRA-TIFR pulsar project</span>
+        </li>
+        <li class="metric reveal" style="--i:3">
+          <span class="metric__value mono">4.1<span class="metric__unit">×</span></span>
+          <span class="metric__label mono">training speedup · F1 tyre model CUDA/CuPy kernels</span>
+        </li>
+        <li class="metric reveal" style="--i:4">
+          <span class="metric__value mono">50<span class="metric__unit">%</span></span>
+          <span class="metric__label mono">latency cut · GMRT filtering pipeline refactor</span>
+        </li>
+        <li class="metric reveal" style="--i:5">
+          <span class="metric__value mono">16</span>
+          <span class="metric__label mono">vulnerabilities found and fixed · ARO adversarial audit</span>
+        </li>
+      </ul>
     </section>
 
-    <!-- ==================== MARQUEE / TICKER ==================== -->
+    <!-- ==================== TICKER ==================== -->
     <div class="ticker" aria-hidden="true">
       <div class="ticker__track">
-        <span class="ticker__item mono">DRDO</span><span class="ticker__sep mono">::</span>
+        <span class="ticker__item mono">C-DAC</span><span class="ticker__sep mono">::</span>
         <span class="ticker__item mono">NCRA-TIFR</span><span class="ticker__sep mono">::</span>
         <span class="ticker__item mono">GMRT</span><span class="ticker__sep mono">::</span>
-        <span class="ticker__item mono">C-DAC</span><span class="ticker__sep mono">::</span>
-        <span class="ticker__item mono">IoT Security</span><span class="ticker__sep mono">::</span>
+        <span class="ticker__item mono">DIAT</span><span class="ticker__sep mono">::</span>
+        <span class="ticker__item mono">IoT security</span><span class="ticker__sep mono">::</span>
         <span class="ticker__item mono">Zero Trust</span><span class="ticker__sep mono">::</span>
-        <span class="ticker__item mono">Physics-Informed Neural Networks</span><span class="ticker__sep mono">::</span>
-        <span class="ticker__item mono">GPU Computing</span><span class="ticker__sep mono">::</span>
-        <span class="ticker__item mono">LLM Fine-Tuning</span><span class="ticker__sep mono">::</span>
-        <span class="ticker__item mono">RAG Systems</span><span class="ticker__sep mono">::</span>
-        <span class="ticker__item mono">Signal Processing</span><span class="ticker__sep mono">::</span>
-        <span class="ticker__item mono">Multi-Agent Orchestration</span><span class="ticker__sep mono">::</span>
-        <!-- duplicate for seamless loop -->
-        <span class="ticker__item mono">DRDO</span><span class="ticker__sep mono">::</span>
+        <span class="ticker__item mono">physics-informed neural networks</span><span class="ticker__sep mono">::</span>
+        <span class="ticker__item mono">GPU computing</span><span class="ticker__sep mono">::</span>
+        <span class="ticker__item mono">LLM fine-tuning</span><span class="ticker__sep mono">::</span>
+        <span class="ticker__item mono">RAG</span><span class="ticker__sep mono">::</span>
+        <span class="ticker__item mono">signal processing</span><span class="ticker__sep mono">::</span>
+        <span class="ticker__item mono">multi-agent orchestration</span><span class="ticker__sep mono">::</span>
+        <!-- second copy, so the loop has no gap -->
+        <span class="ticker__item mono">C-DAC</span><span class="ticker__sep mono">::</span>
         <span class="ticker__item mono">NCRA-TIFR</span><span class="ticker__sep mono">::</span>
         <span class="ticker__item mono">GMRT</span><span class="ticker__sep mono">::</span>
-        <span class="ticker__item mono">C-DAC</span><span class="ticker__sep mono">::</span>
-        <span class="ticker__item mono">IoT Security</span><span class="ticker__sep mono">::</span>
+        <span class="ticker__item mono">DIAT</span><span class="ticker__sep mono">::</span>
+        <span class="ticker__item mono">IoT security</span><span class="ticker__sep mono">::</span>
         <span class="ticker__item mono">Zero Trust</span><span class="ticker__sep mono">::</span>
-        <span class="ticker__item mono">Physics-Informed Neural Networks</span><span class="ticker__sep mono">::</span>
-        <span class="ticker__item mono">GPU Computing</span><span class="ticker__sep mono">::</span>
-        <span class="ticker__item mono">LLM Fine-Tuning</span><span class="ticker__sep mono">::</span>
-        <span class="ticker__item mono">RAG Systems</span><span class="ticker__sep mono">::</span>
-        <span class="ticker__item mono">Signal Processing</span><span class="ticker__sep mono">::</span>
-        <span class="ticker__item mono">Multi-Agent Orchestration</span><span class="ticker__sep mono">::</span>
+        <span class="ticker__item mono">physics-informed neural networks</span><span class="ticker__sep mono">::</span>
+        <span class="ticker__item mono">GPU computing</span><span class="ticker__sep mono">::</span>
+        <span class="ticker__item mono">LLM fine-tuning</span><span class="ticker__sep mono">::</span>
+        <span class="ticker__item mono">RAG</span><span class="ticker__sep mono">::</span>
+        <span class="ticker__item mono">signal processing</span><span class="ticker__sep mono">::</span>
+        <span class="ticker__item mono">multi-agent orchestration</span><span class="ticker__sep mono">::</span>
       </div>
     </div>
 
@@ -163,90 +167,86 @@
     <section id="experience" class="section">
       <div class="container">
         <div class="section__head reveal">
-          <span class="section__index mono">01</span>
           <h2 class="section__title mono">~/experience</h2>
           <span class="section__rule"></span>
         </div>
 
-        <!-- C-DAC -->
         <article class="entry reveal" style="--i:0">
-          <div class="entry__marker mono">+</div>
+          <div class="entry__marker mono" aria-hidden="true">+</div>
           <div class="entry__content">
             <div class="entry__header">
               <div>
                 <h3 class="entry__company mono">C-DAC
                   <span class="entry__company-full">(Centre for Development of Advanced Computing)</span>
                 </h3>
-                <p class="entry__role">Project Engineer — AI Research &amp; IoT Security</p>
+                <p class="entry__role">Project Engineer, AI Research &amp; IoT Security</p>
               </div>
               <div class="entry__meta mono">
-                <span class="entry__date">July 2025 — Present</span>
+                <span class="entry__date">July 2025 – Present</span>
                 <span class="entry__location">Chennai, India</span>
               </div>
             </div>
             <ul class="entry__list">
-              <li>Built a real-time Zero Trust security framework for IoT networks covering WiFi (802.11), BLE, Zigbee,
-                and LoRa; ML-based attack detection feeds a continuous 7-pillar device trust score engine.</li>
-              <li>Two-stage hybrid detection pipeline: window model (1-second sliding windows, 7 attack classes) + flow
-                model for longer-duration patterns. Compared RF, XGBoost, SVM, MLP, and Voting Ensemble across 6
-                preprocessing iterations with SMOTE and Optuna (TPE) hyperparameter search.</li>
-              <li>Detection pipeline runs at <strong>&lt;1 ms inference latency per window</strong> (optimised XGBoost
-                and MLP architectures) — deployable on edge devices; best accuracy <strong>97.93%</strong> on
-                high-throughput network data.</li>
-              <li>Integrated <strong>SHAP-based explainability</strong> to debug model behaviour and keep automated
-                decisions transparent; SQL pipelines for continuous logging plus live monitoring dashboards.</li>
-              <li>Engineered 63 statistical and behavioural features from raw PCAPs using Scapy and PyShark (MAC entropy,
-                frame rate statistics, sequence gap analysis, EAPOL key MIC ratios, beacon timestamp variance).</li>
-              <li>Live PCAP drop-folder pipeline via Watchdog: MD5 deduplication, multi-threaded extraction, batch
-                inference, per-resource thread-safe locking.</li>
-              <li>Integrated SPIFFE/SPIRE workload identity, mTLS, OTP-based 2FA.</li>
-              <li>Co-authored two papers published at IoTaIS 2025.</li>
+              <li>Built a real-time Zero Trust security framework for IoT networks covering WiFi (802.11), BLE, Zigbee
+                and LoRa. Its ML-based attack detection feeds a continuous 7-pillar device trust score.</li>
+              <li>Designed a two-stage detection pipeline. A window model sorts 1-second sliding windows of 802.11
+                management frames into 7 attack classes, and a flow model catches longer patterns. I compared RF,
+                XGBoost, SVM, MLP and a Voting Ensemble over 6 preprocessing iterations, with SMOTE and Optuna (TPE)
+                for the hyperparameter search.</li>
+              <li>Best results: <strong>96.97% accuracy</strong> on flow classification (RF), and
+                <strong>90.86% accuracy / 86.78% macro F1</strong> on window classification (Voting Ensemble). Youden's
+                J threshold optimisation and protected feature selection handled the 7-class imbalance.</li>
+              <li>Engineered 63 statistical and behavioural features from raw PCAP captures with Scapy and PyShark: MAC
+                entropy, frame-rate statistics, sequence gaps, EAPOL key MIC ratios and beacon timestamp variance. A
+                streaming reader keeps memory flat on large files.</li>
+              <li>Wrote a live PCAP drop-folder pipeline on Watchdog observers, with stability checks, MD5
+                deduplication, multi-threaded frame extraction, batch inference and a lock per shared resource.</li>
+              <li>Integrated SPIFFE/SPIRE workload identity, mTLS and OTP-based 2FA, and co-authored the two IoTaIS 2025
+                papers on the framework.</li>
             </ul>
           </div>
         </article>
 
-        <!-- NCRA-TIFR -->
         <article class="entry reveal" style="--i:1">
-          <div class="entry__marker mono">+</div>
+          <div class="entry__marker mono" aria-hidden="true">+</div>
           <div class="entry__content">
             <div class="entry__header">
               <div>
                 <h3 class="entry__company mono">National Centre for Radio Astrophysics (NCRA-TIFR)</h3>
-                <p class="entry__role">Research Intern (M.Tech Project)</p>
+                <p class="entry__role">Research Intern (M.Tech project)</p>
               </div>
               <div class="entry__meta mono">
-                <span class="entry__date">Aug 2024 — Apr 2025</span>
+                <span class="entry__date">Aug 2024 – Apr 2025</span>
                 <span class="entry__location">Pune, India</span>
               </div>
             </div>
             <ul class="entry__list">
-              <li>Designed a ResNet1D architecture with Squeeze-and-Excitation attention for weak pulsar signal detection
-                in noisy astrophysical data at low SNR.</li>
-              <li>Achieved <strong>99.8% F1-score</strong> across 70M+ samples; built adaptive thresholding for
-                non-stationary noise floors across observation sessions.</li>
-              <li>Ran the project end-to-end independently: scoping through deployment and write-up.</li>
+              <li>Designed a ResNet1D with Squeeze-and-Excitation attention to tell real pulsar signatures from radio
+                interference in noisy, low-SNR astrophysical data.</li>
+              <li>Reached <strong>99.8% F1</strong> across 70M+ samples, with adaptive thresholding for noise floors
+                that shifted between observation sessions.</li>
+              <li>Ran the project on my own, from scoping through deployment and the write-up.</li>
             </ul>
           </div>
         </article>
 
-        <!-- GMRT -->
         <article class="entry reveal" style="--i:2">
-          <div class="entry__marker mono">+</div>
+          <div class="entry__marker mono" aria-hidden="true">+</div>
           <div class="entry__content">
             <div class="entry__header">
               <div>
-                <h3 class="entry__company mono">Giant Metrewave Radio Telescope (GMRT-NCRA-TIFR)</h3>
-                <p class="entry__role">Winter Intern — HPC &amp; Signal Processing Optimisation</p>
+                <h3 class="entry__company mono">Giant Metrewave Radio Telescope (GMRT, NCRA-TIFR)</h3>
+                <p class="entry__role">Winter Intern, HPC &amp; Signal Processing Optimisation</p>
               </div>
               <div class="entry__meta mono">
-                <span class="entry__date">Dec 2023 — Jan 2024</span>
+                <span class="entry__date">Dec 2023 – Jan 2024</span>
                 <span class="entry__location">Pune, India</span>
               </div>
             </div>
             <ul class="entry__list">
-              <li>Profiled legacy CPU signal filtering pipelines, refactored for multicore execution.</li>
-              <li>Cut latency by <strong>50%</strong>, unblocking real-time processing of continuous telescope data
-                streams.</li>
+              <li>Profiled the legacy CPU signal-filtering pipelines and refactored them for multicore execution.</li>
+              <li>That cut latency by <strong>50%</strong>, enough to process the telescope's continuous data stream in
+                real time.</li>
             </ul>
           </div>
         </article>
@@ -258,18 +258,16 @@
     <section id="projects" class="section">
       <div class="container">
         <div class="section__head reveal">
-          <span class="section__index mono">02</span>
           <h2 class="section__title mono">~/projects</h2>
           <span class="section__rule"></span>
         </div>
 
         <div class="cards">
 
-          <!-- F1 Tyre Degradation -->
           <article class="card reveal" style="--i:0">
-            <div class="card__bar mono"><span class="card__dot"></span> f1_tyre_degradation.py</div>
+            <div class="card__bar mono" aria-hidden="true"><span class="card__dot"></span> f1_tyre_degradation.py</div>
             <div class="card__body">
-              <h3 class="card__title">GPU-Accelerated F1 Tyre Degradation &amp; Race Strategy</h3>
+              <h3 class="card__title">GPU-accelerated F1 tyre degradation and race strategy</h3>
               <div class="card__stack">
                 <span class="tag mono">Python</span>
                 <span class="tag mono">PyTorch</span>
@@ -278,20 +276,20 @@
                 <span class="tag mono">XGBoost</span>
               </div>
               <ul class="card__list">
-                <li>Hybrid LSTM-XGBoost architecture for tyre wear modelling and pit-stop window prediction from 10 Hz
-                  telemetry.</li>
-                <li>Physics-Informed Loss Functions (PINNs) separating thermal and mechanical degradation; enforces
-                  physical constraints pure data-driven models cannot capture.</li>
-                <li>Custom CUDA/CuPy kernels for dense matrix operations; <strong>4.1x training speedup</strong>.</li>
+                <li>A hybrid LSTM-XGBoost model predicts tyre wear and pit-stop windows from 10 Hz telemetry, turning
+                  raw sensor streams into strategy calls in near real time.</li>
+                <li>Physics-informed loss terms separate thermal from mechanical degradation and hold the model to
+                  physical constraints.</li>
+                <li>Custom CUDA/CuPy kernels for the dense matrix operations cut training time by
+                  <strong>4.1×</strong>.</li>
               </ul>
             </div>
           </article>
 
-          <!-- Omniscience Pro -->
           <article class="card reveal" style="--i:1">
-            <div class="card__bar mono"><span class="card__dot"></span> omniscience_pro.py</div>
+            <div class="card__bar mono" aria-hidden="true"><span class="card__dot"></span> omniscience_pro.py</div>
             <div class="card__body">
-              <h3 class="card__title">Omniscience Pro — Privacy-First Local RAG System</h3>
+              <h3 class="card__title">Omniscience Pro: a privacy-first local RAG system</h3>
               <div class="card__stack">
                 <span class="tag mono">Python</span>
                 <span class="tag mono">LangChain</span>
@@ -299,18 +297,19 @@
                 <span class="tag mono">Docker</span>
               </div>
               <ul class="card__list">
-                <li>Local, privacy-first RAG supporting multi-modal document ingestion.</li>
-                <li>&lt;50 ms vector search (HNSW index); &lt;500 ms first-token latency on consumer hardware.</li>
-                <li>GPU-aware Docker with full CI/CD pipeline; POSIX file locking for concurrent access.</li>
+                <li>Runs locally and ingests documents of several kinds.</li>
+                <li>Vector search in under 50 ms (HNSW index) and the first token in under 500 ms, on consumer
+                  hardware.</li>
+                <li>Ships as a GPU-aware Docker image with a full CI/CD pipeline. POSIX file locking keeps concurrent
+                  sessions from corrupting each other.</li>
               </ul>
             </div>
           </article>
 
-          <!-- ARO -->
           <article class="card reveal" style="--i:2">
-            <div class="card__bar mono"><span class="card__dot"></span> aro_operator.py</div>
+            <div class="card__bar mono" aria-hidden="true"><span class="card__dot"></span> aro_operator.py</div>
             <div class="card__body">
-              <h3 class="card__title">ARO — Autonomous Research Operator (Multi-Agent LLM Platform)</h3>
+              <h3 class="card__title">ARO: Autonomous Research Operator</h3>
               <div class="card__stack">
                 <span class="tag mono">Python</span>
                 <span class="tag mono">Flask</span>
@@ -319,19 +318,18 @@
                 <span class="tag mono">React</span>
               </div>
               <ul class="card__list">
-                <li>Multi-agent LLM workflows as directed graphs (NetworkX); Flask backend streaming via Server-Sent
-                  Events; React frontend for interactive output.</li>
-                <li>Full adversarial audit post-build: found and fixed 16 vulnerabilities across auth, SSRF, input
-                  validation, and CORS. SQLAlchemy-backed audit trails.</li>
+                <li>Runs multi-agent LLM workflows as directed graphs in NetworkX. A Flask backend streams progress to a
+                  React frontend over Server-Sent Events.</li>
+                <li>An adversarial audit after the build found and fixed 16 vulnerabilities across auth, SSRF, input
+                  validation and CORS. SQLAlchemy-backed audit trails keep concurrent sessions safe.</li>
               </ul>
             </div>
           </article>
 
-          <!-- Llama 3.2 -->
           <article class="card reveal" style="--i:3">
-            <div class="card__bar mono"><span class="card__dot"></span> llama32_optimise.py</div>
+            <div class="card__bar mono" aria-hidden="true"><span class="card__dot"></span> llama32_finetune.py</div>
             <div class="card__body">
-              <h3 class="card__title">Llama 3.2 Optimisation for Efficient Inference</h3>
+              <h3 class="card__title">Fine-tuning Llama 3.2 for efficient inference</h3>
               <div class="card__stack">
                 <span class="tag mono">Python</span>
                 <span class="tag mono">Unsloth</span>
@@ -339,10 +337,10 @@
                 <span class="tag mono">PyTorch</span>
               </div>
               <ul class="card__list">
-                <li>Fine-tuned Llama 3.2 (1B and 3B) on 21.5k domain-specific interactions for specialised task following
-                  and agentic use cases.</li>
-                <li>4-bit quantisation via Unsloth for consumer GPU deployment; no meaningful quality drop vs
-                  full-precision baselines.</li>
+                <li>Fine-tuned Llama 3.2 1B and 3B on 21.5k domain-specific interactions, for task following and agentic
+                  use.</li>
+                <li>4-bit quantisation with Unsloth brought memory down far enough to run on a consumer GPU, with no
+                  meaningful drop in output quality against the full-precision models.</li>
               </ul>
             </div>
           </article>
@@ -355,25 +353,26 @@
     <section id="publications" class="section">
       <div class="container">
         <div class="section__head reveal">
-          <span class="section__index mono">03</span>
           <h2 class="section__title mono">~/publications</h2>
           <span class="section__rule"></span>
         </div>
 
         <div class="pubs">
           <article class="pub reveal" style="--i:0">
-            <span class="pub__bullet mono">&gt;</span>
+            <span class="pub__bullet mono" aria-hidden="true">&gt;</span>
             <div>
               <h3 class="pub__title">Protocol-Aware Continuous Monitoring and Anomaly Detection in IoT Networks</h3>
-              <p class="pub__venue mono">IoTaIS 2025, Bali, Indonesia</p>
+              <p class="pub__venue mono">International Conference on Internet of Things and Intelligence Systems
+                (IoTaIS) 2025, Bali, Indonesia</p>
             </div>
           </article>
 
           <article class="pub reveal" style="--i:1">
-            <span class="pub__bullet mono">&gt;</span>
+            <span class="pub__bullet mono" aria-hidden="true">&gt;</span>
             <div>
               <h3 class="pub__title">A Comprehensive Survey on Zero Trust Architecture in IoT Networks</h3>
-              <p class="pub__venue mono">IoTaIS 2025, Bali, Indonesia</p>
+              <p class="pub__venue mono">International Conference on Internet of Things and Intelligence Systems
+                (IoTaIS) 2025, Bali, Indonesia</p>
             </div>
           </article>
         </div>
@@ -384,7 +383,6 @@
     <section id="education" class="section">
       <div class="container">
         <div class="section__head reveal">
-          <span class="section__index mono">04</span>
           <h2 class="section__title mono">~/education</h2>
           <span class="section__rule"></span>
         </div>
@@ -392,32 +390,33 @@
         <div class="cards cards--edu">
 
           <article class="card reveal" style="--i:0">
-            <div class="card__bar mono"><span class="card__dot"></span> m_tech.log</div>
+            <div class="card__bar mono" aria-hidden="true"><span class="card__dot"></span> m_tech.log</div>
             <div class="card__body">
               <span class="edu__degree mono">M.Tech</span>
               <h3 class="card__title">Computer Science &amp; Engineering (Artificial Intelligence)</h3>
               <p class="edu__institution">Defence Institute of Advanced Technology (DIAT), DRDO</p>
               <p class="edu__location mono">Pune, India</p>
               <div class="edu__details mono">
-                <span class="edu__year">2023 — 2025</span>
-                <span class="edu__score">CGPA: <strong>8.64</strong>/10.0</span>
+                <span class="edu__year">2023–2025</span>
+                <span class="edu__score">CGPA <strong>8.64</strong>/10.0</span>
               </div>
             </div>
           </article>
 
           <article class="card reveal" style="--i:1">
-            <div class="card__bar mono"><span class="card__dot"></span> b_tech.log</div>
+            <div class="card__bar mono" aria-hidden="true"><span class="card__dot"></span> b_tech.log</div>
             <div class="card__body">
               <span class="edu__degree mono">B.Tech</span>
               <h3 class="card__title">Computer Science &amp; Engineering</h3>
               <p class="edu__institution">Academy of Technology</p>
               <p class="edu__location mono">Kolkata, India</p>
               <div class="edu__details mono">
-                <span class="edu__year">2019 — 2023</span>
-                <span class="edu__score">CGPA: <strong>9.44</strong>/10.0</span>
+                <span class="edu__year">2019–2023</span>
+                <span class="edu__score">CGPA <strong>9.44</strong>/10.0</span>
               </div>
               <div class="edu__badge">
-                <span class="tag tag--accent mono">GATE 2024 — Rank 1790 in Data Science &amp; AI (Top 5%)</span>
+                <span class="tag tag--accent mono">GATE 2024: rank 1790 in Data Science &amp; AI (top 5% of
+                  applicants)</span>
               </div>
             </div>
           </article>
@@ -430,7 +429,6 @@
     <section id="skills" class="section">
       <div class="container">
         <div class="section__head reveal">
-          <span class="section__index mono">05</span>
           <h2 class="section__title mono">~/skills</h2>
           <span class="section__rule"></span>
         </div>
@@ -453,7 +451,7 @@
             <div class="skill-group__pills">
               <span class="tag mono">PyTorch</span>
               <span class="tag mono">XGBoost</span>
-              <span class="tag mono">Scikit-learn</span>
+              <span class="tag mono">scikit-learn</span>
               <span class="tag mono">PINNs</span>
               <span class="tag mono">NumPy</span>
               <span class="tag mono">SciPy</span>
@@ -465,9 +463,9 @@
             <div class="skill-group__pills">
               <span class="tag mono">CUDA</span>
               <span class="tag mono">CuPy</span>
-              <span class="tag mono">Parallel Processing</span>
-              <span class="tag mono">Model Quantisation (4-bit/8-bit)</span>
-              <span class="tag mono">Latency Optimisation</span>
+              <span class="tag mono">parallel processing</span>
+              <span class="tag mono">4-bit / 8-bit quantisation</span>
+              <span class="tag mono">latency optimisation</span>
               <span class="tag mono">Linux</span>
             </div>
           </div>
@@ -475,8 +473,8 @@
           <div class="skill-group reveal" style="--i:3">
             <h3 class="skill-group__label mono"># data &amp; engineering</h3>
             <div class="skill-group__pills">
-              <span class="tag mono">Statistical Anomaly Detection</span>
-              <span class="tag mono">Time-Series Analysis</span>
+              <span class="tag mono">statistical anomaly detection</span>
+              <span class="tag mono">time-series analysis</span>
               <span class="tag mono">CI/CD</span>
               <span class="tag mono">Docker</span>
               <span class="tag mono">Git</span>
@@ -488,9 +486,9 @@
           <div class="skill-group reveal" style="--i:4">
             <h3 class="skill-group__label mono"># ai &amp; mlops</h3>
             <div class="skill-group__pills">
-              <span class="tag mono">RAG Systems</span>
-              <span class="tag mono">LLM Fine-Tuning</span>
-              <span class="tag mono">Multi-Agent Orchestration (NetworkX, LangChain)</span>
+              <span class="tag mono">RAG</span>
+              <span class="tag mono">LLM fine-tuning</span>
+              <span class="tag mono">multi-agent orchestration (NetworkX, LangChain)</span>
               <span class="tag mono">SQLAlchemy</span>
             </div>
           </div>
@@ -499,26 +497,87 @@
       </div>
     </section>
 
+    <!-- ==================== EXPLORE ==================== -->
+    <section id="explore" class="section">
+      <div class="container">
+        <div class="section__head reveal">
+          <h2 class="section__title mono">~/play</h2>
+          <span class="section__rule"></span>
+        </div>
+
+        <p class="explore__intro reveal">The same work, built into things you can play. Each one needs a modern
+          browser, and they sound best with audio on.</p>
+
+        <ul class="cards cards--explore">
+          <li class="reveal" style="--i:0">
+            <a class="card card--link" href="wander/index.html">
+              <span class="card__bar mono" aria-hidden="true"><span class="card__dot"></span> wander/</span>
+              <span class="card__body">
+                <span class="card__title">The Wander</span>
+                <span class="card__text">A 3D walk through eight small worlds. The doors open onto parts of my work,
+                  six machines inside actually run, and a fairy answers questions about me.</span>
+                <span class="card__go mono">walk it →</span>
+              </span>
+            </a>
+          </li>
+          <li class="reveal" style="--i:1">
+            <a class="card card--link" href="signal/index.html">
+              <span class="card__bar mono" aria-hidden="true"><span class="card__dot"></span> signal/</span>
+              <span class="card__body">
+                <span class="card__title">The Signal</span>
+                <span class="card__text">Eight short acts, each a simplified version of a real task: folding pulsar
+                  data, splitting the GMRT pipeline across cores, catching an IoT intrusion, calling an F1 pit
+                  stop.</span>
+                <span class="card__go mono">run it →</span>
+              </span>
+            </a>
+          </li>
+          <li class="reveal" style="--i:2">
+            <a class="card card--link" href="light/index.html">
+              <span class="card__bar mono" aria-hidden="true"><span class="card__dot"></span> light/ <span
+                  class="card__flag">experimental</span></span>
+              <span class="card__body">
+                <span class="card__title">The Long Light</span>
+                <span class="card__text">An island to walk, run and row across in one day's light, with a fairy
+                  riding along to answer questions. Still being built, and heavy: it wants a GPU.</span>
+                <span class="card__go mono">cross it →</span>
+              </span>
+            </a>
+          </li>
+          <li class="reveal" style="--i:3">
+            <a class="card card--link" href="demos/index.html">
+              <span class="card__bar mono" aria-hidden="true"><span class="card__dot"></span> demos/</span>
+              <span class="card__body">
+                <span class="card__title">The archive</span>
+                <span class="card__text">Fourteen earlier versions of this portfolio, from a terminal you can type into
+                  to a night drive where each motorway exit is a chapter.</span>
+                <span class="card__go mono">browse →</span>
+              </span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </section>
+
     <!-- ==================== CONTACT ==================== -->
     <section id="contact" class="section">
       <div class="container">
         <div class="section__head reveal">
-          <span class="section__index mono">06</span>
           <h2 class="section__title mono">~/contact</h2>
           <span class="section__rule"></span>
         </div>
 
         <p class="contact__subtitle mono reveal" style="--i:0">
-          <span class="hero__prompt">$</span> echo "Open to research collaborations, engineering roles, and
-          interesting problems."
+          <span class="hero__prompt" aria-hidden="true">$</span> echo "Open to research collaborations and engineering
+          roles."
         </p>
 
         <div class="contact__links">
 
           <a href="mailto:saptarshinag18@gmail.com" class="contact-card reveal" style="--i:0">
-            <svg class="contact-card__icon" xmlns="http://www.w3.org/2000/svg" width="26" height="26"
-              viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-              stroke-linejoin="round">
+            <svg class="contact-card__icon" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"
+              width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+              stroke-linecap="round" stroke-linejoin="round">
               <rect width="20" height="16" x="2" y="4" rx="0" />
               <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
             </svg>
@@ -528,9 +587,9 @@
 
           <a href="https://www.linkedin.com/in/saptarshi18" target="_blank" rel="noopener" class="contact-card reveal"
             style="--i:1">
-            <svg class="contact-card__icon" xmlns="http://www.w3.org/2000/svg" width="26" height="26"
-              viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-              stroke-linejoin="round">
+            <svg class="contact-card__icon" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"
+              width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+              stroke-linecap="round" stroke-linejoin="round">
               <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
               <rect width="4" height="12" x="2" y="9" />
               <circle cx="4" cy="4" r="2" />
@@ -541,8 +600,8 @@
 
           <a href="https://github.com/Saptarshi-Nag189" target="_blank" rel="noopener" class="contact-card reveal"
             style="--i:2">
-            <svg class="contact-card__icon" xmlns="http://www.w3.org/2000/svg" width="26" height="26"
-              viewBox="0 0 24 24" fill="currentColor">
+            <svg class="contact-card__icon" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"
+              width="26" height="26" viewBox="0 0 24 24" fill="currentColor">
               <path
                 d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23a11.509 11.509 0 0 1 3.004-.404c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
             </svg>
@@ -556,15 +615,13 @@
 
   </main>
 
-  <!-- Footer -->
   <footer class="footer">
     <div class="container footer__inner mono">
-      <span class="footer__text">// Saptarshi Nag — built from scratch, no frameworks</span>
-      <span class="footer__year">© <span id="footer-year"></span></span>
+      <span class="footer__text">// Saptarshi Nag · hand-written HTML, CSS and JavaScript</span>
+      <span class="footer__year">© <span id="footer-year">2026</span></span>
     </div>
   </footer>
 
-  <!-- App script -->
   <script type="module" src="app.js"></script>
 
 </body>

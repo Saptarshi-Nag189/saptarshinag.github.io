@@ -398,31 +398,62 @@ export function buildGrass(BABYLON, scene, field, shaders, opts) {
    Species geometry
    ========================================================================== */
 
-/** Broadleaf: four canopy masses sitting low on a short trunk. */
-function broadleafGeometry(BABYLON, scene, field) {
-  const noise = makeNoise2D(field.seed + 606);
+/**
+ * Broadleaf, in four silhouettes.
+ *
+ * One tree shape at four scales is what makes a wood read as wallpaper: the eye
+ * spots the repeat immediately however the instances are rotated. These differ
+ * in the thing the eye actually reads at distance — the OUTLINE — rather than
+ * in detail nobody can see: a broad rounded crown, a tall narrow one, a low
+ * spreading one, and a leaning tree that breaks every horizon it stands on.
+ */
+const BROADLEAF_FORMS = [
+  { // 0 — the broad standard
+    H: 4.0, trunk: [0.30, 0.72], lean: 0,
+    blobs: [[0.0, 1.26, 0.0, 5.2], [1.7, 1.05, -1.0, 4.0],
+            [-1.6, 1.12, 1.3, 3.6], [0.4, 1.58, 0.6, 3.4]],
+    squash: 0.80,
+  },
+  { // 1 — tall and narrow, for crowded ground
+    H: 6.2, trunk: [0.26, 0.56], lean: 0,
+    blobs: [[0.0, 1.10, 0.0, 3.5], [0.7, 1.28, -0.4, 2.9],
+            [-0.6, 1.36, 0.5, 2.6], [0.1, 1.55, 0.2, 2.2]],
+    squash: 0.92,
+  },
+  { // 2 — low and spreading, the one you shelter under
+    H: 2.9, trunk: [0.40, 0.95], lean: 0,
+    blobs: [[0.0, 1.45, 0.0, 6.0], [2.4, 1.28, -1.3, 4.4],
+            [-2.2, 1.34, 1.6, 4.2], [0.3, 1.62, 1.9, 3.6], [0.6, 1.30, -2.2, 3.4]],
+    squash: 0.62,
+  },
+  { // 3 — leaning, gnarled; breaks the horizon wherever it stands
+    H: 4.6, trunk: [0.28, 0.66], lean: 0.34,
+    blobs: [[1.5, 1.22, 0.4, 4.2], [2.6, 1.02, -0.8, 3.2],
+            [0.6, 1.34, 1.4, 3.0], [2.0, 1.48, 0.9, 2.6]],
+    squash: 0.78,
+  },
+];
+
+function broadleafGeometry(BABYLON, scene, field, form) {
+  const F = BROADLEAF_FORMS[form || 0];
+  const noise = makeNoise2D(field.seed + 606 + (form || 0) * 91);
   const parts = [];
-  const H = 4.0;
+  const H = F.H;
 
   const trunk = BABYLON.MeshBuilder.CreateCylinder('tr',
-    { height: H, diameterTop: 0.30, diameterBottom: 0.72, tessellation: 6 }, scene);
+    { height: H, diameterTop: F.trunk[0], diameterBottom: F.trunk[1], tessellation: 6 }, scene);
   trunk.position.y = H / 2;
+  if (F.lean) { trunk.rotation.z = -F.lean; trunk.position.x = Math.sin(F.lean) * H * 0.4; }
   trunk.bakeCurrentTransformIntoVertices();
   deform(BABYLON, trunk, noise, 0.10, 0.9, 0.2);
   paint(BABYLON, trunk, [0.27, 0.21, 0.17], 0, H * 3.0);
   parts.push(trunk);
 
-  const blobs = [
-    [ 0.0, H * 1.26, 0.0, 5.2],
-    [ 1.7, H * 1.05, -1.0, 4.0],
-    [-1.6, H * 1.12, 1.3, 3.6],
-    [ 0.4, H * 1.58, 0.6, 3.4],
-  ];
-  for (const [bx, by, bz, d] of blobs) {
+  for (const [bx, by, bz, d] of F.blobs) {
     const s = BABYLON.MeshBuilder.CreateIcoSphere('cn',
       { radius: d / 2, subdivisions: 2, flat: true }, scene);
-    s.position.set(bx, by, bz);
-    s.scaling.y = 0.80;
+    s.position.set(bx, H * by, bz);
+    s.scaling.y = F.squash;
     s.bakeCurrentTransformIntoVertices();
     deform(BABYLON, s, noise, 0.42, 0.55, 0.8);
     paint(BABYLON, s, [1, 1, 1], 1, H * 2.0);      // white: the tint IS the leaf colour
@@ -430,7 +461,7 @@ function broadleafGeometry(BABYLON, scene, field) {
   }
 
   const m = BABYLON.Mesh.MergeMeshes(parts, true, true, undefined, false, false);
-  m.name = 'broadleaf';
+  m.name = 'broadleaf' + (form || 0);
   return m;
 }
 
@@ -663,10 +694,14 @@ function rockGeometry(BABYLON, scene, field) {
   return base;
 }
 
+/* `collide` is the radius of the TRUNK, not the canopy. A broadleaf canopy is
+   five metres across and you are meant to walk under it; colliding with that
+   would turn a wood into a wall. Species with no `collide` (grass, shrub,
+   reeds) are brushed through. */
 export const SPECIES = [
   {
-    name: 'broadleaf', rngSalt: 10193, perTile: 140, islandCount: 3600,
-    geom: (B, sc, f) => broadleafGeometry(B, sc, f),
+    name: 'broadleaf', collide: 0.42, rngSalt: 10193, perTile: 60, islandCount: 1479,
+    geom: (B, sc, f) => broadleafGeometry(B, sc, f, 0),
     mat: { wind: 0.16, shadeSoft: 0.40, bandLift: 0.06, rimScale: 0.9, nearFade: [1.1, 3.4] },
     rule: {
       effort: 6, minY: 2.4, maxY: 78, maxSlope: 0.42,
@@ -677,7 +712,43 @@ export const SPECIES = [
     place: { scale: uniScale(0.58, 1.12), sink: () => -0.25, tint: leafTint },
   },
   {
-    name: 'pine', rngSalt: 20411, perTile: 100, islandCount: 2400,
+    name: 'broadleafTall', collide: 0.36, rngSalt: 11279, perTile: 42, islandCount: 1035,
+    geom: (B, sc, f) => broadleafGeometry(B, sc, f, 1),
+    mat: { wind: 0.16, shadeSoft: 0.40, bandLift: 0.06, rimScale: 0.9, nearFade: [1.1, 3.4] },
+    rule: {
+      effort: 6, minY: 2.4, maxY: 78, maxSlope: 0.42,
+      // dense where it is forest, scattered where it is meadow
+      pick: (w) => clamp(w.forest * 1.0 + w.meadow * 0.22 + w.marsh * 0.25
+                         - w.desert - w.snow - w.rock * 0.8, 0, 1),
+    },
+    place: { scale: uniScale(0.58, 1.12), sink: () => -0.25, tint: leafTint },
+  },
+  {
+    name: 'broadleafLow', collide: 0.50, rngSalt: 12347, perTile: 24, islandCount: 591,
+    geom: (B, sc, f) => broadleafGeometry(B, sc, f, 2),
+    mat: { wind: 0.16, shadeSoft: 0.40, bandLift: 0.06, rimScale: 0.9, nearFade: [1.1, 3.4] },
+    rule: {
+      effort: 6, minY: 2.4, maxY: 78, maxSlope: 0.42,
+      // dense where it is forest, scattered where it is meadow
+      pick: (w) => clamp(w.forest * 1.0 + w.meadow * 0.22 + w.marsh * 0.25
+                         - w.desert - w.snow - w.rock * 0.8, 0, 1),
+    },
+    place: { scale: uniScale(0.58, 1.12), sink: () => -0.25, tint: leafTint },
+  },
+  {
+    name: 'broadleafLean', collide: 0.38, rngSalt: 13451, perTile: 20, islandCount: 493,
+    geom: (B, sc, f) => broadleafGeometry(B, sc, f, 3),
+    mat: { wind: 0.16, shadeSoft: 0.40, bandLift: 0.06, rimScale: 0.9, nearFade: [1.1, 3.4] },
+    rule: {
+      effort: 6, minY: 2.4, maxY: 78, maxSlope: 0.42,
+      // dense where it is forest, scattered where it is meadow
+      pick: (w) => clamp(w.forest * 1.0 + w.meadow * 0.22 + w.marsh * 0.25
+                         - w.desert - w.snow - w.rock * 0.8, 0, 1),
+    },
+    place: { scale: uniScale(0.58, 1.12), sink: () => -0.25, tint: leafTint },
+  },
+  {
+    name: 'pine', collide: 0.30,rngSalt: 20411, perTile: 100, islandCount: 2400,
     geom: (B, sc, f) => pineGeometry(B, sc, f),
     mat: { wind: 0.07, shadeSoft: 0.44, bandLift: 0.07, rimScale: 0.9, nearFade: [1.1, 3.2] },
     rule: {
@@ -698,8 +769,8 @@ export const SPECIES = [
     },
   },
   {
-    name: 'blossom', rngSalt: 30637, perTile: 4, islandCount: 190,
-    geom: (B, sc, f) => broadleafGeometry(B, sc, f),
+    name: 'blossom', collide: 0.40,rngSalt: 30637, perTile: 4, islandCount: 190,
+    geom: (B, sc, f) => broadleafGeometry(B, sc, f, 2),
     mat: { wind: 0.20, shadeSoft: 0.46, bandLift: 0.14, rimScale: 1.0, nearFade: [1.1, 3.4] },
     rule: {
       effort: 10, minY: 4, maxY: 54, maxSlope: 0.34,
@@ -712,7 +783,7 @@ export const SPECIES = [
     },
   },
   {
-    name: 'palm', rngSalt: 40763, perTile: 16, islandCount: 420,
+    name: 'palm', collide: 0.26,rngSalt: 40763, perTile: 16, islandCount: 420,
     geom: (B, sc) => palmGeometry(B, sc),
     mat: { wind: 0.26, shadeSoft: 0.42, bandLift: 0.08, rimScale: 0.95, cull: false, nearFade: [1.2, 3.6] },
     rule: {
@@ -726,7 +797,7 @@ export const SPECIES = [
     },
   },
   {
-    name: 'cactus', rngSalt: 50909, perTile: 42, islandCount: 900,
+    name: 'cactus', collide: 0.52,rngSalt: 50909, perTile: 42, islandCount: 900,
     geom: (B, sc) => cactusGeometry(B, sc),
     mat: { shadeSoft: 0.36, bandLift: 0.10, rimScale: 0.9 },
     rule: {
@@ -766,7 +837,7 @@ export const SPECIES = [
     },
   },
   {
-    name: 'rock', rngSalt: 81281, perTile: 46, islandCount: 1600,
+    name: 'rock', collide: 0.85,rngSalt: 81281, perTile: 46, islandCount: 1600,
     geom: (B, sc, f) => rockGeometry(B, sc, f),
     mat: { shadeSoft: 0.50, bandLift: 0.22, rimScale: 0.8 },
     rule: {

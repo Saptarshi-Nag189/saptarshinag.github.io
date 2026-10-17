@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Night Train — Saptarshi Nag</title>
+<title>The Night Train · Saptarshi Nag</title>
+<link rel="icon" href="../../icon.ico">
 <meta name="description" content="A slow train across a mirror-still sea. Every window is a chapter of Saptarshi Nag's story.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,6 +13,7 @@
 <link rel="stylesheet" href="../_shared/chrome.css">
 <script src="../_shared/chrome.js" data-accent="#ffb2d3" data-tag="the night train"></script>
 <script src="../_shared/sfx.js"></script>
+<script src="../_shared/a11y.js"></script>
 <style>
   :root{
     --rose:#ffb2d3; --amber:#ffd9a0; --ink:#eef0fa; --dim:#9aa4c6;
@@ -28,7 +30,7 @@
   /* poem-title top center */
   #poem{position:fixed;left:50%;top:9%;transform:translateX(-50%);z-index:5;text-align:center;
     pointer-events:none;transition:opacity 1.2s}
-  #poem .k{font-family:var(--mono);font-size:10.5px;letter-spacing:.5em;text-transform:uppercase;
+  #poem .k{font-family:var(--mono);font-size:11.5px;letter-spacing:.5em;text-transform:uppercase;
     color:rgba(255,178,211,.7);margin-bottom:10px}
   #poem h1{font-family:var(--serif);font-weight:500;font-style:italic;
     font-size:clamp(26px,4.6vw,52px);color:#f4ecf5;letter-spacing:.01em;
@@ -37,7 +39,7 @@
     text-transform:uppercase;color:var(--dim)}
   #poem.gone{opacity:0}
   #whisper{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:5;
-    font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;color:var(--dim);
+    font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;color:var(--dim);
     pointer-events:none;transition:opacity .8s;white-space:nowrap}
   #whisper b{color:var(--amber);font-weight:500}
   #whisper.gone{opacity:0}
@@ -59,10 +61,10 @@
   .thead::after,.thead::before{content:"";position:absolute;bottom:-9px;width:18px;height:18px;
     border-radius:50%;background:#070b1e}
   .thead::before{left:-9px} .thead::after{right:-9px}
-  .thead .no{position:absolute;top:18px;right:22px;font-family:var(--mono);font-size:10px;
+  .thead .no{position:absolute;top:18px;right:22px;font-family:var(--mono);font-size:11.5px;
     letter-spacing:.2em;color:var(--amber);border:1px solid rgba(255,217,160,.4);
     border-radius:6px;padding:4px 9px;text-transform:uppercase}
-  .thead .kk{font-family:var(--mono);font-size:10px;letter-spacing:.28em;text-transform:uppercase;
+  .thead .kk{font-family:var(--mono);font-size:11.5px;letter-spacing:.28em;text-transform:uppercase;
     color:var(--rose);margin-bottom:7px;display:flex;align-items:center;gap:8px}
   .thead h2{font-family:var(--serif);font-weight:600;font-size:clamp(24px,3.4vw,32px);
     color:#fdf6ee;line-height:1.1}
@@ -71,21 +73,21 @@
   .tbody p{margin-bottom:13px}
   .tbody .item{border-left:2px solid rgba(255,217,160,.25);padding:3px 0 3px 15px;margin-bottom:17px}
   .tbody .item h3{font-size:15.5px;font-weight:600;color:#fff;margin-bottom:2px}
-  .tbody .item .meta{font-family:var(--mono);font-size:11px;color:var(--dim);margin-bottom:7px}
+  .tbody .item .meta{font-family:var(--mono);font-size:12px;color:var(--dim);margin-bottom:7px}
   .tbody ul{list-style:none;margin:4px 0 8px}
   .tbody ul li{position:relative;padding:5px 0 5px 20px;font-size:13.5px;line-height:1.55}
   .tbody ul li::before{content:"\f005";font-family:"Font Awesome 6 Free";font-weight:900;
-    position:absolute;left:0;top:7px;color:rgba(255,217,160,.8);font-size:8px}
+    position:absolute;left:0;top:7px;color:rgba(255,217,160,.8);font-size:11px}
   .tbody b{color:#fff;font-weight:600}
   .tags{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 12px}
-  .tag{font-family:var(--mono);font-size:10.5px;color:#ffdff0;background:rgba(255,178,211,.09);
+  .tag{font-family:var(--mono);font-size:12px;color:#ffdff0;background:rgba(255,178,211,.09);
     border:1px solid var(--line);border-radius:6px;padding:3px 9px}
   .mgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(115px,1fr));gap:11px;margin:8px 0 4px}
   .mtile{background:rgba(255,217,160,.06);border:1px solid rgba(255,217,160,.2);border-radius:12px;padding:12px}
   .mtile .v{font-family:var(--mono);font-size:19px;font-weight:700;color:var(--amber);line-height:1}
-  .mtile .l{font-size:10.5px;color:var(--dim);margin-top:5px;line-height:1.35}
+  .mtile .l{font-size:12px;color:var(--dim);margin-top:5px;line-height:1.35}
   .skillg{margin-bottom:12px}
-  .skillg h4{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
+  .skillg h4{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;
     color:var(--rose);margin-bottom:7px}
   .links a{display:inline-flex;align-items:center;gap:9px;color:var(--amber);text-decoration:none;
     font-size:14px;margin:5px 20px 5px 0;transition:.18s}
@@ -98,6 +100,16 @@
 
   @media (prefers-reduced-motion: reduce){ #tWrap,#ticket{animation:none !important} }
   @media (max-width:640px){ .thead{padding:20px 20px 15px} .tbody{padding:16px 20px 0} }
+
+  /* accessibility pass: 40px close button, kicker clear of it, hints that wrap on a phone
+     and sit above the sound button (accessibility.md > Mobility; layout.md > Adaptability) */
+  #tClose{width:40px;height:40px;font-size:15px}
+  #tClose{left:auto;right:16px}
+  .thead{padding-right:64px}
+  #whisper{white-space:normal;width:max-content;max-width:calc(100vw - 32px);text-align:center;line-height:1.55;}
+  @media (max-width:640px){ #whisper{bottom:76px} }
+  .kb-only{display:inline} .touch-only{display:none}
+  @media (pointer:coarse){ .kb-only{display:none} .touch-only{display:inline} }
 </style>
 </head>
 <body>
@@ -106,14 +118,14 @@
 
 <div id="poem">
   <div class="k">the night train</div>
-  <h1>Somewhere over still water,<br>a life rides by.</h1>
-  <div class="s">eight windows · eight chapters</div>
+  <h1>Saptarshi Nag,<br>on the night train</h1>
+  <div class="s">each lit carriage carries a chapter, from his B.Tech to C-DAC</div>
 </div>
-<div id="whisper"><b>click a lit window</b> — each carriage carries a chapter</div>
+<div id="whisper"><span class="kb-only"><b>click a lit window</b> or press 1 to 8 to read it</span><span class="touch-only"><b>tap a lit window</b> to read it</span></div>
 
 <div id="tWrap">
   <div id="ticket">
-    <button id="tClose" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+    <button id="tClose" aria-label="Close"><i aria-hidden="true" class="fa-solid fa-xmark"></i></button>
     <div class="thead">
       <span class="no" id="tNo"></span>
       <div class="kk" id="tKick"></div>
@@ -142,60 +154,60 @@ addEventListener('keydown', startWorldSound);
 
 /* ================= CONTENT (8 carriages) ================= */
 var CARS = [
- { no:'Carriage 1', icon:'fa-user', kick:'the passenger', title:'Saptarshi Nag', sub:'AI/ML Engineer — the one by the window',
-   body:'<p>AI/ML engineer at the intersection of <b>security and systems research</b>. M.Tech in Artificial Intelligence (DIAT, DRDO); research at NCRA-TIFR &amp; GMRT; now a Project Engineer at C-DAC building real-time IoT security — Zero Trust with ML threat detection.</p>'+
+ { no:'Carriage 1', icon:'fa-user', kick:'the passenger', title:'Saptarshi Nag', sub:'AI/ML Engineer, in the window seat',
+   body:'<p>AI/ML engineer at C-DAC Chennai, building ML-based attack detection for a <b>Zero Trust IoT security framework</b>. M.Tech in CSE (Artificial Intelligence) from DIAT, a DRDO institute, and research at NCRA-TIFR and GMRT.</p>'+
         '<p>Works the full ML stack: feature engineering from raw data, model development and optimisation, production deployment under tight constraints. Past work spans physics-informed neural networks, GPU-accelerated scientific computing, LLM fine-tuning and RAG systems.</p>' },
  { no:'Carriage 2', icon:'fa-graduation-cap', kick:'where he boarded', title:'Education', sub:'Kolkata → Pune · 2019 → 2025',
    body:'<div class="item"><h3>B.Tech, Computer Science &amp; Engineering</h3><div class="meta">Academy of Technology, Kolkata · 2019–2023 · CGPA 9.44/10.0</div></div>'+
         '<div class="item"><h3>M.Tech, CSE (Artificial Intelligence)</h3><div class="meta">DIAT (DRDO), Pune · 2023–2025 · CGPA 8.64/10.0</div></div>'+
         '<div class="item"><h3>GATE 2024</h3><div class="meta">Rank 1790 · Data Science &amp; AI · top 5%</div></div>' },
  { no:'Carriage 3', icon:'fa-satellite-dish', kick:'first stop', title:'GMRT', sub:'Winter Intern · HPC & Signal Processing · Dec 2023 – Jan 2024 · Pune',
-   body:'<p>A winter at one of the world\'s largest radio telescope arrays.</p>'+
+   body:'<p>GMRT is one of the largest radio telescope arrays in the world.</p>'+
         '<ul><li>Profiled legacy <b>CPU signal-filtering pipelines</b>, refactored for <b>multicore execution</b>.</li>'+
         '<li>Cut latency by <b>50%</b>, unblocking <b>real-time processing</b> of continuous telescope streams.</li></ul>' },
  { no:'Carriage 4', icon:'fa-star', kick:'listening for pulsars', title:'NCRA-TIFR', sub:'Research Intern (M.Tech project) · Aug 2024 – Apr 2025 · Pune',
    body:'<ul><li><b>ResNet1D + Squeeze-and-Excitation attention</b> for weak pulsar signals at low SNR.</li>'+
         '<li><b>99.8% F1</b> across <b>70M+ samples</b>; adaptive thresholding for non-stationary noise floors.</li>'+
-        '<li>Ran end-to-end independently — scoping through deployment and write-up.</li></ul>'+
-        '<div class="mgrid"><div class="mtile"><div class="v">99.8%</div><div class="l">pulsar F1-score</div></div>'+
-        '<div class="mtile"><div class="v">70M+</div><div class="l">samples</div></div></div>' },
+        '<li>Ran it alone, from scoping through deployment and the write-up.</li></ul>'+
+        '<div class="mgrid"><div class="mtile"><div class="v">99.8%</div><div class="l">pulsar F1 · NCRA-TIFR</div></div>'+
+        '<div class="mtile"><div class="v">70M+</div><div class="l">samples · NCRA pulsar search</div></div></div>' },
  { no:'Carriage 5', icon:'fa-shield-halved', kick:'the present day', title:'C-DAC', sub:'Project Engineer · AI Research & IoT Security · Jul 2025 – present · Chennai',
    body:'<ul><li>Real-time <b>Zero Trust framework</b> for IoT (WiFi 802.11, BLE, Zigbee, LoRa) feeding a continuous <b>7-pillar device trust score</b>.</li>'+
         '<li>Two-stage hybrid detection: 1-second <b>window model</b> (7 attack classes) + <b>flow model</b>; RF/XGBoost/SVM/MLP/Voting Ensemble across 6 preprocessing iterations with SMOTE + Optuna (TPE).</li>'+
-        '<li>Best: <b>97.93% accuracy</b> (flow/RF); <b>90.86% acc / 86.78% macro F1</b> (window/Ensemble).</li>'+
+        '<li>Best: <b>96.97% accuracy</b> (flow/RF); <b>90.86% acc / 86.78% macro F1</b> (window/Ensemble).</li>'+
         '<li><b>63 features</b> from raw PCAPs (Scapy/PyShark); live PCAP pipeline (Watchdog, MD5 dedup, multi-threaded); SPIFFE/SPIRE, mTLS, OTP 2FA.</li>'+
         '<li>Two papers at <b>IoTaIS 2025</b>, Bali: <b>“Protocol-Aware Continuous Monitoring and Anomaly Detection in IoT Networks”</b> and <b>“A Comprehensive Survey on Zero Trust Architecture in IoT Networks.”</b></li></ul>' },
  { no:'Carriage 6', icon:'fa-diagram-project', kick:'the luggage car', title:'Projects', sub:'four builds riding along',
-   body:'<div class="item"><h3>GPU-Accelerated F1 Tyre Degradation &amp; Race Strategy</h3>'+
+   body:'<div class="item"><h3>GPU-accelerated F1 tyre degradation and race strategy</h3>'+
         '<div class="tags"><span class="tag">Python</span><span class="tag">PyTorch</span><span class="tag">CUDA</span><span class="tag">CuPy</span><span class="tag">XGBoost</span></div>'+
         '<ul><li>Hybrid <b>LSTM-XGBoost</b> for tyre wear + pit-stop windows from 10 Hz telemetry.</li>'+
-        '<li><b>PINNs</b> separating thermal and mechanical degradation; custom CUDA/CuPy kernels — <b>4.1× speedup</b>.</li></ul></div>'+
-        '<div class="item"><h3>Omniscience Pro — Privacy-First Local RAG</h3>'+
+        '<li><b>Physics-informed loss</b> separating thermal and mechanical degradation; custom CUDA/CuPy kernels cut training time <b>4.1×</b>.</li></ul></div>'+
+        '<div class="item"><h3>Omniscience Pro · privacy-first local RAG</h3>'+
         '<div class="tags"><span class="tag">Python</span><span class="tag">LangChain</span><span class="tag">ChromaDB</span><span class="tag">Docker</span></div>'+
         '<ul><li>Multi-modal ingestion; <b>&lt;50 ms</b> vector search (HNSW); <b>&lt;500 ms</b> first token; GPU-aware Docker, CI/CD, POSIX locking.</li></ul></div>'+
-        '<div class="item"><h3>ARO — Autonomous Research Operator</h3>'+
+        '<div class="item"><h3>ARO · Autonomous Research Operator</h3>'+
         '<div class="tags"><span class="tag">Python</span><span class="tag">Flask</span><span class="tag">SQLAlchemy</span><span class="tag">NetworkX</span><span class="tag">React</span></div>'+
         '<ul><li>Multi-agent LLM workflows as directed graphs; SSE streaming; React UI; adversarial audit fixed <b>16 vulnerabilities</b>.</li></ul></div>'+
-        '<div class="item"><h3>Llama 3.2 Optimisation</h3>'+
+        '<div class="item"><h3>Llama 3.2 fine-tuning and quantisation</h3>'+
         '<div class="tags"><span class="tag">Python</span><span class="tag">Unsloth</span><span class="tag">Hugging Face</span><span class="tag">PyTorch</span></div>'+
-        '<ul><li>Fine-tuned 1B/3B on <b>21.5k</b> interactions; <b>4-bit quantisation</b>, no meaningful quality drop.</li></ul></div>' },
+        '<ul><li>Fine-tuned 1B and 3B on <b>21.5k</b> interactions; <b>4-bit quantisation</b> with Unsloth for a consumer GPU, with no meaningful quality drop.</li></ul></div>' },
  { no:'Carriage 7', icon:'fa-microchip', kick:'the toolbox under the seat', title:'Skills', sub:'everything he travels with',
    body:'<div class="skillg"><h4>Languages</h4><div class="tags"><span class="tag">Python (advanced)</span><span class="tag">C++ (proficient)</span><span class="tag">C</span><span class="tag">Bash</span><span class="tag">SQL</span></div></div>'+
-        '<div class="skillg"><h4>ML &amp; Scientific Computing</h4><div class="tags"><span class="tag">PyTorch</span><span class="tag">XGBoost</span><span class="tag">Scikit-learn</span><span class="tag">PINNs</span><span class="tag">NumPy</span><span class="tag">SciPy</span></div></div>'+
-        '<div class="skillg"><h4>HPC &amp; Systems</h4><div class="tags"><span class="tag">CUDA</span><span class="tag">CuPy</span><span class="tag">Parallel Processing</span><span class="tag">Quantisation (4/8-bit)</span><span class="tag">Latency Optimisation</span><span class="tag">Linux</span></div></div>'+
-        '<div class="skillg"><h4>Data &amp; Engineering</h4><div class="tags"><span class="tag">Statistical Anomaly Detection</span><span class="tag">Time-Series</span><span class="tag">CI/CD</span><span class="tag">Docker</span><span class="tag">Git</span><span class="tag">Flask</span><span class="tag">ChromaDB</span></div></div>'+
-        '<div class="skillg"><h4>AI &amp; MLOps</h4><div class="tags"><span class="tag">RAG Systems</span><span class="tag">LLM Fine-Tuning</span><span class="tag">Multi-Agent Orchestration</span><span class="tag">SQLAlchemy</span></div></div>'+
-        '<div class="mgrid"><div class="mtile"><div class="v">97.93%</div><div class="l">IoT attack detection</div></div>'+
-        '<div class="mtile"><div class="v">99.8%</div><div class="l">pulsar F1</div></div>'+
-        '<div class="mtile"><div class="v">4.1×</div><div class="l">GPU speedup</div></div>'+
-        '<div class="mtile"><div class="v">50%</div><div class="l">latency cut</div></div>'+
-        '<div class="mtile"><div class="v">70M+</div><div class="l">samples</div></div></div>' },
+        '<div class="skillg"><h4>ML &amp; scientific computing</h4><div class="tags"><span class="tag">PyTorch</span><span class="tag">XGBoost</span><span class="tag">Scikit-learn</span><span class="tag">PINNs</span><span class="tag">NumPy</span><span class="tag">SciPy</span></div></div>'+
+        '<div class="skillg"><h4>HPC &amp; systems</h4><div class="tags"><span class="tag">CUDA</span><span class="tag">CuPy</span><span class="tag">parallel processing</span><span class="tag">Quantisation (4/8-bit)</span><span class="tag">latency optimisation</span><span class="tag">Linux</span></div></div>'+
+        '<div class="skillg"><h4>Data &amp; engineering</h4><div class="tags"><span class="tag">statistical anomaly detection</span><span class="tag">Time-Series</span><span class="tag">CI/CD</span><span class="tag">Docker</span><span class="tag">Git</span><span class="tag">Flask</span><span class="tag">ChromaDB</span></div></div>'+
+        '<div class="skillg"><h4>AI &amp; MLOps</h4><div class="tags"><span class="tag">RAG</span><span class="tag">LLM fine-tuning</span><span class="tag">multi-agent orchestration</span><span class="tag">SQLAlchemy</span></div></div>'+
+        '<div class="mgrid"><div class="mtile"><div class="v">96.97%</div><div class="l">flow-attack accuracy (RF) · C-DAC IoT</div></div>'+
+        '<div class="mtile"><div class="v">99.8%</div><div class="l">pulsar F1 · NCRA-TIFR</div></div>'+
+        '<div class="mtile"><div class="v">4.1×</div><div class="l">training speedup · F1 tyre model</div></div>'+
+        '<div class="mtile"><div class="v">50%</div><div class="l">latency cut · GMRT pipeline</div></div>'+
+        '<div class="mtile"><div class="v">70M+</div><div class="l">samples · NCRA pulsar search</div></div></div>' },
  { no:'Last Carriage', icon:'fa-envelope', kick:'leave a note on the seat', title:'Write to him', sub:'the train always comes back around',
-   body:'<p>Open to research collaborations, engineering roles, and interesting problems.</p>'+
-        '<div class="links"><a href="mailto:saptarshinag18@gmail.com"><i class="fa-solid fa-envelope"></i>saptarshinag18@gmail.com</a>'+
-        '<a href="https://www.linkedin.com/in/saptarshi18" target="_blank" rel="noopener"><i class="fa-brands fa-linkedin"></i>/in/saptarshi18</a>'+
-        '<a href="https://github.com/Saptarshi-Nag189" target="_blank" rel="noopener"><i class="fa-brands fa-github"></i>Saptarshi-Nag189</a>'+
-        '<a href="../../saptarshi_resume_linkedin_2026.pdf" target="_blank" rel="noopener"><i class="fa-solid fa-file-arrow-down"></i>download CV</a></div>' }
+   body:'<p>Open to research collaborations and engineering roles.</p>'+
+        '<div class="links"><a href="mailto:saptarshinag18@gmail.com"><i aria-hidden="true" class="fa-solid fa-envelope"></i>saptarshinag18@gmail.com</a>'+
+        '<a href="https://www.linkedin.com/in/saptarshi18" target="_blank" rel="noopener"><i aria-hidden="true" class="fa-brands fa-linkedin"></i>/in/saptarshi18</a>'+
+        '<a href="https://github.com/Saptarshi-Nag189" target="_blank" rel="noopener"><i aria-hidden="true" class="fa-brands fa-github"></i>Saptarshi-Nag189</a>'+
+        '<a href="../../saptarshi_resume_linkedin_2026.pdf" target="_blank" rel="noopener"><i aria-hidden="true" class="fa-solid fa-file-arrow-down"></i>download CV</a></div>' }
 ];
 
 /* ================= SCENE ================= */
@@ -391,28 +403,32 @@ var wrapEl=document.getElementById('tWrap'), poemEl=document.getElementById('poe
 function openTicket(i){
   var c=CARS[i];
   document.getElementById('tNo').textContent=c.no;
-  document.getElementById('tKick').innerHTML='<i class="fa-solid '+c.icon+'"></i> '+c.kick;
+  document.getElementById('tKick').innerHTML='<i aria-hidden="true" class="fa-solid '+c.icon+'"></i> '+c.kick;
   document.getElementById('tTitle').textContent=c.title;
   document.getElementById('tSub').textContent=c.sub;
   document.getElementById('tBody').innerHTML=c.body;
   document.getElementById('ticket').scrollTop=0;
   wrapEl.classList.add('open');
+  if(DLG) DLG.opened();
   poemEl.classList.add('gone'); whisperEl.classList.add('gone');
   sfx('chime');
 }
 function closeTicket(){
   if(!wrapEl.classList.contains('open')) return;
-  wrapEl.classList.remove('open'); poemEl.classList.remove('gone');
+  wrapEl.classList.remove('open'); if(DLG) DLG.closed(); poemEl.classList.remove('gone');
   sfx('back');
 }
 document.getElementById('tClose').addEventListener('click',closeTicket);
 wrapEl.addEventListener('click',function(e){ if(e.target===wrapEl) closeTicket(); });
+/* keyboard and screen readers: the panel is a real dialog, and a chapter list (hidden until tabbed into) opens what the canvas opens */
+var DLG = window.A11Y ? A11Y.dialog(wrapEl, document.getElementById('ticket'), document.getElementById('tClose'), 'tTitle') : null;
+if (window.A11Y) A11Y.chapters(CARS.map(function(x){ return x.title; }), function(i){ openTicket(i); });
 
 /* ================= LOOP ================= */
 var raf=null;
 function loop(t){ raf=requestAnimationFrame(loop); if(document.hidden) return; draw(t); }
 if(REDUCED){ draw(performance.now());
-  whisperEl.innerHTML='<b>click a window</b> (or press 1–8) — each carriage carries a chapter';
+  whisperEl.innerHTML='<span class="kb-only"><b>click a window</b> or press 1 to 8 to read it</span><span class="touch-only"><b>tap a window</b> to read it</span>';
   addEventListener('resize',function(){ draw(performance.now()); });
 } else { raf=requestAnimationFrame(loop); }
 window.__train=function(){ return { cars:CARS.length, hover:hoverCar }; };

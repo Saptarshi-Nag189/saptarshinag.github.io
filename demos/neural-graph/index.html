@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>Neural Graph Universe · Saptarshi Nag</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Neural Graph · Saptarshi Nag</title>
+<link rel="icon" href="../../icon.ico">
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -11,6 +12,7 @@
 <link rel="stylesheet" href="../_shared/chrome.css">
 <script src="../_shared/chrome.js" data-accent="#a78bfa" data-tag="neural graph"></script>
 <script src="../_shared/sfx.js"></script>
+<script src="../_shared/a11y.js"></script>
 <style>
   :root{
     --violet:#a78bfa;
@@ -63,7 +65,7 @@
   .back i{margin-right:5px;font-size:11px;}
   .tag{
     font-family:'JetBrains Mono',monospace;
-    font-size:10px;letter-spacing:.22em;text-transform:uppercase;
+    font-size:12px;letter-spacing:.22em;text-transform:uppercase;
     color:rgba(154,150,179,.6);
     border:1px solid rgba(167,139,250,.12);
     padding:4px 9px;border-radius:4px;
@@ -83,7 +85,7 @@
   }
   .brand p{
     margin-top:5px;font-family:'JetBrains Mono',monospace;
-    font-size:10.5px;color:var(--muted);letter-spacing:.08em;opacity:.7;
+    font-size:11.5px;color:var(--muted);letter-spacing:.08em;
   }
 
   /* hint bottom-center */
@@ -109,7 +111,7 @@
     transition:opacity .3s;
   }
   .legend h2{
-    font-size:9px;letter-spacing:.2em;text-transform:uppercase;
+    font-size:11.5px;letter-spacing:.2em;text-transform:uppercase;
     color:var(--muted);margin-bottom:9px;font-weight:600;
   }
   .legend .row{display:flex;align-items:center;gap:9px;margin:5px 0;color:#cfcbe2;cursor:default;}
@@ -134,7 +136,7 @@
   .panel .scroll::-webkit-scrollbar{width:8px;}
   .panel .scroll::-webkit-scrollbar-thumb{background:rgba(124,92,255,.3);border-radius:8px;}
   .panel .kicker{
-    font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.22em;
+    font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:.22em;
     text-transform:uppercase;color:var(--violet);opacity:.9;margin-bottom:8px;
     display:flex;align-items:center;gap:8px;
   }
@@ -150,15 +152,15 @@
   }
   .panel .body ul li:last-child{border-bottom:none;}
   .panel .body ul li > i.fa-solid{
-    position:absolute;left:0;top:9px;font-size:11px;color:var(--violet);opacity:.85;
+    position:absolute;left:0;top:9px;font-size:12px;color:var(--violet);opacity:.85;
   }
   .panel .body b{color:#f0ecff;font-weight:600;}
   .panel .seclabel{
-    font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.2em;
+    font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:.2em;
     text-transform:uppercase;color:var(--muted);margin:18px 0 8px;
     display:flex;align-items:center;gap:7px;
   }
-  .panel .seclabel i{color:var(--violet);opacity:.8;font-size:10px;}
+  .panel .seclabel i{color:var(--violet);opacity:.8;font-size:11.5px;}
   .panel .meta{
     display:flex;flex-wrap:wrap;gap:7px;margin:4px 0 20px;
   }
@@ -174,10 +176,10 @@
     border-radius:10px;padding:12px 13px;
   }
   .panel .stat .num{font-size:19px;font-weight:700;color:#fff;letter-spacing:-.01em;}
-  .panel .stat .lbl{font-size:10.5px;color:var(--muted);margin-top:3px;line-height:1.3;}
+  .panel .stat .lbl{font-size:11.5px;color:var(--muted);margin-top:3px;line-height:1.3;}
   .panel .conns{margin-top:6px;}
   .panel .conns .ch2{
-    font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.2em;
+    font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:.2em;
     text-transform:uppercase;color:var(--muted);margin-bottom:10px;
   }
   .panel .conn{
@@ -211,8 +213,8 @@
 
   @media (max-width:600px){
     .brand{display:none;}
-    .legend{font-size:10px;padding:9px 11px;bottom:14px;left:12px;}
-    .hint{font-size:9.5px;padding:6px 11px;bottom:auto;top:54px;}
+    .legend{font-size:11.5px;padding:9px 11px;bottom:14px;left:12px;}
+    .hint{font-size:11.5px;padding:6px 11px;bottom:auto;top:54px;}
     .topbar{padding:12px 14px;}
     .panel{width:100%;}
   }
@@ -220,6 +222,16 @@
     .panel{transition:transform .01s;}
     .close:hover{transform:none;}
   }
+
+  /* accessibility pass */
+  .panel .conn{width:100%;background:none;font:inherit;font-size:13px;text-align:left;min-height:40px;}
+  .panel .conn:focus-visible,.panel a.lk:focus-visible,.panel .close:focus-visible{outline:2px solid var(--violet);outline-offset:2px;}
+  .panel .close{width:40px;height:40px;}
+  .hint{white-space:normal;width:max-content;max-width:calc(100vw - 32px);text-align:center;line-height:1.55;}
+  .legend{bottom:76px;}
+  .touch-only{display:none}
+  @media (pointer:coarse){ .kb-only{display:none} .touch-only{display:inline} }
+  @media (max-width:600px){ .hint{top:64px;} .legend{bottom:72px;} }
 </style>
 </head>
 <body>
@@ -228,16 +240,17 @@
 
 
   <div class="brand">
-    <h1>Neural Graph Universe</h1>
-    <p>a living map of Saptarshi Nag</p>
+    <h1>Neural graph</h1>
+    <p>Saptarshi Nag's work as a network of linked nodes</p>
   </div>
 
   <div class="hint">
-    <b>click</b> a node · <b>drag</b> to pan · <b>scroll</b> to zoom · drag a node to move it
+    <span class="kb-only"><b>click</b> a node · <b>drag</b> to pan · <b>scroll</b> to zoom · drag a node to move it</span>
+    <span class="touch-only"><b>tap</b> a node · <b>drag</b> to pan or to move a node</span>
   </div>
 
   <div class="legend" id="legend">
-    <h2>Node Map</h2>
+    <h2>Node map</h2>
   </div>
 
   <aside class="panel" id="panel" aria-hidden="true">
@@ -285,15 +298,15 @@
   var NODES = [
     { id:'you', cat:'you', label:'Saptarshi Nag', sub:'AI / ML Engineer',
       kicker:'You',
-      body:'<p><b>AI/ML engineer at the intersection of security and systems research.</b></p>'
-        +'<p>AI/ML engineer with an M.Tech in Artificial Intelligence (DIAT, DRDO) and research experience at NCRA-TIFR and GMRT. Works across the full ML stack: feature engineering from raw data, model development and optimisation, and production deployment under tight performance constraints.</p>'
-        +'<p>Current work at <b>C-DAC</b> focuses on real-time IoT security using a Zero Trust framework with ML-based threat detection across multiple wireless protocols. Past projects span physics-informed neural networks, GPU-accelerated scientific computing, LLM fine-tuning, and RAG systems.</p>',
+      body:'<p><b>AI/ML engineer at C-DAC Chennai, working on IoT intrusion detection.</b></p>'
+        +'<p>He has an M.Tech in CSE (Artificial Intelligence) from DIAT, a DRDO institute, and research experience at NCRA-TIFR and GMRT. He works across the whole of an ML project, from features built out of raw data to deployment under tight performance limits.</p>'
+        +'<p>At <b>C-DAC</b> he builds ML-based attack detection for a Zero Trust IoT framework that covers several wireless protocols. His past projects include physics-informed neural networks, GPU-accelerated scientific computing, LLM fine-tuning and RAG systems.</p>',
       stats:[
-        {num:'97.93%', lbl:'IoT attack-detection accuracy'},
-        {num:'99.8%',  lbl:'Pulsar-detection F1'},
-        {num:'4.1×',   lbl:'GPU training speedup'},
-        {num:'50%',    lbl:'signal-pipeline latency cut'},
-        {num:'70M+',   lbl:'samples processed'}
+        {num:'96.97%', lbl:'flow-attack accuracy (RF) · C-DAC IoT'},
+        {num:'99.8%',  lbl:'pulsar F1 · NCRA-TIFR'},
+        {num:'4.1×',   lbl:'training speedup · F1 tyre model'},
+        {num:'50%',    lbl:'latency cut · GMRT pipeline'},
+        {num:'70M+',   lbl:'samples · NCRA pulsar search'}
       ]
     },
 
@@ -301,30 +314,30 @@
     { id:'cdac', cat:'role', label:'C-DAC', sub:'Project Engineer, AI Research & IoT Security · Jul 2025–Present · Chennai',
       kicker:'Role',
       body:'<ul>'
-        +'<li><i class="fa-solid fa-shield-halved"></i>Built a real-time Zero Trust security framework for IoT (WiFi/BLE/Zigbee/LoRa) feeding a continuous 7-pillar device trust score engine.</li>'
-        +'<li><i class="fa-solid fa-layer-group"></i>Two-stage hybrid detection: window model (1s windows, 7 attack classes) + flow model; compared RF/XGBoost/SVM/MLP/Voting Ensemble over 6 preprocessing iterations with SMOTE + Optuna (TPE).</li>'
-        +'<li><i class="fa-solid fa-trophy"></i>Best: <b>97.93% accuracy</b> (flow/RF); <b>90.86% acc / 86.78% macro F1</b> (window/Ensemble).</li>'
-        +'<li><i class="fa-solid fa-gears"></i>Engineered 63 features from raw PCAPs (Scapy/PyShark).</li>'
-        +'<li><i class="fa-solid fa-folder-open"></i>Live PCAP drop-folder pipeline (Watchdog, MD5 dedup, multi-threaded).</li>'
-        +'<li><i class="fa-solid fa-lock"></i>SPIFFE/SPIRE, mTLS, OTP 2FA.</li>'
-        +'<li><i class="fa-solid fa-book"></i>Two IoTaIS 2025 papers.</li>'
+        +'<li><i aria-hidden="true" class="fa-solid fa-shield-halved"></i>Built a real-time Zero Trust security framework for IoT (WiFi/BLE/Zigbee/LoRa) feeding a continuous 7-pillar device trust score engine.</li>'
+        +'<li><i aria-hidden="true" class="fa-solid fa-layer-group"></i>Two-stage hybrid detection: window model (1s windows, 7 attack classes) + flow model; compared RF/XGBoost/SVM/MLP/Voting Ensemble over 6 preprocessing iterations with SMOTE + Optuna (TPE).</li>'
+        +'<li><i aria-hidden="true" class="fa-solid fa-trophy"></i>Best: <b>96.97% accuracy</b> (flow/RF); <b>90.86% acc / 86.78% macro F1</b> (window/Ensemble).</li>'
+        +'<li><i aria-hidden="true" class="fa-solid fa-gears"></i>Engineered 63 features from raw PCAPs (Scapy/PyShark).</li>'
+        +'<li><i aria-hidden="true" class="fa-solid fa-folder-open"></i>Live PCAP drop-folder pipeline (Watchdog, MD5 dedup, multi-threaded).</li>'
+        +'<li><i aria-hidden="true" class="fa-solid fa-lock"></i>SPIFFE/SPIRE, mTLS, OTP 2FA.</li>'
+        +'<li><i aria-hidden="true" class="fa-solid fa-book"></i>Co-authored two papers on the framework at IoTaIS 2025, Bali.</li>'
         +'</ul>',
-      stats:[{num:'97.93%',lbl:'attack detection (flow/RF)'},{num:'86.78%',lbl:'window macro F1 (Ensemble)'},{num:'63',lbl:'features from raw PCAPs'},{num:'4',lbl:'wireless protocols'}]
+      stats:[{num:'96.97%',lbl:'flow-attack accuracy (RF)'},{num:'86.78%',lbl:'window macro F1 (Ensemble)'},{num:'63',lbl:'features from raw PCAPs'},{num:'4',lbl:'wireless protocols'}]
     },
     { id:'ncra', cat:'role', label:'NCRA-TIFR', sub:'Research Intern (M.Tech) · Aug 2024–Apr 2025 · Pune',
       kicker:'Role',
       body:'<ul>'
-        +'<li><i class="fa-solid fa-network-wired"></i>ResNet1D + Squeeze-and-Excitation attention for weak pulsar detection at low SNR.</li>'
-        +'<li><i class="fa-solid fa-bullseye"></i><b>99.8% F1</b> across <b>70M+</b> samples; adaptive thresholding for non-stationary noise.</li>'
-        +'<li><i class="fa-solid fa-user-astronaut"></i>Ran end-to-end independently.</li>'
+        +'<li><i aria-hidden="true" class="fa-solid fa-network-wired"></i>ResNet1D + Squeeze-and-Excitation attention for weak pulsar detection at low SNR.</li>'
+        +'<li><i aria-hidden="true" class="fa-solid fa-bullseye"></i><b>99.8% F1</b> across <b>70M+</b> samples; adaptive thresholding for non-stationary noise.</li>'
+        +'<li><i aria-hidden="true" class="fa-solid fa-user-astronaut"></i>Ran it alone, from scoping to write-up.</li>'
         +'</ul>',
       stats:[{num:'99.8%',lbl:'pulsar F1'},{num:'70M+',lbl:'samples'}]
     },
     { id:'gmrt', cat:'role', label:'GMRT', sub:'Winter Intern, HPC & Signal Processing · Dec 2023–Jan 2024 · Pune',
       kicker:'Role',
       body:'<ul>'
-        +'<li><i class="fa-solid fa-microchip"></i>Profiled legacy CPU signal filtering, refactored for multicore.</li>'
-        +'<li><i class="fa-solid fa-gauge-high"></i>Cut latency <b>50%</b>, enabling real-time telescope stream processing.</li>'
+        +'<li><i aria-hidden="true" class="fa-solid fa-microchip"></i>Profiled legacy CPU signal filtering, refactored for multicore.</li>'
+        +'<li><i aria-hidden="true" class="fa-solid fa-gauge-high"></i>Cut latency <b>50%</b>, enabling real-time telescope stream processing.</li>'
         +'</ul>',
       stats:[{num:'-50%',lbl:'pipeline latency'}]
     },
@@ -334,9 +347,9 @@
       kicker:'Project',
       stack:['Python','PyTorch','CUDA','CuPy','XGBoost'],
       body:'<ul>'
-        +'<li><i class="fa-solid fa-gauge-high"></i>Hybrid LSTM-XGBoost for tyre wear + pit-stop window prediction from 10 Hz telemetry.</li>'
-        +'<li><i class="fa-solid fa-atom"></i>PINNs separating thermal/mechanical degradation.</li>'
-        +'<li><i class="fa-solid fa-bolt"></i>Custom CUDA/CuPy kernels; <b>4.1× speedup</b>.</li>'
+        +'<li><i aria-hidden="true" class="fa-solid fa-gauge-high"></i>Hybrid LSTM-XGBoost for tyre wear + pit-stop window prediction from 10 Hz telemetry.</li>'
+        +'<li><i aria-hidden="true" class="fa-solid fa-atom"></i>PINNs separating thermal/mechanical degradation.</li>'
+        +'<li><i aria-hidden="true" class="fa-solid fa-bolt"></i>Custom CUDA/CuPy kernels; <b>4.1× speedup</b>.</li>'
         +'</ul>',
       stats:[{num:'4.1×',lbl:'speedup'},{num:'10 Hz',lbl:'telemetry'}]
     },
@@ -344,10 +357,10 @@
       kicker:'Project',
       stack:['Python','LangChain','ChromaDB','Docker'],
       body:'<ul>'
-        +'<li><i class="fa-solid fa-photo-film"></i>Multi-modal ingestion.</li>'
-        +'<li><i class="fa-solid fa-magnifying-glass"></i><b>&lt;50 ms</b> vector search (HNSW).</li>'
-        +'<li><i class="fa-solid fa-stopwatch"></i><b>&lt;500 ms</b> first-token latency.</li>'
-        +'<li><i class="fa-solid fa-box"></i>GPU-aware Docker, CI/CD, POSIX locking.</li>'
+        +'<li><i aria-hidden="true" class="fa-solid fa-photo-film"></i>Multi-modal ingestion.</li>'
+        +'<li><i aria-hidden="true" class="fa-solid fa-magnifying-glass"></i><b>&lt;50 ms</b> vector search (HNSW).</li>'
+        +'<li><i aria-hidden="true" class="fa-solid fa-stopwatch"></i><b>&lt;500 ms</b> first-token latency.</li>'
+        +'<li><i aria-hidden="true" class="fa-solid fa-box"></i>GPU-aware Docker, CI/CD, POSIX locking.</li>'
         +'</ul>',
       stats:[{num:'<50 ms',lbl:'vector search'},{num:'<500 ms',lbl:'first-token'}]
     },
@@ -355,9 +368,9 @@
       kicker:'Project',
       stack:['Python','Flask','SQLAlchemy','NetworkX','React'],
       body:'<ul>'
-        +'<li><i class="fa-solid fa-diagram-project"></i>Multi-agent LLM workflows as directed graphs.</li>'
-        +'<li><i class="fa-solid fa-tower-broadcast"></i>Flask SSE streaming; React UI.</li>'
-        +'<li><i class="fa-solid fa-shield-halved"></i>Adversarial audit fixed 16 vulns (auth, SSRF, input validation, CORS).</li>'
+        +'<li><i aria-hidden="true" class="fa-solid fa-diagram-project"></i>Multi-agent LLM workflows as directed graphs.</li>'
+        +'<li><i aria-hidden="true" class="fa-solid fa-tower-broadcast"></i>Flask SSE streaming; React UI.</li>'
+        +'<li><i aria-hidden="true" class="fa-solid fa-shield-halved"></i>Adversarial audit fixed 16 vulns (auth, SSRF, input validation, CORS).</li>'
         +'</ul>',
       stats:[{num:'16',lbl:'vulns fixed'},{num:'Multi-agent',lbl:'LLM workflows'}]
     },
@@ -365,9 +378,9 @@
       kicker:'Project',
       stack:['Python','Unsloth','Hugging Face','PyTorch'],
       body:'<ul>'
-        +'<li><i class="fa-solid fa-sliders"></i>Fine-tuned Llama 3.2 (1B/3B) on 21.5k interactions.</li>'
-        +'<li><i class="fa-solid fa-compress"></i>4-bit quantisation via Unsloth.</li>'
-        +'<li><i class="fa-solid fa-check"></i>No meaningful quality drop.</li>'
+        +'<li><i aria-hidden="true" class="fa-solid fa-sliders"></i>Fine-tuned Llama 3.2 (1B/3B) on 21.5k interactions.</li>'
+        +'<li><i aria-hidden="true" class="fa-solid fa-compress"></i>4-bit quantisation via Unsloth.</li>'
+        +'<li><i aria-hidden="true" class="fa-solid fa-check"></i>No meaningful quality drop.</li>'
         +'</ul>',
       stats:[{num:'21.5k',lbl:'interactions'},{num:'4-bit',lbl:'quantisation'}]
     },
@@ -405,7 +418,7 @@
     { id:'linux',  cat:'skill', label:'Linux', group:'HPC' },
 
     // education
-    { id:'mtech', cat:'education', label:'M.Tech CSE (AI) — DIAT', sub:'DIAT (DRDO), Pune · 2023–2025 · CGPA 8.64',
+    { id:'mtech', cat:'education', label:'M.Tech CSE (AI) · DIAT', sub:'DIAT (DRDO), Pune · 2023–2025 · CGPA 8.64',
       kicker:'Education',
       body:'<p>M.Tech in Computer Science &amp; Engineering (Artificial Intelligence) at the <b>Defence Institute of Advanced Technology (DRDO)</b>, Pune. 2023–2025.</p>',
       stats:[{num:'8.64',lbl:'CGPA'}]
@@ -417,7 +430,7 @@
     },
     { id:'gate', cat:'education', label:'GATE 2024', sub:'Data Science & AI · Rank 1790',
       kicker:'Education',
-      body:'<p><b>GATE 2024</b> — Rank <b>1790</b> in Data Science &amp; AI (top 5%).</p>',
+      body:'<p><b>GATE 2024</b>: rank <b>1790</b> in Data Science &amp; AI (top 5% of applicants).</p>',
       stats:[{num:'#1790',lbl:'All-India Rank'},{num:'Top 5%',lbl:'Data Science & AI'}]
     },
 
@@ -436,10 +449,10 @@
       kicker:'Contact',
       body:'<p>Open to AI/ML research &amp; engineering work.</p>',
       links:[
-        {t:'saptarshinag18@gmail.com', u:'mailto:saptarshinag18@gmail.com', i:'<i class="fa-solid fa-envelope"></i>'},
-        {t:'linkedin.com/in/saptarshi18', u:'https://www.linkedin.com/in/saptarshi18', i:'<i class="fa-brands fa-linkedin"></i>'},
-        {t:'github.com/Saptarshi-Nag189', u:'https://github.com/Saptarshi-Nag189', i:'<i class="fa-brands fa-github"></i>'},
-        {t:'Download CV (PDF)', u:'../../saptarshi_resume_linkedin_2026.pdf', i:'<i class="fa-solid fa-file-arrow-down"></i>'}
+        {t:'saptarshinag18@gmail.com', u:'mailto:saptarshinag18@gmail.com', i:'<i aria-hidden="true" class="fa-solid fa-envelope"></i>'},
+        {t:'linkedin.com/in/saptarshi18', u:'https://www.linkedin.com/in/saptarshi18', i:'<i aria-hidden="true" class="fa-brands fa-linkedin"></i>'},
+        {t:'github.com/Saptarshi-Nag189', u:'https://github.com/Saptarshi-Nag189', i:'<i aria-hidden="true" class="fa-brands fa-github"></i>'},
+        {t:'Download CV (PDF)', u:'../../saptarshi_resume_linkedin_2026.pdf', i:'<i aria-hidden="true" class="fa-solid fa-file-arrow-down"></i>'}
       ]
     }
   ];
@@ -651,7 +664,7 @@
     // stall can't jump animations. Falls back to a nominal frame on first call.
     var dts = (typeof dtMs === 'number' ? dtMs : 16) / 1000;
     if(dts > 0.1) dts = 0.1;
-    t += dts;
+    if(!prefersReduced) t += dts; // reduced motion: the pulses, breathing and edge particles hold still
     ctx.clearRect(0,0,W,H);
 
     if(!bgGrad) buildBgGrad();
@@ -893,16 +906,17 @@
   }
 
   function openPanel(n){
+    var wasOpen = panel.classList.contains('open');
     var html = '';
     html += '<div class="kicker"><span class="pdot" style="background:'+n.color+';color:'+n.color+'"></span>'+(n.kicker||CATS[n.cat].label)+'</div>';
-    html += '<h3>'+esc(n.label)+'</h3>';
+    html += '<h3 id="pTitle">'+esc(n.label)+'</h3>';
     if(n.sub) html += '<div class="sub">'+esc(n.sub)+'</div>';
 
     if(n.cat==='skill'){
       // generated skill body: where it is used + its group
       var uses = [];
       for(var id in neighbors[n.id]){ uses.push(nodeById[id]); }
-      html += '<div class="body"><p>A core tool in my stack';
+      html += '<div class="body"><p>A tool he uses';
       if(n.level) html += ' (<b>'+esc(n.level)+'</b>)';
       html += '. ';
       var proj = uses.filter(function(u){return u.cat==='project'||u.cat==='role';});
@@ -911,7 +925,7 @@
       }
       html += '</p></div>';
       if(n.group){
-        html += '<div class="seclabel"><i class="fa-solid fa-microchip"></i>'+esc(n.group)+'</div>';
+        html += '<div class="seclabel"><i aria-hidden="true" class="fa-solid fa-microchip"></i>'+esc(n.group)+'</div>';
         var siblings = NODES.filter(function(s){ return s.cat==='skill' && s.group===n.group; });
         html += '<div class="meta">';
         siblings.forEach(function(s){
@@ -946,7 +960,7 @@
       conns.sort(function(a,b){ return (a.cat==='you'?-1:0) - (b.cat==='you'?-1:0); });
       html += '<div class="conns"><div class="ch2">Connected ('+conns.length+')</div>';
       conns.forEach(function(c){
-        html += '<div class="conn" data-id="'+c.id+'"><span class="cdot" style="background:'+c.color+';color:'+c.color+'"></span>'+esc(c.label)+'</div>';
+        html += '<button type="button" class="conn" data-id="'+c.id+'"><span class="cdot" style="background:'+c.color+';color:'+c.color+'"></span>'+esc(c.label)+'</button>';
       });
       html += '</div>';
     }
@@ -955,6 +969,8 @@
     panelScroll.scrollTop = 0;
     panel.classList.add('open');
     panel.setAttribute('aria-hidden','false');
+    // following a connection swaps the panel's contents, so focus goes back to its close button
+    if(DLG){ if(!wasOpen) DLG.opened(); else closeBtn.focus({preventScroll:true}); }
 
     // wire connection clicks
     var cs = panelScroll.querySelectorAll('.conn');
@@ -967,8 +983,10 @@
   }
 
   function closePanel(){
+    var wasOpen = panel.classList.contains('open');
     panel.classList.remove('open');
     panel.setAttribute('aria-hidden','true');
+    if(DLG && wasOpen) DLG.closed();
     selected = null;
     settled = false; settleFrames = 30;
     // ease view back a touch
@@ -982,6 +1000,12 @@
   function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
 
   closeBtn.addEventListener('click', function(){ sfx('back'); closePanel(); });
+
+  // keyboard path: the canvas can't take focus, so the main nodes are also a list of buttons
+  // (skills are reached from the panels, under "Connected")
+  var DLG = window.A11Y ? A11Y.dialog(panel, panel, closeBtn, 'pTitle') : null;
+  var CHAPTER_NODES = NODES.filter(function(n){ return n.cat!=='skill'; });
+  if(window.A11Y) A11Y.chapters(CHAPTER_NODES.map(function(n){ return n.label; }), function(i){ selectNode(CHAPTER_NODES[i]); }, 'Nodes');
 
   // ---------- pointer events ----------
   function getXY(ev){
@@ -1112,9 +1136,9 @@
   // ---------- legend ----------
   (function buildLegend(){
     var order = ['you','role','project','skill','education','publication','contact'];
-    var html = '<h2>Node Map</h2>';
+    var html = '<h2>Node map</h2>';
     order.forEach(function(c){
-      html += '<div class="row"><span class="dot" style="background:'+CATS[c].color+';color:'+CATS[c].color+'"></span><i class="fa-solid '+CATS[c].icon+'" style="color:'+CATS[c].color+'"></i>'+CATS[c].label+'</div>';
+      html += '<div class="row"><span class="dot" style="background:'+CATS[c].color+';color:'+CATS[c].color+'"></span><i aria-hidden="true" class="fa-solid '+CATS[c].icon+'" style="color:'+CATS[c].color+'"></i>'+CATS[c].label+'</div>';
     });
     legendEl.innerHTML = html;
   })();

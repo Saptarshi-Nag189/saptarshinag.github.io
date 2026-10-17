@@ -509,5 +509,41 @@ export function buildLandmarks(BABYLON, scene, field, shaders, opts) {
       0.42 * (0.35 + night * 0.7)));
   }
 
-  return { items, mats, update, templeSite: tSite, stonesSite: sSite, gateSite: gSite };
+  /**
+   * Hand the built things to the collider store. These are permanent — they
+   * are not streamed — so they are added once under a fixed owner rather than
+   * living and dying with a tile.
+   */
+  function addColliders(solid) {
+    if (!solid) return 0;
+    let n = 0;
+    const put = (x, z, r) => { solid.add('landmark', x, z, r); n++; };
+    // the temple is a building: ring its colonnade rather than one fat circle,
+    // so you can walk up the steps and stand between the columns
+    if (tSite) {
+      const R = 4.9;
+      for (let i = -1; i <= 1; i++) {
+        for (let j = -1; j <= 1; j++) {
+          if (!i && !j) continue;
+          put(tSite.x + i * R, tSite.z + j * R, 0.55);
+        }
+      }
+      put(tSite.x, tSite.z, 2.4);            // the inner chamber
+    }
+    if (sSite) {
+      const R = 10.5;
+      for (let k = 0; k < 9; k++) {
+        const a = (k / 9) * Math.PI * 2;
+        put(sSite.x + Math.cos(a) * R, sSite.z + Math.sin(a) * R, 0.8);
+      }
+    }
+    if (gSite) {                              // the torii's two uprights
+      put(gSite.x - 2.2, gSite.z, 0.35);
+      put(gSite.x + 2.2, gSite.z, 0.35);
+    }
+    return n;
+  }
+
+  return { items, mats, update, addColliders,
+           templeSite: tSite, stonesSite: sSite, gateSite: gSite };
 }
