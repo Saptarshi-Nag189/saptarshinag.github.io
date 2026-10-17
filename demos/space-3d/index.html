@@ -13,6 +13,7 @@
 <link rel="stylesheet" href="../_shared/chrome.css">
 <script src="../_shared/chrome.js" data-accent="#7cc8ff" data-tag="the constellation"></script>
 <script src="../_shared/sfx.js"></script>
+<script src="../_shared/a11y.js"></script>
 <style>
   :root{
     --accent:#7cc8ff; --ink:#e8f2fd; --dim:#8aa0bd;
@@ -29,15 +30,15 @@
 
   #titleBlock{position:fixed;left:50%;top:8%;transform:translateX(-50%);z-index:5;text-align:center;
     pointer-events:none;transition:opacity .9s}
-  #titleBlock .k{font-family:var(--mono);font-size:10px;letter-spacing:.5em;text-transform:uppercase;
+  #titleBlock .k{font-family:var(--mono);font-size:11.5px;letter-spacing:.5em;text-transform:uppercase;
     color:rgba(124,200,255,.8);margin-bottom:10px}
   #titleBlock h1{font-size:clamp(26px,4.4vw,50px);font-weight:700;letter-spacing:-.02em;color:#fff;
     text-shadow:0 0 46px rgba(124,200,255,.35)}
-  #titleBlock .s{margin-top:8px;font-family:var(--mono);font-size:10.5px;letter-spacing:.26em;
+  #titleBlock .s{margin-top:8px;font-family:var(--mono);font-size:11.5px;letter-spacing:.26em;
     text-transform:uppercase;color:var(--dim)}
   #titleBlock.gone{opacity:0}
   #hint{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:5;
-    font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;color:var(--dim);
+    font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;color:var(--dim);
     pointer-events:none;transition:opacity .8s;white-space:nowrap;
     background:rgba(3,8,18,.5);border:1px solid var(--line);border-radius:999px;padding:7px 16px;
     backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
@@ -65,28 +66,28 @@
   @keyframes sr{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
   #panel::-webkit-scrollbar{width:8px}
   #panel::-webkit-scrollbar-thumb{background:rgba(124,200,255,.3);border-radius:6px}
-  #pKick{font-family:var(--mono);font-size:10.5px;letter-spacing:.26em;text-transform:uppercase;
+  #pKick{font-family:var(--mono);font-size:11.5px;letter-spacing:.26em;text-transform:uppercase;
     color:var(--pc,var(--accent));margin-bottom:6px;display:flex;align-items:center;gap:8px}
   #pTitle{font-size:clamp(21px,3vw,27px);font-weight:700;letter-spacing:-.01em;margin-bottom:16px;color:#fff}
   #pBody{font-size:14.5px;line-height:1.62;color:#c6d6e8}
   #pBody p{margin-bottom:13px}
   #pBody .item{border-left:2px solid var(--line);padding:3px 0 3px 15px;margin-bottom:17px}
   #pBody .item h3{font-size:15.5px;font-weight:600;color:#fff;margin-bottom:2px}
-  #pBody .item .meta{font-family:var(--mono);font-size:11px;color:var(--dim);margin-bottom:7px}
+  #pBody .item .meta{font-family:var(--mono);font-size:12px;color:var(--dim);margin-bottom:7px}
   #pBody ul{list-style:none;margin:4px 0 8px}
   #pBody ul li{position:relative;padding:5px 0 5px 20px;font-size:13.5px;line-height:1.55}
   #pBody ul li::before{content:"\f005";font-family:"Font Awesome 6 Free";font-weight:900;
-    position:absolute;left:0;top:7px;color:var(--pc,var(--accent));font-size:8px}
+    position:absolute;left:0;top:7px;color:var(--pc,var(--accent));font-size:11px}
   #pBody b{color:#fff;font-weight:600}
   .tags{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 12px}
-  .tag{font-family:var(--mono);font-size:10.5px;color:#cfe6ff;background:rgba(124,200,255,.09);
+  .tag{font-family:var(--mono);font-size:12px;color:#cfe6ff;background:rgba(124,200,255,.09);
     border:1px solid var(--line);border-radius:6px;padding:3px 9px}
   .mgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(115px,1fr));gap:11px;margin:8px 0 4px}
   .mtile{background:rgba(124,200,255,.06);border:1px solid var(--line);border-radius:12px;padding:12px}
   .mtile .v{font-family:var(--mono);font-size:19px;font-weight:700;color:var(--pc,var(--accent));line-height:1}
-  .mtile .l{font-size:10.5px;color:var(--dim);margin-top:5px;line-height:1.35}
+  .mtile .l{font-size:12px;color:var(--dim);margin-top:5px;line-height:1.35}
   .skillg{margin-bottom:12px}
-  .skillg h4{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
+  .skillg h4{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;
     color:var(--pc,var(--accent));margin-bottom:7px}
   .links a{display:inline-flex;align-items:center;gap:9px;color:var(--accent);text-decoration:none;
     font-size:14px;margin:5px 20px 5px 0;transition:.18s}
@@ -109,6 +110,15 @@
 
   @media (prefers-reduced-motion: reduce){ #pWrap,#panel{animation:none !important} }
   @media (max-width:640px){ #panel{padding:22px 18px} }
+
+  /* accessibility pass: 40px close button, kicker clear of it, hints that wrap on a phone
+     and sit above the sound button (accessibility.md > Mobility; layout.md > Adaptability) */
+  #pClose{width:40px;height:40px;font-size:15px}
+  #pKick{padding-right:46px}
+  #hint{white-space:normal;width:max-content;max-width:calc(100vw - 32px);text-align:center;line-height:1.55;}
+  @media (max-width:640px){ #hint{bottom:76px} }
+  .kb-only{display:inline} .touch-only{display:none}
+  @media (pointer:coarse){ .kb-only{display:none} .touch-only{display:inline} }
 </style>
 </head>
 <body>
@@ -121,7 +131,7 @@
   <h1>Eight crystals. One story.</h1>
   <div class="s">drag to orbit · scroll to zoom · click a crystal</div>
 </div>
-<div id="hint"><b>drag</b> to orbit · <b>scroll</b> to zoom · <b>click a crystal</b> to read it</div>
+<div id="hint"><span class="kb-only"><b>drag</b> to orbit, <b>scroll</b> to zoom, <b>click a crystal</b> to read it</span><span class="touch-only"><b>drag</b> to orbit, <b>pinch</b> to zoom, <b>tap a crystal</b> to read it</span></div>
 <div id="label"></div>
 
 <div id="pWrap">
@@ -215,6 +225,7 @@ window.openSection = function(i){
   document.getElementById('pBody').innerHTML=s.body;
   panel.scrollTop=0;
   document.getElementById('pWrap').classList.add('open');
+  if(window.__dlg) window.__dlg.opened();
   document.getElementById('titleBlock').classList.add('gone');
   try{ window.SFX && SFX.play('select'); }catch(e){}
 };
@@ -222,12 +233,19 @@ window.closeSection = function(){
   var w=document.getElementById('pWrap');
   if(!w.classList.contains('open')) return;
   w.classList.remove('open');
+  if(window.__dlg) window.__dlg.closed();
   document.getElementById('titleBlock').classList.remove('gone');
   try{ window.SFX && SFX.play('back'); }catch(e){}
 };
 document.getElementById('pClose').addEventListener('click',window.closeSection);
 document.getElementById('pWrap').addEventListener('click',function(e){ if(e.target===document.getElementById('pWrap')) window.closeSection(); });
 addEventListener('keydown',function(e){ if(e.key==='Escape') window.closeSection(); });
+/* keyboard and screen readers: the panel is a real dialog, and a chapter list (hidden until
+   tabbed into) opens what clicking a crystal opens. Before this there was no keyboard path at all. */
+if (window.A11Y) {
+  window.__dlg = A11Y.dialog(document.getElementById('pWrap'), document.getElementById('panel'), document.getElementById('pClose'), 'pTitle');
+  A11Y.chapters(window.SECTIONS.map(function(x){ return x.label; }), function(i){ window.openSection(i); });
+}
 
 window.showFallback = function(){
   if(document.getElementById('fallback').classList.contains('show')) return;
@@ -389,7 +407,14 @@ try{
     if(!downAt) return;
     const moved = Math.hypot(e.clientX-downAt[0], e.clientY-downAt[1]);
     downAt=null;
-    if(moved<6 && hover>=0) window.openSection(hover);
+    if(moved>=6 || e.target!==canvas) return;
+    /* Pick at the release point itself. A tap fires no pointermove, so the hover
+       state was never set and a tap on a phone opened nothing. */
+    mouse.x = (e.clientX/innerWidth)*2-1;
+    mouse.y = -(e.clientY/innerHeight)*2+1;
+    ray.setFromCamera(mouse, camera);
+    const hit = ray.intersectObjects(crystalGroup.children.filter(o=>o.isMesh), false);
+    if(hit.length) window.openSection(hit[0].object.userData.i);
   });
 
   /* ---------- resize / visibility ---------- */

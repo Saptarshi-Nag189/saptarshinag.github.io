@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Neural Graph Universe · Saptarshi Nag</title>
 <link rel="icon" href="../../icon.ico">
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -12,6 +12,7 @@
 <link rel="stylesheet" href="../_shared/chrome.css">
 <script src="../_shared/chrome.js" data-accent="#a78bfa" data-tag="neural graph"></script>
 <script src="../_shared/sfx.js"></script>
+<script src="../_shared/a11y.js"></script>
 <style>
   :root{
     --violet:#a78bfa;
@@ -64,7 +65,7 @@
   .back i{margin-right:5px;font-size:11px;}
   .tag{
     font-family:'JetBrains Mono',monospace;
-    font-size:10px;letter-spacing:.22em;text-transform:uppercase;
+    font-size:12px;letter-spacing:.22em;text-transform:uppercase;
     color:rgba(154,150,179,.6);
     border:1px solid rgba(167,139,250,.12);
     padding:4px 9px;border-radius:4px;
@@ -84,7 +85,7 @@
   }
   .brand p{
     margin-top:5px;font-family:'JetBrains Mono',monospace;
-    font-size:10.5px;color:var(--muted);letter-spacing:.08em;opacity:.7;
+    font-size:11.5px;color:var(--muted);letter-spacing:.08em;
   }
 
   /* hint bottom-center */
@@ -110,7 +111,7 @@
     transition:opacity .3s;
   }
   .legend h2{
-    font-size:9px;letter-spacing:.2em;text-transform:uppercase;
+    font-size:11.5px;letter-spacing:.2em;text-transform:uppercase;
     color:var(--muted);margin-bottom:9px;font-weight:600;
   }
   .legend .row{display:flex;align-items:center;gap:9px;margin:5px 0;color:#cfcbe2;cursor:default;}
@@ -135,7 +136,7 @@
   .panel .scroll::-webkit-scrollbar{width:8px;}
   .panel .scroll::-webkit-scrollbar-thumb{background:rgba(124,92,255,.3);border-radius:8px;}
   .panel .kicker{
-    font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.22em;
+    font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:.22em;
     text-transform:uppercase;color:var(--violet);opacity:.9;margin-bottom:8px;
     display:flex;align-items:center;gap:8px;
   }
@@ -151,15 +152,15 @@
   }
   .panel .body ul li:last-child{border-bottom:none;}
   .panel .body ul li > i.fa-solid{
-    position:absolute;left:0;top:9px;font-size:11px;color:var(--violet);opacity:.85;
+    position:absolute;left:0;top:9px;font-size:12px;color:var(--violet);opacity:.85;
   }
   .panel .body b{color:#f0ecff;font-weight:600;}
   .panel .seclabel{
-    font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.2em;
+    font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:.2em;
     text-transform:uppercase;color:var(--muted);margin:18px 0 8px;
     display:flex;align-items:center;gap:7px;
   }
-  .panel .seclabel i{color:var(--violet);opacity:.8;font-size:10px;}
+  .panel .seclabel i{color:var(--violet);opacity:.8;font-size:11.5px;}
   .panel .meta{
     display:flex;flex-wrap:wrap;gap:7px;margin:4px 0 20px;
   }
@@ -175,10 +176,10 @@
     border-radius:10px;padding:12px 13px;
   }
   .panel .stat .num{font-size:19px;font-weight:700;color:#fff;letter-spacing:-.01em;}
-  .panel .stat .lbl{font-size:10.5px;color:var(--muted);margin-top:3px;line-height:1.3;}
+  .panel .stat .lbl{font-size:11.5px;color:var(--muted);margin-top:3px;line-height:1.3;}
   .panel .conns{margin-top:6px;}
   .panel .conns .ch2{
-    font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.2em;
+    font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:.2em;
     text-transform:uppercase;color:var(--muted);margin-bottom:10px;
   }
   .panel .conn{
@@ -212,8 +213,8 @@
 
   @media (max-width:600px){
     .brand{display:none;}
-    .legend{font-size:10px;padding:9px 11px;bottom:14px;left:12px;}
-    .hint{font-size:9.5px;padding:6px 11px;bottom:auto;top:54px;}
+    .legend{font-size:11.5px;padding:9px 11px;bottom:14px;left:12px;}
+    .hint{font-size:11.5px;padding:6px 11px;bottom:auto;top:54px;}
     .topbar{padding:12px 14px;}
     .panel{width:100%;}
   }
@@ -221,6 +222,16 @@
     .panel{transition:transform .01s;}
     .close:hover{transform:none;}
   }
+
+  /* accessibility pass */
+  .panel .conn{width:100%;background:none;font:inherit;font-size:13px;text-align:left;min-height:40px;}
+  .panel .conn:focus-visible,.panel a.lk:focus-visible,.panel .close:focus-visible{outline:2px solid var(--violet);outline-offset:2px;}
+  .panel .close{width:40px;height:40px;}
+  .hint{white-space:normal;width:max-content;max-width:calc(100vw - 32px);text-align:center;line-height:1.55;}
+  .legend{bottom:76px;}
+  .touch-only{display:none}
+  @media (pointer:coarse){ .kb-only{display:none} .touch-only{display:inline} }
+  @media (max-width:600px){ .hint{top:64px;} .legend{bottom:72px;} }
 </style>
 </head>
 <body>
@@ -234,7 +245,8 @@
   </div>
 
   <div class="hint">
-    <b>click</b> a node · <b>drag</b> to pan · <b>scroll</b> to zoom · drag a node to move it
+    <span class="kb-only"><b>click</b> a node · <b>drag</b> to pan · <b>scroll</b> to zoom · drag a node to move it</span>
+    <span class="touch-only"><b>tap</b> a node · <b>drag</b> to pan or to move a node</span>
   </div>
 
   <div class="legend" id="legend">
@@ -652,7 +664,7 @@
     // stall can't jump animations. Falls back to a nominal frame on first call.
     var dts = (typeof dtMs === 'number' ? dtMs : 16) / 1000;
     if(dts > 0.1) dts = 0.1;
-    t += dts;
+    if(!prefersReduced) t += dts; // reduced motion: the pulses, breathing and edge particles hold still
     ctx.clearRect(0,0,W,H);
 
     if(!bgGrad) buildBgGrad();
@@ -894,9 +906,10 @@
   }
 
   function openPanel(n){
+    var wasOpen = panel.classList.contains('open');
     var html = '';
     html += '<div class="kicker"><span class="pdot" style="background:'+n.color+';color:'+n.color+'"></span>'+(n.kicker||CATS[n.cat].label)+'</div>';
-    html += '<h3>'+esc(n.label)+'</h3>';
+    html += '<h3 id="pTitle">'+esc(n.label)+'</h3>';
     if(n.sub) html += '<div class="sub">'+esc(n.sub)+'</div>';
 
     if(n.cat==='skill'){
@@ -947,7 +960,7 @@
       conns.sort(function(a,b){ return (a.cat==='you'?-1:0) - (b.cat==='you'?-1:0); });
       html += '<div class="conns"><div class="ch2">Connected ('+conns.length+')</div>';
       conns.forEach(function(c){
-        html += '<div class="conn" data-id="'+c.id+'"><span class="cdot" style="background:'+c.color+';color:'+c.color+'"></span>'+esc(c.label)+'</div>';
+        html += '<button type="button" class="conn" data-id="'+c.id+'"><span class="cdot" style="background:'+c.color+';color:'+c.color+'"></span>'+esc(c.label)+'</button>';
       });
       html += '</div>';
     }
@@ -956,6 +969,8 @@
     panelScroll.scrollTop = 0;
     panel.classList.add('open');
     panel.setAttribute('aria-hidden','false');
+    // following a connection swaps the panel's contents, so focus goes back to its close button
+    if(DLG){ if(!wasOpen) DLG.opened(); else closeBtn.focus({preventScroll:true}); }
 
     // wire connection clicks
     var cs = panelScroll.querySelectorAll('.conn');
@@ -968,8 +983,10 @@
   }
 
   function closePanel(){
+    var wasOpen = panel.classList.contains('open');
     panel.classList.remove('open');
     panel.setAttribute('aria-hidden','true');
+    if(DLG && wasOpen) DLG.closed();
     selected = null;
     settled = false; settleFrames = 30;
     // ease view back a touch
@@ -983,6 +1000,12 @@
   function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
 
   closeBtn.addEventListener('click', function(){ sfx('back'); closePanel(); });
+
+  // keyboard path: the canvas can't take focus, so the main nodes are also a list of buttons
+  // (skills are reached from the panels, under "Connected")
+  var DLG = window.A11Y ? A11Y.dialog(panel, panel, closeBtn, 'pTitle') : null;
+  var CHAPTER_NODES = NODES.filter(function(n){ return n.cat!=='skill'; });
+  if(window.A11Y) A11Y.chapters(CHAPTER_NODES.map(function(n){ return n.label; }), function(i){ selectNode(CHAPTER_NODES[i]); }, 'Nodes');
 
   // ---------- pointer events ----------
   function getXY(ev){

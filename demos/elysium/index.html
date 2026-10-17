@@ -13,6 +13,7 @@
 <link rel="stylesheet" href="../_shared/chrome.css">
 <script src="../_shared/chrome.js" data-accent="#ff71ce" data-tag="elysium"></script>
 <script src="../_shared/sfx.js"></script>
+<script src="../_shared/a11y.js"></script>
 <style>
   :root{
     --pink:#ff71ce; --cyan:#01cdfe; --purp:#b967ff; --ink:#fdeffa; --dim:#c39ac0;
@@ -28,18 +29,18 @@
 
   #epigraph{position:fixed;left:50%;top:7.5%;transform:translateX(-50%);z-index:5;text-align:center;
     pointer-events:none;transition:opacity 1s}
-  #epigraph .k{font-family:var(--mono);font-size:10px;letter-spacing:.52em;text-transform:uppercase;
+  #epigraph .k{font-family:var(--mono);font-size:11.5px;letter-spacing:.52em;text-transform:uppercase;
     color:rgba(1,205,254,.85);margin-bottom:10px}
   #epigraph h1{font-family:var(--serif);font-weight:700;font-style:italic;
     font-size:clamp(26px,4.4vw,50px);
     background:linear-gradient(92deg,var(--pink),#ffd9f2 45%,var(--cyan));
     -webkit-background-clip:text;background-clip:text;color:transparent;
     filter:drop-shadow(0 0 26px rgba(255,113,206,.35))}
-  #epigraph .s{margin-top:8px;font-family:var(--mono);font-size:10.5px;letter-spacing:.28em;
+  #epigraph .s{margin-top:8px;font-family:var(--mono);font-size:11.5px;letter-spacing:.28em;
     text-transform:uppercase;color:var(--dim)}
   #epigraph.gone{opacity:0}
   #whisper{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:5;
-    font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;color:var(--dim);
+    font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;color:var(--dim);
     pointer-events:none;transition:opacity .8s;white-space:nowrap}
   #whisper b{color:var(--cyan);font-weight:500}
   #whisper.gone{opacity:0}
@@ -58,7 +59,7 @@
   @keyframes gr{from{opacity:0;transform:translateY(28px) scale(.98)}to{opacity:1;transform:none}}
   #glass::-webkit-scrollbar{width:8px}
   #glass::-webkit-scrollbar-thumb{background:rgba(255,113,206,.35);border-radius:6px}
-  #gKick{font-family:var(--mono);font-size:10.5px;letter-spacing:.26em;text-transform:uppercase;
+  #gKick{font-family:var(--mono);font-size:11.5px;letter-spacing:.26em;text-transform:uppercase;
     color:var(--cyan);margin-bottom:7px;display:flex;align-items:center;gap:8px}
   #gTitle{font-family:var(--serif);font-weight:700;font-size:clamp(23px,3.2vw,30px);
     background:linear-gradient(92deg,#ffd9f2,var(--pink));
@@ -67,21 +68,21 @@
   #gBody p{margin-bottom:13px}
   #gBody .item{border-left:2px solid var(--line);padding:3px 0 3px 15px;margin-bottom:17px}
   #gBody .item h3{font-size:15.5px;font-weight:600;color:#fff;margin-bottom:2px}
-  #gBody .item .meta{font-family:var(--mono);font-size:11px;color:var(--dim);margin-bottom:7px}
+  #gBody .item .meta{font-family:var(--mono);font-size:12px;color:var(--dim);margin-bottom:7px}
   #gBody ul{list-style:none;margin:4px 0 8px}
   #gBody ul li{position:relative;padding:5px 0 5px 20px;font-size:13.5px;line-height:1.55}
   #gBody ul li::before{content:"\f005";font-family:"Font Awesome 6 Free";font-weight:900;
-    position:absolute;left:0;top:7px;color:var(--cyan);font-size:8px}
+    position:absolute;left:0;top:7px;color:var(--cyan);font-size:11px}
   #gBody b{color:#fff;font-weight:600}
   .tags{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 12px}
-  .tag{font-family:var(--mono);font-size:10.5px;color:#ffd9f2;background:rgba(255,113,206,.1);
+  .tag{font-family:var(--mono);font-size:12px;color:#ffd9f2;background:rgba(255,113,206,.1);
     border:1px solid var(--line);border-radius:6px;padding:3px 9px}
   .mgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(115px,1fr));gap:11px;margin:8px 0 4px}
   .mtile{background:rgba(1,205,254,.07);border:1px solid rgba(1,205,254,.25);border-radius:12px;padding:12px}
   .mtile .v{font-family:var(--mono);font-size:19px;font-weight:700;color:var(--cyan);line-height:1}
-  .mtile .l{font-size:10.5px;color:var(--dim);margin-top:5px;line-height:1.35}
+  .mtile .l{font-size:12px;color:var(--dim);margin-top:5px;line-height:1.35}
   .skillg{margin-bottom:12px}
-  .skillg h4{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
+  .skillg h4{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;
     color:var(--purp);margin-bottom:7px}
   .links a{display:inline-flex;align-items:center;gap:9px;color:var(--cyan);text-decoration:none;
     font-size:14px;margin:5px 20px 5px 0;transition:.18s}
@@ -94,6 +95,15 @@
 
   @media (prefers-reduced-motion: reduce){ #gWrap,#glass{animation:none !important} }
   @media (max-width:640px){ #glass{padding:24px 20px} }
+
+  /* accessibility pass: 40px close button, kicker clear of it, hints that wrap on a phone
+     and sit above the sound button (accessibility.md > Mobility; layout.md > Adaptability) */
+  #gClose{width:40px;height:40px;font-size:15px}
+  #gKick{padding-right:46px}
+  #whisper{white-space:normal;width:max-content;max-width:calc(100vw - 32px);text-align:center;line-height:1.55;background:rgba(14,4,26,.66);padding:7px 14px;border-radius:999px;}
+  @media (max-width:640px){ #whisper{bottom:76px} }
+  .kb-only{display:inline} .touch-only{display:none}
+  @media (pointer:coarse){ .kb-only{display:none} .touch-only{display:inline} }
 </style>
 </head>
 <body>
@@ -105,7 +115,7 @@
   <h1>Marble remembers.<br>Neon never sleeps.</h1>
   <div class="s">eight frames drifting in the forever-sunset</div>
 </div>
-<div id="whisper"><b>click a drifting frame</b>, or press 1 to 8, to open a chapter</div>
+<div id="whisper"><span class="kb-only"><b>click a frame</b> or press 1 to 8 to open a chapter</span><span class="touch-only"><b>tap a frame</b> to open a chapter</span></div>
 
 <div id="gWrap">
   <div id="glass">
@@ -306,12 +316,14 @@ function draw(now){
     ctx.beginPath(); ctx.moveTo(-fr.w/2+8,-fr.h/2+14); ctx.lineTo(-fr.w/2+26,-fr.h/2+5); ctx.stroke();
     /* label */
     ctx.fillStyle=hov?'#fff':'rgba(253,239,250,.92)';
-    ctx.font='600 '+Math.max(10,fr.w*0.115)+'px "JetBrains Mono",monospace';
+    ctx.font='600 '+Math.max(11,fr.w*0.115)+'px "JetBrains Mono",monospace';
     ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.shadowColor='rgba(20,4,30,.85)'; ctx.shadowBlur=6; /* keeps the label readable over the sun */
     ctx.fillText(FRAMES[f].label.toUpperCase(),0,fr.h*0.12);
     ctx.fillStyle=hov?'#ffd9f2':'rgba(195,154,192,.9)';
-    ctx.font='500 '+Math.max(8,fr.w*0.08)+'px "JetBrains Mono",monospace';
+    ctx.font='500 '+Math.max(11,fr.w*0.08)+'px "JetBrains Mono",monospace';
     ctx.fillText('0'+(f+1),0,-fr.h*0.24);
+    ctx.shadowBlur=0;
     ctx.restore();
   }
 
@@ -397,16 +409,20 @@ function openFrame(i){
   document.getElementById('gBody').innerHTML=f.body;
   document.getElementById('glass').scrollTop=0;
   wrapEl.classList.add('open');
+  if(DLG) DLG.opened();
   epiEl.classList.add('gone'); whisperEl.classList.add('gone');
   sfx('chime');
 }
 function closeFrame(){
   if(!wrapEl.classList.contains('open')) return;
-  wrapEl.classList.remove('open'); epiEl.classList.remove('gone');
+  wrapEl.classList.remove('open'); if(DLG) DLG.closed(); epiEl.classList.remove('gone');
   sfx('click'); sfx('back');
 }
 document.getElementById('gClose').addEventListener('click',closeFrame);
 wrapEl.addEventListener('click',function(e){ if(e.target===wrapEl) closeFrame(); });
+/* keyboard and screen readers: the panel is a real dialog, and a chapter list (hidden until tabbed into) opens what the canvas opens */
+var DLG = window.A11Y ? A11Y.dialog(wrapEl, document.getElementById('glass'), document.getElementById('gClose'), 'gTitle') : null;
+if (window.A11Y) A11Y.chapters(FRAMES.map(function(x){ return x.label; }), function(i){ openFrame(i); });
 
 /* ================= LOOP ================= */
 var raf=null;

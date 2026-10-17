@@ -13,6 +13,7 @@
 <link rel="stylesheet" href="../_shared/chrome.css">
 <script src="../_shared/chrome.js" data-accent="#ffb2d3" data-tag="the night train"></script>
 <script src="../_shared/sfx.js"></script>
+<script src="../_shared/a11y.js"></script>
 <style>
   :root{
     --rose:#ffb2d3; --amber:#ffd9a0; --ink:#eef0fa; --dim:#9aa4c6;
@@ -29,7 +30,7 @@
   /* poem-title top center */
   #poem{position:fixed;left:50%;top:9%;transform:translateX(-50%);z-index:5;text-align:center;
     pointer-events:none;transition:opacity 1.2s}
-  #poem .k{font-family:var(--mono);font-size:10.5px;letter-spacing:.5em;text-transform:uppercase;
+  #poem .k{font-family:var(--mono);font-size:11.5px;letter-spacing:.5em;text-transform:uppercase;
     color:rgba(255,178,211,.7);margin-bottom:10px}
   #poem h1{font-family:var(--serif);font-weight:500;font-style:italic;
     font-size:clamp(26px,4.6vw,52px);color:#f4ecf5;letter-spacing:.01em;
@@ -38,7 +39,7 @@
     text-transform:uppercase;color:var(--dim)}
   #poem.gone{opacity:0}
   #whisper{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:5;
-    font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;color:var(--dim);
+    font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;color:var(--dim);
     pointer-events:none;transition:opacity .8s;white-space:nowrap}
   #whisper b{color:var(--amber);font-weight:500}
   #whisper.gone{opacity:0}
@@ -60,10 +61,10 @@
   .thead::after,.thead::before{content:"";position:absolute;bottom:-9px;width:18px;height:18px;
     border-radius:50%;background:#070b1e}
   .thead::before{left:-9px} .thead::after{right:-9px}
-  .thead .no{position:absolute;top:18px;right:22px;font-family:var(--mono);font-size:10px;
+  .thead .no{position:absolute;top:18px;right:22px;font-family:var(--mono);font-size:11.5px;
     letter-spacing:.2em;color:var(--amber);border:1px solid rgba(255,217,160,.4);
     border-radius:6px;padding:4px 9px;text-transform:uppercase}
-  .thead .kk{font-family:var(--mono);font-size:10px;letter-spacing:.28em;text-transform:uppercase;
+  .thead .kk{font-family:var(--mono);font-size:11.5px;letter-spacing:.28em;text-transform:uppercase;
     color:var(--rose);margin-bottom:7px;display:flex;align-items:center;gap:8px}
   .thead h2{font-family:var(--serif);font-weight:600;font-size:clamp(24px,3.4vw,32px);
     color:#fdf6ee;line-height:1.1}
@@ -72,21 +73,21 @@
   .tbody p{margin-bottom:13px}
   .tbody .item{border-left:2px solid rgba(255,217,160,.25);padding:3px 0 3px 15px;margin-bottom:17px}
   .tbody .item h3{font-size:15.5px;font-weight:600;color:#fff;margin-bottom:2px}
-  .tbody .item .meta{font-family:var(--mono);font-size:11px;color:var(--dim);margin-bottom:7px}
+  .tbody .item .meta{font-family:var(--mono);font-size:12px;color:var(--dim);margin-bottom:7px}
   .tbody ul{list-style:none;margin:4px 0 8px}
   .tbody ul li{position:relative;padding:5px 0 5px 20px;font-size:13.5px;line-height:1.55}
   .tbody ul li::before{content:"\f005";font-family:"Font Awesome 6 Free";font-weight:900;
-    position:absolute;left:0;top:7px;color:rgba(255,217,160,.8);font-size:8px}
+    position:absolute;left:0;top:7px;color:rgba(255,217,160,.8);font-size:11px}
   .tbody b{color:#fff;font-weight:600}
   .tags{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 12px}
-  .tag{font-family:var(--mono);font-size:10.5px;color:#ffdff0;background:rgba(255,178,211,.09);
+  .tag{font-family:var(--mono);font-size:12px;color:#ffdff0;background:rgba(255,178,211,.09);
     border:1px solid var(--line);border-radius:6px;padding:3px 9px}
   .mgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(115px,1fr));gap:11px;margin:8px 0 4px}
   .mtile{background:rgba(255,217,160,.06);border:1px solid rgba(255,217,160,.2);border-radius:12px;padding:12px}
   .mtile .v{font-family:var(--mono);font-size:19px;font-weight:700;color:var(--amber);line-height:1}
-  .mtile .l{font-size:10.5px;color:var(--dim);margin-top:5px;line-height:1.35}
+  .mtile .l{font-size:12px;color:var(--dim);margin-top:5px;line-height:1.35}
   .skillg{margin-bottom:12px}
-  .skillg h4{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
+  .skillg h4{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;
     color:var(--rose);margin-bottom:7px}
   .links a{display:inline-flex;align-items:center;gap:9px;color:var(--amber);text-decoration:none;
     font-size:14px;margin:5px 20px 5px 0;transition:.18s}
@@ -99,6 +100,16 @@
 
   @media (prefers-reduced-motion: reduce){ #tWrap,#ticket{animation:none !important} }
   @media (max-width:640px){ .thead{padding:20px 20px 15px} .tbody{padding:16px 20px 0} }
+
+  /* accessibility pass: 40px close button, kicker clear of it, hints that wrap on a phone
+     and sit above the sound button (accessibility.md > Mobility; layout.md > Adaptability) */
+  #tClose{width:40px;height:40px;font-size:15px}
+  #tClose{left:auto;right:16px}
+  .thead{padding-right:64px}
+  #whisper{white-space:normal;width:max-content;max-width:calc(100vw - 32px);text-align:center;line-height:1.55;}
+  @media (max-width:640px){ #whisper{bottom:76px} }
+  .kb-only{display:inline} .touch-only{display:none}
+  @media (pointer:coarse){ .kb-only{display:none} .touch-only{display:inline} }
 </style>
 </head>
 <body>
@@ -110,7 +121,7 @@
   <h1>Somewhere over still water,<br>a life rides by.</h1>
   <div class="s">eight windows · eight chapters</div>
 </div>
-<div id="whisper"><b>click a lit window</b>: each carriage carries a chapter</div>
+<div id="whisper"><span class="kb-only"><b>click a lit window</b> or press 1 to 8; each carriage holds a chapter</span><span class="touch-only"><b>tap a lit window</b>; each carriage holds a chapter</span></div>
 
 <div id="tWrap">
   <div id="ticket">
@@ -398,22 +409,26 @@ function openTicket(i){
   document.getElementById('tBody').innerHTML=c.body;
   document.getElementById('ticket').scrollTop=0;
   wrapEl.classList.add('open');
+  if(DLG) DLG.opened();
   poemEl.classList.add('gone'); whisperEl.classList.add('gone');
   sfx('chime');
 }
 function closeTicket(){
   if(!wrapEl.classList.contains('open')) return;
-  wrapEl.classList.remove('open'); poemEl.classList.remove('gone');
+  wrapEl.classList.remove('open'); if(DLG) DLG.closed(); poemEl.classList.remove('gone');
   sfx('back');
 }
 document.getElementById('tClose').addEventListener('click',closeTicket);
 wrapEl.addEventListener('click',function(e){ if(e.target===wrapEl) closeTicket(); });
+/* keyboard and screen readers: the panel is a real dialog, and a chapter list (hidden until tabbed into) opens what the canvas opens */
+var DLG = window.A11Y ? A11Y.dialog(wrapEl, document.getElementById('ticket'), document.getElementById('tClose'), 'tTitle') : null;
+if (window.A11Y) A11Y.chapters(CARS.map(function(x){ return x.title; }), function(i){ openTicket(i); });
 
 /* ================= LOOP ================= */
 var raf=null;
 function loop(t){ raf=requestAnimationFrame(loop); if(document.hidden) return; draw(t); }
 if(REDUCED){ draw(performance.now());
-  whisperEl.innerHTML='<b>click a window</b> (or press 1 to 8): each carriage carries a chapter';
+  whisperEl.innerHTML='<span class="kb-only"><b>click a window</b> or press 1 to 8; each carriage holds a chapter</span><span class="touch-only"><b>tap a window</b>; each carriage holds a chapter</span>';
   addEventListener('resize',function(){ draw(performance.now()); });
 } else { raf=requestAnimationFrame(loop); }
 window.__train=function(){ return { cars:CARS.length, hover:hoverCar }; };

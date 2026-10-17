@@ -13,6 +13,7 @@
 <link rel="stylesheet" href="../_shared/chrome.css">
 <script src="../_shared/chrome.js" data-accent="#37e0c8" data-tag="the abyss"></script>
 <script src="../_shared/sfx.js"></script>
+<script src="../_shared/a11y.js"></script>
 <style>
   :root{
     --teal:#37e0c8; --glow:#7ffbe9; --ink:#e8f6f4; --dim:#8fb5b0;
@@ -30,7 +31,7 @@
     font-family:var(--mono);pointer-events:none}
   #meter .d{font-size:clamp(22px,3vw,34px);font-weight:700;color:var(--glow);
     text-shadow:0 0 22px rgba(127,251,233,.5);line-height:1}
-  #meter .z{margin-top:6px;font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:var(--dim)}
+  #meter .z{margin-top:6px;font-size:11.5px;letter-spacing:.28em;text-transform:uppercase;color:var(--dim)}
   #hint{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:6;
     font-family:var(--mono);font-size:11px;letter-spacing:.12em;color:var(--dim);
     pointer-events:none;transition:opacity .8s;white-space:nowrap}
@@ -44,9 +45,11 @@
   .rdot{position:relative;width:12px;height:12px;border-radius:50%;cursor:pointer;
     background:#0a2b30;border:2px solid rgba(127,251,233,.35);transition:.25s;z-index:1}
   .rdot:hover{border-color:var(--glow);transform:scale(1.25)}
+  .rdot::after{content:"";position:absolute;inset:-7px;border-radius:50%} /* a 26px target around the 12px dot */
+  .rdot:focus-visible{outline:2px solid var(--glow);outline-offset:4px}
   .rdot.here{background:var(--glow);border-color:var(--glow);box-shadow:0 0 14px rgba(127,251,233,.8)}
   .rdot .lbl{position:absolute;right:22px;top:50%;transform:translateY(-50%);
-    font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;
+    font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;
     color:var(--dim);white-space:nowrap;opacity:0;transition:.2s;pointer-events:none}
   .rdot:hover .lbl{opacity:1}
 
@@ -63,30 +66,30 @@
   @keyframes ar{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:none}}
   #panel::-webkit-scrollbar{width:8px}
   #panel::-webkit-scrollbar-thumb{background:rgba(55,224,200,.3);border-radius:6px}
-  #pDepth{font-family:var(--mono);font-size:10px;letter-spacing:.24em;color:var(--dim);
+  #pDepth{font-family:var(--mono);font-size:11.5px;letter-spacing:.24em;color:var(--dim);
     text-transform:uppercase;margin-bottom:8px}
-  #pKick{font-family:var(--mono);font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;
+  #pKick{font-family:var(--mono);font-size:11.5px;letter-spacing:.24em;text-transform:uppercase;
     color:var(--teal);margin-bottom:6px;display:flex;align-items:center;gap:8px}
   #pTitle{font-size:clamp(21px,3vw,27px);font-weight:700;letter-spacing:-.01em;margin-bottom:16px;color:#f2fffd}
   #pBody{font-size:14.5px;line-height:1.62;color:#c3dbd7}
   #pBody p{margin-bottom:13px}
   #pBody .item{border-left:2px solid var(--line);padding:3px 0 3px 15px;margin-bottom:17px}
   #pBody .item h3{font-size:15.5px;font-weight:600;color:#fff;margin-bottom:2px}
-  #pBody .item .meta{font-family:var(--mono);font-size:11px;color:var(--dim);margin-bottom:7px}
+  #pBody .item .meta{font-family:var(--mono);font-size:12px;color:var(--dim);margin-bottom:7px}
   #pBody ul{list-style:none;margin:4px 0 8px}
   #pBody ul li{position:relative;padding:5px 0 5px 20px;font-size:13.5px;line-height:1.55}
   #pBody ul li::before{content:"\f06e";font-family:"Font Awesome 6 Free";font-weight:900;
-    position:absolute;left:0;top:6px;color:var(--teal);font-size:9px;opacity:.8}
+    position:absolute;left:0;top:6px;color:var(--teal);font-size:11px;opacity:.8}
   #pBody b{color:#fff;font-weight:600}
   .tags{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 12px}
-  .tag{font-family:var(--mono);font-size:10.5px;color:#c8fff5;background:rgba(55,224,200,.09);
+  .tag{font-family:var(--mono);font-size:12px;color:#c8fff5;background:rgba(55,224,200,.09);
     border:1px solid var(--line);border-radius:6px;padding:3px 9px}
   .mgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(115px,1fr));gap:11px;margin:8px 0 4px}
   .mtile{background:rgba(55,224,200,.06);border:1px solid var(--line);border-radius:12px;padding:12px}
   .mtile .v{font-family:var(--mono);font-size:19px;font-weight:700;color:var(--glow);line-height:1}
-  .mtile .l{font-size:10.5px;color:var(--dim);margin-top:5px;line-height:1.35}
+  .mtile .l{font-size:12px;color:var(--dim);margin-top:5px;line-height:1.35}
   .skillg{margin-bottom:12px}
-  .skillg h4{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
+  .skillg h4{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;
     color:var(--teal);margin-bottom:7px}
   .links a{display:inline-flex;align-items:center;gap:9px;color:var(--glow);text-decoration:none;
     font-size:14px;margin:5px 20px 5px 0;transition:.18s}
@@ -99,6 +102,15 @@
 
   @media (prefers-reduced-motion: reduce){ #pWrap,#panel{animation:none !important} }
   @media (max-width:640px){ #panel{padding:22px 18px} #meter{left:12px} #rail{right:12px} }
+
+  /* accessibility pass: 40px close button, kicker clear of it, hints that wrap on a phone
+     and sit above the sound button (accessibility.md > Mobility; layout.md > Adaptability) */
+  #pClose{width:40px;height:40px;font-size:15px}
+  #pDepth,#pKick{padding-right:46px}
+  #hint{white-space:normal;width:max-content;max-width:calc(100vw - 32px);text-align:center;line-height:1.55;}
+  @media (max-width:640px){ #hint{bottom:76px} }
+  .kb-only{display:inline} .touch-only{display:none}
+  @media (pointer:coarse){ .kb-only{display:none} .touch-only{display:inline} }
 </style>
 </head>
 <body>
@@ -106,7 +118,7 @@
 <canvas id="deep"></canvas>
 
 <div id="meter"><div class="d" id="mD">0 m</div><div class="z" id="mZ">surface</div></div>
-<div id="hint"><b>scroll / drag</b> to descend, and a glowing creature carries each chapter</div>
+<div id="hint"><span class="kb-only"><b>scroll</b> or use the arrow keys to dive, then <b>click a glowing creature</b> to read its chapter</span><span class="touch-only"><b>drag up</b> to dive, then <b>tap a glowing creature</b> to read its chapter</span></div>
 <div id="rail" aria-label="Depth stations"></div>
 
 <div id="pWrap">
@@ -477,11 +489,15 @@ function openP(i){
   document.getElementById('pBody').innerHTML=s.body;
   document.getElementById('panel').scrollTop=0;
   wrapEl.classList.add('open');
+  if(DLG) DLG.opened();
   sfx('splash');
 }
-function closeP(){ if(!wrapEl.classList.contains('open'))return; wrapEl.classList.remove('open'); sfx('back'); }
+function closeP(){ if(!wrapEl.classList.contains('open'))return; wrapEl.classList.remove('open'); if(DLG) DLG.closed(); sfx('back'); }
 document.getElementById('pClose').addEventListener('click',closeP);
 wrapEl.addEventListener('click',function(e){ if(e.target===wrapEl) closeP(); });
+/* keyboard and screen readers: the panel is a real dialog, and a chapter list (hidden until tabbed into) opens what the canvas opens */
+var DLG = window.A11Y ? A11Y.dialog(wrapEl, document.getElementById('panel'), document.getElementById('pClose'), 'pTitle') : null;
+if (window.A11Y) A11Y.chapters(ST.map(function(x){ return x.label; }), function(i){ openP(i); });
 
 /* ================= LOOP ================= */
 function hud(){
@@ -500,7 +516,7 @@ function loop(now){
 }
 if(REDUCED){
   hintEl.innerHTML='use the <b>dots on the right</b> to dive to each station';
-  (function rloop(now){ raf=requestAnimationFrame(rloop); if(!document.hidden){ depth+=(targetDepth-depth); draw(now||performance.now()); hud(); } })();
+  (function rloop(now){ raf=requestAnimationFrame(rloop); if(!document.hidden){ depth+=(targetDepth-depth); draw(t0+4000); hud(); } /* a frozen clock: the creatures hold still */ })();
 } else {
   raf=requestAnimationFrame(loop);
 }

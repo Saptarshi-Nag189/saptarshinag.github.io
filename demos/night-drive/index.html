@@ -13,6 +13,7 @@
 <link rel="stylesheet" href="../_shared/chrome.css">
 <script src="../_shared/chrome.js" data-accent="#7fe08f" data-tag="night drive"></script>
 <script src="../_shared/sfx.js"></script>
+<script src="../_shared/a11y.js"></script>
 <style>
   :root{
     --green:#7fe08f;          /* highway sign green */
@@ -62,7 +63,7 @@
     padding:0 clamp(9px,1.7vw,19px);cursor:pointer;flex:none}
   .stopdot .d{width:11px;height:11px;border-radius:50%;background:#232c3c;
     border:2px solid #39465d;transition:.25s}
-  .stopdot .l{font-family:var(--mono);font-size:9px;letter-spacing:.09em;color:var(--dim);
+  .stopdot .l{font-family:var(--mono);font-size:12px;letter-spacing:.09em;color:var(--dim);
     text-transform:uppercase;white-space:nowrap;transition:.25s}
   .stopdot:hover .d{border-color:var(--green)}
   .stopdot.visited .d{background:var(--green);border-color:var(--green);box-shadow:0 0 10px rgba(127,224,143,.6)}
@@ -92,12 +93,12 @@
   #card::-webkit-scrollbar{width:8px}
   #card::-webkit-scrollbar-thumb{background:rgba(127,224,143,.3);border-radius:6px}
   /* the card header styled as a highway sign board */
-  .signhead{background:linear-gradient(180deg,#227a46,#175c33);border-bottom:3px solid #0f4023;
-    border-radius:15px 15px 0 0;padding:22px 30px 18px;position:relative}
-  .signhead .exitno{position:absolute;top:14px;right:18px;font-family:var(--mono);font-size:10.5px;
-    letter-spacing:.18em;color:rgba(255,255,255,.75);border:1.5px solid rgba(255,255,255,.5);
+  .signhead{background:linear-gradient(180deg,#1b5e37,#144d2c);border-bottom:3px solid #0f4023;
+    border-radius:15px 15px 0 0;padding:22px 30px 18px 68px;position:relative}
+  .signhead .exitno{position:absolute;top:14px;right:18px;font-family:var(--mono);font-size:11.5px;
+    letter-spacing:.18em;color:rgba(255,255,255,.92);border:1.5px solid rgba(255,255,255,.6);
     border-radius:6px;padding:4px 9px;text-transform:uppercase}
-  .signhead .kick{font-family:var(--mono);font-size:10.5px;letter-spacing:.24em;
+  .signhead .kick{font-family:var(--mono);font-size:11.5px;letter-spacing:.24em;
     text-transform:uppercase;color:#cdeed8;margin-bottom:7px;display:flex;align-items:center;gap:8px}
   .signhead h2{font-size:clamp(20px,3vw,27px);font-weight:700;color:#fff;letter-spacing:-.01em;line-height:1.15}
   .signhead .sub{margin-top:5px;font-size:13px;color:#bfe3cb}
@@ -105,19 +106,19 @@
   .cbody p{margin-bottom:13px}
   .cbody .item{border-left:2px solid var(--line);padding:3px 0 3px 16px;margin-bottom:18px}
   .cbody .item h3{font-size:16px;font-weight:600;color:#fff;margin-bottom:2px}
-  .cbody .item .meta{font-family:var(--mono);font-size:11px;color:var(--dim);margin-bottom:8px}
+  .cbody .item .meta{font-family:var(--mono);font-size:12px;color:var(--dim);margin-bottom:8px}
   .cbody ul{list-style:none;margin:4px 0 10px}
   .cbody ul li{position:relative;padding:5px 0 5px 20px;font-size:13.5px;line-height:1.55}
   .cbody ul li::before{content:"\f105";font-family:"Font Awesome 6 Free";font-weight:900;
     position:absolute;left:2px;top:6px;color:var(--green);font-size:11px}
   .cbody b{color:#fff;font-weight:600}
   .tags{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 14px}
-  .tag{font-family:var(--mono);font-size:10.5px;color:var(--green);background:rgba(127,224,143,.08);
+  .tag{font-family:var(--mono);font-size:12px;color:var(--green);background:rgba(127,224,143,.08);
     border:1px solid var(--line);border-radius:5px;padding:3px 9px}
   .mgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:11px;margin:8px 0 6px}
   .mtile{background:rgba(127,224,143,.05);border:1px solid var(--line);border-radius:11px;padding:13px}
   .mtile .v{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--green);line-height:1}
-  .mtile .l{font-size:11px;color:var(--dim);margin-top:5px;line-height:1.35}
+  .mtile .l{font-size:12px;color:var(--dim);margin-top:5px;line-height:1.35}
   .skillg{margin-bottom:13px}
   .skillg h4{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;
     color:var(--green);margin-bottom:7px}
@@ -125,7 +126,7 @@
     font-size:14px;margin:5px 20px 5px 0;transition:.18s}
   .links a:hover{text-shadow:0 0 12px rgba(255,210,127,.6)}
   .links a i{width:18px;text-align:center}
-  #cardClose{position:absolute;top:14px;left:16px;width:34px;height:34px;border-radius:9px;
+  #cardClose{position:absolute;top:14px;left:16px;width:40px;height:40px;border-radius:9px;
     border:1px solid rgba(255,255,255,.3);background:rgba(0,0,0,.25);color:#fff;cursor:pointer;
     font-size:13px;display:flex;align-items:center;justify-content:center;transition:.18s;z-index:2}
   #cardClose:hover{background:rgba(0,0,0,.45)}
@@ -139,10 +140,15 @@
   }
   @media (max-width:640px){
     .stopdot .l{display:none}
-    .signhead{padding:20px 20px 15px}
+    .signhead{padding:20px 20px 15px 66px}
     .cbody{padding:18px 20px 0}
     #cardNext{margin-left:20px}
   }
+
+  /* accessibility pass: route stops are tappable on a phone, and focus is visible */
+  .stopdot{min-height:28px;min-width:24px}
+  .stopdot:focus-visible,#cardClose:focus-visible,#cardNext:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+  @media (max-width:640px){ .stopdot{min-width:30px;min-height:32px;justify-content:center} }
 </style>
 </head>
 <body>
@@ -488,6 +494,9 @@ function updateRoute(){
 }
 function fastTravel(i){
   sfx('select'); closeCard(true);
+  /* With reduced motion the animation loop never runs, so autopilot never arrived and no
+     chapter could open at all. Jump to the exit and open it instead of driving there. */
+  if(REDUCED){ cam=Math.max(0,stopZ[i]-40); speed=0; draw(); arrive(i); return; }
   if(Math.abs((stopZ[i]-40)-cam)<10){ arrive(i); return; }
   if(stopZ[i]-40<cam){ cam=Math.max(0,stopZ[i]-460); }  /* wormhole back, then drive in */
   autopilot=i;
@@ -507,12 +516,13 @@ function arrive(i){
   document.getElementById('cBody').innerHTML=STOPS[i].body;
   document.getElementById('card').scrollTop=0;
   wrapEl.classList.add('open');
+  if(DLG) DLG.opened();
   updateRoute();
 }
 function closeCard(silent){
   if(current<0) return;
   if(!silent) sfx('back');
-  current=-1; wrapEl.classList.remove('open'); updateRoute();
+  current=-1; wrapEl.classList.remove('open'); if(DLG) DLG.closed(); updateRoute();
 }
 document.getElementById('cardClose').addEventListener('click',function(){ closeCard(); });
 document.getElementById('cardNext').addEventListener('click',function(){
@@ -520,6 +530,8 @@ document.getElementById('cardNext').addEventListener('click',function(){
   try{ window.SFX && SFX.revTo(0.7,420); }catch(e){}
 });
 wrapEl.addEventListener('click',function(e){ if(e.target===wrapEl) closeCard(); });
+/* the card is a real dialog; the route strip below already gives the keyboard a way to every exit */
+var DLG = window.A11Y ? A11Y.dialog(wrapEl, document.getElementById('card'), document.getElementById('cardClose'), 'cTitle') : null;
 addEventListener('keydown',function(e){ if(e.key==='Escape') closeCard(); });
 
 /* ================= INPUT ================= */

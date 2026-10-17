@@ -13,6 +13,7 @@
 <link rel="stylesheet" href="../_shared/chrome.css">
 <script src="../_shared/chrome.js" data-accent="#59c2ff" data-tag="liquid"></script>
 <script src="../_shared/sfx.js"></script>
+<script src="../_shared/a11y.js"></script>
 <style>
   :root{
     --blue:#59c2ff; --ink:#eaf3fb; --dim:#8fa5bd;
@@ -28,7 +29,7 @@
   /* name floating over the fluid */
   #title{position:fixed;left:50%;top:38%;transform:translate(-50%,-50%);z-index:5;
     text-align:center;pointer-events:none;mix-blend-mode:screen}
-  #title .k{font-family:var(--mono);font-size:clamp(10px,1.4vw,13px);letter-spacing:.44em;
+  #title .k{font-family:var(--mono);font-size:clamp(11.5px,1.4vw,13px);letter-spacing:.44em;
     text-transform:uppercase;color:rgba(150,205,255,.75);margin-bottom:12px}
   #title h1{font-size:clamp(40px,8vw,104px);font-weight:700;letter-spacing:-.03em;line-height:1;
     color:#fff;text-shadow:0 0 60px rgba(89,194,255,.35)}
@@ -53,7 +54,7 @@
   .orb:hover{transform:translateY(-6px) scale(1.07)}
   .orb:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
   .orb .lbl{position:absolute;top:-26px;left:50%;transform:translateX(-50%);
-    font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;
+    font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;
     color:var(--dim);white-space:nowrap;opacity:0;transition:opacity .2s;pointer-events:none}
   .orb:hover .lbl{opacity:1}
 
@@ -73,26 +74,26 @@
   #pIcon{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;
     font-size:19px;color:#04121f;background:var(--pc,var(--blue));margin-bottom:14px;
     box-shadow:0 0 30px -6px var(--pc,var(--blue))}
-  #pKick{font-family:var(--mono);font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;
+  #pKick{font-family:var(--mono);font-size:11.5px;letter-spacing:.24em;text-transform:uppercase;
     color:var(--pc,var(--blue));margin-bottom:6px}
   #pTitle{font-size:clamp(20px,3vw,26px);font-weight:700;letter-spacing:-.01em;margin-bottom:16px}
   #pBody{font-size:14.5px;line-height:1.62;color:#c8d9ea}
   #pBody p{margin-bottom:13px}
   #pBody .item{border-left:2px solid var(--line);padding:3px 0 3px 15px;margin-bottom:17px}
   #pBody .item h3{font-size:15.5px;font-weight:600;color:#fff;margin-bottom:2px}
-  #pBody .item .meta{font-family:var(--mono);font-size:11px;color:var(--dim);margin-bottom:7px}
+  #pBody .item .meta{font-family:var(--mono);font-size:12px;color:var(--dim);margin-bottom:7px}
   #pBody ul{list-style:none;margin:4px 0 8px}
   #pBody ul li{position:relative;padding:5px 0 5px 19px;font-size:13.5px;line-height:1.55}
   #pBody ul li::before{content:"\f043";font-family:"Font Awesome 6 Free";font-weight:900;
-    position:absolute;left:0;top:6px;color:var(--pc,var(--blue));font-size:10px;opacity:.85}
+    position:absolute;left:0;top:6px;color:var(--pc,var(--blue));font-size:11px;opacity:.85}
   #pBody b{color:#fff;font-weight:600}
   .tags{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 12px}
-  .tag{font-family:var(--mono);font-size:10.5px;color:#bfe2ff;background:rgba(89,194,255,.09);
+  .tag{font-family:var(--mono);font-size:12px;color:#bfe2ff;background:rgba(89,194,255,.09);
     border:1px solid var(--line);border-radius:6px;padding:3px 9px}
   .mgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:11px;margin:8px 0 4px}
   .mtile{background:rgba(89,194,255,.06);border:1px solid var(--line);border-radius:12px;padding:13px}
   .mtile .v{font-family:var(--mono);font-size:19px;font-weight:700;color:var(--pc,var(--blue));line-height:1}
-  .mtile .l{font-size:11px;color:var(--dim);margin-top:5px;line-height:1.35}
+  .mtile .l{font-size:12px;color:var(--dim);margin-top:5px;line-height:1.35}
   .skillg{margin-bottom:12px}
   .skillg h4{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;
     color:var(--pc,var(--blue));margin-bottom:7px}
@@ -120,6 +121,17 @@
     #orbs{bottom:70px;gap:9px}
     #panel{padding:24px 20px}
   }
+
+  /* accessibility pass: 40px close button, kicker clear of it, hints that wrap on a phone
+     and sit above the sound button (accessibility.md > Mobility; layout.md > Adaptability) */
+  #pClose{width:40px;height:40px;font-size:15px}
+  #pKick{padding-right:46px}
+  .kb-only{display:inline} .touch-only{display:none}
+  @media (pointer:coarse){ .kb-only{display:none} .touch-only{display:inline} }
+  /* bright dye could wash out the small lines, so they carry a dark halo instead of blending */
+  #title{mix-blend-mode:normal}
+  #title .k,#title .r,#hint{text-shadow:0 0 14px rgba(2,6,16,.95),0 1px 3px rgba(2,6,16,.9)}
+  #hint{font-size:12px}
 </style>
 </head>
 <body>
@@ -238,11 +250,14 @@ function openPanel(i){
   document.getElementById('pBody').innerHTML=s.body;
   panelEl.scrollTop=0;
   wrapEl.classList.add('open');
+  if(DLG) DLG.opened();
   sfx('splash');
 }
-function closePanel(){ if(!wrapEl.classList.contains('open'))return; wrapEl.classList.remove('open'); sfx('back'); }
+function closePanel(){ if(!wrapEl.classList.contains('open'))return; wrapEl.classList.remove('open'); if(DLG) DLG.closed(); sfx('back'); }
 document.getElementById('pClose').addEventListener('click',closePanel);
 wrapEl.addEventListener('click',function(e){ if(e.target===wrapEl) closePanel(); });
+/* keyboard and screen readers: the panel is a real dialog */
+var DLG = window.A11Y ? A11Y.dialog(wrapEl, document.getElementById('panel'), document.getElementById('pClose'), 'pTitle') : null;
 addEventListener('keydown',function(e){ if(e.key==='Escape') closePanel(); });
 
 function buildFallback(){
