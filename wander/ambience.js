@@ -1,18 +1,26 @@
 /* ==========================================================================
    ambience.js — real-recording ambience player with synth fallback.
-   Drop audio files into wander/audio/ (see audio/README.md for the list).
-   For each biome it tries audio/<id>.ogg then audio/<id>.mp3; if neither
-   exists, it calls the synth fallback so the world is never silent.
+   Drop audio files into wander/audio/ (see audio/README.md for the list) and
+   add each one to RECORDINGS below. Anything not listed plays the synth, so the
+   world is never silent.
    Obeys the shared mute button (localStorage 'exp-sfx-muted').
    ========================================================================== */
+
+/* Which recordings actually exist, as id -> file extension. Guessing used to
+   cost two 404s per biome (an .ogg, then an .mp3), up to 18 per visit, while the
+   folder held nothing but a README. Example: { river:'ogg', rain:'mp3' } */
+const RECORDINGS = {};
+
+const readMuted=()=>{ try{ return localStorage.getItem('exp-sfx-muted')==='1'; }catch(e){ return false; } };
+
 export function createAmbience(synthFallback, stopSynth){
   const TRACKS={};              /* id -> {el,ok} */
-  let current=null, fadeTimer=null, muted=localStorage.getItem('exp-sfx-muted')==='1';
+  let current=null, fadeTimer=null, muted=readMuted();
   const VOL={ glade:0.5, forest:0.55, river:0.65, desert:0.5, snow:0.45,
               sky:0.55, city:0.5, meadow:0.55, rain:0.7 };
 
   setInterval(()=>{ /* follow the shared mute button */
-    const m=localStorage.getItem('exp-sfx-muted')==='1';
+    const m=readMuted();
     if(m!==muted){ muted=m;
       Object.values(TRACKS).forEach(t=>{ if(t.el && !t.el.paused) t.el.volume=m?0:(t.target||0.5); });
       if(m) stopSynth && stopSynth();
@@ -30,7 +38,8 @@ export function createAmbience(synthFallback, stopSynth){
       el.addEventListener('canplaythrough',()=>{ if(t.ok===null){ t.ok=true; t.el=el; } },{once:true});
       el.addEventListener('error',()=>{ if(t.ok===null) tryExt(exts.slice(1)); },{once:true});
     };
-    tryExt(['ogg','mp3']);
+    if(RECORDINGS[id]) tryExt([RECORDINGS[id]]);
+    else t.ok=false;
     return t;
   }
 

@@ -16,7 +16,10 @@
   var KEY = 'exp-sfx-muted';
   var AC = window.AudioContext || window.webkitAudioContext;
   var ctx = null, master = null;
-  var muted = (localStorage.getItem(KEY) === '1');
+  /* guarded: where storage is blocked, an unguarded read threw and the whole
+     sound engine never loaded */
+  var muted = false;
+  try { muted = (localStorage.getItem(KEY) === '1'); } catch (e) {}
   var unlocked = false;
   var ambient = null, projector = null, engine = null, chiptune = null, rain = null, clack = null, brook = null, wind = null, crickets = null, hum = null;
   var accent = '#9aa0ff';

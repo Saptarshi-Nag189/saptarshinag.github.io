@@ -561,8 +561,8 @@ function sparkTick(dt,ms){
       sp.got=true; sparkCount++;
       sfx('coin'); sfx('trill');
       const n=document.getElementById('sparkN'); if(n) n.textContent=sparkCount;
-      if(sparkCount===1) fairySay('Oh — a memory spark! Seven of them hide along the road. Collect them all and something lovely happens at the end. ✧',6200);
-      if(sparkCount===7) fairySay('All seven memories! The night sky will remember this. ✧',5200);
+      if(sparkCount===1) fairySay('Oh, a memory spark! Seven of them hide along the road. Find all seven and they make a constellation at the end. ✧',6200);
+      if(sparkCount===7) fairySay('All seven! They will be waiting in the night sky at the end. ✧',5200);
       drawConstellation();
     }
   }
@@ -676,7 +676,7 @@ function setPhoto(v){
   state.photo=v;
   document.body.classList.toggle('photo',v);
   const b=document.getElementById('photoBtn');
-  if(b) b.innerHTML='<i class="fa-solid fa-camera"></i> '+(v?'exit':'photo');
+  if(b) b.innerHTML='<i aria-hidden="true" class="fa-solid fa-camera"></i> '+(v?'exit':'photo');
   sfx(v?'chime':'back');
 }
 addEventListener('keydown',e=>{
@@ -689,21 +689,25 @@ if(photoBtn) photoBtn.addEventListener('click',()=>setPhoto(!state.photo));
 function setRun(v){
   state.run=v;
   const b=document.getElementById('runBtn');
-  if(b) b.innerHTML='<i class="fa-solid fa-person-'+(v?'running':'walking')+'"></i> '+(v?'run':'walk');
+  if(b) b.innerHTML='<i aria-hidden="true" class="fa-solid fa-person-'+(v?'running':'walking')+'"></i> '+(v?'run':'walk');
 }
 addEventListener('keydown',e=>{ if(e.key==='Shift' && !e.repeat){ setRun(!state.run); sfx('tick'); } });
 const input={left:false,right:false,up:false};
 
 /* keyboard */
+/* e.code, not e.key: e.key is 'A' with Caps Lock on, which used to freeze WASD.
+   And no walking while the chat box has focus, or typing "was" walks you off. */
+const typing=()=>{ const t=document.activeElement; return !!t && (t.tagName==='INPUT' || t.tagName==='TEXTAREA'); };
 addEventListener('keydown',e=>{
-  if(e.key==='ArrowLeft'||e.key==='a') input.left=true;
-  if(e.key==='ArrowRight'||e.key==='d') input.right=true;
-  if(e.key==='ArrowUp'||e.key===' '||e.key==='w'){ input.up=true; e.preventDefault(); }
+  if(typing()) return;
+  if(e.key==='ArrowLeft'||e.code==='KeyA') input.left=true;
+  if(e.key==='ArrowRight'||e.code==='KeyD') input.right=true;
+  if(e.key==='ArrowUp'||e.key===' '||e.code==='KeyW'){ input.up=true; e.preventDefault(); }
 });
 addEventListener('keyup',e=>{
-  if(e.key==='ArrowLeft'||e.key==='a') input.left=false;
-  if(e.key==='ArrowRight'||e.key==='d') input.right=false;
-  if(e.key==='ArrowUp'||e.key===' '||e.key==='w') input.up=false;
+  if(e.key==='ArrowLeft'||e.code==='KeyA') input.left=false;
+  if(e.key==='ArrowRight'||e.code==='KeyD') input.right=false;
+  if(e.key==='ArrowUp'||e.key===' '||e.code==='KeyW') input.up=false;
 });
 /* on-screen pad */
 function bindPad(id,key){
@@ -722,7 +726,7 @@ const runBtn=document.getElementById('runBtn');
 if(runBtn) runBtn.addEventListener('click',()=>{ setRun(!state.run); sfx('select'); });
 povBtn.addEventListener('click',()=>{
   state.pov = state.pov==='third' ? 'first' : 'third';
-  povBtn.innerHTML='<i class="fa-solid fa-video"></i> '+(state.pov==='third'?'3rd person':'1st person');
+  povBtn.innerHTML='<i aria-hidden="true" class="fa-solid fa-video"></i> '+(state.pov==='third'?'3rd person':'1st person');
   sfx('select');
 });
 
@@ -862,7 +866,7 @@ function tick(ms){
   /* boarding / alighting transitions */
   if(riding && boat.state!=='carry'){
     boat.state='carry'; state.jumpV=2.6; sfx('creak'); sfx('splash');
-    fairySay('Steady… step aboard. The river does the walking now.',3800);
+    fairySay('Steady… step aboard. The river carries you from here.',3800);
   } else if(!riding && boat.state==='carry'){
     boat.state = state.t>=ALIGHT_T ? 'moor1' : 'moor0';
     state.jumpV=2.6; sfx('splash'); sfx('step');
@@ -1006,7 +1010,7 @@ function tick(ms){
     if(flying && !skyLife.manta.userData.seen &&
        skyLife.manta.position.distanceTo(wanderer.g.position)<70){
       skyLife.manta.userData.seen=true;
-      fairySay('Oh — look up. She only shows herself to gentle travellers. ✧',5200);
+      fairySay('Oh, look up! She only shows herself to gentle travellers. ✧',5200);
       sfx('whale');
     }
     for(const fl of skyLife.flocks){

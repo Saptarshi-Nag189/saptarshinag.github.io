@@ -1,8 +1,10 @@
-# THE WANDER — ambience recordings (drop-in)
+# The Wander: ambience recordings
 
 The world plays real recordings from this folder when they exist, and falls back
-to the built-in synth ambience when they don't. **Just drop files here with these
-exact names** (`.ogg` preferred, `.mp3` also works) and refresh — no code changes.
+to the built-in synth ambience when they don't. Drop files here with these exact
+names (`.ogg` preferred, `.mp3` also works), then list each one in `RECORDINGS` at
+the top of `../ambience.js`, for example `{ river:'ogg', rain:'mp3' }`. The list
+stops the page from requesting files that aren't there.
 
 | File | What to look for | Suggested search |
 |---|---|---|

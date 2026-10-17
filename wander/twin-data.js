@@ -1,78 +1,94 @@
 /* ==========================================================================
-   twin-data.js — EVERYTHING editable about the Saptarshi AI twin + domains.
-   To update the twin: edit this file only. Three exports:
-     FAIRY   — scripted companion lines (biome intros, events, idle)
-     CORPUS  — Q&A intents for the chat drawer (patterns are lowercase substrings)
-     DOMAINS — station content for every dungeon
+   twin-data.js: everything editable about the Saptarshi twin and the domains.
+   To update the twin, edit this file only. Three exports:
+     FAIRY   scripted companion lines (biome intros, events, idle)
+     CORPUS  Q&A intents for the chat drawer (patterns match whole words, see domains.js)
+     DOMAINS station content for every dungeon
+
+   Facts come from the linked CV (saptarshi_resume_linkedin_2026.pdf) and
+   nothing else, and every number names the project it came from.
    ========================================================================== */
 
 export const FAIRY = {
-  wake: "Oh! You're here. I'm Saptarshi's twin — I'll wander with you. ◀ ▶ walk · ▲ hop or enter · Esc steps out of any domain · T opens a chat with me. The road knows the way.",
-  rest: "Shhh… lie down. You walked a whole life today. I'll be right here on the table. Listen — rain.",
+  wake: "Oh! You're here. I'm Saptarshi's twin, and I'll wander with you. ◀ ▶ walk, ▲ hops or goes through a door, Esc steps back out of any domain, and T opens a chat with me. The road only goes one way, so you can't get lost.",
+  rest: "Shhh… lie down. That was a long walk. I'll be right here on the table. Listen, it's raining.",
   idle: [
-    "The path continues ▶ — no map needed, I promise.",
-    "If you're curious about him, tap me anytime and just ask.",
-    "Every glowing door hides a piece of his story."
+    "The path keeps going ▶ and there's no map to read.",
+    "If you're curious about him, tap me and ask.",
+    "Each glowing door opens onto a part of his work."
   ],
   biomes: {
-    glade:  "This is where every story starts — soft light and no plans. Walk on ▶",
-    forest: "The Grove of Foundations… his learning years grew tall here. That glowing arch leads inside.",
-    river:  "Hear the water? Hop in the boat — his research years flowed just like this. Listen…",
-    desert: "The Dunes of Craft. Everything he practised, distilled to an oasis. Doors shimmer near water.",
-    snow:   "Hush now — the Quiet Archive keeps what he published. Snow keeps paper safe, you know.",
-    sky:    "Hold on — this is my favourite part. Spread the cape. We fly from here. ✧",
-    city:   "The Atelier! Everything he builds lives in there — you can actually run his machines.",
-    meadow: "Journey's end… or a beginning. Send a lantern up, he always answers."
+    glade:  "This is the start. Walk on ▶",
+    forest: "The Grove of Foundations holds his degrees. That glowing arch leads inside.",
+    river:  "Hear the water? Hop in the boat. His two research internships are down this river.",
+    desert: "The Oasis of Craft. His skills are in here, laid out as constellations. The doors shimmer near the water.",
+    snow:   "Hush now. The Quiet Archive keeps his two papers. Snow keeps paper safe, you know.",
+    sky:    "Hold on, this is my favourite part. Spread the cape, we fly from here. ✧",
+    city:   "The Atelier! His projects are in there, and you can actually run them.",
+    meadow: "Journey's End. Send a lantern up and you'll find how to reach him."
   },
-  doorEnter: "In we go — softly…",
+  doorEnter: "In we go, softly…",
   doorExit: "Back to the open air ✧",
   demoDone: [
     "You did that just like he does. Almost.",
-    "See? His work makes more sense when your hands do it.",
+    "His work makes more sense once your hands have done it.",
     "I'm keeping a note that you were good at this."
   ],
-  chatGreeting: "Hi! Ask me anything about Saptarshi — his work, projects, studies… I keep all of it."
+  chatGreeting: "Hi! Ask me about Saptarshi: his work, his projects, where he studied. I know all of it."
 };
 
 export const CORPUS = [
-  { p: ["who are you","what are you","your name"], a: "I'm Saptarshi's digital twin — a small local mind trained on his story. No servers, no spying; I live entirely in this page. One day a real language model will sit where I am (the plumbing is already here)." },
-  { p: ["who is saptarshi","about him","who is he","introduce"], a: "Saptarshi Nag is an AI/ML engineer — M.Tech in Artificial Intelligence from DIAT (DRDO), research at NCRA-TIFR and GMRT, and now a Project Engineer at C-DAC building real-time IoT security with Zero Trust and ML detection. He works the whole stack: raw data → models → production." },
-  { p: ["education","study","college","degree","btech","mtech","gate"], a: "B.Tech in CSE from Academy of Technology, Kolkata (CGPA 9.44), then M.Tech in AI at DIAT (DRDO), Pune (CGPA 8.64). GATE 2024: rank 1790 in Data Science & AI — top 5%. The Grove of Foundations in the forest holds all of it." },
-  { p: ["current","c-dac","cdac","job","work now","zero trust","iot"], a: "At C-DAC Chennai (Project Engineer, AI Research & IoT Security, since July 2025) he builds real-time detection for IoT networks: optimised XGBoost and MLP models running at under 1 ms per window on edge devices, 97.93% accuracy on high-throughput traffic, SHAP explainability so every decision can be debugged, and SQL pipelines feeding live dashboards. You can fight off an attack yourself at the WiFi-Guard post in the Atelier." },
-  { p: ["pulsar","ncra","astronomy","telescope","gmrt"], a: "His research years: at GMRT he refactored the telescope's signal pipeline for multicore and halved its latency; at NCRA-TIFR he built a ResNet1D with SE-attention that finds weak pulsars at 99.8% F1 across 70M+ samples. Both live on the Listening River — the boat will take you." },
-  { p: ["f1","tyre","tire","race","formula"], a: "His F1 project predicts tyre degradation with physics-informed neural networks — thermal and mechanical wear split apart — plus LSTM-XGBoost on 10 Hz telemetry, and custom CUDA/CuPy kernels for a 4.1× training speedup. Try beating his model at the pit wall in the Atelier!" },
-  { p: ["omniscience","rag","retrieval"], a: "Omniscience Pro is his privacy-first local RAG system — vector search under 50 ms (HNSW), first token under 500 ms, fully offline. It ranks answers with a citation-weighted algorithm across local documents, DuckDuckGo and academic APIs (ArXiv, OpenAlex), and is hardened like production software: symlink-aware path-traversal protection, sliding-window rate limiting, SQL-injection safeguards, POSIX file locking, GPU-aware Docker." },
-  { p: ["aro","agent","multi-agent"], a: "ARO — Autonomous Research Operator — runs multi-agent LLM workflows as directed graphs (NetworkX): iterative planning, web search, hypothesis generation, structured reports. Flask backend with Server-Sent Events streaming to a React front, SQLAlchemy/SQLite persistent memory with session recovery and audit trails. Then he red-teamed it himself: 16 vulnerabilities found and fixed across auth, SSRF, validation, log sanitisation and CORS." },
-  { p: ["llama","fine-tun","quant"], a: "He fine-tuned Llama 3.2 (1B and 3B) on 21.5k domain interactions and squeezed it to 4-bit with Unsloth — no meaningful quality loss, runs on consumer GPUs. That's also the model family destined to replace my little local brain someday." },
-  { p: ["skill","stack","tools","language"], a: "Python (advanced) and C++ (proficient) at the core; PyTorch, XGBoost, scikit-learn, PINNs; CUDA and CuPy for speed; Docker, Flask, ChromaDB, Git for shipping; RAG, LLM fine-tuning and multi-agent orchestration for the AI work. The desert oasis shows them as constellations." },
-  { p: ["paper","publication","iotais"], a: "Two papers at IoTaIS 2025 in Bali: 'Protocol-Aware Continuous Monitoring and Anomaly Detection in IoT Networks' and 'A Comprehensive Survey on Zero Trust Architecture in IoT Networks'. They rest in the snow archive." },
-  { p: ["contact","email","hire","reach","linkedin","github","cv","resume"], a: "Reach him at saptarshinag18@gmail.com, /in/saptarshi18 on LinkedIn, or Saptarshi-Nag189 on GitHub. His CV waits at journey's end — or right here: I'd say he's open to interesting problems." },
-  { p: ["metric","number","stat","achievement"], a: "The numbers he's proudest of — each from a real build: 97.93% attack detection at under 1 ms per window (C-DAC's IoT Zero-Trust framework), 99.8% F1 over 70M+ samples (the NCRA-TIFR pulsar ResNet1D), 4.1× training speedup (custom CUDA kernels in his F1 tyre project), a 50% latency cut (the GMRT telescope pipeline refactor), and sub-50 ms retrieval (Omniscience Pro, his local RAG)." },
-  { p: ["hello","hi ","hey","namaste"], a: "Hello, wanderer ✧ Lovely night for a walk through a life, isn't it? Ask me anything, or just keep going ▶" },
-  { p: ["thank","thanks"], a: "Always. He'd say it too — softly, and then go back to training something." }
+  { p: ["who are you","what are you","your name"], a: "I'm Saptarshi's digital twin. Right now I'm a small matcher that picks from answers written about him, and I run entirely in this page, with no server. Press ✨ full brain and a small language model loads in your browser to phrase the same answers." },
+  { p: ["who is saptarshi","about him","who is he","introduce"], a: "Saptarshi Nag is an AI/ML engineer. He has an M.Tech in Computer Science and Engineering (Artificial Intelligence) from DIAT, a DRDO institute, did research at NCRA-TIFR and GMRT, and is now a Project Engineer at C-DAC Chennai, building ML-based attack detection for a Zero Trust IoT framework." },
+  { p: ["education","study","studied","college","degree","btech","b.tech","mtech","m.tech","gate"], a: "B.Tech in Computer Science and Engineering from Academy of Technology, Kolkata (CGPA 9.44, 2019–2023), then an M.Tech in CSE (Artificial Intelligence) at DIAT, Pune (CGPA 8.64, 2023–2025). He qualified GATE 2024 with rank 1790 in Data Science & AI, in the top 5% of applicants. The Grove of Foundations in the forest holds all of it." },
+  { p: ["current","c-dac","cdac","job","work now","zero trust","iot","security"], a: "Since July 2025 he's been a Project Engineer, AI Research & IoT Security, at C-DAC Chennai. He built a real-time Zero Trust framework for IoT networks covering WiFi, BLE, Zigbee and LoRa, where ML attack detection feeds a 7-pillar device trust score. The detection has two stages, a window model and a flow model. The flow model (RF) reached 96.97% accuracy, and the window model (Voting Ensemble) 90.86% accuracy with 86.78% macro F1. He engineered 63 features from raw PCAPs and added SPIFFE/SPIRE, mTLS and OTP 2FA. You can stop an attack yourself at the WiFi-Guard post in the Atelier." },
+  { p: ["pulsar","ncra","astronomy","telescope","gmrt","research"], a: "Two internships. At GMRT (Dec 2023 to Jan 2024) he refactored the telescope's CPU filtering pipeline for multicore and cut its latency by 50%. At NCRA-TIFR (Aug 2024 to Apr 2025, his M.Tech project) he built a ResNet1D with Squeeze-and-Excitation attention that detects weak pulsars at 99.8% F1 across 70M+ samples. Both are on the Listening River, and the boat will take you." },
+  { p: ["f1","tyre","tire","formula"], a: "His F1 project predicts tyre degradation and pit-stop windows with a hybrid LSTM-XGBoost model on 10 Hz telemetry. A physics-informed loss separates thermal from mechanical wear, and custom CUDA/CuPy kernels cut training time by 4.1×. Try beating his model at the pit wall in the Atelier!" },
+  { p: ["omniscience","rag","retrieval"], a: "Omniscience Pro is his privacy-first local RAG system. It ingests several kinds of documents, searches its vector index in under 50 ms (HNSW), and returns the first token in under 500 ms on consumer hardware. It runs in a GPU-aware Docker container with a full CI/CD pipeline and uses POSIX file locking so concurrent sessions stay safe." },
+  { p: ["aro","agent","agents","multi-agent"], a: "ARO, the Autonomous Research Operator, runs multi-agent LLM workflows as directed graphs in NetworkX. A Flask backend streams progress to a React frontend over Server-Sent Events. After building it he audited it adversarially and fixed 16 vulnerabilities across auth, SSRF, input validation and CORS, and he added SQLAlchemy-backed audit trails." },
+  { p: ["llama","fine-tune","fine-tuning","finetune","quantisation","quantization","quantise","quantize"], a: "He fine-tuned Llama 3.2 1B and 3B on 21.5k domain-specific interactions, then quantised them to 4-bit with Unsloth. That brought memory down far enough for a consumer GPU, with no meaningful drop in output quality." },
+  { p: ["skill","skills","stack","tools","language","languages"], a: "Python (advanced) and C++ (proficient), plus C, Bash and SQL. For ML: PyTorch, XGBoost, scikit-learn and PINNs. For speed: CUDA, CuPy and 4/8-bit quantisation. For shipping: Docker, Git, Flask, ChromaDB and CI/CD. On the AI side, RAG, LLM fine-tuning and multi-agent orchestration with NetworkX and LangChain. The desert oasis shows them as constellations." },
+  { p: ["paper","papers","publication","publications","iotais"], a: "Two papers at IoTaIS 2025 in Bali, both on the C-DAC framework: 'Protocol-Aware Continuous Monitoring and Anomaly Detection in IoT Networks' and 'A Comprehensive Survey on Zero Trust Architecture in IoT Networks'. They're in the snow archive." },
+  { p: ["contact","email","hire","reach","linkedin","github","cv","resume"], a: "You can reach him at saptarshinag18@gmail.com, at /in/saptarshi18 on LinkedIn, or as Saptarshi-Nag189 on GitHub. His CV is at Journey's End, the last stop on the road." },
+  { p: ["metric","metrics","number","numbers","figures","stat","stats","achievement","achievements","proud","proudest"], a: "The headline numbers, each with its project: 96.97% flow-attack accuracy (C-DAC's Zero Trust IoT framework, RF model), 99.8% F1 over 70M+ samples (the NCRA-TIFR pulsar ResNet1D), a 4.1× training speedup (CUDA kernels in the F1 tyre project), a 50% latency cut (the GMRT pipeline refactor), and search under 50 ms (Omniscience Pro)." },
+  { p: ["hello","hi","hey","namaste"], a: "Hello, wanderer ✧ Ask me anything about him, or just keep walking ▶" },
+  { p: ["thank","thanks"], a: "Any time." }
 ];
-export const CORPUS_FALLBACK = "Mmm, that's beyond my little local brain — for now. Try asking about his education, research, C-DAC, the F1 or RAG projects, skills, papers, or how to reach him. (A full language model will move in here someday — the socket's ready.)";
+/* Score one intent against a question. Patterns match whole words only: plain
+   substring matching sent "around" to ARO, "storage" to RAG and "navigate" to
+   GATE. Several hits on one intent count for more than one long hit, so an
+   opener like "tell me about" can't outvote the topic words after it. */
+export function scoreIntent(q, patterns){
+  let s=0, hits=0;
+  for(const p of patterns){
+    const esc=p.trim().replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+    if(new RegExp('(^|[^a-z0-9])'+esc+'($|[^a-z0-9])').test(q)){ s+=p.length; hits++; }
+  }
+  return hits>1 ? s+(hits-1)*3 : s;
+}
+
+export const CORPUS_FALLBACK = "I don't have an answer for that one. Try asking about his education, his research, C-DAC, the F1 or RAG projects, his skills, the papers, or how to reach him.";
 
 /* ---------- domain station content (subsections) ---------- */
 export const DOMAINS = {
   forest: {
     name: "Grove of Foundations", sub: "education", door: "a ring of glowing birches",
     stations: [
-      { k:"first roots · 2019–2023", t:"B.Tech — Computer Science & Engineering",
-        b:"<p><b>Academy of Technology, Kolkata</b> · CGPA <b>9.44/10.0</b></p><p>Where the fundamentals took root — C, algorithms, systems — the quiet years that made everything after possible.</p>" },
-      { k:"the ascent · 2023–2025", t:"M.Tech — CSE (Artificial Intelligence)",
-        b:"<p><b>DIAT (DRDO), Pune</b> · CGPA <b>8.64/10.0</b></p><p>Defence Institute of Advanced Technology — deep learning, HPC, and AI for defence. The years the forest grew tall.</p>" },
-      { k:"the proof · 2024", t:"GATE — Data Science & AI",
-        b:"<p>Rank <b>1790</b> nationally · <b>top 5%</b>.</p><p>One exam, one afternoon, years of roots underneath it.</p>" }
+      { k:"first roots · 2019–2023", t:"B.Tech, Computer Science & Engineering",
+        b:"<p><b>Academy of Technology, Kolkata</b> · CGPA <b>9.44/10.0</b></p>" },
+      { k:"the ascent · 2023–2025", t:"M.Tech, CSE (Artificial Intelligence)",
+        b:"<p><b>Defence Institute of Advanced Technology (DIAT), DRDO, Pune</b> · CGPA <b>8.64/10.0</b></p>" },
+      { k:"the exam · 2024", t:"GATE, Data Science & AI",
+        b:"<p>Rank <b>1790</b> · in the <b>top 5%</b> of applicants.</p>" }
     ]
   },
   river: {
     name: "The Listening River", sub: "research years", door: "a moon-gate over the water",
     stations: [
-      { k:"winter 2023 · GMRT", t:"Making a telescope breathe",
-        b:"<p><b>Giant Metrewave Radio Telescope · NCRA-TIFR · Pune</b></p><ul><li>Profiled the legacy <b>CPU signal-filtering pipeline</b>, rebuilt it for <b>multicore</b>.</li><li>Latency fell <b>50%</b> — real-time processing of continuous sky streams, unblocked.</li></ul><p><i>Play the waterwheel console here to feel the same rebalancing.</i></p>", demo:"gmrt" },
-      { k:"2024–25 · NCRA-TIFR", t:"Hearing dead stars",
-        b:"<p><b>Research Intern (M.Tech project)</b></p><ul><li><b>ResNet1D + Squeeze-and-Excitation attention</b> for weak pulsar signals at low SNR.</li><li><b>99.8% F1</b> across <b>70M+ samples</b>, adaptive thresholds for shifting noise floors.</li><li>Scoped, built, and defended entirely alone.</li></ul><p><i>The folding pool beside this stone lets you find a pulsar yourself.</i></p>", demo:"pulsar" }
+      { k:"Dec 2023 – Jan 2024 · GMRT", t:"Speeding up a telescope",
+        b:"<p><b>Winter Intern, HPC & Signal Processing Optimisation · GMRT, NCRA-TIFR · Pune</b></p><ul><li>Profiled the legacy <b>CPU signal-filtering pipelines</b> and refactored them for <b>multicore</b> execution.</li><li>Latency fell <b>50%</b>, enough to process the continuous telescope data stream in real time.</li></ul><p><i>The waterwheel console here lets you do the same rebalancing (simulated).</i></p>", demo:"gmrt" },
+      { k:"Aug 2024 – Apr 2025 · NCRA-TIFR", t:"Finding faint pulsars",
+        b:"<p><b>Research Intern (M.Tech project)</b></p><ul><li>A <b>ResNet1D with Squeeze-and-Excitation attention</b> to tell weak pulsar signals from interference at low SNR.</li><li><b>99.8% F1</b> across <b>70M+ samples</b>, with adaptive thresholds for noise floors that shifted between sessions.</li><li>He ran it alone, from scoping through deployment and the write-up.</li></ul><p><i>The folding pool beside this stone lets you find a pulsar yourself.</i></p>", demo:"pulsar" }
     ]
   },
   desert: {
@@ -80,46 +96,46 @@ export const DOMAINS = {
     stations: [
       { k:"spoken tongues", t:"Languages",
         b:"<div class='tags'><span class='tag'>Python (advanced)</span><span class='tag'>C++ (proficient)</span><span class='tag'>C</span><span class='tag'>Bash</span><span class='tag'>SQL</span></div>" },
-      { k:"the loom", t:"ML & Scientific Computing",
-        b:"<div class='tags'><span class='tag'>PyTorch</span><span class='tag'>TensorFlow</span><span class='tag'>Keras</span><span class='tag'>XGBoost</span><span class='tag'>Scikit-learn</span><span class='tag'>PINNs</span></div>" },
-      { k:"the forge", t:"HPC & Systems",
-        b:"<div class='tags'><span class='tag'>CUDA</span><span class='tag'>CuPy</span><span class='tag'>Parallel Processing</span><span class='tag'>Quantisation 4/8-bit</span><span class='tag'>Latency Optimisation</span><span class='tag'>Linux</span></div>" },
-      { k:"the caravan", t:"Data, Engineering & MLOps",
-        b:"<div class='tags'><span class='tag'>Anomaly Detection</span><span class='tag'>Time-Series</span><span class='tag'>Docker</span><span class='tag'>Git</span><span class='tag'>Flask</span><span class='tag'>Streamlit</span><span class='tag'>ChromaDB</span><span class='tag'>Ollama</span><span class='tag'>Hugging Face</span><span class='tag'>Unsloth</span><span class='tag'>RAG</span><span class='tag'>LLM Fine-Tuning</span><span class='tag'>Multi-Agent (NetworkX · LangChain)</span></div>" }
+      { k:"the loom", t:"ML and scientific computing",
+        b:"<div class='tags'><span class='tag'>PyTorch</span><span class='tag'>XGBoost</span><span class='tag'>scikit-learn</span><span class='tag'>PINNs</span><span class='tag'>NumPy</span><span class='tag'>SciPy</span></div>" },
+      { k:"the forge", t:"HPC and systems",
+        b:"<div class='tags'><span class='tag'>CUDA</span><span class='tag'>CuPy</span><span class='tag'>parallel processing</span><span class='tag'>4/8-bit quantisation</span><span class='tag'>latency optimisation</span><span class='tag'>Linux</span></div>" },
+      { k:"the caravan", t:"Data, engineering and AI",
+        b:"<div class='tags'><span class='tag'>anomaly detection</span><span class='tag'>time-series analysis</span><span class='tag'>CI/CD</span><span class='tag'>Docker</span><span class='tag'>Git</span><span class='tag'>Flask</span><span class='tag'>ChromaDB</span><span class='tag'>RAG</span><span class='tag'>LLM fine-tuning</span><span class='tag'>multi-agent (NetworkX, LangChain)</span><span class='tag'>SQLAlchemy</span></div>" }
     ]
   },
   snow: {
-    name: "The Quiet Archive", sub: "publications & milestones", door: "doors of frosted glass",
+    name: "The Quiet Archive", sub: "publications", door: "doors of frosted glass",
     stations: [
       { k:"IoTaIS 2025 · Bali", t:"Protocol-Aware Continuous Monitoring and Anomaly Detection in IoT Networks",
-        b:"<p>The C-DAC detection work, peer-reviewed — window models, flow models, and what it takes to watch four radio protocols at once, published.</p>" },
+        b:"<p>Co-authored at C-DAC, on the Zero Trust framework's ML detection.</p>" },
       { k:"IoTaIS 2025 · Bali", t:"A Comprehensive Survey on Zero Trust Architecture in IoT Networks",
-        b:"<p>The wider map: how Zero Trust must bend to fit constrained devices — and where the field goes next.</p>" }
+        b:"<p>Co-authored at C-DAC: a survey of Zero Trust architectures for IoT networks.</p>" }
     ]
   },
   sky: {
-    name: "The Dreamer's Isle", sub: "about him", door: "a gap in the clouds",
+    name: "The Dreamer's Sky", sub: "about him", door: "a gap in the clouds",
     stations: [
-      { k:"the person", t:"Saptarshi Nag — AI/ML Engineer",
-        b:"<p>An engineer at the meeting point of <b>security and systems research</b> — happiest where raw data becomes a working model that must survive production.</p><p>From Kolkata, through Pune's telescopes and defence labs, to Chennai's live networks — the thread is the same: teach machines to notice what matters.</p>" },
-      { k:"carried lights", t:"The numbers he keeps",
-        b:"<div class='mgrid'><div class='mtile'><div class='v'>97.93%</div><div class='l'>attack detection · C-DAC IoT framework</div></div><div class='mtile'><div class='v'>&lt;1 ms</div><div class='l'>inference/window · C-DAC edge models</div></div><div class='mtile'><div class='v'>99.8%</div><div class='l'>pulsar F1 · NCRA ResNet1D</div></div><div class='mtile'><div class='v'>4.1×</div><div class='l'>speedup · F1 tyre CUDA kernels</div></div><div class='mtile'><div class='v'>50%</div><div class='l'>latency cut · GMRT pipeline</div></div><div class='mtile'><div class='v'>70M+</div><div class='l'>samples · NCRA pulsar search</div></div></div>" }
+      { k:"the person", t:"Saptarshi Nag, AI/ML Engineer",
+        b:"<p>He works across the whole of an ML project: features from raw data, the model, and deployment under tight performance limits.</p><p>Kolkata for the B.Tech, Pune for the M.Tech and two telescope internships, and now Chennai, at C-DAC.</p>" },
+      { k:"carried lights", t:"The numbers, and where each came from",
+        b:"<div class='mgrid'><div class='mtile'><div class='v'>96.97%</div><div class='l'>flow-attack accuracy (RF) · C-DAC Zero Trust IoT</div></div><div class='mtile'><div class='v'>86.78%</div><div class='l'>window macro F1 (Voting Ensemble) · C-DAC</div></div><div class='mtile'><div class='v'>99.8%</div><div class='l'>pulsar F1 · NCRA ResNet1D</div></div><div class='mtile'><div class='v'>4.1×</div><div class='l'>training speedup · F1 tyre CUDA kernels</div></div><div class='mtile'><div class='v'>50%</div><div class='l'>latency cut · GMRT pipeline</div></div><div class='mtile'><div class='v'>70M+</div><div class='l'>samples · NCRA pulsar search</div></div></div>" }
     ]
   },
   city: {
-    name: "The Atelier", sub: "projects & c-dac — run his machines", door: "a portal of soft neon",
+    name: "The Atelier", sub: "projects and C-DAC: run his machines", door: "a portal of soft neon",
     stations: [
-      { k:"machine 01", t:"F1 Tyre Lab", b:"<p>Physics-informed tyre degradation — watch thermal and mechanical wear separate, then call the pit stop against his model. <b>4.1× CUDA speedup · LSTM-XGBoost · 10 Hz telemetry.</b></p>", demo:"f1" },
-      { k:"machine 02", t:"Omniscience Console", b:"<p>His privacy-first local RAG. Ask, and watch retrieval happen in embedding space — <b>&lt;50 ms search · &lt;500 ms first token</b> · citation-weighted ranking across local docs, web and academic APIs · hardened with path-traversal protection, rate limiting and POSIX file locking.</p>", demo:"oracle" },
-      { k:"machine 03", t:"ARO Table", b:"<p>Autonomous Research Operator — multi-agent workflows as living graphs, with SQLAlchemy-backed memory for session recovery and audit trails. <b>Flask SSE · NetworkX · React · 16 vulnerabilities found & fixed in his own adversarial audit.</b></p>", demo:"aro" },
-      { k:"machine 04", t:"WiFi-Guard Post (C-DAC)", b:"<p>His day job, live: management-frame streams, a deauth storm, a window model that flags it — and you on the quarantine switch. <b>97.93% accuracy · &lt;1 ms per window · XGBoost + MLP · SHAP explainability.</b></p>", demo:"wifi" }
+      { k:"machine 01", t:"F1 Tyre Lab", b:"<p>Physics-informed tyre degradation. Watch thermal and mechanical wear separate, then call the pit stop against his model. <b>LSTM-XGBoost · 10 Hz telemetry · CUDA/CuPy kernels, 4.1× faster training.</b></p>", demo:"f1" },
+      { k:"machine 02", t:"Omniscience Console", b:"<p>His privacy-first local RAG system. Ask a question and watch retrieval happen in embedding space (simulated). <b>Under 50 ms search · under 500 ms to first token · POSIX file locking · GPU-aware Docker.</b></p>", demo:"oracle" },
+      { k:"machine 03", t:"ARO Table", b:"<p>The Autonomous Research Operator runs multi-agent workflows as directed graphs. <b>Flask SSE · NetworkX · React · 16 vulnerabilities found and fixed in his own adversarial audit · SQLAlchemy audit trails.</b></p>", demo:"aro" },
+      { k:"machine 04", t:"WiFi-Guard Post (C-DAC)", b:"<p>His current job, simulated: a stream of management frames, a deauth flood, a window model that flags it, and you on the quarantine switch. <b>Flow model 96.97% accuracy (RF) · window model 90.86% / 86.78% macro F1 · 63 features from raw PCAPs.</b></p>", demo:"wifi" }
     ]
   },
   meadow: {
-    name: "The Send-off", sub: "contact", door: "an arch of fireflies",
+    name: "Journey's End", sub: "contact", door: "an arch of fireflies",
     stations: [
       { k:"send a lantern", t:"Reach the real one",
-        b:"<p>The wander ends; the conversation doesn't have to.</p><div class='links'><a href='mailto:saptarshinag18@gmail.com'><i class='fa-solid fa-envelope'></i>saptarshinag18@gmail.com</a><a href='https://www.linkedin.com/in/saptarshi18' target='_blank' rel='noopener'><i class='fa-brands fa-linkedin'></i>/in/saptarshi18</a><a href='https://github.com/Saptarshi-Nag189' target='_blank' rel='noopener'><i class='fa-brands fa-github'></i>Saptarshi-Nag189</a><a href='../saptarshi_resume_linkedin_2026.pdf' target='_blank' rel='noopener'><i class='fa-solid fa-file-arrow-down'></i>his CV</a></div>" }
+        b:"<p>He's open to research collaborations and engineering roles.</p><div class='links'><a href='mailto:saptarshinag18@gmail.com'><i aria-hidden='true' class='fa-solid fa-envelope'></i>saptarshinag18@gmail.com</a><a href='https://www.linkedin.com/in/saptarshi18' target='_blank' rel='noopener'><i aria-hidden='true' class='fa-brands fa-linkedin'></i>/in/saptarshi18</a><a href='https://github.com/Saptarshi-Nag189' target='_blank' rel='noopener'><i aria-hidden='true' class='fa-brands fa-github'></i>Saptarshi-Nag189</a><a href='../saptarshi_resume_linkedin_2026.pdf' target='_blank' rel='noopener'><i aria-hidden='true' class='fa-solid fa-file-arrow-down'></i>his CV</a></div>" }
     ]
   }
 };
