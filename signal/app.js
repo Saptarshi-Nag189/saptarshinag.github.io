@@ -69,7 +69,7 @@ function paintRail(){
 function toast(msg){
   var d=document.createElement('div');
   d.className='logline';
-  d.innerHTML='<i class="fa-solid fa-check" style="margin-right:6px"></i>'+msg;
+  d.innerHTML='<i aria-hidden="true" class="fa-solid fa-check" style="margin-right:6px"></i>'+msg;
   toastEl.appendChild(d);
   requestAnimationFrame(function(){ d.classList.add('on'); });
   setTimeout(function(){ d.classList.remove('on'); setTimeout(function(){ d.remove(); },500); }, 5200);
@@ -85,7 +85,7 @@ function makeApi(section){
     stamp: function(host,icon,text,delay){
       var s=document.createElement('span');
       s.className='stamp';
-      s.innerHTML='<i class="fa-solid '+icon+'"></i>'+text;
+      s.innerHTML='<i aria-hidden="true" class="fa-solid '+icon+'"></i>'+text;
       host.appendChild(s);
       setTimeout(function(){ s.classList.add('on');
         try{ window.SFX && SFX.play('coin'); }catch(e){} }, (delay||0)+(REDUCED?0:120));
@@ -100,7 +100,7 @@ function makeApi(section){
         nextBtn=document.createElement('button');
         nextBtn.className='btn';
         nextBtn.style.cssText='margin-top:20px';
-        nextBtn.innerHTML='continue <i class="fa-solid fa-angles-right" style="margin-left:8px"></i>';
+        nextBtn.innerHTML='continue <i aria-hidden="true" class="fa-solid fa-angles-right" style="margin-left:8px"></i>';
         nextBtn.addEventListener('click',function(){ go(cur+1); });
         section.appendChild(nextBtn);
         nextBtn.focus({preventScroll:true});
@@ -115,8 +115,10 @@ function go(i){
   /* signal sweep wipe between acts */
   var sw=document.getElementById('sweep');
   if(sw && !REDUCED){ sw.classList.remove('go'); void sw.offsetWidth; sw.classList.add('go'); }
-  /* retire old */
+  /* retire old: its loops, and any sound it left running (act 5's engine drone
+     used to keep going through acts 6 and 7) */
   frameFns=[];
+  try{ window.SFX && SFX.stopEngine && SFX.stopEngine(); }catch(e){}
   actDone=false; nextBtn=null;
   var old=curSection;
   if(old){
@@ -133,17 +135,20 @@ function go(i){
     ACTS[i].build(section, api);
   }catch(e){
     /* an act must never hard-kill the journey */
-    section.appendChild(api.el('p','a-story','this instrument failed to boot ('+e.message+') — skipping ahead.'));
-    api.done(ACTS[i].title+' skipped (boot failure)');
+    section.appendChild(api.el('p','a-story','This act failed to load ('+e.message+'), so it was skipped.'));
+    api.done(ACTS[i].title+' skipped: it failed to load');
   }
   requestAnimationFrame(function(){ requestAnimationFrame(function(){ section.classList.add('live'); }); });
   skipBtn.style.display = i===ACTS.length-1 ? 'none' : '';
   paintRail();
+  /* the rail is visual only; screen readers hear the act change here */
+  var sr=document.getElementById('srAct');
+  if(sr) sr.textContent='Act '+i+' of '+(ACTS.length-1)+': '+ACTS[i].title;
 }
 
 skipBtn.addEventListener('click',function(){
   if(cur>=ACTS.length-1) return;
-  missionLog.push(ACTS[cur].title+' — skipped');
+  missionLog.push(ACTS[cur].title+' skipped');
   go(cur+1);
 });
 addEventListener('keydown',function(e){

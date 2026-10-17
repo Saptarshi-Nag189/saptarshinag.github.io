@@ -36,12 +36,12 @@ function setupCanvas(cv, cssH){
 function act0(stage, api){
   stage.appendChild(el('div','a-head',
     '<div class="a-act">act 0 · calibration</div>'+
-    '<h1 class="a-title">Every career is a signal buried in noise.</h1>'+
-    '<p class="a-story">This one starts in Kolkata, 2019, and is still transmitting. '+
-    'You are the operator tonight. <b>Turn the gain until the noise confesses.</b></p>'));
+    '<h1 class="a-title">Find the signal.</h1>'+
+    '<p class="a-story">The story starts in Kolkata in 2019. You are the operator: '+
+    '<b>drag the gain up until a name comes through the noise.</b></p>'));
 
   var rig=el('div','rig');
-  rig.appendChild(el('div','rig-cap','<span>osc·01 — raw feed</span><span class="st" id="a0st">NO CARRIER</span>'));
+  rig.appendChild(el('div','rig-cap','<span>osc·01 · raw feed</span><span class="st" id="a0st">NO CARRIER</span>'));
   var cv=el('canvas'); rig.appendChild(cv);
   var ctl=el('div','ctl');
   ctl.appendChild(el('span','readout','GAIN<br><b id="a0g">0%</b>'));
@@ -99,9 +99,9 @@ function act0(stage, api){
         locked=true;
         stEl.textContent='CARRIER LOCKED';
         api.sfx('lock');
-        api.stamp(stamps,'fa-tower-broadcast','carrier acquired — Kolkata, 2019 → present',0);
-        api.stamp(stamps,'fa-hand-pointer','you operate everything from here',350);
-        api.done('calibration complete — carrier locked');
+        api.stamp(stamps,'fa-tower-broadcast','carrier locked · Kolkata, 2019 to now',0);
+        api.stamp(stamps,'fa-hand-pointer','every act gives you one control like this',350);
+        api.done('calibration complete, carrier locked');
       }
     } else if(g<=0.95){ lockT=0; if(!locked) stEl.textContent=g>0.5?'SIGNAL EMERGING…':'NO CARRIER'; }
   });
@@ -121,19 +121,19 @@ function act0(stage, api){
 function act1(stage, api){
   stage.appendChild(el('div','a-head',
     '<div class="a-act">act 1 · foundations</div>'+
-    '<h1 class="a-title">Compiling the engineer.</h1>'+
-    '<p class="a-story">Before the signal could be found, the receiver had to be built. '+
-    '<b>Link the three sources</b> and watch the build log.</p>'));
+    '<h1 class="a-title">Compile the engineer.</h1>'+
+    '<p class="a-story">His education, as a build. <b>Link the three source files</b> '+
+    'and the log on the right fills in each degree.</p>'));
 
   var rig=el('div','rig');
-  rig.appendChild(el('div','rig-cap','<span>buildsys — saptarshi v1.0</span><span class="st" id="a1st">3 SOURCES UNLINKED</span>'));
+  rig.appendChild(el('div','rig-cap','<span>buildsys · saptarshi v1.0</span><span class="st" id="a1st">3 SOURCES UNLINKED</span>'));
 
   var wrap=el('div','',''); wrap.style.cssText='display:flex;gap:16px;flex-wrap:wrap';
   var tray=el('div'); tray.style.cssText='flex:1;min-width:220px;display:flex;flex-direction:column;gap:9px';
   var logBox=el('div'); logBox.style.cssText='flex:1.4;min-width:260px;height:230px;overflow-y:auto;'+
     'background:rgba(2,8,14,.8);border:1px solid rgba(141,227,255,.15);border-radius:10px;'+
     "padding:12px 14px;font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.7;color:#9fd8c8";
-  logBox.innerHTML='<span style="color:#5a6b7d">$ make engineer<br>waiting for sources…</span><br>';
+  logBox.innerHTML='<span style="color:#7d8fa3">$ make engineer<br>waiting for sources…</span><br>';
   wrap.appendChild(tray); wrap.appendChild(logBox);
   rig.appendChild(wrap);
   stage.appendChild(rig);
@@ -141,16 +141,16 @@ function act1(stage, api){
 
   var SRC=[
     { name:'btech.c', label:'B.Tech · CSE', log:[
-      'cc btech.c  — Academy of Technology, Kolkata',
-      '  » 2019–2023 · CGPA <b style="color:#ffd27f">9.44/10.0</b>',
-      '  » foundations: C, algorithms, systems  ✓'] },
+      'cc btech.c · Academy of Technology, Kolkata',
+      '  » B.Tech, Computer Science &amp; Engineering',
+      '  » 2019–2023 · CGPA <b style="color:#ffd27f">9.44/10.0</b>  ✓'] },
     { name:'gate.h', label:'GATE 2024', log:[
-      'linking gate.h — national aptitude header',
-      '  » rank <b style="color:#ffd27f">1790</b> · Data Science &amp; AI · <b style="color:#ffd27f">top 5%</b>  ✓'] },
-    { name:'mtech_ai.cu', label:'M.Tech · AI (DIAT, DRDO)', log:[
-      'nvcc mtech_ai.cu — Defence Institute of Advanced Technology',
-      '  » 2023–2025 · CGPA <b style="color:#ffd27f">8.64/10.0</b>',
-      '  » specialised: deep learning, HPC, defence AI  ✓'] }
+      'linking gate.h · GATE 2024',
+      '  » rank <b style="color:#ffd27f">1790</b> in Data Science &amp; AI · <b style="color:#ffd27f">top 5%</b> of applicants  ✓'] },
+    { name:'mtech_ai.cu', label:'M.Tech · CSE (AI), DIAT', log:[
+      'nvcc mtech_ai.cu · Defence Institute of Advanced Technology (DRDO), Pune',
+      '  » M.Tech, Computer Science &amp; Engineering (Artificial Intelligence)',
+      '  » 2023–2025 · CGPA <b style="color:#ffd27f">8.64/10.0</b>  ✓'] }
   ];
   var linked=0, stEl=rig.querySelector('#a1st');
   function logLines(lines,cb){
@@ -165,7 +165,7 @@ function act1(stage, api){
   }
   SRC.forEach(function(s,i){
     var b=el('button','',
-      '<i class="fa-solid fa-file-code" style="margin-right:9px"></i>'+s.label+
+      '<i aria-hidden="true" class="fa-solid fa-file-code" style="margin-right:9px"></i>'+s.label+
       '<span style="float:right;opacity:.55">'+s.name+'</span>');
     b.style.cssText="text-align:left;font-family:'JetBrains Mono',monospace;font-size:12px;"+
       'color:#cfe9ff;background:rgba(141,227,255,.06);border:1px solid rgba(141,227,255,.25);'+
@@ -180,14 +180,14 @@ function act1(stage, api){
         linked++;
         stEl.textContent=(3-linked)+' SOURCES UNLINKED';
         if(linked===3){
-          logLines(['','<b style="color:#7dffb2">BUILD SUCCEEDED</b> — engineer v1.0 ready',
-            'artifact: <b style="color:#8de3ff">saptarshi</b> (portable, GPU-capable)'],function(){
+          logLines(['','<b style="color:#7dffb2">BUILD SUCCEEDED</b> · engineer v1.0',
+            'artifact: <b style="color:#8de3ff">saptarshi</b>'],function(){
             stEl.textContent='BUILD OK';
             api.sfx('success');
             api.stamp(stamps,'fa-graduation-cap','B.Tech 9.44 · Academy of Technology, Kolkata',0);
             api.stamp(stamps,'fa-award','GATE 2024 · rank 1790 · top 5%',250);
-            api.stamp(stamps,'fa-shield','M.Tech AI 8.64 · DIAT (DRDO), Pune',500);
-            api.done('engineer v1.0 compiled — three sources linked');
+            api.stamp(stamps,'fa-shield','M.Tech CSE (AI) 8.64 · DIAT (DRDO), Pune',500);
+            api.done('engineer v1.0 compiled from three sources');
           });
         }
       });
@@ -201,18 +201,21 @@ function act1(stage, api){
    ========================================================================= */
 function act2(stage, api){
   stage.appendChild(el('div','a-head',
-    '<div class="a-act">act 2 · the array — GMRT, winter 2023</div>'+
-    '<h1 class="a-title">The telescope is drowning in its own data.</h1>'+
-    '<p class="a-story">One of the world\'s largest radio telescope arrays — and its filter '+
-    'pipeline runs on <b>one core</b> while three sit idle. Do what he did: '+
-    '<b>spread the load.</b></p>'));
+    '<div class="a-act">act 2 · the array · GMRT, Dec 2023 to Jan 2024</div>'+
+    '<h1 class="a-title">The pipeline runs on one core.</h1>'+
+    '<p class="a-story">GMRT is one of the largest radio telescope arrays in the world. In this '+
+    'simplified version of its filtering pipeline every task sits on one core while three stay '+
+    'idle. <b>Move the three gold tasks to the idle cores</b>, the way he refactored it for multicore.</p>'));
 
   var rig=el('div','rig');
-  rig.appendChild(el('div','rig-cap','<span>gmrt · signal-filter pipeline</span><span class="st" id="a2lat">LATENCY 240 ms</span>'));
+  rig.appendChild(el('div','rig-cap','<span>gmrt filter pipeline · simulated</span><span class="st" id="a2lat">LATENCY 240 ms</span>'));
   var cv=el('canvas'); rig.appendChild(cv);
   var ctl=el('div','ctl');
-  var hint=el('span','readout','tap a <b>queued task</b><br>to move it to an idle core');
+  var hint=el('span','readout','tap a <b>gold task</b><br>to move it to an idle core');
   ctl.appendChild(hint);
+  /* the canvas is pointer-only, so the same move is also a real button */
+  var moveBtn=el('button','btn ghost','move next task');
+  ctl.appendChild(moveBtn);
   rig.appendChild(ctl);
   stage.appendChild(rig);
   var stamps=el('div','stamps'); stage.appendChild(stamps);
@@ -246,10 +249,18 @@ function act2(stage, api){
     var hit=taskPos().find(function(p){ return movable.indexOf(p.id)>=0 && p.ci===0 &&
       Math.abs(mx-p.x)<20 && Math.abs(my-p.y)<16; });
     if(!hit) return;
+    moveTask(hit.id);
+  });
+  moveBtn.addEventListener('click',function(){
+    if(done) return;
+    var next=movable.find(function(id){ return cores[0].indexOf(id)>=0; });
+    if(next!=null) moveTask(next);
+  });
+  function moveTask(id){
     /* move to the emptiest idle core */
     var target=1; for(var c2=2;c2<4;c2++) if(cores[c2].length<cores[target].length) target=c2;
-    cores[0]=cores[0].filter(function(id){return id!==hit.id;});
-    cores[target].push(hit.id);
+    cores[0]=cores[0].filter(function(q){return q!==id;});
+    cores[target].push(id);
     moved++;
     api.sfx('upshift');
     lat=240-moved*40;
@@ -258,12 +269,13 @@ function act2(stage, api){
       done=true; lat=120;
       latEl.textContent='LATENCY 120 ms  (−50%)';
       api.sfx('success');
+      moveBtn.disabled=true;
       api.stamp(stamps,'fa-satellite-dish','GMRT · NCRA-TIFR · winter intern, Dec 2023–Jan 2024',0);
       api.stamp(stamps,'fa-microchip','legacy CPU pipeline → multicore refactor',260);
-      api.stamp(stamps,'fa-gauge-high','latency −50% · real-time telescope streams unblocked',520);
-      api.done('pipeline parallelized — latency halved, exactly as he did');
+      api.stamp(stamps,'fa-gauge-high','latency cut 50% · the continuous data stream processed in real time',520);
+      api.done('pipeline split across four cores, latency halved');
     }
-  });
+  }
 
   api.onFrame(function(){
     t+=0.03;
@@ -323,32 +335,6 @@ function act2(stage, api){
     x.fillText(lat+' ms', 26+mw, 39);
   });
 
-  if(api.reduced){
-    var auto=el('button','btn ghost','auto-balance (watch)');
-    rig.querySelector('.ctl').appendChild(auto);
-    auto.addEventListener('click',function(){
-      movable.slice().forEach(function(id,k){
-        setTimeout(function(){ cv.dispatchEvent(new MouseEvent('click',{clientX:0,clientY:0})); },k*300);
-      });
-      /* direct move for reliability in reduced mode */
-      var ids=movable.slice(); ids.forEach(function(id,k){
-        setTimeout(function(){
-          if(cores[0].indexOf(id)<0) return;
-          cores[0]=cores[0].filter(function(q){return q!==id;});
-          cores[1+k%3].push(id);
-          moved++; lat=240-moved*40; latEl.textContent='LATENCY '+lat+' ms';
-          if(moved===3 && !done){
-            done=true; lat=120; latEl.textContent='LATENCY 120 ms  (−50%)';
-            api.stamp(stamps,'fa-satellite-dish','GMRT · NCRA-TIFR · winter intern, Dec 2023–Jan 2024',0);
-            api.stamp(stamps,'fa-microchip','legacy CPU pipeline → multicore refactor',200);
-            api.stamp(stamps,'fa-gauge-high','latency −50% · real-time streams unblocked',400);
-            api.done('pipeline parallelized — latency halved');
-          }
-        }, 200+k*320);
-      });
-      auto.remove();
-    });
-  }
 }
 
 /* =========================================================================
@@ -356,14 +342,14 @@ function act2(stage, api){
    ========================================================================= */
 function act3(stage, api){
   stage.appendChild(el('div','a-head',
-    '<div class="a-act">act 3 · the pulsar hunt — NCRA-TIFR, 2024–25</div>'+
-    '<h1 class="a-title">There is a dead star ticking in this noise.</h1>'+
-    '<p class="a-story">Below is a real technique: <b>epoch folding</b>. A pulsar\'s pulse is '+
-    'far too faint to see — unless you guess its period and stack thousands of turns on top of '+
-    'each other. <b>Sweep the period. When you\'re right, the star appears.</b></p>'));
+    '<div class="a-act">act 3 · the pulsar hunt · NCRA-TIFR, Aug 2024 to Apr 2025</div>'+
+    '<h1 class="a-title">Find the pulsar in the noise.</h1>'+
+    '<p class="a-story">This uses a real technique called <b>epoch folding</b>. One pulse is too '+
+    'faint to see, but if you guess the pulsar\'s period and stack many turns on top of each other, '+
+    'the pulse adds up while the noise cancels out. <b>Slide the period until the profile spikes.</b></p>'));
 
   var rig=el('div','rig');
-  rig.appendChild(el('div','rig-cap','<span>fold·console — 70M-sample feed</span><span class="st" id="a3snr">FOLDED SNR 0.0</span>'));
+  rig.appendChild(el('div','rig-cap','<span>fold·console · synthetic pulsar, 120 pulses</span><span class="st" id="a3snr">FOLDED SNR 0.0</span>'));
   var cv=el('canvas'); rig.appendChild(cv);
   var ctl=el('div','ctl');
   ctl.appendChild(el('span','readout','FOLD PERIOD<br><b id="a3p">0.5000 s</b>'));
@@ -371,7 +357,7 @@ function act3(stage, api){
   slider.min=5000; slider.max=10000; slider.value=5000;   /* 0.5000–1.0000 s in 0.1 ms steps */
   slider.setAttribute('aria-label','Folding period');
   ctl.appendChild(slider);
-  var auto=el('button','btn ghost','let his model do it');
+  var auto=el('button','btn ghost','sweep it for me');
   ctl.appendChild(auto);
   rig.appendChild(ctl);
   stage.appendChild(rig);
@@ -425,11 +411,11 @@ function act3(stage, api){
         api.sfx('pulse'); beats++;
         if(beats>14) clearInterval(pulsarTimer);
       }, P0*1000);
-      api.stamp(stamps,'fa-star','PSR-lock at 0.7168 s — you just did real epoch folding',0);
-      api.stamp(stamps,'fa-brain','his ResNet1D + SE-attention did this across 70M+ samples',300);
-      api.stamp(stamps,'fa-bullseye','99.8% F1 at low SNR · adaptive noise thresholds',600);
-      api.stamp(stamps,'fa-user','M.Tech project · run end-to-end, alone',900);
-      api.done('pulsar folded out of the noise — 99.8% F1, 70M samples');
+      api.stamp(stamps,'fa-star','locked at 0.7168 s · that was real epoch folding',0);
+      api.stamp(stamps,'fa-brain','his ResNet1D with SE attention detected pulsars across 70M+ samples',300);
+      api.stamp(stamps,'fa-bullseye','99.8% F1 at low SNR · adaptive thresholds for shifting noise',600);
+      api.stamp(stamps,'fa-user','M.Tech project · he ran it from scoping to write-up',900);
+      api.done('pulsar folded out of the noise · his detector: 99.8% F1 over 70M+ samples');
     }
   }
   slider.addEventListener('input',function(){
@@ -473,7 +459,7 @@ function act3(stage, api){
     x.fillText('PULSE STACK  (each row = one turn of the star, folded at your period)', 20, 16);
     /* bottom: folded profile */
     var py0=half+18, ph2=h-py0-14;
-    x.fillText('FOLDED PROFILE — '+NP+' pulses stacked', 20, py0-4);
+    x.fillText('FOLDED PROFILE · '+NP+' pulses stacked', 20, py0-4);
     x.strokeStyle='rgba(141,227,255,.15)'; x.strokeRect(20,py0,w-40,ph2);
     x.beginPath();
     var mean=res.mean;
@@ -499,7 +485,7 @@ function act3(stage, api){
       }
       x.fillStyle='rgba(255,210,127,'+(0.5+0.5*Math.sin(t*8))+')';
       x.font='700 11px "JetBrains Mono",monospace'; x.textAlign='center';
-      x.fillText('♥ the star\'s heartbeat — every '+P0+' s', w/2, py0+14);
+      x.fillText('one pulse every '+P0+' s', w/2, py0+14);
     }
   });
   setP(0.5);
@@ -510,14 +496,15 @@ function act3(stage, api){
    ========================================================================= */
 function act4(stage, api){
   stage.appendChild(el('div','a-head',
-    '<div class="a-act">act 4 · the intrusion — C-DAC, now</div>'+
-    '<h1 class="a-title">Something just joined the network.</h1>'+
-    '<p class="a-story">His day job: a real-time <b>Zero-Trust framework</b> watching WiFi, BLE, '+
-    'Zigbee and LoRa at once. An attack is about to start. The window-model will flag it — '+
-    '<b>you make the call.</b></p>'));
+    '<div class="a-act">act 4 · the intrusion · C-DAC Chennai, July 2025 to now</div>'+
+    '<h1 class="a-title">Catch the intrusion.</h1>'+
+    '<p class="a-story">His current job, as Project Engineer in AI Research &amp; IoT Security, is a '+
+    'real-time <b>Zero Trust framework</b> that watches WiFi, BLE, Zigbee and LoRa devices. In this '+
+    'simulation an attack starts in a few seconds. The window model flags the device, and '+
+    '<b>you quarantine it.</b></p>'));
 
   var rig=el('div','rig');
-  rig.appendChild(el('div','rig-cap','<span>zt·watch — 7-pillar trust engine</span><span class="st" id="a4st">ALL DEVICES TRUSTED</span>'));
+  rig.appendChild(el('div','rig-cap','<span>zt·watch · 7-pillar trust score · simulated</span><span class="st" id="a4st">ALL DEVICES TRUSTED</span>'));
   var cv=el('canvas'); rig.appendChild(cv);
   var ctl=el('div','ctl');
   var qbtn=el('button','btn warn','quarantine flagged device'); qbtn.disabled=true;
@@ -526,7 +513,8 @@ function act4(stage, api){
   stage.appendChild(rig);
   var stamps=el('div','stamps'); stage.appendChild(stamps);
 
-  var C=setupCanvas(cv,310);
+  /* tall enough that the bottom device's label clears the window strip */
+  var C=setupCanvas(cv,340);
   var stEl=rig.querySelector('#a4st');
   var DEV=[
     {n:'cam-01', icon:'▣', proto:'WiFi'},{n:'lock-02', icon:'▲', proto:'BLE'},
@@ -548,16 +536,16 @@ function act4(stage, api){
       api.sfx('lock'); api.sfx('success');
       stEl.textContent='THREAT CONTAINED · cam-01 ISOLATED';
       qbtn.disabled=true; qbtn.textContent='contained ✓';
-      api.stamp(stamps,'fa-shield-halved','deauth-flood contained · window model p=0.97',0);
-      api.stamp(stamps,'fa-crosshairs','C-DAC IoT detection: 97.93% acc · <1 ms/window (XGBoost/MLP)',280);
-      api.stamp(stamps,'fa-network-wired','63 features from raw PCAPs · Scapy/PyShark · SMOTE+Optuna',560);
-      api.stamp(stamps,'fa-key','SHAP explainability · SQL pipelines · live dashboards',840);
-      api.stamp(stamps,'fa-book','cited: 2 papers @ IoTaIS 2025, Bali (monitoring + Zero-Trust survey)',1120);
-      api.done('intrusion contained — the detector flagged, you executed');
+      api.stamp(stamps,'fa-shield-halved','deauth flood contained (simulated)',0);
+      api.stamp(stamps,'fa-crosshairs','flow model: 96.97% accuracy (RF) · window model: 90.86% / 86.78% macro F1 (Voting Ensemble)',280);
+      api.stamp(stamps,'fa-network-wired','63 features from raw PCAPs · Scapy and PyShark · SMOTE and Optuna',560);
+      api.stamp(stamps,'fa-key','SPIFFE/SPIRE identity · mTLS · OTP 2FA',840);
+      api.stamp(stamps,'fa-book','2 papers at IoTaIS 2025, Bali: protocol-aware IoT monitoring, and a Zero Trust survey',1120);
+      api.done('intrusion contained: the model flagged it, you isolated it');
     } else {
       failedClicks++;
       api.sfx('error');
-      stEl.textContent='WRONG DEVICE — trust the flags';
+      stEl.textContent='WRONG DEVICE · go by the red flag';
     }
   }
   cv.addEventListener('click',function(e){
@@ -575,7 +563,7 @@ function act4(stage, api){
     var x=C.x,w=C.w,h=C.h;
     x.clearRect(0,0,w,h);
     var hub={x:w/2,y:150};
-    if(phase==='calm'&&t>attackAt){ phase='attack'; stEl.textContent='⚠ ANOMALY — deauth storm on cam-01'; api.sfx('error'); qbtn.disabled=false; rig.classList.add('alarm'); }
+    if(phase==='calm'&&t>attackAt){ phase='attack'; stEl.textContent='⚠ ANOMALY · deauth flood on cam-01'; api.sfx('error'); qbtn.disabled=false; rig.classList.add('alarm'); }
     if(phase==='attack'&&!contained&&t%52===0){ api.sfx('beep'); }
     if(phase==='attack'&&!contained){ trust[victim]=Math.max(8,trust[victim]-0.35); }
     if(phase==='contained'){ trust[victim]=Math.min(100,trust[victim]+0.8); }
@@ -636,7 +624,7 @@ function act4(stage, api){
     /* 1-second window strip */
     var wy=h-38;
     x.fillStyle='rgba(234,244,251,.6)'; x.font='600 9px "JetBrains Mono",monospace'; x.textAlign='left';
-    x.fillText('WINDOW MODEL — 1 s slices · 7 attack classes', 20, wy-6);
+    x.fillText('WINDOW MODEL · 1 s windows · 7 attack classes', 20, wy-6);
     var cells=Math.floor((w-40)/16);
     for(var cix=0;cix<cells;cix++){
       var age=cells-cix;
@@ -647,13 +635,13 @@ function act4(stage, api){
     }
     if(phase==='attack'&&!contained){
       x.fillStyle='rgba(255,92,106,1)'; x.textAlign='right';
-      x.fillText('DEAUTH-FLOOD p=0.97 → QUARANTINE cam-01', w-20, wy-6);
+      x.fillText('DEAUTH FLOOD → QUARANTINE cam-01', w-20, wy-6);
     }
   });
 
   if(api.reduced){
     /* quarantine button already provides the non-pointer path */
-    stEl.textContent='observe mode — attack begins shortly';
+    stEl.textContent='attack begins shortly';
   }
 }
 
@@ -662,14 +650,14 @@ function act4(stage, api){
    ========================================================================= */
 function act5(stage, api){
   stage.appendChild(el('div','a-head',
-    '<div class="a-act">act 5 · the pit wall — his own build</div>'+
-    '<h1 class="a-title">The tyres are dying. When do you box?</h1>'+
-    '<p class="a-story">His physics-informed model splits degradation into <b>thermal</b> and '+
-    '<b>mechanical</b> — and predicts the perfect stop. The race is live. '+
-    '<b>Beat the model if you can.</b></p>'));
+    '<div class="a-act">act 5 · the pit wall · F1 tyre project</div>'+
+    '<h1 class="a-title">Call the pit stop.</h1>'+
+    '<p class="a-story">His physics-informed model splits tyre degradation into <b>thermal</b> and '+
+    '<b>mechanical</b> wear and predicts when to stop. Watch the curves in this simulated stint and '+
+    '<b>press BOX when you think it\'s time.</b> The model\'s window appears as a green band.</p>'));
 
   var rig=el('div','rig');
-  rig.appendChild(el('div','rig-cap','<span>strategy·deck — 10 Hz telemetry</span><span class="st" id="a5st">LAP 1 / 24</span>'));
+  rig.appendChild(el('div','rig-cap','<span>strategy·deck · simulated stint</span><span class="st" id="a5st">LAP 1 / 24</span>'));
   var cv=el('canvas'); rig.appendChild(cv);
   var ctl=el('div','ctl');
   var box=el('button','btn warn','█ BOX BOX BOX');
@@ -690,15 +678,15 @@ function act5(stage, api){
   function finish(){
     over=true;
     var d=delta(boxed);
-    var verdict = d<0.01 ? 'PERFECT — you matched the model.' :
+    var verdict = d<0.01 ? 'PERFECT · same lap as the model' :
                   '+'+d.toFixed(1)+'s vs the model\'s lap '+OPT+' call.';
     stEl.textContent='RESULT: '+verdict;
     api.sfx(d<1?'success':'radio');
     api.stamp(stamps,'fa-flag-checkered','you boxed lap '+boxed+' · model window: laps 14–16',0);
-    api.stamp(stamps,'fa-fire','PINN loss splits thermal vs mechanical wear — the curves you watched',280);
-    api.stamp(stamps,'fa-bolt','custom CUDA/CuPy kernels · 4.1× training speedup',560);
+    api.stamp(stamps,'fa-fire','physics-informed loss splits thermal and mechanical wear: the two curves you watched',280);
+    api.stamp(stamps,'fa-bolt','custom CUDA/CuPy kernels cut training time 4.1×',560);
     api.stamp(stamps,'fa-chart-line','hybrid LSTM-XGBoost on 10 Hz telemetry',840);
-    api.done('pit call made — '+(d<1?'you matched':'the model beat you by '+d.toFixed(1)+'s'));
+    api.done('pit call made: '+(d<1?'you matched the model':'the model beat you by '+d.toFixed(1)+'s'));
   }
   box.addEventListener('click',function(){
     if(over||boxed) return;
@@ -716,7 +704,7 @@ function act5(stage, api){
         lap++;
         stEl.textContent='LAP '+lap+' / '+LAPS;
         try{ window.SFX && SFX.setThrottle && SFX.setThrottle(0.25+grip(lap)*0.3); }catch(e){}
-        if(lap>=LAPS){ boxed=LAPS; box.disabled=true; box.textContent='tyre cliff — too late'; setTimeout(finish,700); }
+        if(lap>=LAPS){ boxed=LAPS; box.disabled=true; box.textContent='tyre cliff, too late'; setTimeout(finish,700); }
       }
     }
     var x=C.x,w=C.w,h=C.h;
@@ -732,7 +720,7 @@ function act5(stage, api){
       x.fillStyle='rgba(125,255,178,.12)';
       x.fillRect(wx1,gy,wx2-wx1,gh);
       x.fillStyle='rgba(125,255,178,.85)'; x.textAlign='center';
-      x.fillText('PINN WINDOW',(wx1+wx2)/2,gy+12);
+      x.fillText('MODEL WINDOW',(wx1+wx2)/2,gy+12);
     }
     /* curves up to current lap */
     function curve(fn,col){
@@ -749,9 +737,9 @@ function act5(stage, api){
     curve(grip,'rgba(141,227,255,.95)');
     /* legend */
     x.textAlign='left';
-    x.fillStyle='rgba(255,92,106,.9)'; x.fillText('— thermal deg',gx+8,gy+16);
-    x.fillStyle='rgba(255,210,127,.9)'; x.fillText('— mechanical deg',gx+8,gy+30);
-    x.fillStyle='rgba(141,227,255,.95)'; x.fillText('— grip',gx+8,gy+44);
+    x.fillStyle='rgba(255,92,106,.9)'; x.fillText('━ thermal wear',gx+8,gy+16);
+    x.fillStyle='rgba(255,210,127,.9)'; x.fillText('━ mechanical wear',gx+8,gy+30);
+    x.fillStyle='rgba(141,227,255,.95)'; x.fillText('━ grip',gx+8,gy+44);
     /* lap cursor */
     var lx=gx+((lap-1)/(LAPS-1))*gw;
     x.strokeStyle='rgba(255,255,255,.5)';
@@ -777,14 +765,14 @@ function act5(stage, api){
    ========================================================================= */
 function act6(stage, api){
   stage.appendChild(el('div','a-head',
-    '<div class="a-act">act 6 · the oracle — three builds, one machine</div>'+
-    '<h1 class="a-title">Ask the work itself.</h1>'+
-    '<p class="a-story">Omniscience Pro (local RAG) retrieves, ARO\'s agents orchestrate, a '+
-    '4-bit Llama answers. <b>Pick a question and watch the real pipeline run.</b> Answer two '+
-    'and the oracle opens the way.</p>'));
+    '<div class="a-act">act 6 · the oracle · three LLM projects</div>'+
+    '<h1 class="a-title">Ask about the LLM work.</h1>'+
+    '<p class="a-story">Three separate projects share this console: Omniscience Pro, a local RAG '+
+    'system; ARO, which runs multi-agent workflows; and a 4-bit fine-tune of Llama 3.2. '+
+    '<b>Ask any two questions.</b> The retrieval animation is a sketch of how RAG works, not a live system.</p>'));
 
   var rig=el('div','rig');
-  rig.appendChild(el('div','rig-cap','<span>oracle — retrieval-augmented console</span><span class="st" id="a6st">0 / 2 ANSWERED</span>'));
+  rig.appendChild(el('div','rig-cap','<span>oracle · retrieval console · simulated</span><span class="st" id="a6st">0 / 2 ANSWERED</span>'));
   var wrap=el('div'); wrap.style.cssText='display:flex;gap:14px;flex-wrap:wrap';
   var left=el('div'); left.style.cssText='flex:1;min-width:200px;display:flex;flex-direction:column;gap:8px';
   var right=el('div'); right.style.cssText='flex:1.5;min-width:260px';
@@ -792,7 +780,7 @@ function act6(stage, api){
   var out=el('div'); out.style.cssText="height:92px;overflow-y:auto;margin-top:10px;background:rgba(2,8,14,.8);"+
     "border:1px solid rgba(141,227,255,.15);border-radius:10px;padding:10px 13px;"+
     "font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.65;color:#bfe9d9";
-  out.innerHTML='<span style="color:#5a6b7d">oracle idle — select a query…</span>';
+  out.innerHTML='<span style="color:#7d8fa3">oracle idle · pick a question</span>';
   right.appendChild(out);
   wrap.appendChild(left); wrap.appendChild(right);
   rig.appendChild(wrap);
@@ -802,17 +790,17 @@ function act6(stage, api){
   var C=setupCanvas(cv,170);
   var stEl=rig.querySelector('#a6st');
   var QS=[
-    { q:'How fast is your retrieval?', a:'Vector search over the local index answers in <b style="color:#ffd27f">&lt;50 ms</b> (HNSW), first token in <b style="color:#ffd27f">&lt;500 ms</b> — all on consumer hardware, fully offline. <span style="color:#8de3ff">[omniscience-pro]</span>' },
-    { q:'What did the adversarial audit find?', a:'A post-build red-team pass on ARO found and fixed <b style="color:#ffd27f">16 vulnerabilities</b> — auth, SSRF, input validation, CORS — with SQLAlchemy audit trails. <span style="color:#8de3ff">[aro]</span>' },
-    { q:'How was Llama made to fit?', a:'Llama 3.2 (1B/3B) fine-tuned on <b style="color:#ffd27f">21.5k interactions</b>, then <b style="color:#ffd27f">4-bit quantised</b> with Unsloth — no meaningful quality drop, runs on consumer GPUs. <span style="color:#8de3ff">[llama-3.2]</span>' },
-    { q:'What connects all three?', a:'One belief: <b>intelligence should run where the data lives</b> — private, local, fast. RAG retrieves, agents orchestrate (NetworkX graphs + SSE), the compressed model answers. <span style="color:#8de3ff">[all]</span>' }
+    { q:'How fast is Omniscience Pro?', a:'It searches its local vector index in <b style="color:#ffd27f">under 50 ms</b> (HNSW) and returns the first token in <b style="color:#ffd27f">under 500 ms</b>, on consumer hardware. <span style="color:#8de3ff">[omniscience-pro]</span>' },
+    { q:'What did the ARO audit find?', a:'After building ARO he audited it adversarially, then found and fixed <b style="color:#ffd27f">16 vulnerabilities</b> across auth, SSRF, input validation and CORS. He also added SQLAlchemy-backed audit trails. <span style="color:#8de3ff">[aro]</span>' },
+    { q:'How did Llama fit on one GPU?', a:'He fine-tuned Llama 3.2 1B and 3B on <b style="color:#ffd27f">21.5k interactions</b>, then quantised them to <b style="color:#ffd27f">4-bit</b> with Unsloth. That cut memory enough for a consumer GPU, with no meaningful drop in output quality. <span style="color:#8de3ff">[llama-3.2]</span>' },
+    { q:'How do the three relate?', a:'They are separate projects. Omniscience Pro does retrieval, ARO orchestrates agents as NetworkX graphs and streams progress over SSE, and the Llama work is about fitting a model onto consumer hardware. <span style="color:#8de3ff">[all]</span>' }
   ];
   /* embedding scatter: 60 chunk dots */
   var chunks=[]; for(var i=0;i<60;i++) chunks.push({x:Math.random(),y:Math.random(),hot:0});
   var query=null, answered=0, busy=false, t=0;
 
   QS.forEach(function(item,qi){
-    var b=el('button','', '<i class="fa-solid fa-terminal" style="margin-right:8px;opacity:.6"></i>'+item.q);
+    var b=el('button','', '<i aria-hidden="true" class="fa-solid fa-terminal" style="margin-right:8px;opacity:.6"></i>'+item.q);
     b.style.cssText="text-align:left;font-family:'JetBrains Mono',monospace;font-size:11px;color:#cfe9ff;"+
       'background:rgba(141,227,255,.06);border:1px solid rgba(141,227,255,.25);border-radius:10px;'+
       'padding:11px 12px;cursor:pointer;transition:.2s';
@@ -825,31 +813,31 @@ function act6(stage, api){
       /* mark 3 nearest chunks hot */
       var byD=chunks.map(function(c,idx){ return {idx:idx, d:(c.x-query.x)*(c.x-query.x)+(c.y-query.y)*(c.y-query.y)}; })
         .sort(function(a,b2){return a.d-b2.d;}).slice(0,3);
-      out.innerHTML='<span style="color:#8de3ff">» '+item.q+'</span><br><span style="color:#5a6b7d">embedding… searching index…</span>';
+      out.innerHTML='<span style="color:#8de3ff">» '+item.q+'</span><br><span style="color:#7d8fa3">embedding… searching index…</span>';
       setTimeout(function(){
         byD.forEach(function(o){ chunks[o.idx].hot=1; });
         api.sfx('sonar');
-        out.innerHTML+='<br><span style="color:#7dffb2">3 chunks retrieved · 43 ms (&lt;50 ms budget)</span><br>';
+        out.innerHTML+='<br><span style="color:#7dffb2">3 chunks retrieved</span><br>';
         var full=item.a, k=0;
         var iv=setInterval(function(){
           k+=api.reduced?24:3;
           out.innerHTML='<span style="color:#8de3ff">» '+item.q+'</span><br>'+
-            '<span style="color:#7dffb2">3 chunks · 43 ms</span><br>'+full.slice(0,k);
+            '<span style="color:#7dffb2">3 chunks retrieved</span><br>'+full.slice(0,k);
           out.scrollTop=1e6;
           if(k%9===0) api.sfx('type');
           if(k>=full.length){
             clearInterval(iv);
             out.innerHTML='<span style="color:#8de3ff">» '+item.q+'</span><br>'+
-              '<span style="color:#7dffb2">3 chunks · 43 ms</span><br>'+full;
+              '<span style="color:#7dffb2">3 chunks retrieved</span><br>'+full;
             busy=false; answered++;
             stEl.textContent=Math.min(answered,2)+' / 2 ANSWERED';
             chunks.forEach(function(c){c.hot=0;}); query=null;
             if(answered===2){
               api.sfx('success');
-              api.stamp(stamps,'fa-database','Omniscience Pro — local RAG · <50 ms search · <500 ms first token',0);
-              api.stamp(stamps,'fa-diagram-project','ARO — agent graphs (NetworkX) · SSE streaming · 16 vulns fixed',280);
-              api.stamp(stamps,'fa-compress','Llama 3.2 — 21.5k-example fine-tune · 4-bit Unsloth quant',560);
-              api.done('the oracle answered — retrieval, agents, and a 4-bit model, all his');
+              api.stamp(stamps,'fa-database','Omniscience Pro · local RAG · <50 ms search · <500 ms to first token',0);
+              api.stamp(stamps,'fa-diagram-project','ARO · agent graphs in NetworkX · SSE streaming · 16 vulnerabilities fixed',280);
+              api.stamp(stamps,'fa-compress','Llama 3.2 · fine-tuned on 21.5k interactions · 4-bit with Unsloth',560);
+              api.done('oracle answered twice');
             }
           }
         },18);
@@ -863,7 +851,7 @@ function act6(stage, api){
     var x=C.x,w=C.w,h=C.h;
     x.clearRect(0,0,w,h);
     x.fillStyle='rgba(234,244,251,.5)'; x.font='600 9px "JetBrains Mono",monospace'; x.textAlign='left';
-    x.fillText('EMBEDDING SPACE — 60 chunks · cosine neighbourhood',8,12);
+    x.fillText('EMBEDDING SPACE · 60 chunks',8,12);
     chunks.forEach(function(c){
       var cx2=14+c.x*(w-28), cy2=24+c.y*(h-38);
       if(c.hot){
@@ -895,31 +883,30 @@ function act6(stage, api){
 function act7(stage, api){
   stage.appendChild(el('div','a-head',
     '<div class="a-act">act 7 · transmission</div>'+
-    '<h1 class="a-title">Signal strength: 100%.</h1>'+
-    '<p class="a-story">You didn\'t read a résumé tonight. <b>You ran one.</b> '+
-    'Here is your mission report — and the frequency to reach the man himself.</p>'));
+    '<h1 class="a-title">Mission report.</h1>'+
+    '<p class="a-story">That was the whole run. Here is what each act stood for, and how to reach him.</p>'));
 
   var rig=el('div','rig');
-  rig.appendChild(el('div','rig-cap','<span>mission report — operator: you</span><span class="st">TX READY</span>'));
+  rig.appendChild(el('div','rig-cap','<span>mission report · operator: you</span><span class="st">TX READY</span>'));
   var rep=el('div','report');
   var LINES=[
-    '<span class="c">▸</span> you <b>calibrated the carrier</b> — Kolkata 2019 → present',
-    '<span class="c">▸</span> you <b>compiled the engineer</b> — B.Tech <span class="y">9.44</span> · GATE <span class="y">top 5%</span> · M.Tech AI @ DIAT (DRDO) <span class="y">8.64</span>',
-    '<span class="c">▸</span> you <b>parallelized a radio telescope</b> — GMRT latency <span class="y">−50%</span>, real-time unblocked',
-    '<span class="c">▸</span> you <b>folded a pulsar out of noise</b> — his model: <span class="y">99.8% F1</span> across <span class="y">70M+ samples</span> (NCRA-TIFR)',
-    '<span class="c">▸</span> you <b>contained a live intrusion</b> — Zero-Trust @ C-DAC · <span class="y">97.93%</span> · <span class="y">&lt;1 ms</span>/window · 2× IoTaIS\'25',
-    '<span class="c">▸</span> you <b>called a pit stop against a PINN</b> — thermal/mechanical split · <span class="y">4.1×</span> CUDA speedup',
-    '<span class="c">▸</span> you <b>queried the oracle</b> — local RAG <span class="y">&lt;50 ms</span> · agent graphs · 4-bit Llama',
-    '<span class="c">▸</span> conclusion: <b>one operator behind all of it — Saptarshi Nag, AI/ML Engineer.</b>'
+    '<span class="c">▸</span> you <b>found the carrier</b> · Kolkata, 2019 to now',
+    '<span class="c">▸</span> you <b>compiled his education</b> · B.Tech <span class="y">9.44</span> · GATE 2024 rank <span class="y">1790</span> · M.Tech CSE (AI), DIAT <span class="y">8.64</span>',
+    '<span class="c">▸</span> you <b>split a telescope pipeline across cores</b> · GMRT, latency <span class="y">−50%</span>',
+    '<span class="c">▸</span> you <b>folded a pulsar out of the noise</b> · his NCRA-TIFR detector: <span class="y">99.8% F1</span> over <span class="y">70M+</span> samples',
+    '<span class="c">▸</span> you <b>isolated an IoT intrusion</b> · C-DAC Zero Trust: <span class="y">96.97%</span> flow accuracy (RF) · 2 IoTaIS 2025 papers',
+    '<span class="c">▸</span> you <b>called a pit stop against his model</b> · physics-informed tyre model · training <span class="y">4.1×</span> faster with CUDA',
+    '<span class="c">▸</span> you <b>asked the oracle</b> · Omniscience Pro search <span class="y">&lt;50 ms</span> · ARO <span class="y">16</span> fixes · Llama 3.2 in 4-bit',
+    '<span class="c">▸</span> <b>Saptarshi Nag</b>, AI/ML Engineer at C-DAC Chennai'
   ];
   LINES.forEach(function(l){ rep.appendChild(el('div','rline',l)); });
   rig.appendChild(rep);
   var links=el('div','tx-links',
-    '<a href="mailto:saptarshinag18@gmail.com"><i class="fa-solid fa-envelope"></i>saptarshinag18@gmail.com</a>'+
-    '<a href="https://www.linkedin.com/in/saptarshi18" target="_blank" rel="noopener"><i class="fa-brands fa-linkedin"></i>/in/saptarshi18</a>'+
-    '<a href="https://github.com/Saptarshi-Nag189" target="_blank" rel="noopener"><i class="fa-brands fa-github"></i>Saptarshi-Nag189</a>'+
-    '<a href="../saptarshi_resume_linkedin_2026.pdf" target="_blank" rel="noopener"><i class="fa-solid fa-file-arrow-down"></i>the flat version (CV)</a>'+
-    '<a href="#" id="replay"><i class="fa-solid fa-rotate-left"></i>run it again</a>');
+    '<a href="mailto:saptarshinag18@gmail.com"><i aria-hidden="true" class="fa-solid fa-envelope"></i>saptarshinag18@gmail.com</a>'+
+    '<a href="https://www.linkedin.com/in/saptarshi18" target="_blank" rel="noopener"><i aria-hidden="true" class="fa-brands fa-linkedin"></i>/in/saptarshi18</a>'+
+    '<a href="https://github.com/Saptarshi-Nag189" target="_blank" rel="noopener"><i aria-hidden="true" class="fa-brands fa-github"></i>Saptarshi-Nag189</a>'+
+    '<a href="../saptarshi_resume_linkedin_2026.pdf" target="_blank" rel="noopener"><i aria-hidden="true" class="fa-solid fa-file-arrow-down"></i>download the CV</a>'+
+    '<a href="#" id="replay"><i aria-hidden="true" class="fa-solid fa-rotate-left"></i>run it again</a>');
   rig.appendChild(links);
   stage.appendChild(rig);
 
@@ -932,7 +919,7 @@ function act7(stage, api){
     setTimeout(function(){ l.classList.add('on'); api.sfx(i===lines.length-1?'success':'tick'); },
       api.reduced? 60*i : 420*i);
   });
-  setTimeout(function(){ api.sfx('chime'); api.done('transmission complete — over to you'); },
+  setTimeout(function(){ api.sfx('chime'); api.done('transmission complete'); },
     api.reduced? 600 : 420*LINES.length+400);
 }
 
