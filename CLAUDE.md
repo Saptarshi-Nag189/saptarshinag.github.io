@@ -21,6 +21,9 @@ Contact: saptarshinag18@gmail.com · LinkedIn `/in/saptarshi18` · GitHub `Sapta
   chiptune/rain/clack/brook/wind/crickets/hum loops plus many named one-shots. Auto mute button,
   gesture-unlock. To add a new sound: add a named entry to the `lib` object or a new loop pair
   (`startX`/`stopX`) here — every surface can then call `SFX.play('name')`.
+- **`demos/_shared/a11y.js`** — `A11Y.dialog()` turns a demo's panel into a modal dialog (focus
+  in, Tab trapped, focus back on close) and `A11Y.chapters()` adds a keyboard list of chapter
+  buttons, hidden until tabbed into. Any new demo with a canvas-only way in should use both.
 - **`/signal/`** — **THE SIGNAL — a playable biography**. 8-act sequencer (`acts.js`), zero
   modals; each act simulates real work (epoch-folding pulsar detection, GMRT parallel
   scheduling, C-DAC intrusion detection, F1 PINN pit call, RAG oracle). Secondary flagship,

@@ -31,7 +31,7 @@ export const FAIRY = {
   doorExit: "Back to the open air ✧",
   demoDone: [
     "You did that just like he does. Almost.",
-    "His work makes more sense once your hands have done it.",
+    "Go on, try one. Each machine is a small version of something he built.",
     "I'm keeping a note that you were good at this."
   ],
   chatGreeting: "Hi! Ask me about Saptarshi: his work, his projects, where he studied. I know all of it."

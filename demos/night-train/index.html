@@ -118,10 +118,10 @@
 
 <div id="poem">
   <div class="k">the night train</div>
-  <h1>Somewhere over still water,<br>a life rides by.</h1>
-  <div class="s">eight windows · eight chapters</div>
+  <h1>Saptarshi Nag,<br>on the night train</h1>
+  <div class="s">each lit carriage carries a chapter, from his B.Tech to C-DAC</div>
 </div>
-<div id="whisper"><span class="kb-only"><b>click a lit window</b> or press 1 to 8; each carriage holds a chapter</span><span class="touch-only"><b>tap a lit window</b>; each carriage holds a chapter</span></div>
+<div id="whisper"><span class="kb-only"><b>click a lit window</b> or press 1 to 8 to read it</span><span class="touch-only"><b>tap a lit window</b> to read it</span></div>
 
 <div id="tWrap">
   <div id="ticket">
@@ -428,7 +428,7 @@ if (window.A11Y) A11Y.chapters(CARS.map(function(x){ return x.title; }), functio
 var raf=null;
 function loop(t){ raf=requestAnimationFrame(loop); if(document.hidden) return; draw(t); }
 if(REDUCED){ draw(performance.now());
-  whisperEl.innerHTML='<span class="kb-only"><b>click a window</b> or press 1 to 8; each carriage holds a chapter</span><span class="touch-only"><b>tap a window</b>; each carriage holds a chapter</span>';
+  whisperEl.innerHTML='<span class="kb-only"><b>click a window</b> or press 1 to 8 to read it</span><span class="touch-only"><b>tap a window</b> to read it</span>';
   addEventListener('resize',function(){ draw(performance.now()); });
 } else { raf=requestAnimationFrame(loop); }
 window.__train=function(){ return { cars:CARS.length, hover:hoverCar }; };

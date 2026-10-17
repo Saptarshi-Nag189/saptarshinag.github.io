@@ -240,7 +240,7 @@ you want to look around with is a walk button.
 
 It is now a real thumbstick bottom-left with a run toggle and a use button
 bottom-right. The stick is **analog**, so a half push strolls, which meant
-teaching the controller that intent has a magnitude and not just four booleans:
+teaching the controller that intent has a magnitude as well as a direction:
 `control.axis(x, z, run)` sits beside `control.key()` and speaks over it while
 held. Run is a toggle rather than a hold, because holding a second button while
 your other thumb steers is a two-hand problem nobody wants on a phone.

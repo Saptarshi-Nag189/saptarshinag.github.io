@@ -823,7 +823,7 @@ addEventListener('resize',()=>{
 
 /* ---------------- start veil ---------------- */
 const veil=document.getElementById('veil'), startBtn=document.getElementById('startBtn');
-document.getElementById('veilMsg').textContent='a small world grew while you blinked';
+document.getElementById('veilMsg').textContent='eight small worlds are ready';
 startBtn.style.display='block';
 startBtn.addEventListener('click',()=>{
   veil.classList.add('gone');

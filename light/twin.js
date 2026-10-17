@@ -55,7 +55,7 @@ export const CORPUS = [
   { p: ["metric", "metrics", "number", "numbers", "figures", "stat", "stats", "achievement", "achievements", "best", "proud", "proudest"],
     a: "The headline numbers, each with its project: 96.97% flow-attack accuracy (C-DAC's Zero Trust IoT framework, RF model), 99.8% F1 over 70M+ samples (the NCRA-TIFR pulsar ResNet1D), a 4.1× training speedup (CUDA kernels in the F1 tyre project), a 50% latency cut (the GMRT pipeline refactor), and search under 50 ms (Omniscience Pro)." },
   { p: ["this world", "this game", "how did you make", "babylon", "island", "built this", "how was this made"],
-    a: "The island is generated, not modelled: a climate of temperature and moisture decides where desert, forest and snow go, and the world streams in 64-metre tiles that are freed once they're behind you. Press L for the plain version of everything." },
+    a: "The island is generated from a climate map: temperature and moisture decide where desert, forest and snow go, and the world streams in 64-metre tiles that are freed once they're behind you. Press L for the plain version of everything." },
   { p: ["hello", "hi", "hey", "namaste", "yo"],
     a: "Hello ✧ Ask me anything about him, or just keep walking." },
   { p: ["thank", "thanks", "thank you"],
