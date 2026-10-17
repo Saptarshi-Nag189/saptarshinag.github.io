@@ -73,7 +73,7 @@
     border-radius:999px;padding:10px 22px;box-shadow:0 8px 28px rgba(150,100,180,.3);
     opacity:0;transition:.35s;pointer-events:none}
   #prompt.show{opacity:1;transform:translateX(-50%) translateY(0)}
-  #prompt b{color:#e75f9c}
+  #prompt b{color:#b83a76}
 
   /* fairy bubble */
   #bubble{position:fixed;z-index:16;max-width:min(320px,72vw);pointer-events:none;
@@ -83,7 +83,7 @@
     transition:opacity .4s,transform .4s}
   #bubble.show{opacity:1;transform:none}
   #bubble .who{font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;
-    color:#c78ad6;margin-bottom:3px}
+    color:#8e4fa6;margin-bottom:3px}
 
   /* on-screen controls */
   #pad{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:20;
@@ -105,7 +105,7 @@
   #plate::-webkit-scrollbar{width:7px}
   #plate::-webkit-scrollbar-thumb{background:rgba(200,140,214,.4);border-radius:5px}
   #plate .pk{font-family:var(--mono);font-size:11px;letter-spacing:.24em;text-transform:uppercase;
-    color:#c78ad6;margin-bottom:5px}
+    color:#8e4fa6;margin-bottom:5px}
   #plate h3{font-size:19px;font-weight:700;color:#3c3552;margin-bottom:9px}
   #plate .pb{font-size:13.5px;line-height:1.6;color:#5a5175}
   #plate .pb p{margin-bottom:10px}
@@ -120,7 +120,7 @@
   #plate .mtile{background:rgba(143,216,255,.14);border:1px solid rgba(143,216,255,.4);border-radius:12px;padding:10px}
   #plate .mtile .v{font-family:var(--mono);font-size:17px;font-weight:700;color:#3d7fa8}
   #plate .mtile .l{font-size:11px;color:#4f6378;margin-top:3px;line-height:1.3}
-  #plate .links a{display:inline-flex;align-items:center;gap:8px;color:#e75f9c;text-decoration:none;
+  #plate .links a{display:inline-flex;align-items:center;gap:8px;color:#b83a76;text-decoration:none;
     font-weight:600;font-size:13.5px;margin:4px 16px 4px 0}
   #plate .links a:hover{text-decoration:underline}
 
@@ -133,13 +133,13 @@
   #console .chead{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
   #console .ct{font-weight:700;font-size:17px;color:#3c3552}
   #console .ct .ck{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.22em;
-    text-transform:uppercase;color:#c78ad6;margin-bottom:2px}
+    text-transform:uppercase;color:#8e4fa6;margin-bottom:2px}
   #console .cx{width:34px;height:34px;border-radius:10px;border:1px solid rgba(120,80,160,.25);
     background:rgba(120,80,160,.06);color:#6b5b8e;cursor:pointer;font-size:13px}
   #console canvas{display:block;width:100%;border-radius:14px;background:#241f38}
   #console .crow{display:flex;gap:12px;align-items:center;justify-content:center;margin-top:12px;flex-wrap:wrap}
   #console .cbtn{font-family:var(--sans);font-weight:700;font-size:13px;color:#fff;
-    background:linear-gradient(135deg,#ff9ecb,#c78ad6);border:none;border-radius:999px;
+    background:linear-gradient(135deg,#c2427f,#8e4fa6);border:none;border-radius:999px;
     padding:11px 22px;cursor:pointer;box-shadow:0 8px 22px rgba(199,138,214,.4);transition:transform .15s}
   #console .cbtn:hover{transform:translateY(-2px)}
   #console .cbtn:disabled{opacity:.4;transform:none;cursor:default}
@@ -148,7 +148,7 @@
   #console .cslider::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;
     background:radial-gradient(circle at 35% 30%,#fff,#ff9ecb 65%);box-shadow:0 0 14px rgba(255,158,203,.8);cursor:ew-resize}
   #console .cread{font-family:var(--mono);font-size:11.5px;color:#7a7194;min-width:110px;text-align:center}
-  #console .cread b{color:#e75f9c;font-size:14px}
+  #console .cread b{color:#b83a76;font-size:14px}
   #console .cstamp{font-family:var(--mono);font-size:11.5px;color:#6e5428;background:rgba(255,217,138,.25);
     border:1px dashed rgba(200,160,80,.5);border-radius:8px;padding:5px 10px;margin:3px}
 
@@ -169,7 +169,7 @@
   #chatIn input{flex:1;font-family:var(--sans);font-size:13px;color:#3c3552;border:1px solid rgba(120,80,160,.2);
     border-radius:999px;padding:9px 14px;outline:none;background:#fff}
   #chatIn button{border:none;border-radius:50%;width:38px;height:38px;cursor:pointer;color:#fff;
-    background:linear-gradient(135deg,#ff9ecb,#c78ad6);font-size:13px}
+    background:linear-gradient(135deg,#c2427f,#8e4fa6);font-size:13px}
 
   /* journey tracker */
   #journey{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:20;display:flex;gap:9px;
@@ -181,7 +181,7 @@
   /* chat fab (touch devices have no T key) */
   #chatFab{position:fixed;right:16px;bottom:24px;z-index:22;width:52px;height:52px;border-radius:50%;
     border:1px solid rgba(255,255,255,.9);color:#fff;font-size:19px;cursor:pointer;
-    background:linear-gradient(135deg,#ff9ecb,#c78ad6);box-shadow:0 10px 28px rgba(199,138,214,.45);
+    background:linear-gradient(135deg,#c2427f,#8e4fa6);box-shadow:0 10px 28px rgba(199,138,214,.45);
     transition:transform .15s}
   #chatFab:hover{transform:translateY(-2px) scale(1.05)}
   @media (max-width:640px){
@@ -216,7 +216,7 @@
   body.photo #chip, body.photo #journey, body.photo #pad, body.photo #povBtn, body.photo #runBtn,
   body.photo #exitLink, body.photo #chatFab, body.photo #prompt, body.photo #bubble,
   body.photo #plate, body.photo #toast, body.photo #sparks{opacity:0 !important; pointer-events:none !important}
-  body.photo #photoBtn{color:#e75f9c;border-color:#e75f9c}
+  body.photo #photoBtn{color:#b83a76;border-color:#b83a76}
 
   /* night fade for the goodnight ending */
   #night{position:fixed;inset:0;z-index:38;pointer-events:none;background:#05060f;opacity:0;
@@ -249,6 +249,12 @@
   @media (prefers-reduced-motion: reduce){
     #bloom{transition:opacity .25s} #plate,#bubble,#prompt{transition:opacity .2s}
   }
+  /* the start screen's control legend: keys on a keyboard device, the on-screen pad on touch */
+  #veilKeys,#veilTouch{margin-top:18px;padding:0 20px;max-width:640px;text-align:center;
+    font-family:var(--mono);font-size:12px;line-height:1.7;letter-spacing:.06em;color:#5f5677}
+  .keys-touch{display:none}
+  @media (pointer:coarse){ .keys-kb{display:none} .keys-touch{display:block} }
+
   /* plain-HTML version for browsers without WebGL */
   #fallback{position:fixed;inset:0;z-index:80;overflow-y:auto;background:#fff7fb;color:#3c3552;
     padding:48px 20px 64px;font-family:var(--sans)}
@@ -281,8 +287,8 @@
   <div class="orb"></div>
   <p id="veilMsg">the fairy is waking…</p>
   <button class="start" id="startBtn"><i aria-hidden="true" class="fa-solid fa-seedling"></i>&nbsp; begin the wander</button>
-  <p style="margin-top:18px;font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:#5f5677">
-    ◀ ▶ move &nbsp;·&nbsp; Shift run/walk &nbsp;·&nbsp; ▲ hop / enter &nbsp;·&nbsp; Esc leave a domain &nbsp;·&nbsp; T talk to the fairy</p>
+  <p id="veilKeys" class="keys-kb">◀ ▶ move &nbsp;·&nbsp; Shift run/walk &nbsp;·&nbsp; ▲ hop / enter &nbsp;·&nbsp; Esc leave a domain &nbsp;·&nbsp; T talk to the fairy</p>
+  <p id="veilTouch" class="keys-touch">◀ ▶ walk &nbsp;·&nbsp; ▲ hop or go through a door &nbsp;·&nbsp; the bubble button talks to the fairy</p>
 </div>
 
 <div id="chip">the <b>wander</b> · saptarshi nag</div>
