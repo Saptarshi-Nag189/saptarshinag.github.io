@@ -124,7 +124,7 @@ const LEDGER = {
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
 
 /** Facts are authored above; only <b> is meaningful inside a point. */
-const rich = (s) => esc(s).replace(/&lt;b&gt;/g, '<b>').replace(/&lt;\/b&gt;/g, '</b>');
+const rich = (s) => esc(s).replace(/&lt;(\/?)b>/g, '<$1b>'); // esc() leaves '>' alone
 
 function section(title, inner) {
   return `<section class="lsec"><h2>${esc(title)}</h2>${inner}</section>`;
