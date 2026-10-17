@@ -35,7 +35,7 @@
   }
 
   /* ---------- CRT overlays ---------- */
-  .crt-vignette{position:fixed;inset:0;z-index:30;pointer-events:none;
+  .crt-vignette{position:fixed;inset:0;z-index:9;pointer-events:none; /* under the text, so the corners stay readable */
     background:radial-gradient(ellipse 120% 100% at 50% 50%,transparent 38%,rgba(0,0,0,.7) 100%);}
   .crt-scanlines{position:fixed;inset:0;z-index:31;pointer-events:none;opacity:.45;
     background:repeating-linear-gradient(0deg,rgba(0,0,0,0) 0px,rgba(0,0,0,0) 2px,rgba(0,0,0,.32) 3px,rgba(0,0,0,0) 4px);
@@ -50,20 +50,6 @@
     33%{opacity:.02} 33.5%{opacity:.07} 34%{opacity:.02}
     70%{opacity:.01} 72%{opacity:.06} 74%{opacity:.015}
   }
-
-  /* ---------- Chrome ---------- */
-  .topbar{position:fixed;top:0;left:0;right:0;z-index:20;
-    display:flex;align-items:center;gap:14px;
-    padding:10px 16px;font-size:12px;color:var(--text-dim);
-    background:linear-gradient(180deg, rgba(4,8,6,.85), rgba(4,8,6,0));
-    pointer-events:none;}
-  .topbar a{pointer-events:auto;color:var(--green);text-decoration:none;
-    border:1px solid var(--green-faint);padding:4px 10px;border-radius:4px;
-    transition:.18s;letter-spacing:.04em;}
-  .topbar a:hover{background:var(--green-faint);color:#dfffe9;border-color:var(--green-dim);}
-  .topbar .spacer{flex:1}
-  .tag{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--amber-dim);
-    border:1px dashed var(--amber-dim);padding:3px 8px;border-radius:4px;opacity:.8;}
 
   /* ---------- Screen / terminal ---------- */
   #screen{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;
@@ -113,8 +99,6 @@
     box-shadow:0 0 12px rgba(74,255,143,.18);transform:translateY(-1px);}
   .chip .k{color:var(--amber)}
 
-  .hint{font-size:11px;color:var(--text-dim);padding-top:2px;opacity:.7}
-
   /* ---------- Font Awesome icon styling ---------- */
   .line i.fa-solid, .line i.fa-brands{
     display:inline-block;width:1.35em;text-align:center;
@@ -125,14 +109,21 @@
   .line i.ic-red{color:var(--red);text-shadow:0 0 8px rgba(255,107,107,.5)}
   .prompt i, .ps i{color:inherit;text-shadow:inherit;width:auto;margin-right:2px}
   .chip i{margin-right:5px;color:var(--amber);width:auto}
-  .topbar a i{margin-right:5px}
-  .tag i{margin-right:4px}
 
   @media (max-width:640px){
     body{font-size:13px}
     #screen{padding:50px 4vw 12px}
     .ascii{font-size:9px}
-    .topbar .tag{display:none}
+  }
+
+  /* accessibility pass */
+  .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+  .chip{min-height:36px}
+  .chip:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+  #screen{padding-top:68px;padding-bottom:70px} /* clear of the archive pill and the sound button */
+  @media (max-width:640px){
+    #cmd, .mirror{font-size:16px} /* 16px or more, or iOS zooms the page on focus */
+    #screen{padding-top:62px;padding-bottom:68px}
   }
 
   @media (prefers-reduced-motion: reduce){
@@ -149,7 +140,8 @@
 
 
   <div id="screen">
-    <div id="scrollback" aria-live="polite"></div>
+    <div id="scrollback"></div>
+    <div id="sr-live" class="sr-only" aria-live="polite"></div>
 
     <div class="chips" id="chips" style="display:none">
       <button class="chip" data-cmd="help"><i aria-hidden="true" class="fa-solid fa-circle-question"></i>help</button>
@@ -197,9 +189,23 @@
     d.innerHTML = html;
     sb.appendChild(d);
     scroll();
+    if(html) announce(d);
     return d;
   }
   function blank(){ el('&nbsp;'); }
+
+  // Screen readers hear each finished line once, from a separate live region. The scrollback
+  // itself isn't live, because typing a line rewrites it every 12 ms.
+  const live = document.getElementById('sr-live');
+  let liveBuf = [], liveT = 0;
+  function announce(node){
+    if(!node || node.classList.contains('ascii')) return;
+    const t = node.textContent.replace(/\s+/g,' ').trim();
+    if(!t) return;
+    liveBuf.push(t);
+    clearTimeout(liveT);
+    liveT = setTimeout(()=>{ live.textContent = liveBuf.join('\n'); liveBuf = []; }, 120);
+  }
   let scrollRAF = 0;
   let pinned = true; // stick to bottom unless the user scrolls up to read
   sb.addEventListener('scroll', ()=>{
@@ -232,7 +238,7 @@
   function typeLine(html, cls, cps){
     return new Promise(res=>{
       const node = el('', cls);
-      if(REDUCED){ node.innerHTML = html; scroll(); return res(); }
+      if(REDUCED){ node.innerHTML = html; scroll(); announce(node); return res(); }
       let i = 0;
       const speed = cps || 1; // chars per tick
       const tick = ()=>{
@@ -241,7 +247,7 @@
         node.innerHTML = html.slice(0, cut);
         scroll();
         if(cut < html.length){ setTimeout(tick, 12); }
-        else { node.innerHTML = html; scroll(); res(); }
+        else { node.innerHTML = html; scroll(); announce(node); res(); }
       };
       tick();
     });
@@ -684,7 +690,7 @@
   }
   document.addEventListener('mousedown', (e)=>{
     // don't steal selection from links / chips / topbar
-    if(e.target.closest('a, .chip, .topbar')) return;
+    if(e.target.closest('a, .chip')) return;
     // allow text selection
     if(window.getSelection && String(window.getSelection())) return;
     focusInput();
