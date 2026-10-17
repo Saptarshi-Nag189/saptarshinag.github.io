@@ -1,15 +1,15 @@
 /* ==========================================================================
-   twin.js — the companion's mind, and everything editable about her.
+   twin.js: the companion's mind, and everything editable about her.
 
    Ported from /wander/'s twin-data.js, with the place references rewritten for
    this island: there is no Atelier or Grove here, there is a dune sea, a deep
    wood, a lake with a boat, a temple and a frozen crown.
 
-   THE HOUSE RULE HOLDS: every metric names the project it came from. A bare
-   number is a decoration, not a claim.
+   House rules: facts come from the linked CV only, and every metric names the
+   project it came from.
 
    To update the twin, edit this file and nothing else. The brain below is a
-   substring-intent matcher — small, instant, offline, and incapable of making
+   whole-word intent matcher. It's small, instant and offline, and it can't make
    anything up, which for a résumé matters more than fluency. The socket is the
    same one /wander/ used, so a real language model can replace it later:
 
@@ -17,85 +17,84 @@
    ========================================================================== */
 
 export const FAIRY = {
-  wake: "Oh — you're here. That hooded figure is Saptarshi Nag, walking his own island; I'm his digital twin, and I ride along as this light. Ask me anything about him.",
-  greeting: "Ask me about his work, his research, the numbers he's proudest of, or how to reach him ✧",
-  idle: [
-    "Seven lands on this island, and one day's light to cross them.",
-    "Curious about him? Just ask — I'm a local mind, I answer instantly.",
-    "The temple is worth the climb. So is the lake at dusk.",
-  ],
-  places: {
-    beach:  "Where the island begins. He'd say every project starts on a shore like this.",
-    desert: "The Dune Sea — dry, and older than the rest of it.",
-    meadow: "The easy middle. Good walking.",
-    forest: "The Deep Wood. Close, and full of quiet.",
-    marsh:  "The Still Water. There's a boat on the bank — press E and take it out.",
-    rock:   "Above where things grow.",
-    snow:   "The Frozen Crown. Cold enough to keep paper safe, he'd tell you.",
-  },
+  wake: "Oh, you're here. That hooded figure is Saptarshi Nag, walking his own island. I'm his digital twin, and I ride along as this light. Ask me anything about him.",
+  greeting: "You can ask about his work, his research, his numbers, or how to reach him ✧",
 };
 
 export const CORPUS = [
   /* "who is this?" was the first thing a real player asked. Keep the patterns
-     specific — a loose one like "figure" steals "what figures is he proudest
-     of" from the metrics answer. */
+     specific: a loose one like "figure" steals "what figures is he proudest
+     of" from the numbers answer. */
   { p: ["who is this", "who am i", "who is that", "who do i play", "playing as",
         "the character", "the traveller", "the traveler", "hooded", "the wanderer"],
-    a: "The traveller you're steering is Saptarshi himself — the island is his career laid out as ground, and each biome is a chapter of it. I'm the light at his shoulder: his digital twin, here to answer for him." },
+    a: "The traveller you're steering is Saptarshi. I'm the light at his shoulder, his digital twin, here to answer for him." },
   { p: ["who are you", "what are you", "your name", "who r u"],
-    a: "I'm Saptarshi's digital twin — a small local mind that knows his story. No servers and no tracking: I live entirely in this page, which is also why I answer instantly and never invent a number." },
+    a: "I'm Saptarshi's digital twin. I pick from answers written from his CV, and I run entirely in this page, so I can only tell you what's in them." },
   { p: ["who is saptarshi", "about saptarshi", "about him", "who is he", "introduce", "his background"],
-    a: "Saptarshi Nag is an AI/ML engineer. M.Tech in Artificial Intelligence from DIAT (DRDO), research at NCRA-TIFR and GMRT, and now a Project Engineer at C-DAC Chennai building real-time IoT security. He works the whole stack — raw data, models, and the production system around them." },
-  { p: ["education", "study", "college", "degree", "btech", "mtech", "gate", "university"],
-    a: "B.Tech in CSE from Academy of Technology, Kolkata — CGPA 9.44. Then M.Tech in AI at DIAT (DRDO), Pune — CGPA 8.64. GATE 2024: All India Rank 1790 in Data Science & AI, top 5%." },
+    a: "Saptarshi Nag is an AI/ML engineer. He has an M.Tech in Computer Science and Engineering (Artificial Intelligence) from DIAT, a DRDO institute, did research internships at NCRA-TIFR and GMRT, and is now a Project Engineer at C-DAC Chennai, working on ML-based attack detection for IoT networks." },
+  { p: ["education", "study", "studied", "college", "degree", "btech", "b.tech", "mtech", "m.tech", "gate", "university"],
+    a: "A B.Tech in Computer Science and Engineering from Academy of Technology, Kolkata (CGPA 9.44, 2019–2023), then an M.Tech in CSE (Artificial Intelligence) at DIAT, Pune (CGPA 8.64, 2023–2025). He qualified GATE 2024 with rank 1790 in Data Science & AI, in the top 5% of applicants." },
   { p: ["current", "c-dac", "cdac", "job", "work now", "zero trust", "iot", "security"],
-    a: "At C-DAC Chennai since July 2025, as Project Engineer in AI Research & IoT Security. He builds real-time detection for IoT networks across WiFi, BLE, Zigbee and LoRa: two-stage XGBoost/MLP models reaching 97.93% accuracy on high-throughput traffic at under 1 ms per window, so it runs at the edge rather than in a datacentre. 63 features engineered from raw PCAPs, SHAP for explainability, and SPIFFE/SPIRE with mTLS for identity." },
-  { p: ["pulsar", "ncra", "astronomy", "telescope", "gmrt", "research"],
-    a: "His research years. At GMRT he refactored the telescope's CPU filtering pipeline for multicore and cut its latency by 50%. At NCRA-TIFR he built a ResNet1D with squeeze-and-excitation attention that finds pulsars at 99.8% F1 across more than 70 million samples." },
-  { p: ["f1", "tyre", "tire", "race", "formula", "cuda"],
-    a: "His F1 project predicts tyre degradation with a physics-informed loss that splits thermal from mechanical wear instead of fitting one blended curve, LSTM plus XGBoost over 10 Hz telemetry, and custom CUDA/CuPy kernels giving a 4.1x training speedup." },
+    a: "Since July 2025 he's been a Project Engineer in AI Research & IoT Security at C-DAC Chennai. He built a real-time Zero Trust framework for IoT networks covering WiFi, BLE, Zigbee and LoRa, with two-stage ML detection: the flow model (RF) reached 96.97% accuracy, and the window model (Voting Ensemble) 90.86% accuracy with 86.78% macro F1. He engineered 63 features from raw PCAPs and added SPIFFE/SPIRE, mTLS and OTP 2FA." },
+  { p: ["pulsar", "pulsars", "ncra", "astronomy", "telescope", "gmrt", "research"],
+    a: "Two research internships. At GMRT he refactored the telescope's CPU filtering pipelines for multicore and cut latency by 50%. At NCRA-TIFR, for his M.Tech project, he built a ResNet1D with Squeeze-and-Excitation attention that detects weak pulsars at 99.8% F1 across 70M+ samples." },
+  { p: ["f1", "tyre", "tyres", "tire", "tires", "formula", "cuda"],
+    a: "His F1 project predicts tyre wear and pit-stop windows with a hybrid LSTM-XGBoost model on 10 Hz telemetry. A physics-informed loss separates thermal from mechanical degradation, and custom CUDA/CuPy kernels cut training time by 4.1×." },
   { p: ["omniscience", "rag", "retrieval", "vector"],
-    a: "Omniscience Pro is his privacy-first local RAG system: under 50 ms HNSW vector search and under 500 ms to first token, entirely offline. Citation-weighted ranking across local, web and academic sources, hardened with path-traversal protection, rate limiting and POSIX file locking." },
-  { p: ["aro", "agent", "multi-agent", "autonomous"],
-    a: "ARO — the Autonomous Research Operator — runs multi-agent LLM workflows as NetworkX directed graphs, so execution order is data rather than control flow. Flask with server-sent events into a React front end, SQLAlchemy persistence for agent memory. He then red-teamed it himself and fixed 16 vulnerabilities." },
-  { p: ["llama", "fine-tun", "quant", "unsloth"],
-    a: "He fine-tuned Llama 3.2, both 1B and 3B, on 21.5k interactions and quantised to 4-bit with Unsloth so it trains and runs on a single consumer GPU." },
-  { p: ["skill", "stack", "tools", "language", "tech"],
-    a: "Python (advanced) and C++ (proficient) at the core. PyTorch, TensorFlow, XGBoost, scikit-learn and physics-informed networks for the modelling; CUDA and 4/8-bit quantisation for speed; LangChain, ChromaDB, Ollama and RAG for the LLM work; Docker, Flask, SQL and Linux for shipping it." },
-  { p: ["paper", "publication", "iotais", "published"],
-    a: "Two papers accepted at IoTaIS 2025 in Bali, both out of the C-DAC zero-trust IoT work." },
+    a: "Omniscience Pro is his privacy-first local RAG system, built on LangChain and ChromaDB. It searches its vector index in under 50 ms (HNSW) and returns the first token in under 500 ms on consumer hardware, and it ships as a GPU-aware Docker image with POSIX file locking for concurrent sessions." },
+  { p: ["aro", "agent", "agents", "multi-agent", "autonomous"],
+    a: "ARO, the Autonomous Research Operator, runs multi-agent LLM workflows as directed graphs in NetworkX, with a Flask backend streaming to a React frontend over Server-Sent Events. An adversarial audit after the build found and fixed 16 vulnerabilities across auth, SSRF, input validation and CORS." },
+  { p: ["llama", "fine-tune", "fine-tuning", "finetune", "quantisation", "quantization", "unsloth"],
+    a: "He fine-tuned Llama 3.2 1B and 3B on 21.5k domain-specific interactions and quantised them to 4-bit with Unsloth, which cut memory enough for a consumer GPU with no meaningful drop in output quality." },
+  { p: ["skill", "skills", "stack", "tools", "language", "languages", "tech"],
+    a: "Python (advanced) and C++ (proficient), plus C, Bash and SQL. PyTorch, XGBoost, scikit-learn and physics-informed networks for modelling; CUDA, CuPy and 4/8-bit quantisation for speed; Docker, Flask, Git, ChromaDB and CI/CD for shipping; RAG, LLM fine-tuning and multi-agent orchestration with NetworkX and LangChain." },
+  { p: ["paper", "papers", "publication", "publications", "iotais", "published"],
+    a: "Two papers at IoTaIS 2025 in Bali, both on the C-DAC framework: 'Protocol-Aware Continuous Monitoring and Anomaly Detection in IoT Networks' and 'A Comprehensive Survey on Zero Trust Architecture in IoT Networks'." },
   { p: ["contact", "email", "hire", "reach", "linkedin", "github", "cv", "resume", "hiring"],
-    a: "saptarshinag18@gmail.com, /in/saptarshi18 on LinkedIn, Saptarshi-Nag189 on GitHub. Press L to read everything plainly, CV and all." },
-  { p: ["metric", "number", "stat", "achievement", "best", "proud"],
-    a: "The ones he'd stand behind, each with the build it came from: 97.93% detection at under 1 ms per window (C-DAC's IoT zero-trust framework), 99.8% F1 over 70M+ samples (the NCRA-TIFR pulsar ResNet1D), 4.1x training speedup (custom CUDA kernels, F1 tyre project), 50% latency cut (the GMRT pipeline refactor), and sub-50 ms retrieval (Omniscience Pro)." },
-  { p: ["this world", "this game", "how did you make", "babylon", "island", "built this"],
-    a: "This island is procedural — no downloaded terrain. A climate of temperature and moisture decides where the desert, forest and snow go; the world streams in 64-metre tiles and frees what is behind you, so memory stays flat however far you walk. Press L for the plain version of everything." },
-  { p: ["hello", "hi ", "hey", "namaste", "yo"],
-    a: "Hello ✧ Ask me anything about him — or just keep walking." },
-  { p: ["thank", "thanks"],
+    a: "saptarshinag18@gmail.com, /in/saptarshi18 on LinkedIn, or Saptarshi-Nag189 on GitHub. Press L for the plain version of everything, with a link to his CV." },
+  { p: ["metric", "metrics", "number", "numbers", "figures", "stat", "stats", "achievement", "achievements", "best", "proud", "proudest"],
+    a: "The headline numbers, each with its project: 96.97% flow-attack accuracy (C-DAC's Zero Trust IoT framework, RF model), 99.8% F1 over 70M+ samples (the NCRA-TIFR pulsar ResNet1D), a 4.1× training speedup (CUDA kernels in the F1 tyre project), a 50% latency cut (the GMRT pipeline refactor), and search under 50 ms (Omniscience Pro)." },
+  { p: ["this world", "this game", "how did you make", "babylon", "island", "built this", "how was this made"],
+    a: "The island is generated, not modelled: a climate of temperature and moisture decides where desert, forest and snow go, and the world streams in 64-metre tiles that are freed once they're behind you. Press L for the plain version of everything." },
+  { p: ["hello", "hi", "hey", "namaste", "yo"],
+    a: "Hello ✧ Ask me anything about him, or just keep walking." },
+  { p: ["thank", "thanks", "thank you"],
     a: "Any time." },
 ];
 
 export const CORPUS_FALLBACK =
-  "That's past what I keep locally. Try his education, his research, C-DAC, the F1 or RAG projects, his skills, the papers, or how to reach him.";
+  "I don't have an answer for that one. Try his education, his research, C-DAC, the F1 or RAG projects, his skills, the papers, or how to reach him.";
 
 /* ==========================================================================
    The brain
    ========================================================================== */
 
 /**
- * Substring-intent matching, scored by the length of what matched, so a long
- * specific pattern beats a short generic one. Deliberately not clever: it can
- * only return sentences that were written by hand, which is the right property
- * for something answering questions about a real person's career.
+ * Intent matching, scored by the length of what matched, so a long specific
+ * pattern beats a short generic one. Deliberately not clever: it can only
+ * return sentences that were written by hand, which is the right property for
+ * something answering questions about a real person's career.
  *
- * Hitting SEVERAL of an intent's patterns is stronger evidence than hitting one
- * long one, and without that bonus a conversational opener wins on length
- * alone: "tell me about the pulsar work at ncra" scored 13 for the phrase
- * "tell me about" in the biography and only 10 for "pulsar" + "ncra", so the
- * question about pulsars got answered with a résumé summary.
+ * Patterns match WHOLE WORDS. Substring matching sent "around" to ARO,
+ * "storage" and "average" to RAG, "navigate" to GATE, "entire" to tyres, and
+ * any "you"/"your" question to the hello line via "yo".
+ *
+ * Hitting several of an intent's patterns is stronger evidence than hitting one
+ * long one. Without that bonus, "tell me about the pulsar work at ncra" scored
+ * 13 for the opener "tell me about" and only 10 for "pulsar" + "ncra".
  */
 const MULTI_BONUS = 3;
+
+const escapeRe = (p) => p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+export function scoreIntent(q, patterns) {
+  let s = 0, hits = 0;
+  for (const pat of patterns) {
+    const re = new RegExp('(^|[^a-z0-9])' + escapeRe(pat.trim()) + '($|[^a-z0-9])');
+    if (re.test(q)) { s += pat.length; hits++; }
+  }
+  return hits > 1 ? s + (hits - 1) * MULTI_BONUS : s;
+}
 
 export const LocalBrain = {
   ready: true,
@@ -104,9 +103,7 @@ export const LocalBrain = {
     q = (q || '').toLowerCase();
     let best = null, score = 0;
     for (const item of CORPUS) {
-      let s = 0, hits = 0;
-      for (const pat of item.p) if (q.includes(pat)) { s += pat.length; hits++; }
-      if (hits > 1) s += (hits - 1) * MULTI_BONUS;
+      const s = scoreIntent(q, item.p);
       if (s > score) { score = s; best = item; }
     }
     return Promise.resolve(best ? best.a : CORPUS_FALLBACK);

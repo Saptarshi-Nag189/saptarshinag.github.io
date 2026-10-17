@@ -59,6 +59,8 @@ function riggedMaterial(BABYLON, scene, shaders, opts) {
     uniform vec3 uTrouser;
     uniform vec3 uBoot;
     uniform vec3 uSkin;
+    uniform vec3 uShirt;
+    uniform vec3 uHood;
     ${shaders.FRAG_PRELUDE}
 
     /* Clothes, cut from the bind pose.
@@ -72,19 +74,30 @@ function riggedMaterial(BABYLON, scene, shaders, opts) {
        nothing but an arm ever gets past 0.11 out from the centre line — the
        arms run straight out to 0.50 — so the body divides cleanly by height
        and spread, and each garment is a threshold rather than geometry. */
+    /* Layers, because one tunic colour still read as skin. A red-ochre tunic
+       next to a warm brown skin tone, over a mannequin with a sculpted chest,
+       looked topless from the front. So: a dark wool vest over a cream linen
+       shirt, whose sleeves cover the arms and whose collar shows above the vest
+       neckline. Every boundary is a change in value as well as hue, so it reads
+       as clothing even in silhouette. */
     vec3 garment() {
       float bx = abs(vBind.x);
       float by = vBind.y;
 
-      // an arm: sleeve from the shoulder, bare hand past the cuff
+      // the hood is tagged outside the body's range when it's built
+      if (bx > 1.5) return uHood;
+
+      // an arm: a linen sleeve from the shoulder, bare hand past the cuff
       if (bx > 0.110) {
-        return mix(uCloth * 0.93, uSkin, smoothstep(0.362, 0.387, bx));
+        return mix(uShirt * 0.94, uSkin, smoothstep(0.362, 0.387, bx));
       }
       // boots, with a shaft that stops on the calf
       vec3 leg = mix(uBoot, uTrouser, smoothstep(0.166, 0.190, by));
-      // trousers give way to the tunic at the hip
+      // trousers give way to the vest at the hip
       vec3 body = mix(leg, uCloth, smoothstep(0.497, 0.525, by));
-      // and the tunic gives way to bare neck under the hood
+      // the shirt's collar showing above the vest
+      body = mix(body, uShirt, smoothstep(0.812, 0.826, by));
+      // and bare neck under the hood
       return mix(body, uSkin, smoothstep(0.856, 0.884, by));
     }
 
@@ -95,7 +108,7 @@ function riggedMaterial(BABYLON, scene, shaders, opts) {
       vec3 albedo = garment();
       // cloth darkens toward the ground, the way heavy fabric does
       albedo *= mix(0.86, 1.0, clamp(vBind.y / 0.94, 0.0, 1.0));
-      // a pale sash about the waist, which is what gives the silhouette a waist
+      // a belt about the waist, which is what gives the silhouette a waist
       albedo = mix(albedo, uTrim,
         smoothstep(0.541, 0.564, vBind.y) * (1.0 - smoothstep(0.586, 0.619, vBind.y))
         * (1.0 - smoothstep(0.110, 0.134, abs(vBind.x))));
@@ -115,7 +128,7 @@ function riggedMaterial(BABYLON, scene, shaders, opts) {
          skinned mesh. Declaring them here as well produced duplicates. */
       attributes: ['position', 'normal', 'aBody'],
       uniforms: shaders.COMMON_UNIFORM_NAMES.concat(
-        ['viewProjection', 'uCloth', 'uTrim', 'uTrouser', 'uBoot', 'uSkin']),
+        ['viewProjection', 'uCloth', 'uTrim', 'uTrouser', 'uBoot', 'uSkin', 'uShirt', 'uHood']),
       defines: [],
       needAlphaBlending: false,
       needAlphaTesting: false,
@@ -125,6 +138,8 @@ function riggedMaterial(BABYLON, scene, shaders, opts) {
   mat.setColor3('uTrouser', new BABYLON.Color3(...(opts.trouser || [0.24, 0.21, 0.25])));
   mat.setColor3('uBoot', new BABYLON.Color3(...(opts.boot || [0.15, 0.12, 0.14])));
   mat.setColor3('uSkin', new BABYLON.Color3(...(opts.skin || [0.54, 0.37, 0.28])));
+  mat.setColor3('uShirt', new BABYLON.Color3(...(opts.shirt || [0.82, 0.76, 0.64])));
+  mat.setColor3('uHood', new BABYLON.Color3(...(opts.hoodColor || [0.46, 0.18, 0.15])));
   mat.backFaceCulling = false;
   return mat;
 }
@@ -179,12 +194,12 @@ function buildHood(BABYLON, scene, mat, r) {
      garment pattern reads it to decide what a fragment is wearing. The hood is
      procedural geometry with no body coordinates of its own, so it arrived as
      aBody = (0,0,0) — below the ankle threshold — and Babylon dutifully cut
-     the man's hood out of boot leather. Give it a constant that lands in the
-     tunic band: a hood is the same cloth as the robe. */
+     the man's hood out of boot leather. Tag it with an x far outside the body
+     (2.0) so the pattern gives it the cape's cloth, not the vest's. */
   {
     const n = hood.getTotalVertices();
     const body = new Float32Array(n * 3);
-    for (let i = 0; i < n; i++) body[i * 3 + 1] = 0.70;   // squarely in the tunic
+    for (let i = 0; i < n; i++) { body[i * 3] = 2.0; body[i * 3 + 1] = 0.70; }
     hood.setVerticesData('aBody', body, false, 3);
   }
   hood.isPickable = false;

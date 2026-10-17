@@ -45,7 +45,9 @@ export function createCameraRig(BABYLON, scene, camera, field, opts) {
     lookHeight: opts.lookHeight || 1.35,
     lead: opts.lead || 2.2,
     fovWalk: opts.fovWalk || 0.96,          // ~55 deg
-    fovRun: opts.fovRun || 1.19,            // ~68 deg
+    // prefers-reduced-motion: no widening on the run, no roll, no handheld bob
+    calm: !!opts.reduced,
+    fovRun: opts.reduced ? (opts.fovWalk || 0.96) : (opts.fovRun || 1.19),   // ~68 deg
     posLambda: 7.5,
     lookLambda: 10.5,
   };
@@ -135,11 +137,11 @@ export function createCameraRig(BABYLON, scene, camera, field, opts) {
     while (dyaw > Math.PI) dyaw -= Math.PI * 2;
     while (dyaw < -Math.PI) dyaw += Math.PI * 2;
     lastYaw = yaw;
-    const wantRoll = clamp(-dyaw / Math.max(dt, 1e-3) * 0.035, -0.026, 0.026) * (0.4 + running);
+    const wantRoll = cfg.calm ? 0 : clamp(-dyaw / Math.max(dt, 1e-3) * 0.035, -0.026, 0.026) * (0.4 + running);
     roll += (wantRoll - roll) * Math.min(1, dt * 4);
 
     // handheld noise — tiny, and only really present when moving
-    const amp = 0.012 + speed * 0.006;
+    const amp = cfg.calm ? 0 : 0.012 + speed * 0.006;
     const nx = Math.sin(bobT * 1.7) * amp + Math.sin(bobT * 0.9) * amp * 0.5;
     const ny = Math.cos(bobT * 2.3) * amp * 0.8;
 

@@ -141,14 +141,16 @@ if (RIG_ON) {
     name: 'traveller3d',
     url: 'assets/traveller.glb',
     height: 1.78,
-    /* He is dressed in the shader, cut from the bind pose — the downloaded rig
+    /* He is dressed in the shader, cut from the bind pose: the downloaded rig
        is a nude mannequin and one flat colour over all of it just made a naked
-       man in a cape. Tunic, sash, trousers, boots, skin. */
-    cloth: [0.66, 0.31, 0.25],
-    trim: [0.86, 0.74, 0.52],
+       man in a cape. Vest over a linen shirt, belt, trousers, boots, skin. */
+    cloth: [0.17, 0.21, 0.33],      // the vest: dark indigo wool
+    shirt: [0.82, 0.76, 0.64],      // cream linen: sleeves and collar
+    trim: [0.34, 0.22, 0.15],       // a leather belt
     trouser: [0.25, 0.21, 0.26],
     boot: [0.15, 0.12, 0.14],
     skin: [0.55, 0.38, 0.29],
+    hoodColor: [0.46, 0.18, 0.15],  // the cape's cloth, so hood and cape are one garment
     clips: { idle: 'idle', walk: 'walk', run: 'run' },
     hood: true, hoodRadius: 0.135, hoodLift: 0.05,
   }).then((r) => {
@@ -166,7 +168,7 @@ const control = createController(field, {
 });
 // the built things are permanent, so they register once rather than per tile
 if (chunks) landmarks.addColliders(chunks.colliders);
-const rig = createCameraRig(B, scene, camera, field, {});
+const rig = createCameraRig(B, scene, camera, field, { reduced: REDUCED });
 traveller.reset(control.me, control.me.heading);
 rig.snap(control.yaw, control.pitch, control.me);
 // Only the near ring is built before the veil lifts. The rest streams in over
@@ -334,10 +336,11 @@ function cycleQuality() {
 
 if (qualityEl) {
   qualityEl.addEventListener('click', (e) => {
-    const el = e.target.closest('span[data-q]');
+    const el = e.target.closest('[data-q]');
     if (!el) return;
     setQuality(el.dataset.q);
-    canvas.focus();
+    // a pointer click hands control back to the world; a keyboard press keeps focus on the pill
+    if (e.detail > 0) canvas.focus();
   });
 }
 
@@ -351,12 +354,12 @@ applyTier(startTier, false, true);
    bug rather than as arrival. */
 const PLACES = {
   beach:  ['The Long Strand', 'where the island begins'],
-  desert: ['The Dune Sea', 'dry, and older than the rest'],
-  meadow: ['The Open Meadow', 'the easy middle of the world'],
-  forest: ['The Deep Wood', 'close, and full of quiet'],
-  marsh:  ['The Still Water', 'reeds, and something moored'],
-  rock:   ['The Bare Shoulder', 'above where things grow'],
-  snow:   ['The Frozen Crown', 'the cold top of the light'],
+  desert: ['The Dune Sea', 'dunes on the dry west side'],
+  meadow: ['The Open Meadow', 'grassland across the middle'],
+  forest: ['The Deep Wood', 'dense woodland on the wet east side'],
+  marsh:  ['The Still Water', 'reeds round the lake, and a boat'],
+  rock:   ['The Bare Shoulder', 'bare rock above the treeline'],
+  snow:   ['The Frozen Crown', 'snow on the highest ground'],
 };
 const placeEl = document.getElementById('placeCard');
 const placeName = document.getElementById('placeName');
@@ -390,6 +393,7 @@ function announcePlace(x, z, dt) {
    'load', which fires long before the shaders have compiled */
 const veil = document.getElementById('veil');
 function liftVeil() {
+  window.__llBooted = true;              // index.html stops waiting to show the ledger instead
   if (!veil || veil.classList.contains('gone')) return;
   veil.classList.add('gone');
   setTimeout(() => veil.remove(), 1400);
