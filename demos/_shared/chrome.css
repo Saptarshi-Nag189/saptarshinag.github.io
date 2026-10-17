@@ -19,8 +19,8 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  height: 38px;
-  padding: 0 14px;
+  height: 44px;                 /* a full touch target (accessibility.md > Mobility) */
+  padding: 0 15px;
   border-radius: 9px;
   border: 1px solid var(--chrome-line);
   background: var(--chrome-ink);
@@ -53,13 +53,13 @@
 
 #exp-tag {
   right: 16px;
-  color: rgba(255, 255, 255, 0.55);
-  font-size: 10px;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 11.5px;
   letter-spacing: 0.22em;
   text-transform: uppercase;
   pointer-events: none;
 }
-#exp-tag i { color: var(--chrome-accent); font-size: 10px; }
+#exp-tag i { color: var(--chrome-accent); font-size: 11.5px; }
 
 /* keep the shared mute button (from sfx.js) visually in the same family */
 #sfx-mute {
@@ -69,10 +69,60 @@
 }
 
 @media (max-width: 560px) {
-  #exp-back, #exp-tag { top: 10px; height: 34px; padding: 0 11px; }
-  #exp-back { left: 10px; }
-  #exp-tag { right: 10px; letter-spacing: 0.16em; }
+  #exp-back, #exp-tag { top: 10px; padding: 0 12px; }
+  #exp-back { left: 10px; height: 44px; }
+  /* on a phone the tag is decoration competing with each demo's own title */
+  #exp-tag { display: none; }
 }
+
+/* The keyboard chapter list from a11y.js. Hidden like a skip link until something
+   inside it has focus, then a bar of real buttons under the back pill. */
+#exp-chapters {
+  position: fixed;
+  top: 70px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 99997;
+  width: max-content;
+  max-width: calc(100vw - 24px);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  padding: 8px;
+  border-radius: 12px;
+  border: 1px solid var(--chrome-line);
+  background: rgba(8, 8, 12, 0.88);
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  clip-path: inset(50%);
+  opacity: 0;
+  pointer-events: none;
+}
+#exp-chapters:focus-within { clip-path: none; opacity: 1; pointer-events: auto; }
+#exp-chapters .exp-ch-title {
+  font-size: 11.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.72);
+  padding: 0 6px;
+}
+#exp-chapters button {
+  min-height: 40px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1px solid var(--chrome-line);
+  background: rgba(255, 255, 255, 0.06);
+  color: #f2f2f6;
+  font: inherit;
+  font-size: 12.5px;
+  cursor: pointer;
+}
+#exp-chapters button:focus-visible { outline: 2px solid var(--chrome-accent); outline-offset: 2px; }
+body.exp-panel-open #exp-chapters { display: none; }
+
+/* a demo's open panel sits above the chrome, so its close button is never covered */
+body.exp-panel-open #exp-tag { display: none; }
 
 @media print {
   #exp-back, #exp-tag, #sfx-mute { display: none !important; }

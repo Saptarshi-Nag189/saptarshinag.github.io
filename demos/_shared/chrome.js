@@ -24,9 +24,13 @@
     ['.top-left', '.concept-tag', '.back-link', 'a.back', 'a.chrome', 'div.chrome'].forEach(function (sel) {
       document.querySelectorAll(sel).forEach(function (el) {
         if (el.id === 'exp-back' || el.id === 'exp-tag') return;
-        // only remove obvious chrome elements (fixed-positioned links/tags), never content
-        var cs = getComputedStyle(el);
-        if (cs.position === 'fixed') el.remove();
+        // only remove obvious chrome elements (fixed-positioned links/tags, or ones inside a
+        // fixed bar, like observatory's .topbar), never content
+        var fixedSelfOrBar = false;
+        for (var a = el; a && a !== document.body; a = a.parentElement) {
+          if (getComputedStyle(a).position === 'fixed') { fixedSelfOrBar = true; break; }
+        }
+        if (fixedSelfOrBar) el.remove();
       });
     });
 
@@ -34,8 +38,9 @@
       var back = document.createElement('a');
       back.id = 'exp-back';
       back.href = '../index.html';
-      back.setAttribute('aria-label', 'Back to all experiences');
-      back.innerHTML = '<i class="fa-solid fa-arrow-left" aria-hidden="true"></i><span>demos</span>';
+      // the spoken name contains the visible word, so voice control can find it
+      back.setAttribute('aria-label', 'Back to the archive');
+      back.innerHTML = '<i class="fa-solid fa-arrow-left" aria-hidden="true"></i><span>archive</span>';
       back.addEventListener('pointerdown', function () {
         if (window.SFX) { try { SFX.play('back'); } catch (e) {} }
       });
