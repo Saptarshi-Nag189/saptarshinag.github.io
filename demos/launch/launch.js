@@ -1,11 +1,10 @@
 /* ==========================================================================
-   launch.js: the fold, the tile drawings, the projects gallery, the nav.
+   launch.js: the detection simulation, the drawings, the nav.
 
-   The fold is the page's one orchestrated moment. Scrolling through it runs
-   real epoch folding on synthetic data: single noisy turns of a pulsar stack
-   into a ridgeline (the way CP 1919's turns were famously drawn), then average
-   into one clean profile. Every frame is computed, not faked: the line you see
-   at the end is the mean of the first k turns, and k is the counter.
+   The detection section is the page's one orchestrated moment. Scrolling through
+   it plays a simulation of the C-DAC pipeline: management frames arrive, the
+   stream is cut into 1-second windows, a deauth flood gets flagged, and the
+   device's 7-pillar trust score falls. The data is made up and the page says so.
    With reduced motion the section doesn't scrub; it shows two still frames.
    ========================================================================== */
 (function () {
@@ -24,110 +23,116 @@
       return ((t ^ t >>> 14) >>> 0) / 4294967296;
     };
   }
-  var rand = rng(1919);
-  function gauss() {
-    var u = 1 - rand(), v = rand();
-    return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
-  }
-  // pulse shape over one rotation (phase 0..1): a main peak and a small shoulder
-  function profile(x) {
-    return Math.exp(-Math.pow(x - 0.36, 2) / (2 * 0.017 * 0.017)) +
-           0.32 * Math.exp(-Math.pow(x - 0.405, 2) / (2 * 0.012 * 0.012));
-  }
-
-  /* ---------------- the fold ---------------- */
-  var K = 512;   // turns recorded
-  var B = 200;   // phase bins per turn
-  var R = 26;    // turns drawn in the ridgeline
-  var AMP = 0.9; // pulse height against smoothed noise of about 0.44: lost in one turn, visible once turns line up
-
-  var KERNEL = [1, 4, 7, 9, 7, 4, 1];
-  var rows = [];
-  var cum = new Float32Array((K + 1) * B); // running sums, so the mean of the first k turns is O(B)
+  var rand = rng(2025);
+  /* ---------------- the detection pipeline (simulated) ---------------- */
+  // 20 seconds of 802.11 management frames from one device; seconds 11 to 15 carry a deauth flood
+  var SECS = 20, ATTACK = [11, 16];
+  var frames = [];
   (function build() {
-    for (var r = 0; r < K; r++) {
-      var raw = new Float32Array(B), row = new Float32Array(B);
-      for (var b = 0; b < B; b++) raw[b] = AMP * profile(b / B) + gauss();
-      for (b = 0; b < B; b++) { // 7-tap smoothing (noise sd about 0.44), so each turn reads as a line
-        var acc = 0;
-        for (var k = -3; k <= 3; k++) acc += KERNEL[k + 3] * raw[(b + k + B) % B];
-        row[b] = acc / 33;
-        cum[(r + 1) * B + b] = cum[r * B + b] + row[b];
-      }
-      rows.push(row);
+    for (var sec = 0; sec < SECS; sec++) {
+      var attack = sec >= ATTACK[0] && sec < ATTACK[1];
+      var n = attack ? 44 + Math.floor(rand() * 16) : 7 + Math.floor(rand() * 7);
+      for (var i = 0; i < n; i++) frames.push({ t: sec + rand(), h: 0.35 + rand() * 0.65 });
     }
+    frames.sort(function (a, b) { return a.t - b.t; });
   })();
-  function meanOf(k, out) {
-    for (var b = 0; b < B; b++) out[b] = (cum[k * B + b]) / k;
-    return out;
-  }
-  var tmp = new Float32Array(B), meanK = new Float32Array(B), finalMean = meanOf(K, new Float32Array(B));
+  var perSec = [];
+  for (var s0 = 0; s0 < SECS; s0++) perSec.push(0);
+  frames.forEach(function (f) { perSec[Math.floor(f.t)]++; });
+  var maxPerSec = Math.max.apply(null, perSec);
 
   var clamp = function (v, a, b) { return v < a ? a : v > b ? b : v; };
   var ease = function (t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; };
   var lerp = function (a, b, t) { return a + (b - a) * t; };
+  var RED = '255,69,58', GREEN = '48,209,88', WHITE = '245,245,247';
 
-  // draw the state of the fold at scroll progress p (0..1); returns the number of turns shown
+  // draw the pipeline at scroll progress p (0..1); returns the counter text
   function drawFold(ctx, w, h, p, dpr) {
     ctx.clearRect(0, 0, w, h);
-    var padX = 8 * dpr, iw = w - padX * 2;
-    var top = h * 0.14, bottom = h * 0.96, gap = (bottom - top) / (R - 1);
-    var yCenter = h * 0.62, yFinal = h * 0.8;
-    var bigAmp = h * 0.14, rowAmp = gap * 1.3, finalAmp = h * 0.62;
+    var wide = w / h > 1.6, pad = 8 * dpr;
+    var L = wide
+      ? { x0: pad, x1: w * 0.66, tick: [h * 0.10, h * 0.36], win: [h * 0.44, h * 0.58], bar: [h * 0.62, h * 0.88], cx: w * 0.84, cy: h * 0.5, r: Math.min(h * 0.3, w * 0.11) }
+      : { x0: pad, x1: w - pad, tick: [h * 0.1, h * 0.25], win: [h * 0.31, h * 0.4], bar: [h * 0.42, h * 0.56], cx: w / 2, cy: h * 0.8, r: Math.min(h * 0.14, w * 0.26) };
+    var tw = L.x1 - L.x0, sx = function (t) { return L.x0 + (t / SECS) * tw; };
 
-    var layoutT = ease(clamp((p - 0.14) / 0.1, 0, 1));
-    var shown = p < 0.14 ? 1 : Math.max(1, Math.round(lerp(1, R, clamp((p - 0.14) / 0.38, 0, 1))));
-    var collapse = ease(clamp((p - 0.54) / 0.3, 0, 1));
-    var turns = shown;
-    if (collapse > 0) {
-      turns = Math.round(R * Math.pow(K / R, collapse));
-      meanOf(turns, meanK);
-    }
+    // the clock: how much of the stream has arrived
+    var T = p < 0.2 ? lerp(0, 8, p / 0.2) : p < 0.42 ? lerp(8, 10.9, (p - 0.2) / 0.22) : lerp(10.9, SECS, clamp((p - 0.42) / 0.2, 0, 1));
+    var winAlpha = ease(clamp((p - 0.18) / 0.1, 0, 1));
+    var classify = p >= 0.42;
+    var trust = lerp(0.92, 0.34, ease(clamp((p - 0.66) / 0.18, 0, 1)));
 
-    function trace(vals, y, amp) {
-      for (var b = 0; b < B; b++) {
-        var x = padX + (b / (B - 1)) * iw, yy = y - vals[b] * amp;
-        if (b === 0) ctx.moveTo(x, yy); else ctx.lineTo(x, yy);
-      }
+    // frames: one tick each
+    ctx.lineWidth = 1.2 * dpr;
+    var nShown = 0;
+    for (var i = 0; i < frames.length && frames[i].t < T; i++) {
+      var f = frames[i], x = sx(f.t);
+      ctx.strokeStyle = 'rgba(' + WHITE + ',0.75)';
+      ctx.beginPath(); ctx.moveTo(x, L.tick[1]); ctx.lineTo(x, L.tick[1] - f.h * (L.tick[1] - L.tick[0])); ctx.stroke();
+      nShown++;
     }
-    function line(vals, y, amp, alpha, fill, width) {
-      if (fill) { // occlude the turns behind, as in the CP 1919 plot
-        ctx.beginPath(); trace(vals, y, amp);
-        ctx.lineTo(padX + iw, y + gap * 4); ctx.lineTo(padX, y + gap * 4); ctx.closePath();
-        ctx.fillStyle = '#000'; ctx.fill();
-      }
-      ctx.beginPath(); trace(vals, y, amp);
-      ctx.lineWidth = width * dpr;
-      ctx.lineJoin = 'round';
-      ctx.strokeStyle = 'rgba(245,245,247,' + alpha + ')';
-      ctx.stroke();
+    // the arrival cursor
+    if (T < SECS) {
+      ctx.strokeStyle = 'rgba(' + WHITE + ',0.35)';
+      ctx.setLineDash([3 * dpr, 4 * dpr]);
+      ctx.beginPath(); ctx.moveTo(sx(T), L.tick[0] - 6 * dpr); ctx.lineTo(sx(T), L.bar[1]); ctx.stroke();
+      ctx.setLineDash([]);
     }
 
-    if (collapse < 1) {
-      for (var r = 0; r < shown; r++) {
-        var slotY = top + r * gap;
-        var y = r === 0 ? lerp(yCenter, slotY, layoutT) : slotY;
-        var amp = r === 0 ? lerp(bigAmp, rowAmp, layoutT) : rowAmp;
-        var vals = rows[r];
-        if (collapse > 0) {
-          for (var b = 0; b < B; b++) tmp[b] = lerp(vals[b], meanK[b], collapse);
-          vals = tmp;
-          y = lerp(y, yFinal, collapse);
-          amp = lerp(amp, finalAmp, collapse);
-        }
-        var fadeIn = r === 0 ? 1 : clamp((shown - r), 0, 1);
-        line(vals, y, amp, 0.9 * fadeIn * Math.pow(1 - collapse, 1.6), collapse === 0, 1.4);
+    // 1-second windows, their feature bar, and the model's verdict
+    var done = Math.floor(T), flagged = 0;
+    if (winAlpha > 0) {
+      var gap = 3 * dpr, bw = tw / SECS - gap;
+      for (var sec = 0; sec < done; sec++) {
+        var x0 = sx(sec) + gap / 2, isAtk = sec >= ATTACK[0] && sec < ATTACK[1];
+        var hit = classify && isAtk;
+        if (hit) flagged++;
+        ctx.globalAlpha = winAlpha;
+        ctx.beginPath();
+        ctx.roundRect(x0, L.win[0], bw, L.win[1] - L.win[0], 4 * dpr);
+        if (hit) { ctx.fillStyle = 'rgba(' + RED + ',0.9)'; ctx.fill(); }
+        else { ctx.strokeStyle = 'rgba(' + WHITE + ',' + (classify ? 0.45 : 0.3) + ')'; ctx.lineWidth = 1.2 * dpr; ctx.stroke(); }
+        var bh = (perSec[sec] / maxPerSec) * (L.bar[1] - L.bar[0]);
+        ctx.fillStyle = hit ? 'rgba(' + RED + ',0.9)' : 'rgba(' + WHITE + ',0.5)';
+        ctx.beginPath(); ctx.roundRect(x0 + bw * 0.25, L.bar[1] - bh, bw * 0.5, Math.max(bh, 2 * dpr), 3 * dpr); ctx.fill();
+        ctx.globalAlpha = 1;
+      }
+      ctx.font = '500 ' + (12 * dpr) + 'px ' + getComputedStyle(document.body).fontFamily;
+      ctx.fillStyle = 'rgba(161,161,166,' + winAlpha + ')';
+      ctx.textBaseline = 'top';
+      ctx.fillText('frames per window', L.x0, L.bar[1] + 6 * dpr);
+      if (flagged) {
+        ctx.fillStyle = 'rgb(' + RED + ')';
+        ctx.textBaseline = 'bottom';
+        ctx.fillText('attack', sx(ATTACK[0]) + gap / 2, L.win[0] - 6 * dpr);
       }
     }
-    if (collapse > 0) {
-      var src = collapse >= 1 ? finalMean : meanK;
-      ctx.save();
-      ctx.shadowColor = 'rgba(255,255,255,0.35)';
-      ctx.shadowBlur = 18 * dpr * collapse;
-      line(src, yFinal, finalAmp, collapse, false, 2.4);
-      ctx.restore();
+
+    // the device trust score: 7 pillars, lit in proportion to trust
+    var segs = 7, gapA = 0.16, lw = Math.max(6 * dpr, L.r * 0.16);
+    ctx.lineCap = 'round'; ctx.lineWidth = lw;
+    for (var k = 0; k < segs; k++) {
+      var a0 = -Math.PI / 2 + k * 2 * Math.PI / segs + gapA / 2, a1 = a0 + 2 * Math.PI / segs - gapA;
+      var lit = clamp(trust * segs - k, 0, 1);
+      ctx.strokeStyle = '#3a3a3c';
+      ctx.beginPath(); ctx.arc(L.cx, L.cy, L.r, a0, a1); ctx.stroke();
+      if (lit > 0) {
+        ctx.strokeStyle = 'rgb(' + GREEN + ')';
+        ctx.beginPath(); ctx.arc(L.cx, L.cy, L.r, a0, a0 + (a1 - a0) * lit); ctx.stroke();
+      }
     }
-    return collapse >= 1 ? K : turns;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = 'rgb(' + WHITE + ')';
+    ctx.font = '600 ' + Math.round(L.r * 0.34) + 'px ' + getComputedStyle(document.body).fontFamily;
+    ctx.fillText('trust', L.cx, L.cy - L.r * 0.08);
+    ctx.fillStyle = '#a1a1a6';
+    ctx.font = '500 ' + Math.max(12 * dpr, Math.round(L.r * 0.15)) + 'px ' + getComputedStyle(document.body).fontFamily;
+    ctx.fillText('7 pillars', L.cx, L.cy + L.r * 0.24);
+    ctx.textAlign = 'start';
+
+    if (p >= 0.66) return 'trust score updated';
+    if (classify) return flagged + ' of ' + done + ' windows flagged';
+    if (winAlpha > 0.5) return done + (done === 1 ? ' window' : ' windows');
+    return nShown + (nShown === 1 ? ' frame' : ' frames');
   }
 
   function sizeCanvas(cv) {
@@ -137,15 +142,15 @@
     return dpr;
   }
 
-  var fold = $('fold'), canvas = $('foldCanvas'), steps = [].slice.call(document.querySelectorAll('#foldSteps li'));
-  var turnsEl = $('foldTurns'), unitEl = $('foldUnit');
+  var fold = $('detect'), canvas = $('foldCanvas'), steps = [].slice.call(document.querySelectorAll('#foldSteps li'));
+  var countEl = $('foldCount');
 
   if (REDUCED) {
-    // two still frames, the stacked turns and the folded profile, then the steps as a list
+    // two still frames, the flagged windows and the fallen trust score, then the steps as a list
     var box = document.createElement('div');
     box.className = 'fold-static';
     box.setAttribute('aria-hidden', 'true');
-    [0.5, 1].forEach(function (p) {
+    [0, 1].forEach(function () {
       var c = document.createElement('canvas');
       c.style.width = '100%'; c.style.height = 'min(34vh, 320px)'; c.style.display = 'block';
       box.appendChild(c);
@@ -154,7 +159,7 @@
     var drawStill = function () {
       [].forEach.call(box.children, function (c, i) {
         var dpr = sizeCanvas(c);
-        drawFold(c.getContext('2d'), c.width, c.height, i ? 1 : 0.5, dpr);
+        drawFold(c.getContext('2d'), c.width, c.height, i ? 1 : 0.64, dpr);
       });
     };
     drawStill();
@@ -169,9 +174,7 @@
       if (!force && Math.abs(p - lastP) < 0.0005) return;
       lastP = p;
       var dpr = sizeCanvas(canvas);
-      var t = drawFold(ctx, canvas.width, canvas.height, p, dpr);
-      turnsEl.textContent = t;
-      unitEl.textContent = t === 1 ? 'turn' : 'turns';
+      countEl.textContent = drawFold(ctx, canvas.width, canvas.height, p, dpr);
       var on = 0;
       steps.forEach(function (li, i) { if (p >= +li.dataset.at) on = i; });
       steps.forEach(function (li, i) { li.classList.toggle('on', i === on); });
@@ -186,7 +189,7 @@
     window.addEventListener('scroll', queue, { passive: true });
     window.addEventListener('resize', function () { fitSteps(); render(true); });
     fitSteps();
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitSteps);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { fitSteps(); render(true); });
     render(true);
   }
 
@@ -197,28 +200,6 @@
     if (parent) parent.appendChild(n);
     return n;
   }
-  // seven arcs for the seven pillars of the device trust score
-  (function ring() {
-    var g = $('ringSegs'); if (!g) return;
-    var cx = 100, cy = 100, rad = 80, n = 7, gapDeg = 11;
-    for (var i = 0; i < n; i++) {
-      var a0 = (-90 + i * 360 / n + gapDeg / 2) * Math.PI / 180;
-      var a1 = (-90 + (i + 1) * 360 / n - gapDeg / 2) * Math.PI / 180;
-      var x0 = cx + rad * Math.cos(a0), y0 = cy + rad * Math.sin(a0);
-      var x1 = cx + rad * Math.cos(a1), y1 = cy + rad * Math.sin(a1);
-      el('path', { d: 'M' + x0.toFixed(2) + ' ' + y0.toFixed(2) + ' A' + rad + ' ' + rad + ' 0 0 1 ' + x1.toFixed(2) + ' ' + y1.toFixed(2) }, g);
-    }
-  })();
-  // the folded pulse profile, the same shape the fold ends on
-  (function pulse() {
-    var p = $('tilePulse'); if (!p) return;
-    var d = '';
-    for (var i = 0; i <= 150; i++) {
-      var x = i / 150, y = 80 - profile(x) * 66;
-      d += (i ? 'L' : 'M') + (x * 296 + 2).toFixed(1) + ' ' + y.toFixed(1);
-    }
-    p.setAttribute('d', d);
-  })();
   // 1-second windows; the burst in the middle is what the window model flags
   (function windows() {
     var s = $('winArt'); if (!s) return;
@@ -229,31 +210,24 @@
     var s = $('aroDots'); if (!s) return;
     for (var i = 0; i < 16; i++) el('circle', { cx: 10 + (i % 8) * 20, cy: 10 + Math.floor(i / 8) * 20, r: 6 }, s);
   })();
-  // a query among document chunks, and its five nearest neighbours
-  (function omni() {
-    var s = $('omniArt'); if (!s) return;
-    var r = rng(50), pts = [], q = { x: 168, y: 70 };
-    for (var i = 0; i < 46; i++) pts.push({ x: 14 + r() * 292, y: 10 + r() * 120 });
-    pts.forEach(function (p) { p.d = Math.hypot(p.x - q.x, p.y - q.y); });
-    var near = pts.slice().sort(function (a, b) { return a.d - b.d; }).slice(0, 5);
-    near.forEach(function (p) { el('line', { x1: q.x, y1: q.y, x2: p.x, y2: p.y, stroke: 'currentColor', 'stroke-width': 1.5, opacity: 0.7 }, s); });
-    pts.forEach(function (p) { el('circle', { cx: p.x.toFixed(1), cy: p.y.toFixed(1), r: 4.5, 'class': near.indexOf(p) >= 0 ? 'pt near' : 'pt' }, s); });
-    el('circle', { cx: q.x, cy: q.y, r: 8, 'class': 'q' }, s);
+  // sixty-three features
+  (function features() {
+    var sv = $('featArt'); if (!sv) return;
+    for (var i = 0; i < 63; i++) el('rect', { x: (i % 21) * 12, y: Math.floor(i / 21) * 26, width: 8, height: 20, rx: 2.5 }, sv);
   })();
-
-  /* ---------------- projects gallery ---------------- */
-  (function gallery() {
-    var g = $('gallery'), prev = $('galPrev'), next = $('galNext'); if (!g) return;
-    var step = function () { var c = g.querySelector('.card'); return c ? c.getBoundingClientRect().width + 20 : 400; };
-    var update = function () {
-      prev.disabled = g.scrollLeft <= 4;
-      next.disabled = g.scrollLeft + g.clientWidth >= g.scrollWidth - 4;
-    };
-    prev.addEventListener('click', function () { g.scrollBy({ left: -step(), behavior: REDUCED ? 'auto' : 'smooth' }); });
-    next.addEventListener('click', function () { g.scrollBy({ left: step(), behavior: REDUCED ? 'auto' : 'smooth' }); });
-    g.addEventListener('scroll', update, { passive: true });
-    window.addEventListener('resize', update);
-    update();
+  // a question in embedding space: chunks from three documents, and the five nearest to the query
+  (function rag() {
+    var sv = $('ragArt'); if (!sv) return;
+    var r = rng(50), pts = [], q = { x: 214, y: 112 };
+    [[96, 80], [236, 98], [150, 188]].forEach(function (c) {
+      for (var i = 0; i < 18; i++) pts.push({ x: c[0] + (r() - 0.5) * 120, y: c[1] + (r() - 0.5) * 90 });
+    });
+    pts.forEach(function (p) { p.x = clamp(p.x, 8, 352); p.y = clamp(p.y, 8, 242); p.d = Math.hypot(p.x - q.x, p.y - q.y); });
+    var near = pts.slice().sort(function (a, b) { return a.d - b.d; }).slice(0, 5);
+    el('circle', { cx: q.x, cy: q.y, r: near[4].d + 6, 'class': 'reach' }, sv);
+    near.forEach(function (p) { el('line', { x1: q.x, y1: q.y, x2: p.x, y2: p.y, 'class': 'link' }, sv); });
+    pts.forEach(function (p) { el('circle', { cx: p.x.toFixed(1), cy: p.y.toFixed(1), r: 4.5, 'class': near.indexOf(p) >= 0 ? 'pt near' : 'pt' }, sv); });
+    el('circle', { cx: q.x, cy: q.y, r: 8, 'class': 'q' }, sv);
   })();
 
   /* ---------------- navigation ---------------- */
@@ -290,6 +264,7 @@
         if (byId[en.target.id]) byId[en.target.id].setAttribute('aria-current', 'true');
       });
     }, { rootMargin: '-45% 0px -50% 0px' });
-    Object.keys(byId).forEach(function (id) { var s = $(id); if (s) io.observe(s); });
+    // sections the nav doesn't list (the hero, the detection scroll, Llama, earlier work) clear the mark
+    [].forEach.call(document.querySelectorAll('main > section[id]'), function (sec) { io.observe(sec); });
   }
 })();

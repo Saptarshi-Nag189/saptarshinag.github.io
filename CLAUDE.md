@@ -17,8 +17,10 @@ Contact: saptarshinag18@gmail.com · LinkedIn `/in/saptarshi18` · GitHub `Sapta
   Liquid, Night Train, Abyss, Library, Elysium, Classic). `demos/index.html` is the chooser, with
   featured cards for `/wander/`, `/signal/`, `/light/` and `/demos/launch/` at the top. **Kept as archive, not deleted.**
 - **`/demos/launch/`** — **THE LAUNCH**, the CV as a product launch page in Apple's design language
-  (built with the apple-design skill, no Apple logo or trademarks). Signature: a scroll-scrubbed
-  epoch fold (`launch.js`), real folding on synthetic data drawn as a CP 1919-style ridgeline.
+  (built with the apple-design skill, no Apple logo or trademarks). **Leads with recent work, by user
+  request:** C-DAC first, then RAG (Omniscience Pro), agents (ARO) and Llama as full chapters; NCRA,
+  GMRT and F1 are a short "Earlier work" row. Signature: a scroll-scrubbed, labelled-simulated C-DAC
+  pipeline (`launch.js`): frames → 1 s windows → a flagged deauth flood → the 7-pillar trust ring drains.
   The nav bar is the page's only glass and darkens over dark sections. Every metric has a numbered
   footnote naming its project. Linked from the homepage's ~/play and featured in the archive. No
   shared chrome or sound, by design.
