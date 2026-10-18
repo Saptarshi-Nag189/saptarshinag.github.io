@@ -16,6 +16,9 @@ JavaScript, with no build step and no framework, served by GitHub Pages.
   An island of seven biomes to walk, run and row across, with a fairy who answers questions. The
   world streams in 64 m tiles and frees the ones behind you. It's still being tuned: the weather
   layer is off, and the quality tiers have only been tested on software rendering.
+- **The Launch:** [/demos/launch](https://saptarshi-nag189.github.io/saptarshinag.github.io/demos/launch/).
+  His work as a product launch page: a pulsar folds out of the noise as you scroll, every number has a
+  footnote naming its project, and the skills are a tech specs table. Follows the light or dark setting.
 - **The archive:** [/demos](https://saptarshi-nag189.github.io/saptarshinag.github.io/demos/).
   Fourteen earlier concepts: Terminal OS, Mission Control, Neural Graph, Signal Decode, Night
   Drive, Movie Premiere, 2D World, The Constellation, Liquid, Night Train, Abyss, Library, Elysium
