@@ -16,6 +16,10 @@ JavaScript, with no build step and no framework, served by GitHub Pages.
   An island of seven biomes to walk, run and row across, with a fairy who answers questions. The
   world streams in 64 m tiles and frees the ones behind you. It's still being tuned: the weather
   layer is off, and the quality tiers have only been tested on software rendering.
+- **The Launch:** [/demos/launch](https://saptarshi-nag189.github.io/saptarshinag.github.io/demos/launch/).
+  His recent work as a product launch page: the C-DAC framework catches a simulated attack as you scroll,
+  then chapters on Omniscience Pro (RAG), ARO (multi-agent LLM) and the Llama 3.2 fine-tune. Every number
+  has a footnote naming its project. Follows the light or dark setting.
 - **The archive:** [/demos](https://saptarshi-nag189.github.io/saptarshinag.github.io/demos/).
   Fourteen earlier concepts: Terminal OS, Mission Control, Neural Graph, Signal Decode, Night
   Drive, Movie Premiere, 2D World, The Constellation, Liquid, Night Train, Abyss, Library, Elysium

@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Launch · Saptarshi Nag</title>
+<meta name="description" content="Saptarshi Nag, AI/ML engineer at C-DAC Chennai, presented as a product launch page: ML attack detection for a Zero Trust IoT framework, a local RAG system, and multi-agent LLM workflows.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231d1d1f'/%3E%3Cpath d='M4 20h7l2-11 3 17 2-9h10' fill='none' stroke='%23f5f5f7' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="launch.css">
+<script>document.documentElement.classList.add('js')</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<!-- The one glass surface on the page: the local navigation bar (liquid-glass.md › The two layers) -->
+<header class="lnav" id="lnav">
+  <div class="lnav-in">
+    <a class="lnav-back" href="../../index.html" aria-label="Back to the portfolio">
+      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3 5 8l5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
+    <a class="lnav-title" href="#top">Saptarshi Nag</a>
+    <nav class="lnav-links" id="lnavLinks" aria-label="Sections">
+      <a href="#cdac">C-DAC</a>
+      <a href="#highlights">Highlights</a>
+      <a href="#rag">RAG</a>
+      <a href="#agents">Agents</a>
+      <a href="#specs">Tech specs</a>
+      <a href="#contact">Contact</a>
+    </nav>
+    <button class="lnav-menu" id="lnavMenu" aria-expanded="false" aria-controls="lnavLinks" aria-label="Sections">
+      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <a class="lnav-cv" href="../../saptarshi_resume_linkedin_2026.pdf" target="_blank" rel="noopener">CV</a>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- ============ HERO ============ -->
+  <section class="hero" id="top">
+    <p class="eyebrow">AI/ML engineer · C-DAC Chennai</p>
+    <h1>Saptarshi Nag</h1>
+    <p class="hero-lede">At C-DAC he builds ML attack detection for a Zero Trust IoT security framework. He also builds RAG systems and multi-agent LLM tools.</p>
+    <p class="hero-links">
+      <a class="more" href="#detect">Watch the framework catch an attack</a>
+      <a class="more" href="../../saptarshi_resume_linkedin_2026.pdf" target="_blank" rel="noopener">Read the CV</a>
+    </p>
+  </section>
+
+  <!-- ============ DETECT: the page's one orchestrated moment ============ -->
+  <section class="fold" id="detect" aria-labelledby="foldTitle">
+    <div class="fold-stage">
+      <h2 class="fold-title" id="foldTitle">How the framework catches an attack</h2>
+      <div class="fold-frame">
+        <canvas id="foldCanvas" aria-hidden="true"></canvas>
+        <p class="fold-count" aria-hidden="true" id="foldCount">0 frames</p>
+      </div>
+      <ol class="fold-steps" id="foldSteps">
+        <li data-at="0">Every WiFi device nearby sends management frames, and the framework reads them as they arrive.</li>
+        <li data-at="0.2">The stream is cut into 1-second windows, and features are computed for each window.</li>
+        <li data-at="0.42">An attack starts, here a flood of deauthentication frames. The window model flags those windows.</li>
+        <li data-at="0.66">The detection feeds the device's 7-pillar trust score, and its trust falls.</li>
+        <li data-at="0.86">In his evaluation the flow model (Random Forest) reached <b>96.97% accuracy</b>, and the window model (Voting Ensemble) <b>90.86% accuracy and 86.78% macro F1</b>.<a class="fn" href="#fn1" id="ref1" aria-describedby="fnLabel">1</a></li>
+      </ol>
+      <p class="fold-note">A simulation of the pipeline. The frames, the attack and the trust score are illustrative.<a class="fn" href="#fn2" id="ref2" aria-describedby="fnLabel">2</a></p>
+    </div>
+  </section>
+
+  <!-- ============ C-DAC ============ -->
+  <section class="band" id="cdac" aria-labelledby="cdacTitle">
+    <div class="wrap narrow">
+      <p class="eyebrow">C-DAC Chennai · July 2025 – present</p>
+      <h2 class="section-title big" id="cdacTitle">Zero Trust security for IoT networks.</h2>
+      <p class="lede">As Project Engineer in AI Research &amp; IoT Security, he built a real-time Zero Trust framework for IoT networks. Machine learning detects attacks, and what it finds feeds a continuous 7-pillar trust score for every device.</p>
+      <ul class="chips" aria-label="Protocols covered">
+        <li>WiFi (802.11)</li><li>BLE</li><li>Zigbee</li><li>LoRa</li>
+      </ul>
+    </div>
+    <div class="wrap">
+      <div class="feature-grid">
+        <div class="feature">
+          <h3>Two models, two time scales</h3>
+          <p>A window model sorts 1-second sliding windows of 802.11 management frames into 7 attack classes, and a flow model catches longer patterns. He compared RF, XGBoost, SVM, MLP and a Voting Ensemble over 6 preprocessing iterations, with SMOTE and Optuna (TPE) for the hyperparameter search, then used Youden's J threshold optimisation and protected feature selection to handle the 7-class imbalance.</p>
+        </div>
+        <div class="feature">
+          <h3>63 features from raw captures</h3>
+          <p>MAC entropy, frame-rate statistics, sequence gaps, EAPOL key MIC ratios and beacon timestamp variance, pulled from raw PCAPs with Scapy and PyShark. A memory-efficient streaming reader handles large files.</p>
+        </div>
+        <div class="feature">
+          <h3>A live drop folder</h3>
+          <p>A Watchdog pipeline picks up new PCAP files as they land, with stability checks, MD5 deduplication, multi-threaded frame extraction, batch inference and a lock for each shared resource.</p>
+        </div>
+        <div class="feature">
+          <h3>Identity for every workload</h3>
+          <p>SPIFFE/SPIRE workload identity, mTLS mutual authentication and OTP-based 2FA are built into the Zero Trust architecture.</p>
+        </div>
+      </div>
+      <div class="papers">
+        <p class="eyebrow">Two papers on the framework · IoTaIS 2025, Bali</p>
+        <ul>
+          <li>Protocol-Aware Continuous Monitoring and Anomaly Detection in IoT Networks</li>
+          <li>A Comprehensive Survey on Zero Trust Architecture in IoT Networks</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ HIGHLIGHTS: bento tiles, recent work first ============ -->
+  <section class="band band-tint" id="highlights" aria-labelledby="hlTitle">
+    <div class="wrap">
+      <h2 class="section-title" id="hlTitle">The numbers, and where each one comes from.</h2>
+      <div class="bento">
+
+        <article class="tile t-cdac">
+          <p class="tile-eyebrow">C-DAC · flow model</p>
+          <p class="tile-num">96.97%</p>
+          <p class="tile-cap">accuracy on flow classification, with a Random Forest<a class="fn" href="#fn1" id="ref1b" aria-describedby="fnLabel">1</a></p>
+          <svg class="tile-art stages" viewBox="0 0 320 120" aria-hidden="true">
+            <rect x="0" y="10" width="140" height="44" rx="12" class="st-box"/><text x="70" y="37" text-anchor="middle">window model</text>
+            <rect x="0" y="66" width="140" height="44" rx="12" class="st-box on"/><text x="70" y="93" text-anchor="middle" class="on">flow model</text>
+            <path d="M146 32 C 196 32, 196 60, 232 60 M146 88 C 196 88, 196 60, 232 60" class="st-line"/>
+            <circle cx="270" cy="60" r="34" class="st-ring"/><text x="270" y="58" text-anchor="middle" class="st-n">7</text><text x="270" y="76" text-anchor="middle" class="st-l">pillars</text>
+          </svg>
+          <p class="tile-foot">Two models feed one continuous device trust score.</p>
+        </article>
+
+        <article class="tile t-window">
+          <p class="tile-eyebrow">C-DAC · window model</p>
+          <p class="tile-num">90.86%</p>
+          <p class="tile-cap">accuracy and 86.78% macro F1 on 1-second windows, 7 attack classes, with a Voting Ensemble<a class="fn" href="#fn1" id="ref1c" aria-describedby="fnLabel">1</a></p>
+          <svg class="tile-art windows" viewBox="0 0 280 40" aria-hidden="true" id="winArt"></svg>
+        </article>
+
+        <article class="tile t-feat">
+          <p class="tile-eyebrow">C-DAC · feature engineering</p>
+          <p class="tile-num">63</p>
+          <p class="tile-cap">statistical and behavioural features from raw PCAPs<a class="fn" href="#fn3" id="ref3" aria-describedby="fnLabel">3</a></p>
+          <svg class="tile-art grid63" viewBox="0 0 252 76" aria-hidden="true" id="featArt"></svg>
+        </article>
+
+        <article class="tile t-omni">
+          <p class="tile-eyebrow">Omniscience Pro · RAG</p>
+          <p class="tile-num">&lt;50<span class="u"> ms</span></p>
+          <p class="tile-cap">vector search (HNSW), and under 500 ms to the first token, on consumer hardware<a class="fn" href="#fn4" id="ref4" aria-describedby="fnLabel">4</a></p>
+        </article>
+
+        <article class="tile t-aro">
+          <p class="tile-eyebrow">ARO · multi-agent LLM</p>
+          <p class="tile-num">16</p>
+          <p class="tile-cap">vulnerabilities found and fixed in his adversarial audit<a class="fn" href="#fn5" id="ref5" aria-describedby="fnLabel">5</a></p>
+          <svg class="tile-art dots" viewBox="0 0 160 40" aria-hidden="true" id="aroDots"></svg>
+        </article>
+
+        <article class="tile t-llama">
+          <p class="tile-eyebrow">Llama 3.2 fine-tune</p>
+          <p class="tile-num">21.5k</p>
+          <p class="tile-cap">domain-specific interactions, then 4-bit quantisation with Unsloth<a class="fn" href="#fn6" id="ref6" aria-describedby="fnLabel">6</a></p>
+        </article>
+
+        <article class="tile tile-sm t-f1">
+          <p class="tile-eyebrow">F1 tyre model</p>
+          <p class="tile-num">4.1×</p>
+          <p class="tile-cap">faster training from custom CUDA/CuPy kernels<a class="fn" href="#fn7" id="ref7" aria-describedby="fnLabel">7</a></p>
+        </article>
+
+        <article class="tile tile-sm t-ncra">
+          <p class="tile-eyebrow">NCRA-TIFR · research</p>
+          <p class="tile-num">99.8%</p>
+          <p class="tile-cap">F1 detecting weak pulsars across 70M+ samples<a class="fn" href="#fn8" id="ref8" aria-describedby="fnLabel">8</a></p>
+        </article>
+
+        <article class="tile tile-sm t-gmrt">
+          <p class="tile-eyebrow">GMRT · internship</p>
+          <p class="tile-num">50%</p>
+          <p class="tile-cap">less latency, after a multicore refactor<a class="fn" href="#fn9" id="ref9" aria-describedby="fnLabel">9</a></p>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ RAG ============ -->
+  <section class="band" id="rag" aria-labelledby="ragTitle">
+    <div class="wrap">
+      <div class="chapter">
+        <div class="chapter-text">
+          <p class="eyebrow">Omniscience Pro · retrieval-augmented generation</p>
+          <h2 class="section-title big" id="ragTitle">A RAG system that stays on your machine.</h2>
+          <p class="lede">Omniscience Pro is privacy-first and local. Built on LangChain and ChromaDB, it ingests documents of several kinds, retrieves the passages that answer a question, and hands them to a model running on the same hardware.</p>
+        </div>
+        <figure class="chapter-art">
+          <svg viewBox="0 0 360 250" aria-hidden="true" id="ragArt" class="rag-art"></svg>
+          <figcaption>A question lands in embedding space, and the nearest chunks are retrieved.</figcaption>
+        </figure>
+      </div>
+      <div class="latency" role="img" aria-label="Latency on consumer hardware: vector search under 50 milliseconds, first token under 500 milliseconds">
+        <div class="lat-track" aria-hidden="true">
+          <span class="lat-search" style="width:10%"></span>
+          <span class="lat-token" style="width:90%"></span>
+        </div>
+        <div class="lat-labels" aria-hidden="true">
+          <span><b>&lt;50 ms</b> vector search (HNSW)</span>
+          <span><b>&lt;500 ms</b> to the first token</span>
+        </div>
+      </div>
+      <p class="lat-note">On consumer hardware, drawn to scale.<a class="fn" href="#fn4" id="ref4b" aria-describedby="fnLabel">4</a></p>
+      <div class="feature-grid three">
+        <div class="feature"><h3>Local and private</h3><p>Documents and questions stay on the machine. Nothing goes to a hosted model.</p></div>
+        <div class="feature"><h3>Ships as a container</h3><p>A GPU-aware Docker image with a full CI/CD pipeline.</p></div>
+        <div class="feature"><h3>Safe with many sessions</h3><p>POSIX file locking keeps concurrent sessions from corrupting each other.</p></div>
+      </div>
+      <p class="stack-line">Python · LangChain · ChromaDB · Docker</p>
+    </div>
+  </section>
+
+  <!-- ============ AGENTS ============ -->
+  <section class="band band-dark" id="agents" aria-labelledby="agTitle">
+    <div class="wrap">
+      <div class="chapter reverse">
+        <div class="chapter-text">
+          <p class="eyebrow">ARO · Autonomous Research Operator</p>
+          <h2 class="section-title big" id="agTitle">Multi-agent LLM workflows, run as a graph.</h2>
+          <p class="lede">ARO runs each workflow as a directed graph in NetworkX. A Flask backend streams the agents' progress over Server-Sent Events to a React frontend, so you can watch the work as it happens.</p>
+        </div>
+        <figure class="chapter-art">
+          <svg viewBox="0 0 360 220" aria-hidden="true" class="arch">
+            <g class="dag">
+              <line x1="24" y1="72" x2="86" y2="36"/><line x1="24" y1="72" x2="86" y2="108"/>
+              <line x1="86" y1="36" x2="148" y2="72"/><line x1="86" y1="108" x2="148" y2="72"/>
+              <circle cx="24" cy="72" r="11"/><circle cx="86" cy="36" r="11"/><circle cx="86" cy="108" r="11"/><circle cx="148" cy="72" r="11" class="end"/>
+              <text x="86" y="148" text-anchor="middle">NetworkX graph</text>
+            </g>
+            <path d="M168 72 H 204" class="arrow"/>
+            <rect x="210" y="50" width="96" height="44" rx="12" class="box"/><text x="258" y="77" text-anchor="middle">Flask</text>
+            <path d="M258 100 V 150" class="arrow"/><text x="270" y="130" class="lbl">SSE</text>
+            <rect x="210" y="156" width="96" height="44" rx="12" class="box"/><text x="258" y="183" text-anchor="middle">React</text>
+          </svg>
+          <figcaption>How ARO is put together.</figcaption>
+        </figure>
+      </div>
+      <div class="audit">
+        <div>
+          <p class="audit-num">16</p>
+          <p class="audit-cap">vulnerabilities found and fixed when he audited ARO adversarially after the build.<a class="fn" href="#fn5" id="ref5b" aria-describedby="fnLabel">5</a> He also added SQLAlchemy-backed audit trails for concurrent session safety.</p>
+        </div>
+        <ul class="chips" aria-label="Areas the audit covered">
+          <li>auth</li><li>SSRF</li><li>input validation</li><li>CORS</li>
+        </ul>
+      </div>
+      <p class="stack-line">Python · Flask · SQLAlchemy · NetworkX · React</p>
+    </div>
+  </section>
+
+  <!-- ============ LLAMA ============ -->
+  <section class="band band-tint" id="llama" aria-labelledby="llTitle">
+    <div class="wrap">
+      <div class="chapter">
+        <div class="chapter-text">
+          <p class="eyebrow">Llama 3.2 for efficient inference</p>
+          <h2 class="section-title" id="llTitle">A fine-tuned model small enough for a consumer GPU.</h2>
+          <p class="lede">He fine-tuned Llama 3.2 1B and 3B on 21.5k domain-specific interactions,<a class="fn" href="#fn6" id="ref6b" aria-describedby="fnLabel">6</a> for specialised task following and agentic use. Then 4-bit quantisation with Unsloth cut memory enough for a consumer GPU, with no meaningful drop in output quality against the full-precision models.</p>
+          <p class="stack-line">Python · Unsloth · Hugging Face · PyTorch</p>
+        </div>
+        <figure class="chapter-art">
+          <svg viewBox="0 0 320 150" aria-hidden="true" class="bits">
+            <text x="0" y="22">16-bit weights</text><rect x="0" y="32" width="320" height="30" rx="8" class="b16"/>
+            <text x="0" y="98">4-bit weights</text><rect x="0" y="108" width="80" height="30" rx="8" class="b4"/>
+          </svg>
+          <figcaption>Bits per weight, before and after quantisation.</figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ EARLIER WORK: kept short ============ -->
+  <section class="band" id="earlier" aria-labelledby="earTitle">
+    <div class="wrap">
+      <h2 class="section-title" id="earTitle">Earlier work.</h2>
+      <div class="trio">
+        <article>
+          <p class="trio-when">F1 project</p>
+          <h3>Tyre degradation and race strategy</h3>
+          <p>A hybrid LSTM-XGBoost model predicts tyre wear and pit-stop windows from 10 Hz telemetry, with a physics-informed loss that separates thermal from mechanical wear. Custom CUDA/CuPy kernels cut training time by 4.1×.</p>
+        </article>
+        <article>
+          <p class="trio-when">NCRA-TIFR · Aug 2024 – Apr 2025</p>
+          <h3>Research intern, M.Tech project</h3>
+          <p>A ResNet1D with Squeeze-and-Excitation attention that detects weak pulsars in noisy radio data, at 99.8% F1 across 70M+ samples.</p>
+        </article>
+        <article>
+          <p class="trio-when">GMRT · Dec 2023 – Jan 2024</p>
+          <h3>Winter intern, HPC and signal processing</h3>
+          <p>A multicore refactor of the telescope's CPU filtering pipelines cut latency by 50%.</p>
+        </article>
+      </div>
+      <div class="edu">
+        <div class="edu-item">
+          <p class="edu-when">2023–2025</p>
+          <h3>M.Tech, Computer Science &amp; Engineering (Artificial Intelligence)</h3>
+          <p>DIAT, a DRDO institute, Pune. CGPA 8.64/10.0.</p>
+        </div>
+        <div class="edu-item">
+          <p class="edu-when">2019–2023</p>
+          <h3>B.Tech, Computer Science &amp; Engineering</h3>
+          <p>Academy of Technology, Kolkata. CGPA 9.44/10.0.</p>
+        </div>
+        <div class="edu-item">
+          <p class="edu-when">2024</p>
+          <h3>GATE, Data Science &amp; AI</h3>
+          <p>Rank 1790, in the top 5% of applicants.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TECH SPECS ============ -->
+  <section class="band band-tint" id="specs" aria-labelledby="specTitle">
+    <div class="wrap">
+      <h2 class="section-title" id="specTitle">Tech specs</h2>
+      <dl class="specs">
+        <div><dt>AI and MLOps</dt><dd>RAG, LLM fine-tuning, multi-agent orchestration (NetworkX, LangChain), SQLAlchemy</dd></div>
+        <div><dt>ML and scientific computing</dt><dd>PyTorch, XGBoost, scikit-learn, physics-informed neural networks, NumPy, SciPy</dd></div>
+        <div><dt>Data and engineering</dt><dd>Statistical anomaly detection, time-series analysis, CI/CD, Docker, Git, Flask, ChromaDB</dd></div>
+        <div><dt>Languages</dt><dd>Python (advanced), C++ (proficient), C, Bash, SQL</dd></div>
+        <div><dt>HPC and systems</dt><dd>CUDA, CuPy, parallel processing, 4-bit and 8-bit quantisation, latency optimisation, Linux</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <!-- ============ CONTACT ============ -->
+  <section class="band contact" id="contact" aria-labelledby="conTitle">
+    <div class="wrap narrow center">
+      <h2 class="section-title big" id="conTitle">Get in touch.</h2>
+      <p class="lede">He's open to research collaborations and engineering roles.</p>
+      <p class="contact-links">
+        <a class="more" href="mailto:saptarshinag18@gmail.com">saptarshinag18@gmail.com</a>
+        <a class="more" href="https://www.linkedin.com/in/saptarshi18" target="_blank" rel="noopener">LinkedIn</a>
+        <a class="more" href="https://github.com/Saptarshi-Nag189" target="_blank" rel="noopener">GitHub</a>
+      </p>
+      <p><a class="button" href="../../saptarshi_resume_linkedin_2026.pdf" target="_blank" rel="noopener">Download the CV</a></p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <h2 class="foot-h" id="fnLabel">Footnotes</h2>
+    <ol class="footnotes">
+      <li id="fn1">The best models in the ML attack detection of C-DAC's real-time Zero Trust IoT framework: 96.97% accuracy on flow classification with a Random Forest, and 90.86% accuracy and 86.78% macro F1 on window classification with a Voting Ensemble (1-second windows of 802.11 management frames, 7 attack classes). <a href="#ref1" aria-label="Back to footnote 1 in the text">↩</a></li>
+      <li id="fn2">The animation draws a made-up stream of frames, a made-up attack and a made-up trust score. It shows how the pipeline works and isn't his data. <a href="#ref2" aria-label="Back to footnote 2 in the text">↩</a></li>
+      <li id="fn3">Features engineered from raw PCAP captures with Scapy and PyShark, for the same framework. <a href="#ref3" aria-label="Back to footnote 3 in the text">↩</a></li>
+      <li id="fn4">Vector search (HNSW) and time to first token in Omniscience Pro, on consumer hardware. <a href="#ref4" aria-label="Back to footnote 4 in the text">↩</a></li>
+      <li id="fn5">Vulnerabilities found and fixed in his adversarial audit of ARO after the build, across auth, SSRF, input validation and CORS. <a href="#ref5" aria-label="Back to footnote 5 in the text">↩</a></li>
+      <li id="fn6">Domain-specific interactions used to fine-tune Llama 3.2 1B and 3B, before 4-bit quantisation with Unsloth. <a href="#ref6" aria-label="Back to footnote 6 in the text">↩</a></li>
+      <li id="fn7">Training time of the F1 tyre-degradation model with his custom CUDA/CuPy kernels. <a href="#ref7" aria-label="Back to footnote 7 in the text">↩</a></li>
+      <li id="fn8">F1 of the ResNet1D with Squeeze-and-Excitation attention across 70M+ samples, his M.Tech project at NCRA-TIFR. <a href="#ref8" aria-label="Back to footnote 8 in the text">↩</a></li>
+      <li id="fn9">Latency of GMRT's CPU signal-filtering pipelines, before and after his multicore refactor. <a href="#ref9" aria-label="Back to footnote 9 in the text">↩</a></li>
+    </ol>
+    <p class="foot-note">Every number on this page comes from his CV. This page is one of several versions of his portfolio.</p>
+    <nav class="foot-links" aria-label="More">
+      <a href="../../index.html">The portfolio</a>
+      <a href="../index.html">The archive</a>
+      <a href="../../wander/index.html">The Wander</a>
+      <a href="../../signal/index.html">The Signal</a>
+    </nav>
+  </div>
+</footer>
+
+<script src="launch.js"></script>
+</body>
+</html>

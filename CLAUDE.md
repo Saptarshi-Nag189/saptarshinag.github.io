@@ -11,11 +11,19 @@ Contact: saptarshinag18@gmail.com · LinkedIn `/in/saptarshi18` · GitHub `Sapta
 
 - **`index.html`** (root) — classic terminal/brutalist homepage: hero, metrics strip,
   experience timeline, projects, publications, education, skills, a "~/play" section linking
-  the four playable versions (`/wander/`, `/signal/`, `/light/`, `/demos/`), and contact.
+  the playable versions (`/wander/`, `/signal/`, `/light/`, `/demos/launch/`, `/demos/`), and contact.
 - **`/demos/`** — archive of 14 earlier "choose your experience" concepts (Terminal OS, Mission
   Control, Neural Graph, Signal Decode, Night Drive, Movie Premiere, 2D World, The Constellation,
   Liquid, Night Train, Abyss, Library, Elysium, Classic). `demos/index.html` is the chooser, with
-  featured cards for `/wander/`, `/signal/` and `/light/` at the top. **Kept as archive, not deleted.**
+  featured cards for `/wander/`, `/signal/`, `/light/` and `/demos/launch/` at the top. **Kept as archive, not deleted.**
+- **`/demos/launch/`** — **THE LAUNCH**, the CV as a product launch page in Apple's design language
+  (built with the apple-design skill, no Apple logo or trademarks). **Leads with recent work, by user
+  request:** C-DAC first, then RAG (Omniscience Pro), agents (ARO) and Llama as full chapters; NCRA,
+  GMRT and F1 are a short "Earlier work" row. Signature: a scroll-scrubbed, labelled-simulated C-DAC
+  pipeline (`launch.js`): frames → 1 s windows → a flagged deauth flood → the 7-pillar trust ring drains.
+  The nav bar is the page's only glass and darkens over dark sections. Every metric has a numbered
+  footnote naming its project. Linked from the homepage's ~/play and featured in the archive. No
+  shared chrome or sound, by design.
 - **`demos/_shared/sfx.js`** — shared synthesized Web Audio engine (zero audio files, all synth
   oscillators/noise). Used by demos, `/signal/`, and `/wander/`. Has ambient/projector/engine/
   chiptune/rain/clack/brook/wind/crickets/hum loops plus many named one-shots. Auto mute button,
